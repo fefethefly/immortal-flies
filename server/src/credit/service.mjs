@@ -1,6 +1,7 @@
 import {
   CREDIT_POLICY,
   advanceCredit,
+  awardDividends,
   createCreditLedger,
   creditView,
   ensureCreditSoul,
@@ -57,6 +58,17 @@ export function createCreditService({ sessions, store, logger }) {
     advanceCredit(ledger, tick);
     const roster = row.session.kernel.flyswarm.roster.snapshot();
     for (const entry of roster) ensureCreditSoul(ledger, entry.soulId);
+    // 质押分红：协议 stakeRewards 池按水位线入账（防重启重复），超额滚回准备金。
+    const protocol = row.session.protocol;
+    if (protocol) {
+      for (const record of protocol.records) {
+        if (record.tick <= ledger._dividendWatermark) continue;
+        const amount = record.allocation?.stakeRewards || 0;
+        const result = awardDividends(ledger, { amount, tick: record.tick });
+        if (result.unAwarded > 0) protocol.reserve += result.unAwarded;
+        ledger._dividendWatermark = record.tick;
+      }
+    }
     for (const member of row.session.kernel.colony.members) {
       const soulId = member.session?.state?.soulId;
       if (!soulId) continue;

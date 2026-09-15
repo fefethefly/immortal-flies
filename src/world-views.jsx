@@ -1283,11 +1283,13 @@ export function IfsView({ world, tx, token, credit, remote, onCreditAction }) {
                     <b>{soul.usable}</b>
                     <em>
                       {tx("credit.free")} {soul.free} · {tx("risk.credit")}{" "}
-                      {soul.capacity}
+                      {soul.capacity} · {tx("credit.dividends")}{" "}
+                      {soul.dividends} · {tx("credit.rwaQuota")} {soul.rwaQuota}
                     </em>
                   </li>
                 ))}
               </ul>
+              <p className="view-note">{tx("credit.rwaHint")}</p>
               <form className="credit-stake" onSubmit={runStake}>
                 <select
                   value={soulId}

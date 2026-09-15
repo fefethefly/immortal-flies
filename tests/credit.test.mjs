@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import {
   CREDIT_POLICY,
   advanceCredit,
+  awardDividends,
+  rwaQuotaOf,
   createCreditLedger,
   creditOf,
   creditView,
@@ -168,4 +170,97 @@ test("快照往返：saveCredit/restoreCredit 逐位一致", () => {
   assert.equal(view.policy, `${CREDIT_POLICY.id}@${CREDIT_POLICY.version}`);
   assert.ok(view.souls.length >= 1);
   assert.equal(view.stakes.length, 1);
+});
+
+test("质押分红：按锁定质押量比例分配，单魂封顶，超额滚回", () => {
+  const ledger = createCreditLedger();
+  stakeCredit(ledger, { soulId: "whale", amount: 90_000, tick: 0 });
+  stakeCredit(ledger, { soulId: "small-a", amount: 10_000, tick: 0 });
+  stakeCredit(ledger, { soulId: "small-b", amount: 10_000, tick: 0 });
+  const { awarded, unAwarded } = awardDividends(ledger, {
+    amount: 1000,
+    tick: 1,
+  });
+  const whale = creditOf(ledger, "whale");
+  const a = creditOf(ledger, "small-a");
+  const b = creditOf(ledger, "small-b");
+  const cap = Math.trunc((1000 * CREDIT_POLICY.dividendCapBps) / 10000);
+  assert.equal(whale.dividends, cap, "巨鲸分红被 10% 封顶");
+  assert.ok(unAwarded > 0, "超额部分必须滚回");
+  assert.equal(awarded + unAwarded, 1000);
+  assert.ok(a.dividends > 0 && b.dividends > 0, "小份额者都有分红");
+  assert.ok(
+    Math.abs(a.dividends - b.dividends) <= 2,
+    "余数按序补给，两小户差距不超过 1 单位余数",
+  );
+  assert.equal(
+    whale.dividends + a.dividends + b.dividends + unAwarded,
+    1000,
+    "分红守恒",
+  );
+  // 分红日志入账
+  const view = creditView(ledger);
+  assert.equal(view.dividends.log.length, 1);
+  assert.equal(view.dividends.log[0].amount, 1000);
+});
+
+test("质押分红：无质押者时全额滚回；零池不分", () => {
+  const ledger = createCreditLedger();
+  const empty = awardDividends(ledger, { amount: 500, tick: 1 });
+  assert.deepEqual(empty, { awarded: 0, unAwarded: 500 });
+  const zero = awardDividends(ledger, { amount: 0, tick: 2 });
+  assert.equal(zero.awarded + zero.unAwarded, 0);
+});
+
+test("RWA 配额：锁定质押 × 倍数，封顶，只做资格模拟", () => {
+  const ledger = createCreditLedger();
+  stakeCredit(ledger, { soulId: "alice", amount: 30_000, tick: 0 });
+  const quota = rwaQuotaOf(ledger, "alice");
+  assert.equal(
+    quota,
+    Math.trunc((30_000 * CREDIT_POLICY.rwaQuotaMultiplierBps) / 10000),
+  );
+  // 封顶
+  stakeCredit(ledger, { soulId: "alice", amount: 2_000_000, tick: 0 });
+  assert.equal(rwaQuotaOf(ledger, "alice"), CREDIT_POLICY.rwaCap);
+  // 未质押者无配额
+  assert.equal(rwaQuotaOf(ledger, "nobody"), 0);
+});
+
+test("分红随协议链路：stakeRewards 拨定进入账本，停机冻结", async () => {
+  const { createProtocolFunds, stepProtocol } = await import(
+    "../src/brain/flyswarm/protocol.mjs"
+  );
+  const { createTreasury } = await import("../src/brain/treasury.mjs");
+  const protocol = createProtocolFunds();
+  const ledger = createCreditLedger();
+  stakeCredit(ledger, { soulId: "alice", amount: 20_000, tick: 0 });
+  // 正常 tick：有收益 → D 拨定含 stakeRewards
+  const treasury = createTreasury();
+  treasury.feesIn = 1_000;
+  treasury.book.realized = 2_000;
+  treasury.book.bnb = 1_000_000;
+  await stepProtocol(protocol, treasury, { tick: 1 });
+  const record = protocol.records[protocol.records.length - 1];
+  const amount = record.allocation?.stakeRewards || 0;
+  assert.ok(amount > 0, "收益期必须有锁仓奖励拨定");
+  const result = awardDividends(ledger, { amount, tick: 1 });
+  assert.equal(result.awarded + result.unAwarded, amount);
+  assert.ok(creditOf(ledger, "alice").dividends > 0);
+  // 停机 tick：无拨定 → 分红自然冻结
+  for (let i = 2; i <= 2 + CREDIT_POLICY.lossStreakFloor; i++) {
+    const t2 = createTreasury();
+    t2.feesIn = 1_000 + i;
+    t2.book.realized = -500 * i;
+    t2.book.bnb = 1_000_000;
+    await stepProtocol(protocol, t2, { tick: i });
+  }
+  const haltedRecord = protocol.records[protocol.records.length - 1];
+  assert.equal(haltedRecord.allocation, null, "停机后 D 冻结");
+  const before = creditOf(ledger, "alice").dividends;
+  awardDividends(ledger, {
+    amount: haltedRecord.allocation?.stakeRewards || 0,
+    tick: 5,
+  });
+  assert.equal(creditOf(ledger, "alice").dividends, before, "停机期不分红");
 });

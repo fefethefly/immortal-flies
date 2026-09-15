@@ -49,6 +49,14 @@ export const CREDIT_POLICY = Object.freeze({
   stakePriceTicks: 100,
   /** 连续亏损达到该值时 reliability 归零 */
   lossStreakFloor: 20,
+  /** 单魂单次分红占池子比例上限（bps）：防巨鲸吞池，超额滚回准备金 */
+  dividendCapBps: 1000,
+  /** RWA（股票篓子）认购额度 = 锁定质押 × 倍数（bps）；只做资格模拟，不是债权 */
+  rwaQuotaMultiplierBps: 20000,
+  /** RWA 认购额度上限 */
+  rwaCap: 1_000_000,
+  /** 分红日志窗口 */
+  maxDividendLog: 60,
 });
 
 export function createCreditLedger() {
@@ -62,6 +70,10 @@ export function createCreditLedger() {
     nextStakeId: 1,
     /** 服务端镜像水位线：soulId -> {realized, trades}（不随快照语义，单独序列化） */
     _mirrored: new Map(),
+    /** 分红水位线：最近一次已入账的协议回执 tick（防重启后重复分红） */
+    _dividendWatermark: 0,
+    /** 分红日志：{tick, amount, entries:[{soulId, share}]} */
+    dividendLog: [],
   };
 }
 
@@ -75,6 +87,7 @@ function soulOf(ledger, soulId) {
       settledProfit: 0,
       completedOrders: 0,
       lossStreak: 0,
+      dividends: 0,
     });
   }
   return ledger.souls.get(soulId);
@@ -232,7 +245,78 @@ export function creditOf(
     lossStreak: soul.lossStreak,
     reliability: Number(reliabilityOf(soul).toFixed(4)),
     collateralValue: collateral,
+    dividends: soul.dividends,
+    rwaQuota: rwaQuotaOf(ledger, soulId),
   };
+}
+
+/**
+ * 质押分红：把协议 stakeRewards 池按锁定质押量比例分给质押者。
+ * - 权重 = 该魂名下未解锁质押之和（锁定在场上才有分红）
+ * - 单魂单次分红封顶 dividendCapBps（超额部分返回调用方滚回准备金）
+ * - 只入账已实现拨定：amount 由调用方（协议层）保证来自 D 的 10% 锁仓奖励
+ * 返回 {awarded, unAwarded}：unAwarded 应滚回协议准备金。
+ */
+export function awardDividends(ledger, { amount, tick }) {
+  integer(amount, 0, Number.MAX_SAFE_INTEGER, "分红池");
+  integer(tick, 0, Number.MAX_SAFE_INTEGER, "tick");
+  if (amount === 0) return { awarded: 0, unAwarded: 0 };
+  const live = ledger.stakes.filter((stake) => stake.unlockAt > tick);
+  const totalStake = live.reduce((sum, stake) => sum + stake.amount, 0);
+  if (totalStake === 0) return { awarded: 0, unAwarded: amount };
+  const cap = Math.max(
+    1,
+    Math.trunc((amount * CREDIT_POLICY.dividendCapBps) / 10000),
+  );
+  const bySoul = new Map();
+  for (const stake of live) {
+    bySoul.set(stake.soulId, (bySoul.get(stake.soulId) || 0) + stake.amount);
+  }
+  // 比例 floor 后的余数：按字典序补给未封顶的份额，全部封顶则滚回。
+  const ordered = [...bySoul.keys()].sort();
+  let remainder = amount;
+  const raws = [];
+  for (const soulId of ordered) {
+    const raw = Math.trunc((amount * bySoul.get(soulId)) / totalStake);
+    raws.push({ soulId, raw });
+    remainder -= raw;
+  }
+  for (const row of raws) {
+    if (remainder <= 0) break;
+    const extra = Math.min(remainder, Math.max(0, cap - row.raw));
+    row.raw += extra;
+    remainder -= extra;
+  }
+  const entries = [];
+  let awarded = 0;
+  let unAwarded = remainder;
+  for (const row of raws) {
+    const share = Math.min(row.raw, cap);
+    const soul = soulOf(ledger, row.soulId);
+    soul.dividends += share;
+    awarded += share;
+    unAwarded += row.raw - share;
+    if (share > 0) entries.push({ soulId: row.soulId, share });
+  }
+  ledger.dividendLog.push({ tick, amount, entries });
+  if (ledger.dividendLog.length > CREDIT_POLICY.maxDividendLog) {
+    ledger.dividendLog = ledger.dividendLog.slice(
+      -CREDIT_POLICY.maxDividendLog,
+    );
+  }
+  return { awarded, unAwarded };
+}
+
+/** RWA（股票篓子）认购额度：锁定质押 × 倍数，封顶。只做资格模拟，不构成债权或收益承诺。 */
+export function rwaQuotaOf(ledger, soulId) {
+  let locked = 0;
+  for (const stake of ledger.stakes) {
+    if (stake.soulId === soulId) locked += stake.amount;
+  }
+  return Math.min(
+    CREDIT_POLICY.rwaCap,
+    Math.trunc((locked * CREDIT_POLICY.rwaQuotaMultiplierBps) / 10000),
+  );
 }
 
 /** 账本视图（JSON 安全）。 */
@@ -247,6 +331,10 @@ export function creditView(ledger, { price = 0, tick = ledger.tick } = {}) {
     tick: ledger.tick,
     souls,
     stakes: ledger.stakes.map((s) => ({ ...s })),
+    dividends: {
+      capBps: CREDIT_POLICY.dividendCapBps,
+      log: ledger.dividendLog.slice(-12).reverse(),
+    },
   };
 }
 
@@ -274,6 +362,11 @@ export function saveCredit(ledger) {
         ...watermark,
       }),
     ),
+    dividendWatermark: ledger._dividendWatermark,
+    dividendLog: ledger.dividendLog.map((row) => ({
+      ...row,
+      entries: row.entries.map((e) => ({ ...e })),
+    })),
   };
 }
 
@@ -291,5 +384,10 @@ export function restoreCredit(saved) {
       watermark,
     ]),
   );
+  ledger._dividendWatermark = saved.dividendWatermark || 0;
+  ledger.dividendLog = (saved.dividendLog || []).map((row) => ({
+    ...row,
+    entries: row.entries.map((e) => ({ ...e })),
+  }));
   return ledger;
 }

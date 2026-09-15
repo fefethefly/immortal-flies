@@ -21,7 +21,7 @@ npm run server   # http://127.0.0.1:8787 ；契约见 docs/API-V1.md
 
 `npm run dev` 会把 `/v1`、`/health`、`/ready` 反代到 8787。无 `OPENAI_API_KEY` 时解释层降级为本地确定性实现。
 
-打开 http://127.0.0.1:4173/ 看对外主站，http://127.0.0.1:4173/swarm.html 看交易场，http://127.0.0.1:4173/brain.html 看连接组连接组，http://127.0.0.1:4173/economy.html 看情景沙盘，http://127.0.0.1:4173/blueprint.html 看蓝图。生产环境 `/altar` 仍重定向到蓝图（见 `vercel.json`）。生产构建：`npm run build`，本地预览：`npm run preview -- --port 4173`。官方代币清单在 `public/token/official.json`，ticker 为 `$IFS`，已在 BSC 主网发射（`0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`），发射记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)。
+打开 http://127.0.0.1:4173/ 看对外主站，http://127.0.0.1:4173/swarm.html 看交易场，http://127.0.0.1:4173/brain.html 看连接组连接组，http://127.0.0.1:4173/economy.html 看信用与盈余，http://127.0.0.1:4173/blueprint.html 看蓝图。顶栏在同一文档里切换，不再整页卸载。生产环境 `/altar` 仍重定向到蓝图（见 `vercel.json`）。生产构建：`npm run build`，本地预览：`npm run preview -- --port 4173`。官方代币清单在 `public/token/official.json`，ticker 为 `$IFS`，已在 BSC 主网发射（`0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`），发射记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)。
 
 ## 这一版可以做什么
 
@@ -144,7 +144,8 @@ npm run preview      # 本地预览生产构建
 5. P5「用户金库」后端已落地：`iff.vault/1`（按 NAV 铸份额、逐批成本/高水位/已实现损益/费用/Position ID、份额所有权校验、FIFO 退出队列受流动性上限、只有已实现收益可分配），端点 `/v1/vault*`，Vault 视图已接服务端金库（注资/退出/结算表单，断线回落未接入）。真实资金仍需外部审计。
 6. §11「行为/金融解耦」已落地：内核话语升级为 `iff.utterance/2`（只含原生 ethology，无 BUY/SELL/置信度），聚合升级为 `iff.quorum/2`（approach/retreat/still 行为分布，无金融方向）；金融方向只在 TradePort 解释层出现，旧 /1 schema 保留解析与重放。至此 §11 资金缺口全部关闭（份额所有权、分账、浮盈回购、行为解耦、历史恢复）。
 7. 用带 tBNB 的测试网私钥跑 `npm run contracts:deploy:testnet`，再在本地祭坛走完铸造 → 训练 → 休眠/转生。
-8. 根据实测 gas 决定哪些互动逐笔上链、哪些先在本地预演；P6 借贷/RWA/NFT、Flap 嵌入包、主网 NFT、发行规则和独立安全检查仍在后面。
+8. 质押权益模型（SIM）已落地：质押 IFS 越多权益越多——①质押分红：协议 `stakeRewards` 池按锁定质押量比例分配（单魂单次封顶 10%、超额滚回准备金、停机自动冻结、水位线防重启重复）；②RWA 配额：锁定质押 × 2 兑换股票篓子认购额度（上限可治理，仅资格模拟不构成债权）。IFS 视图信用账本展示每人分红累计与认购额度。真实分红与 RWA 发行仍待合约层。
+9. 根据实测 gas 决定哪些互动逐笔上链、哪些先在本地预演；P6 借贷/RWA/NFT、Flap 嵌入包、主网 NFT、发行规则和独立安全检查仍在后面。
 
 ## 连接组运行内核（第一版）
 
