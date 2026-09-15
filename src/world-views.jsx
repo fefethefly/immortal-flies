@@ -26,10 +26,10 @@ const KIND_LABEL = {
 const KIND_COLOR = {
   sense: "var(--gold)",
   act: "var(--nerve)",
-  memory: "#d7c4a0",
-  trade: "#8a8478",
-  society: "#8a8478",
-  risk: "#c27972",
+  memory: "#ddcda6",
+  trade: "#938a79",
+  society: "#938a79",
+  risk: "#b57660",
 };
 
 const SIDE_CLASS = (side) =>
@@ -138,7 +138,7 @@ function EventMark({ event, tx }) {
   return (
     <span
       className={`ev-mark ${event.kind} ${sideClass}`}
-      style={{ "--ev": KIND_COLOR[event.kind] || "#8a8478" }}
+      style={{ "--ev": KIND_COLOR[event.kind] || "#938a79" }}
       title={`${label} · T${event.tick} · ${who} ${event.side || ""}`}
     >
       <b>{who}</b>

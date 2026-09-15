@@ -1,14 +1,14 @@
 @import "./fonts.css";
 :root {
   color-scheme: dark;
-  --ink: #08090b;
-  --panel: #121113;
-  --line: #3b3029;
-  --gold: #c9a576;
-  --pale: #e8dbc3;
-  --red: #b43f37;
-  --cyan: #81bbb6;
-  --muted: #8c8580;
+  --ink: #0b0a08;
+  --panel: #12100d;
+  --line: #342e22;
+  --gold: #c9a25e;
+  --pale: #f0ead9;
+  --red: #b57660;
+  --cyan: #a9c4bb;
+  --muted: #938a79;
   --mono: "IBM Plex Mono", monospace;
   --display: "Barlow Condensed", sans-serif;
   --sans: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
@@ -183,18 +183,18 @@ main {
   background:
     linear-gradient(
       90deg,
-      #09090bef 0%,
+      #0b0a08ef 0%,
       #0c090ccd 23%,
       #110c0e42 55%,
       #0a0a0b3d 80%,
-      #08090b6e
+      #0b0a086e
     ),
     linear-gradient(
       0deg,
-      #08090bf2,
+      #0b0a08f2,
       transparent 27%,
       transparent 80%,
-      #09090b7a
+      #0b0a087a
     );
 }
 .scene-grid {
@@ -502,7 +502,7 @@ main {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  background: linear-gradient(#08090b, #0d0b0d);
+  background: linear-gradient(#0b0a08, #0d0b0d);
 }
 .district {
   position: relative;
@@ -1510,8 +1510,8 @@ main {
   }
   .sanctum:before {
     background:
-      linear-gradient(90deg, #09090bd4, #0c090c49 85%),
-      linear-gradient(0deg, #08090b, transparent 40%, #09090b70);
+      linear-gradient(90deg, #0b0a08d4, #0c090c49 85%),
+      linear-gradient(0deg, #0b0a08, transparent 40%, #0b0a0870);
   }
   .scene-footer {
     left: 24px;

@@ -467,12 +467,12 @@ function App() {
                 <div className="signal-grid">
                   {[
                     ["FOOD", stats.buys, "var(--nerve)"],
-                    ["THREAT", stats.sells, "#c27972"],
+                    ["THREAT", stats.sells, "#b57660"],
                     ["MEMORY", view.lineage.length + 7, "var(--gold)"],
                     [
                       "CREDIT",
                       Math.max(0, Math.round(stats.bnb * 100)),
-                      "#d7c4a0",
+                      "#ddcda6",
                     ],
                   ].map(([label, value, color]) => (
                     <div className="signal-row" key={label}>

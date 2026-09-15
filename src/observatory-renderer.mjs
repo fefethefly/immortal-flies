@@ -2,7 +2,7 @@ import { createFlyCloud, colonyPosition } from "./observatory-art.mjs";
 
 const TAU = Math.PI * 2;
 const CLOUD = createFlyCloud();
-const COLORS = { neural: "#a7eee1", society: "#e6c37a", market: "#a6dfa3" };
+const COLORS = { neural: "#a9c4bb", society: "#c9a25e", market: "#93a181" };
 const countBits = (value) => {
   let n = value >>> 0,
     count = 0;
@@ -35,15 +35,15 @@ export function createObservatoryRenderer(canvas, read) {
   const sprites = new Map();
   for (const color of [
     ...Object.values(COLORS),
-    "#ff3939",
-    "#eafff6",
-    "#ffae79",
+    "#b57660",
+    "#e6e0cf",
+    "#d9a86a",
   ]) {
     const surface = document.createElement("canvas");
     surface.width = surface.height = 64;
     const brush = surface.getContext("2d"),
       gradient = brush.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gradient.addColorStop(0, "#ffffff");
+    gradient.addColorStop(0, "#f0ead9");
     gradient.addColorStop(0.12, color);
     gradient.addColorStop(0.34, `${color}88`);
     gradient.addColorStop(1, `${color}00`);
@@ -85,7 +85,7 @@ export function createObservatoryRenderer(canvas, read) {
       end = along(path, u);
     line([start, end], color, 0.7 * strength, 1.5);
     light(...end, 10, color, 0.65 * strength);
-    ctx.fillStyle = "#effff9";
+    ctx.fillStyle = "#e6e0cf";
     ctx.fillRect(end[0] - 1.2, end[1] - 1.2, 2.4, 2.4);
   }
   function draw(now) {
@@ -123,7 +123,7 @@ export function createObservatoryRenderer(canvas, read) {
             at: t,
             type: "trade",
             power: 1,
-            color: trade.side === "SELL" ? "#ffae79" : COLORS.market,
+            color: trade.side === "SELL" ? "#d9a86a" : COLORS.market,
           });
       }
       seenTick = swarm.tick;
@@ -341,12 +341,12 @@ export function createObservatoryRenderer(canvas, read) {
       let alpha = 0.4 + (z + 65) / 280 + scan * 0.55 + running * 0.3;
       const colorPoint =
         p.material === "eye"
-          ? "#ff3939"
+          ? "#b57660"
           : p.material === "wing"
             ? color
             : p.material === "vein"
-              ? "#eafff6"
-              : "#e6c37a";
+              ? "#e6e0cf"
+              : "#c9a25e";
       if (p.material === "wing") alpha *= 0.65;
       if (p.material === "abdomen" && Math.sin(p.y * 0.29) > 0.3) alpha *= 0.35;
       ctx.globalAlpha = Math.min(0.95, alpha);
@@ -358,13 +358,13 @@ export function createObservatoryRenderer(canvas, read) {
       ctx.arc(x, y, size, 0, TAU);
       ctx.fill();
       if (p.material === "eye" && p.seed > 0.95)
-        light(x, y, 9 * unit, "#ff3939", 0.3);
+        light(x, y, 9 * unit, "#b57660", 0.3);
       else if (p.seed > 0.87 && (scan > 0.5 || running > 0.6))
         light(
           x,
           y,
           (5 + scan * 4) * unit,
-          p.material === "vein" ? "#eafff6" : color,
+          p.material === "vein" ? "#e6e0cf" : color,
           0.28,
         );
     }
@@ -399,7 +399,7 @@ export function createObservatoryRenderer(canvas, read) {
         active ? 1.2 : 0.6,
       );
       if (active) {
-        light(p.x, p.y, 6 * unit, "#eafff6", 0.48);
+        light(p.x, p.y, 6 * unit, "#e6e0cf", 0.48);
         if (!reduced)
           packet(
             [

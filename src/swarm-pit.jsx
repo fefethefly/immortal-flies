@@ -1,6 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { FlyMark } from "./vitruvian.jsx";
-import { bookOf, formatBnb, formatPrice, formatToken, reflexOf } from "./swarm.mjs";
+import {
+  bookOf,
+  formatBnb,
+  formatPrice,
+  formatToken,
+  reflexOf,
+} from "./swarm.mjs";
 import { useTx } from "./locale-context.jsx";
 
 const WASH = {
@@ -46,8 +52,8 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
       ctx.translate(x, y);
       ctx.rotate(heading);
       ctx.scale(scale, scale);
-      ctx.strokeStyle = lit ? "#e8e2d6" : "#6e675c";
-      ctx.fillStyle = lit ? "#16140f" : "#100f0c";
+      ctx.strokeStyle = lit ? "#f0ead9" : "#8a8172";
+      ctx.fillStyle = lit ? "#17140f" : "#12100d";
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.ellipse(-11, 0, 7, 16, -0.5, 0, Math.PI * 2);
@@ -56,7 +62,7 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
       ctx.stroke();
       ctx.beginPath();
       ctx.ellipse(0, 2, 4.2, 12, 0, 0, Math.PI * 2);
-      ctx.fillStyle = lit ? "#e8e2d6" : "#9a9284";
+      ctx.fillStyle = lit ? "#f0ead9" : "#a89e8c";
       ctx.fill();
       ctx.restore();
     }
@@ -76,7 +82,8 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
           const seed = (i * 97 + Math.floor(angle * 420)) % 997;
           const px = (seed * 1.73) % width;
           const py = (seed * 2.41 + i * 11) % height;
-          ctx.fillStyle = i % 7 === 0 ? "rgba(176,138,74,.28)" : "rgba(125,139,110,.12)";
+          ctx.fillStyle =
+            i % 7 === 0 ? "rgba(201,162,94,.28)" : "rgba(147,161,129,.12)";
           ctx.fillRect(px, py, i % 3 === 0 ? 1.5 : 1, i % 3 === 0 ? 1.5 : 1);
         }
       }
@@ -85,12 +92,12 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
         const [rr, gg, bb] = WASH[wash];
         const g = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 1.6);
         g.addColorStop(0, `rgba(${rr},${gg},${bb},0.22)`);
-        g.addColorStop(1, "rgba(7,7,6,0)");
+        g.addColorStop(1, "rgba(9,8,6,0)");
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, width, height);
       }
 
-      ctx.strokeStyle = "#2a261c";
+      ctx.strokeStyle = "#2f2a1f";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.rect(cx - r * 0.86, cy - r * 0.86, r * 1.72, r * 1.72);
@@ -111,7 +118,7 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
         const max = Math.max(...prices);
         const span = Math.max(1, max - min);
         ctx.beginPath();
-        ctx.strokeStyle = "#b08a4a";
+        ctx.strokeStyle = "#c9a25e";
         ctx.lineWidth = 1.3;
         prices.forEach((price, i) => {
           const x = width * 0.08 + (i / (prices.length - 1)) * width * 0.84;
@@ -129,10 +136,15 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
         const x = cx + Math.cos(theta) * r;
         const y = cy + Math.sin(theta) * r * 0.92;
         const lit = fly.id === selectedId;
-        const heading = fly.lastSide === "BUY" ? -0.7 : fly.lastSide === "SELL" ? 0.7 : theta + Math.PI / 2;
+        const heading =
+          fly.lastSide === "BUY"
+            ? -0.7
+            : fly.lastSide === "SELL"
+              ? 0.7
+              : theta + Math.PI / 2;
         drawFly(x, y, lit ? 1.15 : 0.78, heading, lit);
         hits.current.push({ id: fly.id, x, y });
-        ctx.fillStyle = lit ? "#e8e2d6" : "#8a8478";
+        ctx.fillStyle = lit ? "#f0ead9" : "#938a79";
         ctx.font = "10px 'IBM Plex Mono', monospace";
         ctx.fillText(`#${fly.id}`, x + 14, y - 10);
       });
@@ -141,13 +153,18 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
         const theta = -0.4 + i * 0.18;
         const x = cx + Math.cos(theta) * r * 1.28;
         const y = cy + Math.sin(theta) * r * 1.18;
-        ctx.fillStyle = "#3a362f";
+        ctx.fillStyle = "#443c2c";
         ctx.fillRect(x - 4, y - 4, 8, 8);
       });
 
       const chosen = swarm.flies.find((fly) => fly.id === selectedId);
       if (chosen) {
-        const heading = chosen.lastSide === "BUY" ? -0.55 : chosen.lastSide === "SELL" ? 0.55 : 0;
+        const heading =
+          chosen.lastSide === "BUY"
+            ? -0.55
+            : chosen.lastSide === "SELL"
+              ? 0.55
+              : 0;
         drawFly(cx, cy + 6, 1.7, heading, true);
       }
     }
@@ -187,7 +204,11 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
 export function Cause({ stim, reflex, trade }) {
   const tx = useTx();
   const why =
-    reflex.side === "BUY" ? tx("pit.whyBuy") : reflex.side === "SELL" ? tx("pit.whySell") : tx("pit.whyHold");
+    reflex.side === "BUY"
+      ? tx("pit.whyBuy")
+      : reflex.side === "SELL"
+        ? tx("pit.whySell")
+        : tx("pit.whyHold");
   return (
     <p className="cause" aria-live="polite">
       <span>{stim || tx("pit.market")}</span>
@@ -267,7 +288,17 @@ export function CullRing({ remain, total }) {
   );
 }
 
-export function OrganStops({ kinds, labels, hints, icons, intensity, cooldown, active, onPulse, onIntensity }) {
+export function OrganStops({
+  kinds,
+  labels,
+  hints,
+  icons,
+  intensity,
+  cooldown,
+  active,
+  onPulse,
+  onIntensity,
+}) {
   const tx = useTx();
   return (
     <div className="organ">
@@ -301,7 +332,9 @@ export function OrganStops({ kinds, labels, hints, icons, intensity, cooldown, a
           );
         })}
       </div>
-      <em>{cooldown > 0 ? tx("pit.cooldown", { s: cooldown }) : tx("pit.anyone")}</em>
+      <em>
+        {cooldown > 0 ? tx("pit.cooldown", { s: cooldown }) : tx("pit.anyone")}
+      </em>
     </div>
   );
 }
@@ -323,7 +356,8 @@ export function Roster({ board, selectedId, onSelect }) {
                 {i + 1} · #{row.id}
               </b>
               <small>
-                GEN {row.gen} · {row.status === "alive" ? tx("pit.alive") : tx("pit.dead")}
+                GEN {row.gen} ·{" "}
+                {row.status === "alive" ? tx("pit.alive") : tx("pit.dead")}
               </small>
             </span>
             <em className={row.lastSide.toLowerCase()}>{row.lastSide}</em>
@@ -359,7 +393,9 @@ export function Lineage({ lineage, flies }) {
             </span>
             <i />
             <b>#{row.child}</b>
-            <em>GEN {child?.gen ?? "—"} · t={row.tick}</em>
+            <em>
+              GEN {child?.gen ?? "—"} · t={row.tick}
+            </em>
           </li>
         );
       })}
@@ -375,12 +411,17 @@ export function TradeRiver({ trades }) {
   return (
     <ol className="river">
       {trades.slice(0, 18).map((row, i) => (
-        <li key={`${row.tick}-${row.flyId}-${i}`} className={row.side.toLowerCase()}>
+        <li
+          key={`${row.tick}-${row.flyId}-${i}`}
+          className={row.side.toLowerCase()}
+        >
           <small>{timeLabel(row.tick)}</small>
           <b>{row.side}</b>
           <span>#{row.flyId}</span>
           <em>
-            {row.side === "BUY" ? `${formatBnb(row.amount)} BNB` : `${formatToken(row.amount)} IFL`}
+            {row.side === "BUY"
+              ? `${formatBnb(row.amount)} BNB`
+              : `${formatToken(row.amount)} IFL`}
           </em>
         </li>
       ))}

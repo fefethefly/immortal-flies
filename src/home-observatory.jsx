@@ -6,7 +6,7 @@ import { createObservatoryRenderer } from "./observatory-renderer.mjs";
 import "./home-observatory.css";
 
 const MODES = ["neural", "society", "market"];
-const COLORS = { neural: "#a7eee1", society: "#e6c37a", market: "#a6dfa3" };
+const COLORS = { neural: "#a9c4bb", society: "#c9a25e", market: "#93a181" };
 const words = {
   zh: {
     eyebrow: "永生果蝇 · 数字生命观测站",
@@ -201,7 +201,7 @@ function Panel({
             boxShadow:
               "0 0 28px color-mix(in srgb, var(--obs-accent) 25%, transparent), inset 0 0 22px color-mix(in srgb, var(--obs-accent) 12%, transparent)",
           },
-          { borderColor: "#27302a", boxShadow: "0 0 0 transparent" },
+          { borderColor: "#2f2a1f", boxShadow: "0 0 0 transparent" },
         ],
         { duration: 680, easing: "ease-out" },
       ),

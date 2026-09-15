@@ -245,7 +245,7 @@ function HomeScope({ fly, tick }) {
     node.height = height * d;
     ctx.setTransform(d, 0, 0, d, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = "#2a261c";
+    ctx.strokeStyle = "#2f2a1f";
     ctx.lineWidth = 1;
     for (let i = 1; i < 4; i++) {
       ctx.beginPath();
@@ -257,7 +257,7 @@ function HomeScope({ fly, tick }) {
     if (series.length < 2) return;
     const max = Math.max(1, ...series);
     ctx.beginPath();
-    ctx.strokeStyle = "#b08a4a";
+    ctx.strokeStyle = "#c9a25e";
     ctx.lineWidth = 1.3;
     series.forEach((value, i) => {
       const x = (i / (series.length - 1)) * width;

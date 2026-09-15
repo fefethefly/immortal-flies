@@ -2,18 +2,19 @@
 
 :root {
   color-scheme: dark;
-  --bg: #070706;
-  --surface: #100f0c;
-  --surface-2: #16140f;
-  --text: #e8e2d6;
-  --muted: #9a9284;
-  --quiet: #6e675c;
-  --line: #2a261c;
-  --acid: #e8e2d6;
-  --cyan: #c4b89a;
-  --gold: #b08a4a;
-  --violet: #8a7358;
-  --nerve: #7d8b6e;
+  --bg: #0a0907;
+  --surface: #12100d;
+  --surface-2: #17140f;
+  --text: #f0ead9;
+  --muted: #a89e8c;
+  --quiet: #857d6e;
+  --line: #2f2a1f;
+  --acid: #f0ead9;
+  --cyan: #d8c9a4;
+  --gold: #c9a25e;
+  --violet: #9c855f;
+  --nerve: #93a181;
+  --rust: #a5715c;
   --sans:
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue",
     Arial, sans-serif;
@@ -21,7 +22,7 @@
     "Cormorant Garamond", "Iowan Old Style", Palatino, "Songti SC", "STSong",
     serif;
   --mono: "IBM Plex Mono", monospace;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 * {
   box-sizing: border-box;
@@ -32,7 +33,19 @@ html {
 }
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(
+      ellipse 62% 46% at 20% -6%,
+      rgba(201, 162, 94, 0.1),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 55% 40% at 88% 106%,
+      rgba(147, 161, 129, 0.05),
+      transparent 62%
+    ),
+    linear-gradient(180deg, #0f0d0a 0%, var(--bg) 26%, #080706 100%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -44,8 +57,20 @@ body:before {
   inset: 0;
   pointer-events: none;
   z-index: 10;
-  opacity: 0.035;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23noise)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+}
+body:after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  background: radial-gradient(
+    ellipse 120% 90% at 50% 42%,
+    transparent 58%,
+    rgba(0, 0, 0, 0.42) 100%
+  );
 }
 button,
 a,
@@ -128,7 +153,7 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  background: rgba(7, 7, 6, 0.94);
+  background: rgba(9, 8, 6, 0.94);
   position: relative;
   z-index: 30;
 }
@@ -214,11 +239,11 @@ h3 {
   display: inline-block;
   background: var(--cyan);
   border-radius: 50%;
-  box-shadow: 0 0 9px #bbb19f60;
+  box-shadow: 0 0 9px #cbbfa860;
 }
 .network-pill.chain i {
-  background: #b08a4a;
-  box-shadow: 0 0 9px #b08a4a80;
+  background: #c9a25e;
+  box-shadow: 0 0 9px #c9a25e80;
 }
 .network-pill span {
   font-family: var(--sans);
@@ -267,7 +292,7 @@ h3 {
 .hero-topline i {
   width: 3px;
   height: 3px;
-  background: #76726c;
+  background: #847b6d;
   border-radius: 50%;
 }
 .tiny-cross {
@@ -727,7 +752,7 @@ h1 > sup {
   gap: 28px;
   align-items: center;
   border: 1px solid var(--line);
-  background: #100f0c;
+  background: #12100d;
   padding: 22px 26px;
 }
 .swarm-tape-copy small {
@@ -758,10 +783,15 @@ h1 > sup {
   justify-items: center;
   gap: 4px;
   font: 8px var(--mono);
-  color: #6e675c;
+  color: #8a8172;
 }
-.tape-seals .lead { color: var(--text); }
-.tape-seals .fly-mark { width: 22px; height: 22px; }
+.tape-seals .lead {
+  color: var(--text);
+}
+.tape-seals .fly-mark {
+  width: 22px;
+  height: 22px;
+}
 .swarm-tape dl {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
@@ -770,12 +800,14 @@ h1 > sup {
 }
 .swarm-tape dt {
   font: 8px var(--mono);
-  color: #6e675c;
+  color: #8a8172;
   letter-spacing: 1px;
 }
 .swarm-tape dd {
   margin: 6px 0 0;
-  font: 500 18px/1 "Barlow Condensed", var(--mono);
+  font:
+    500 18px/1 "Barlow Condensed",
+    var(--mono);
   color: var(--text);
 }
 .swarm-tape > a {
@@ -784,7 +816,7 @@ h1 > sup {
   gap: 8px;
   border: 1px solid var(--acid);
   background: var(--acid);
-  color: #14110c;
+  color: #171310;
   padding: 12px 16px;
   font-size: 12px;
   white-space: nowrap;
@@ -929,7 +961,7 @@ h1 > sup {
   letter-spacing: 1px;
 }
 .viewport-meta > span:last-child {
-  color: #5e594f;
+  color: #6a6255;
 }
 .viewport-footer {
   position: absolute;
@@ -1430,7 +1462,7 @@ h1 > sup {
 }
 .maze-cell.wall {
   background: #302d28;
-  box-shadow: inset 0 1px #3e3a33;
+  box-shadow: inset 0 1px #48402f;
 }
 .maze-cell.visited {
   background: #37322a;
@@ -1444,7 +1476,7 @@ h1 > sup {
 .maze-cell.goal {
   color: var(--acid);
   background: #393227;
-  box-shadow: inset 0 0 9px #a2947b22;
+  box-shadow: inset 0 0 9px #b3a48822;
 }
 .maze-cell .fly-mark {
   width: 90%;
@@ -1816,8 +1848,8 @@ h1 > sup {
   padding: 72px 0 62px;
   background:
     radial-gradient(ellipse at 50% 5%, #685d4b18, transparent 60%), #131210;
-  border-top: 1px solid #2f2b24;
-  border-bottom: 1px solid #2f2b24;
+  border-top: 1px solid #342e22;
+  border-bottom: 1px solid #342e22;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1865,14 +1897,14 @@ h1 > sup {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin-top: 47px;
-  border-top: 1px solid #39352d;
-  border-bottom: 1px solid #39352d;
+  border-top: 1px solid #423b2d;
+  border-bottom: 1px solid #423b2d;
   text-align: left;
 }
 .rule-tile {
   position: relative;
   padding: 27px 30px;
-  border-right: 1px solid #39352d;
+  border-right: 1px solid #423b2d;
 }
 .rule-tile:first-child {
   padding-left: 10px;
@@ -2034,7 +2066,7 @@ h1 > sup {
 .hash-record code {
   font: 10px var(--mono);
   letter-spacing: 0.2px;
-  color: #c4bbab;
+  color: #d9d0bb;
   overflow-wrap: anywhere;
 }
 .hash-record p {
@@ -2171,7 +2203,7 @@ h1 > sup {
 .continuity-test {
   margin-top: auto;
   padding-top: 20px;
-  border-top: 1px solid #39352d;
+  border-top: 1px solid #423b2d;
 }
 .continuity-test > div {
   display: flex;
@@ -2388,7 +2420,7 @@ h1 > sup {
 .proof-placeholder {
   height: 170px;
   border: 1px solid #413b30;
-  background: #100f0c;
+  background: #12100d;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2426,7 +2458,7 @@ h1 > sup {
 }
 .proof-result code {
   font: 8px/1.7 var(--mono);
-  color: #bbb19f;
+  color: #cbbfa8;
   overflow-wrap: anywhere;
   display: block;
 }
@@ -3914,7 +3946,7 @@ h1 > sup {
   .rule-tile {
     padding: 24px 8px !important;
     border-right: 0;
-    border-bottom: 1px solid #39352d;
+    border-bottom: 1px solid #423b2d;
     display: grid;
     grid-template-columns: 35px 1fr;
     column-gap: 13px;
@@ -4330,7 +4362,7 @@ h1 > sup {
   font-family: "Songti SC", "STSong", "Noto Serif SC", var(--display), serif;
 }
 .hero-stage:after {
-  background: radial-gradient(ellipse, #b08a4a18, transparent 68%);
+  background: radial-gradient(ellipse, #c9a25e18, transparent 68%);
 }
 .hero-stage.reborn:before {
   border-color: var(--gold);

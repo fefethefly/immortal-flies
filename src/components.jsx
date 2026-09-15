@@ -57,7 +57,7 @@ export function SignalCanvas({ brain, variant = "hero" }) {
               (Math.cos(i * 7.34) * 0.5 + 0.5) * height +
               Math.cos(time * 0.7 + i) * 5;
           const alpha = 0.08 + (Math.sin(time + i) * 0.5 + 0.5) * 0.2;
-          ctx.fillStyle = `rgba(208, 205, 200,${alpha})`;
+          ctx.fillStyle = `rgba(217, 208, 187,${alpha})`;
           ctx.fillRect(x, y, i % 9 === 0 ? 2 : 1, i % 9 === 0 ? 2 : 1);
         }
         return;
@@ -95,17 +95,17 @@ export function SignalCanvas({ brain, variant = "hero" }) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, 5 + strength * 4, 0, Math.PI * 2);
         ctx.fillStyle = active
-          ? "#b08a4a"
+          ? "#c9a25e"
           : `rgba(196, 184, 154,${0.15 + strength * 0.45})`;
         ctx.fill();
         ctx.beginPath();
         ctx.arc(p.x, p.y, 13 + strength * 6, 0, Math.PI * 2);
         ctx.strokeStyle = active
-          ? "rgba(206, 197, 182,.4)"
-          : "rgba(171, 160, 140,.12)";
+          ? "rgba(217, 208, 187,.4)"
+          : "rgba(179, 168, 145,.12)";
         ctx.stroke();
         ctx.font = "9px monospace";
-        ctx.fillStyle = "#8e8b85";
+        ctx.fillStyle = "#938a79";
         ctx.fillText(String(i + 1).padStart(2, "0"), p.x + 16, p.y - 12);
       });
     }

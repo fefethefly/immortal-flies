@@ -10,11 +10,11 @@ export const ECONOMY_DEFAULTS = Object.freeze({
   tokenPrice: 0.002,
 });
 export const FEE_SPLIT = Object.freeze([
-  { key: "team", label: "开发与运营", rate: 0.45, color: "#c8a16c" },
-  { key: "burn", label: "回购 / 销毁", rate: 0.2, color: "#d55b48" },
-  { key: "genesisPool", label: "Genesis 贡献池", rate: 0.15, color: "#af93d2" },
-  { key: "season", label: "全体玩家赛季池", rate: 0.1, color: "#67b9b0" },
-  { key: "preservation", label: "状态保存储备", rate: 0.1, color: "#818c9b" },
+  { key: "team", label: "开发与运营", rate: 0.45, color: "#c9a25e" },
+  { key: "burn", label: "回购 / 销毁", rate: 0.2, color: "#b57660" },
+  { key: "genesisPool", label: "Genesis 贡献池", rate: 0.15, color: "#9c855f" },
+  { key: "season", label: "全体玩家赛季池", rate: 0.1, color: "#a9c4bb" },
+  { key: "preservation", label: "状态保存储备", rate: 0.1, color: "#938a79" },
 ]);
 export function calculateEconomy(input) {
   const p = { ...ECONOMY_DEFAULTS, ...input };

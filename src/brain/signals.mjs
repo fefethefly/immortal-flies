@@ -1,9 +1,9 @@
 export const SIGNAL_GROUPS = Object.freeze([
-  ['food', '食物感受器', '#cfb76a'],
-  ['threat', '威胁感受器', '#c27972'],
-  ['light', '光感受器', '#79d5c1'],
-  ['left', '左侧运动', '#9bb7a8'],
-  ['right', '右侧运动', '#c6d99f'],
+  ['food', '食物感受器', '#c9a25e'],
+  ['threat', '威胁感受器', '#b57660'],
+  ['light', '光感受器', '#a9c4bb'],
+  ['left', '左侧运动', '#93a181'],
+  ['right', '右侧运动', '#c0c9a1'],
 ]);
 
 export function summarizeSignals(state, graph) {
