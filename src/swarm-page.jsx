@@ -75,6 +75,7 @@ function App() {
   const booted = useRef(false);
   const [remote, setRemote] = useState(null);
   const [creditRemote, setCreditRemote] = useState(null);
+  const [vaultRemote, setVaultRemote] = useState(null);
 
   const stats = useMemo(() => (view ? summarize(view) : null), [view]);
   const fly = view
@@ -137,6 +138,34 @@ function App() {
     } catch {
       setCreditRemote(null);
     }
+  }
+
+  /** 拉取服务端用户金库；失败保持未接入显示。 */
+  async function fetchVault() {
+    if (!remoteRef.current) {
+      setVaultRemote(null);
+      return;
+    }
+    try {
+      setVaultRemote(await iffApi.vault());
+    } catch {
+      setVaultRemote(null);
+    }
+  }
+
+  /** 用户金库动作（注资/退出/结算，全部 SIM）。 */
+  async function vaultAction(kind, body) {
+    const r = remoteRef.current;
+    if (!r) return;
+    try {
+      if (kind === "deposit") await iffApi.vaultDeposit(r.ownerToken, body);
+      else if (kind === "exit") await iffApi.vaultExit(r.ownerToken, body);
+      else if (kind === "settle") await iffApi.vaultSettle();
+      setNotice(tx("vault.done"));
+    } catch (err) {
+      setNotice(`${tx("vault.err")} · ${err?.message || kind}`);
+    }
+    await fetchVault();
   }
 
   /** IFS 视图的信用动作（锁仓/占用/释放/解锁，全部 SIM）。 */
@@ -288,6 +317,7 @@ function App() {
   function switchTab(next) {
     setTab(next);
     if (next === "risk" || next === "ifs") fetchCredit();
+    if (next === "vault") fetchVault();
   }
 
   function branchNow() {
@@ -615,7 +645,15 @@ function App() {
         {tab === "execution" && world && (
           <ExecutionView world={world} tx={tx} />
         )}
-        {tab === "vault" && world && <VaultView world={world} tx={tx} />}
+        {tab === "vault" && world && (
+          <VaultView
+            world={world}
+            tx={tx}
+            vaultRemote={vaultRemote}
+            remote={remote}
+            onVaultAction={vaultAction}
+          />
+        )}
         {tab === "ifs" && world && (
           <IfsView
             world={world}

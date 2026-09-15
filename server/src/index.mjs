@@ -14,6 +14,8 @@ import { createLlmService } from "./llm/service.mjs";
 import { mountLlmRoutes } from "./llm/http.mjs";
 import { createCreditService } from "./credit/service.mjs";
 import { mountCreditRoutes } from "./credit/http.mjs";
+import { createVaultService } from "./vault/service.mjs";
+import { mountVaultRoutes } from "./vault/http.mjs";
 
 export async function createApp(options = {}) {
   const config = options.config || createConfig(options.env || process.env);
@@ -33,6 +35,7 @@ export async function createApp(options = {}) {
     options.llm || createLlmService({ sessions, store, provider, logger });
   const credit =
     options.credit || createCreditService({ sessions, store, logger });
+  const vault = options.vault || createVaultService({ store, logger });
 
   if (!options.skipBoot) {
     await sessions.boot(options.graph || null);
@@ -42,6 +45,7 @@ export async function createApp(options = {}) {
   mountSessionRoutes({ router, sessions });
   mountLlmRoutes({ router, llm });
   mountCreditRoutes({ router, credit });
+  mountVaultRoutes({ router, vault });
   const limiter = options.limiter || createRateLimiter();
 
   const corsOrigins = new Set(config.corsOrigins);
@@ -154,7 +158,17 @@ export async function createApp(options = {}) {
     }
   }
 
-  return { config, logger, store, sessions, llm, credit, provider, handler };
+  return {
+    config,
+    logger,
+    store,
+    sessions,
+    llm,
+    credit,
+    vault,
+    provider,
+    handler,
+  };
 }
 
 function sendJson(res, status, body) {

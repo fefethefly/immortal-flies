@@ -109,4 +109,10 @@ export const iffApi = {
       token,
       body,
     }),
+  vault: () => request("/v1/vault"),
+  vaultDeposit: (token, body) =>
+    request("/v1/vault/deposit", { method: "POST", token, body }),
+  vaultExit: (token, body) =>
+    request("/v1/vault/exit", { method: "POST", token, body }),
+  vaultSettle: () => request("/v1/vault/settle", { method: "POST" }),
 };

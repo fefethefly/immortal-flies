@@ -65,6 +65,19 @@ export function createStore(dataDir) {
     }
   }
 
+  async function saveVault(vault) {
+    await ensure();
+    await writeJson(join(dataDir, "vault.json"), vault);
+  }
+
+  async function loadVault() {
+    try {
+      return await readJson(join(dataDir, "vault.json"));
+    } catch {
+      return null;
+    }
+  }
+
   async function saveArchive(sessionId, archive) {
     const dir = sessionPath(sessionId);
     await mkdir(dir, { recursive: true });
@@ -122,5 +135,7 @@ export function createStore(dataDir) {
     appendLlmAudit,
     saveCredit,
     loadCredit,
+    saveVault,
+    loadVault,
   };
 }

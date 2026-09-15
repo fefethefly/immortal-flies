@@ -22,6 +22,10 @@ npm run dev            # Vite 将 /v1 /health /ready 反代到 8787
 - 重启：空闲未过期的会话从 `server/data/sessions/` 恢复；过久未访问只占磁盘，下次请求再载入；超过 `IFF_SESSION_MAX_AGE_MS` 删除
 - 限流：tick / 写 / LLM / 创建会话超限返回 `429 RATE_LIMITED` 与 `Retry-After`
 
+## P5 用户金库（已接入）
+
+`GET /v1/vault`（金库视图）、`POST /v1/vault/deposit | exit`（Bearer owner token = 用户身份，磁盘只存哈希）、`POST /v1/vault/settle`（SIM 机械结算）。账本是 `iff.vault/1`（`src/brain/flyswarm/vault.mjs`）：注资按 NAV 铸份额（1e6 定点）、逐批记录成本/高水位/已实现损益/费用/退出状态与 Position ID、赎回严格校验份额所有权、退出队列 FIFO 受流动性上限、只有已实现收益可分配。用户本金与协议自有资金分账。
+
 ## P4 协议自有资金（已接入）
 
 `GET /v1/sessions/:id/protocol` 返回 `iff.protocol/1` 视图（R/C/N/T/D、35/25/20/10/10 拨定、回购资格与停机原因、追加式哈希链回执，全部 SIM）。收入层在 `src/brain/flyswarm/protocol.mjs`，每 tick 随会话推进；只读派生自内核金库，不动用户资产。

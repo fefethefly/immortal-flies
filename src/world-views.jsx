@@ -860,9 +860,12 @@ export function ExecutionView({ world, tx }) {
 
 /* ---------- VAULT ---------- */
 
-export function VaultView({ world, tx }) {
+export function VaultView({ world, tx, vaultRemote, remote, onVaultAction }) {
   const v = world.vault;
   const h = v.hive;
+  const [depositAmt, setDepositAmt] = useState("");
+  const [exitShares, setExitShares] = useState("");
+  const u = vaultRemote;
   const max = Math.max(
     1,
     ...v.history.map((row) => Math.max(row.nav, row.highWater)),
@@ -876,21 +879,139 @@ export function VaultView({ world, tx }) {
     >
       <div className="vault-grid">
         <section className="panel vault-user">
-          <h2>{tx("vault.user")}</h2>
-          <b className="off">{tx("vault.notConnected")}</b>
-          <dl>
-            <div>
-              <dt>{tx("risk.equity")}</dt>
-              <dd>0.0000</dd>
-            </div>
-            <div>
-              <dt>{tx("vault.shares")}</dt>
-              <dd>0</dd>
-            </div>
-          </dl>
-          <h2>{tx("vault.exits")}</h2>
-          <p className="empty-inline">{tx("vault.exitsEmpty")}</p>
-          <p className="view-note">{tx("vault.note")}</p>
+          {u ? (
+            <>
+              <h2>
+                {tx("vault.api")} <small>{tx("credit.sim")}</small>
+              </h2>
+              <dl>
+                <div>
+                  <dt>{tx("risk.cash")}</dt>
+                  <dd>{u.cash}</dd>
+                </div>
+                <div>
+                  <dt>{tx("vault.shares")}</dt>
+                  <dd>{u.shares}</dd>
+                </div>
+                <div>
+                  <dt>{tx("risk.nav")}</dt>
+                  <dd>{(u.nav / 1000000).toFixed(6)}</dd>
+                </div>
+                <div>
+                  <dt>{tx("vault.highWater")}</dt>
+                  <dd>{(u.highWater / 1000000).toFixed(6)}</dd>
+                </div>
+                <div>
+                  <dt>{tx("vault.realizedPool")}</dt>
+                  <dd>{u.realizedPool}</dd>
+                </div>
+                <div>
+                  <dt>{tx("vault.feeRevenue")}</dt>
+                  <dd>{u.feeRevenue}</dd>
+                </div>
+              </dl>
+              <form
+                className="credit-stake"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const amount = Number(depositAmt);
+                  if (!Number.isSafeInteger(amount) || amount <= 0) return;
+                  onVaultAction?.("deposit", { amount });
+                  setDepositAmt("");
+                }}
+              >
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={depositAmt}
+                  onChange={(e) => setDepositAmt(e.target.value)}
+                  placeholder={tx("credit.amount")}
+                  aria-label={tx("vault.deposit")}
+                />
+                <button type="submit" disabled={!depositAmt}>
+                  {tx("vault.deposit")}
+                </button>
+              </form>
+              <form
+                className="credit-stake"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const shares = Number(exitShares);
+                  if (!Number.isSafeInteger(shares) || shares <= 0) return;
+                  onVaultAction?.("exit", { shares });
+                  setExitShares("");
+                }}
+              >
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={exitShares}
+                  onChange={(e) => setExitShares(e.target.value)}
+                  placeholder={tx("vault.exitShares")}
+                  aria-label={tx("vault.exit")}
+                />
+                <button type="submit" disabled={!exitShares}>
+                  {tx("vault.exit")}
+                </button>
+              </form>
+              <div className="credit-stake-actions">
+                <button onClick={() => onVaultAction?.("settle")}>
+                  {tx("vault.settle")}
+                </button>
+              </div>
+              <h2>{tx("vault.batches")}</h2>
+              <ul className="credit-stakes">
+                {u.batches.map((batch) => (
+                  <li key={batch.id}>
+                    <span>{batch.positionId}</span>
+                    <b>{batch.shares}</b>
+                    <em>
+                      {batch.owner.slice(0, 14)}… · nav{" "}
+                      {(batch.navAtEntry / 1000000).toFixed(4)} · {batch.status}
+                    </em>
+                  </li>
+                ))}
+              </ul>
+              <h2>{tx("vault.exits")}</h2>
+              <ul className="credit-stakes">
+                {u.exits.map((exit) => (
+                  <li key={exit.id}>
+                    <span>{exit.id}</span>
+                    <b>{exit.shares}</b>
+                    <em>
+                      {exit.status === "queued"
+                        ? tx("vault.queued")
+                        : `${tx("vault.done")} · ${exit.realized}`}
+                    </em>
+                  </li>
+                ))}
+                {!u.exits.length && (
+                  <li className="empty-inline">{tx("vault.exitsEmpty")}</li>
+                )}
+              </ul>
+              <p className="view-note">{tx("vault.note")}</p>
+            </>
+          ) : (
+            <>
+              <h2>{tx("vault.user")}</h2>
+              <b className="off">{tx("vault.notConnected")}</b>
+              <dl>
+                <div>
+                  <dt>{tx("risk.equity")}</dt>
+                  <dd>0.0000</dd>
+                </div>
+                <div>
+                  <dt>{tx("vault.shares")}</dt>
+                  <dd>0</dd>
+                </div>
+              </dl>
+              <h2>{tx("vault.exits")}</h2>
+              <p className="empty-inline">{tx("vault.exitsEmpty")}</p>
+              <p className="view-note">{tx("vault.note")}</p>
+            </>
+          )}
         </section>
         <section className="panel">
           <h2>{tx("vault.hive")}</h2>
