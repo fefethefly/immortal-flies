@@ -14,6 +14,18 @@ const WASH = {
   HOLD: [90, 86, 78],
 };
 
+const TAU = Math.PI * 2;
+
+function popcount(value) {
+  let n = value >>> 0;
+  let count = 0;
+  while (n) {
+    n &= n - 1;
+    count += 1;
+  }
+  return count;
+}
+
 function nearestHit(hits, x, y, reach = 30) {
   let best = null;
   let dist = reach;
@@ -73,6 +85,28 @@ export function HomeField({ swarm, selectedId, onSelect }) {
       ctx.setTransform(d, 0, 0, d, 0, 0);
     });
     resize.observe(canvas);
+
+    // Execution bursts: colored ray clusters fired by real fills and spikes.
+    const bursts = [];
+    let tradeSeen = "";
+    let spikesSeen = -1;
+    const passTimes = new Map();
+    function spawnBurst(x, y, color, count = 14, maxLen = 80) {
+      bursts.push({
+        x,
+        y,
+        color,
+        born: (performance.now() - started) / 1000,
+        life: 1.3,
+        rays: Array.from({ length: count }, () => ({
+          angle: Math.random() * TAU,
+          len: maxLen * (0.55 + Math.random() * 0.45),
+          width: 1 + Math.random() * 1.1,
+          delay: Math.random() * 0.12,
+        })),
+      });
+      if (bursts.length > 7) bursts.shift();
+    }
 
     function localPoint(event) {
       const box = canvas.getBoundingClientRect();
@@ -216,8 +250,8 @@ export function HomeField({ swarm, selectedId, onSelect }) {
         );
         ctx.stroke();
       }
-      ctx.font = "400 9px 'IBM Plex Mono', monospace";
-      ctx.fillStyle = "rgba(154,146,132,0.75)";
+      ctx.font = "500 9px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = "rgba(176,148,102,0.95)";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       [
@@ -228,6 +262,61 @@ export function HomeField({ swarm, selectedId, onSelect }) {
       ].forEach(([label, dx, dy]) => {
         ctx.fillText(label, cx + dx * (gauge + 24), cy + dy * (gauge + 24));
       });
+
+      // Radar sweep: the graduation earns its keep — the arm scans the field
+      // and each fly flares once per pass. This is the page's heartbeat.
+      const sweepA = reduced ? -Math.PI / 2 : t * 0.55;
+      if (!reduced) {
+        if (typeof ctx.createConicGradient === "function") {
+          const trail = ctx.createConicGradient(sweepA, cx, cy);
+          trail.addColorStop(0, "rgba(196,176,122,0)");
+          trail.addColorStop(0.78, "rgba(196,176,122,0)");
+          trail.addColorStop(0.94, "rgba(196,176,122,0.14)");
+          trail.addColorStop(1, "rgba(214,190,124,0.26)");
+          ctx.fillStyle = trail;
+          ctx.beginPath();
+          ctx.arc(cx, cy, gauge, 0, TAU);
+          ctx.fill();
+        }
+        ctx.strokeStyle = "rgba(224,198,140,0.85)";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(
+          cx + Math.cos(sweepA) * gauge,
+          cy + Math.sin(sweepA) * gauge,
+        );
+        ctx.stroke();
+        const tipX = cx + Math.cos(sweepA) * gauge;
+        const tipY = cy + Math.sin(sweepA) * gauge;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "rgba(214,190,124,0.8)";
+        ctx.fillStyle = "rgba(240,230,204,0.95)";
+        ctx.beginPath();
+        ctx.arc(tipX, tipY, 2.6, 0, TAU);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // Fresh spikes in the champion throw sparks off the neuron ring.
+      const spikesNow = chosen?.brain?.spikes ?? 0;
+      if (spikesSeen === -1) spikesSeen = spikesNow;
+      if (spikesNow !== spikesSeen) {
+        const grew = popcount(spikesNow) > popcount(spikesSeen);
+        spikesSeen = spikesNow;
+        if (grew && !reduced) {
+          for (let k = 0; k < 3; k += 1) {
+            const node = neurons[Math.floor(Math.random() * neurons.length)];
+            spawnBurst(
+              cx + node.x * r * 1.9,
+              cy + node.y * r * 1.9,
+              "156,171,141",
+              6,
+              26,
+            );
+          }
+        }
+      }
 
       // Neural connectome: signal travels from sensory nodes to motor nodes.
       synapses.forEach(([a, b], edgeIndex) => {
@@ -344,6 +433,23 @@ export function HomeField({ swarm, selectedId, onSelect }) {
         ctx.stroke();
       }
 
+      // A fresh fill fires a ray burst from the fly that ordered.
+      const tradeKey = last ? `${last.tick}:${last.flyId}` : "";
+      if (tradeKey && tradeKey !== tradeSeen && !reduced) {
+        tradeSeen = tradeKey;
+        const origin = hits.current.find((hit) => hit.id === last.flyId) || {
+          x: cx,
+          y: cy,
+        };
+        spawnBurst(
+          origin.x,
+          origin.y,
+          last.side === "SELL" ? "194,121,114" : "214,186,128",
+          16,
+          92,
+        );
+      }
+
       const living = live.flies.filter((row) => row.status === "alive");
       hits.current = [];
       let selectedPos = null;
@@ -370,6 +476,18 @@ export function HomeField({ swarm, selectedId, onSelect }) {
           ? 0.42
           : 0.5 + Math.sin(t * (12 + (row.id % 4)) + row.id) * 0.5;
         if (lit) selectedPos = { x, y };
+        // Radar pass: flare once per sweep revolution, then decay.
+        const behind = (((sweepA - drift) % TAU) + TAU) % TAU;
+        if (!reduced && behind < 0.05) passTimes.set(row.id, t);
+        const passT = passTimes.get(row.id);
+        const flare = reduced ? 0 : Math.max(0, 1 - (t - passT) / 1.4);
+        if (flare > 0) {
+          ctx.strokeStyle = `rgba(214,190,124,${flare * 0.8})`;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(x, y, 8 + (1 - flare) * 26, 0, TAU);
+          ctx.stroke();
+        }
         if (!reduced) {
           const line = flyTrails.current.get(row.id) || [];
           line.push({ x, y });
@@ -385,9 +503,9 @@ export function HomeField({ swarm, selectedId, onSelect }) {
         drawFly(
           x,
           y,
-          lit ? 1.46 : hot ? 1.05 : 0.84,
+          (lit ? 1.46 : hot ? 1.05 : 0.84) + flare * 0.3,
           heading,
-          lit || hot,
+          lit || hot || flare > 0.55,
           flap,
           lit ? 1 : 0.86,
         );
@@ -423,6 +541,47 @@ export function HomeField({ swarm, selectedId, onSelect }) {
         }
       } else {
         trail.current = [];
+      }
+
+      // Draw and retire execution bursts.
+      for (let i = bursts.length - 1; i >= 0; i -= 1) {
+        const burst = bursts[i];
+        const age = t - burst.born;
+        if (age > burst.life) {
+          bursts.splice(i, 1);
+          continue;
+        }
+        const progress = age / burst.life;
+        const eased = 1 - Math.pow(1 - progress, 3);
+        burst.rays.forEach((ray) => {
+          if (age < ray.delay) return;
+          const length = ray.len * eased;
+          const cos = Math.cos(ray.angle);
+          const sin = Math.sin(ray.angle);
+          // Wide faint pass for glow, then a thin bright core.
+          ctx.strokeStyle = `rgba(${burst.color},${(1 - progress) * 0.3})`;
+          ctx.lineWidth = ray.width * 3 * (1 - progress * 0.6);
+          ctx.beginPath();
+          ctx.moveTo(burst.x + cos * 6, burst.y + sin * 6);
+          ctx.lineTo(burst.x + cos * length, burst.y + sin * length);
+          ctx.stroke();
+          ctx.strokeStyle = `rgba(${burst.color},${(1 - progress) * 0.95})`;
+          ctx.lineWidth = ray.width * (1 - progress * 0.6);
+          ctx.beginPath();
+          ctx.moveTo(burst.x + cos * 6, burst.y + sin * 6);
+          ctx.lineTo(burst.x + cos * length, burst.y + sin * length);
+          ctx.stroke();
+        });
+        // Echo ring expanding from the burst origin.
+        ctx.strokeStyle = `rgba(${burst.color},${(1 - progress) * 0.5})`;
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(burst.x, burst.y, 6 + eased * 34, 0, TAU);
+        ctx.stroke();
+        ctx.fillStyle = `rgba(${burst.color},${(1 - progress) * 0.9})`;
+        ctx.beginPath();
+        ctx.arc(burst.x, burst.y, 2.5 * (1 - progress) + 1, 0, TAU);
+        ctx.fill();
       }
 
       // Vignette keeps the stage reading as one lit plate instead of a flat panel.
@@ -484,12 +643,14 @@ export function HomeField({ swarm, selectedId, onSelect }) {
 
 export function useHomeSwarm() {
   const [swarm, setSwarm] = useState(loadStoredSwarm);
+  const [paused, setPaused] = useState(false);
   const [selectedId, setSelectedId] = useState(() => recallFly() ?? 0);
   const touched = useRef(false);
   const swarmRef = useRef(swarm);
   swarmRef.current = swarm;
 
   useEffect(() => {
+    if (paused) return;
     const id = setInterval(() => {
       if (document.hidden) return;
       setSwarm((current) => {
@@ -499,7 +660,7 @@ export function useHomeSwarm() {
       });
     }, 700);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
   useEffect(() => {
     const living = swarm.flies.filter((row) => row.status === "alive");
@@ -510,6 +671,7 @@ export function useHomeSwarm() {
   }, [swarm, selectedId]);
 
   useEffect(() => {
+    if (paused) return;
     const id = setInterval(() => {
       if (document.hidden || touched.current) return;
       const living = swarmRef.current.flies.filter(
@@ -524,12 +686,18 @@ export function useHomeSwarm() {
       });
     }, 4200);
     return () => clearInterval(id);
-  }, []);
+  }, [paused]);
 
   function select(id) {
     touched.current = true;
     setSelectedId(id);
     rememberFly(id);
   }
-  return { swarm, selectedId, select };
+  return {
+    swarm,
+    selectedId,
+    select,
+    paused,
+    togglePause: () => setPaused((value) => !value),
+  };
 }

@@ -6,8 +6,9 @@ import { useLocale } from "./use-locale.mjs";
 import { LocaleContext } from "./locale-context.jsx";
 import { SiteBar, SiteLink } from "./site-chrome.jsx";
 import { SealBar } from "./seal-bar.jsx";
-import { HomeField, useHomeSwarm } from "./home-field.jsx";
-import { HomeLiveDecks, HomeMeters } from "./home-live.jsx";
+import { useHomeSwarm } from "./home-field.jsx";
+import { HomeObservatory } from "./home-observatory.jsx";
+import { HomeLiveDecks } from "./home-live.jsx";
 import { formatPrice, formatToken, reflexOf } from "./swarm.mjs";
 import "./public.css";
 
@@ -124,12 +125,11 @@ function useReveal() {
 function App() {
   const [locale, setLocale, tx] = useLocale("meta.homeTitle", "meta.homeDesc");
   const [token, setToken] = useState(null);
-  const { swarm, selectedId, select } = useHomeSwarm();
+  const { swarm, selectedId, select, paused, togglePause } = useHomeSwarm();
   const champ =
     swarm.flies.find((row) => row.id === selectedId) ||
     swarm.flies.find((row) => row.status === "alive") ||
     swarm.flies[0];
-  const reflex = champ ? reflexOf(champ) : null;
   useReveal();
   useEffect(() => {
     loadOfficialToken()
@@ -137,8 +137,6 @@ function App() {
       .catch(() => {});
   }, [locale]);
   const live = token?.status === "live" && token.address;
-  const ticker = `$${token?.symbol || "IFS"}`;
-  const [heroBefore, heroAfter] = tx("public.hero2").split("{learn}");
   const log = colonyLog(swarm, champ, tx);
   return (
     <LocaleContext.Provider value={{ locale, tx }}>
@@ -164,44 +162,14 @@ function App() {
         />
         <SealBar token={token} tx={tx} />
 
-        <section className="home-hero" data-reveal="wait">
-          <div className="hero-copy">
-            <p className="kicker">
-              <i className="pulse" aria-hidden="true" />
-              {live ? tx("public.kickerLive") : tx("public.kickerWait")}
-            </p>
-            <h1>
-              {tx("public.hero1")}
-              <br />
-              {heroBefore}
-              <em>{tx("public.heroLearn")}</em>
-              {heroAfter}
-            </h1>
-            <p className="lead">{tx("public.lead", { ticker })}</p>
-            <HomeMeters swarm={swarm} fly={champ} token={token} />
-            <div className="home-actions">
-              <SiteLink className="primary" href="/swarm.html">
-                {tx("public.enterPit")}
-                <ArrowUpRight size={16} />
-              </SiteLink>
-              <a href="/brain.html">{tx("public.openCanon")}</a>
-            </div>
-            <div className="pills">
-              <span>{tx("public.paperSim")}</span>
-              <span>{live ? `${ticker} · BSC` : tx("public.unlaunched")}</span>
-              <span>{tx("public.maleCns")}</span>
-            </div>
-          </div>
-          <div className="hero-stage">
-            <small>{tx("public.stageLabel")}</small>
-            <HomeField swarm={swarm} selectedId={champ?.id} onSelect={select} />
-            <p>
-              {tx("public.fieldHint")}
-              {reflex ? ` · #${champ.id} ${reflex.side}` : ""}
-            </p>
-            <SiteLink href="/swarm.html">{tx("public.seeTurn")}</SiteLink>
-          </div>
-        </section>
+        <HomeObservatory
+          swarm={swarm}
+          selectedId={champ?.id}
+          onSelect={select}
+          locale={locale}
+          paused={paused}
+          onPause={togglePause}
+        />
 
         <HomeLiveDecks swarm={swarm} fly={champ} onSelect={select} />
 

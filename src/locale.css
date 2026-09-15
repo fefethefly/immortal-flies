@@ -8,9 +8,13 @@
   font-family: var(--mono, "IBM Plex Mono", monospace);
   font-size: 10px;
   letter-spacing: 0.12em;
-  padding: 5px 8px;
+  padding: 6px 10px;
   color: var(--quiet, #6e675c);
   background: transparent;
+  transition: color 0.2s ease;
+}
+.locale-switch button:hover {
+  color: var(--text, #e8e2d6);
 }
 .locale-switch button[aria-pressed="true"] {
   color: var(--bg, #070706);

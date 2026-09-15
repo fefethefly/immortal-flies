@@ -87,7 +87,8 @@ button:focus-visible {
   inset: 0;
   pointer-events: none;
   z-index: 8;
-  opacity: 0.09;
+  opacity: 0.025;
+  background-size: 180px 180px;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -235,6 +236,55 @@ button:focus-visible {
   position: relative;
   z-index: 1;
 }
+/* Terminal status strip: live swarm vitals, fomoradar-style freshness. */
+.hero-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--quiet);
+  margin: 0 0 20px;
+  font-variant-numeric: tabular-nums;
+}
+.hero-status b {
+  font-weight: 500;
+  color: var(--text);
+}
+.hero-status .buy {
+  color: var(--buy);
+}
+.hero-status .sell {
+  color: var(--sell);
+}
+.hero-status .led {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #8fae7e;
+  box-shadow: 0 0 10px rgba(143, 174, 126, 0.9);
+  animation: ledBlink 2.4s ease-in-out infinite;
+}
+@keyframes ledBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.hero-narrative {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  margin: -8px 0 24px;
+}
 .hero-copy .kicker {
   display: flex;
   align-items: center;
@@ -289,6 +339,50 @@ button:focus-visible {
   font-size: 15.5px;
   margin: 0 0 22px;
   text-wrap: pretty;
+}
+/* Entrance choreography: hero columns rise in a staggered cascade. */
+.hero-copy > * {
+  animation: heroRise 0.7s var(--ease) both;
+}
+.hero-copy > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.hero-copy > *:nth-child(2) {
+  animation-delay: 0.13s;
+}
+.hero-copy > *:nth-child(3) {
+  animation-delay: 0.21s;
+}
+.hero-copy > *:nth-child(4) {
+  animation-delay: 0.29s;
+}
+.hero-copy > *:nth-child(5) {
+  animation-delay: 0.37s;
+}
+.hero-copy > *:nth-child(n + 6) {
+  animation-delay: 0.45s;
+}
+.hero-stage {
+  animation: heroRise 0.9s 0.2s var(--ease) both;
+}
+@keyframes heroRise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-copy > *,
+  .hero-stage {
+    animation: none;
+  }
+  .hero-status .led {
+    animation: none;
+  }
 }
 .home-actions {
   display: flex;
@@ -794,7 +888,8 @@ button:focus-visible {
   gap: 16px;
   margin-bottom: 10px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
   letter-spacing: 0.2em;
   color: var(--gold);
 }
@@ -1098,6 +1193,22 @@ button:focus-visible {
 .language-glyphs i {
   color: #5f6659;
   font-style: normal;
+  animation: glyphPulse 2.8s ease-in-out infinite;
+}
+.language-glyphs i:nth-of-type(1) {
+  animation-delay: 0.4s;
+}
+.language-glyphs i:nth-of-type(2) {
+  animation-delay: 1.4s;
+}
+@keyframes glyphPulse {
+  0%,
+  100% {
+    color: #5f6659;
+  }
+  50% {
+    color: var(--gold-bright);
+  }
 }
 .finance-orbit {
   position: relative;
@@ -1120,11 +1231,30 @@ button:focus-visible {
   border: 1px solid rgba(176, 138, 74, 0.16);
   border-radius: 50%;
   inset: 18px;
-  transform: rotate(35deg);
+  --rot: 35deg;
+  transform: rotate(var(--rot));
+  animation: orbitBreathe 8s ease-in-out infinite;
 }
 .finance-orbit::after {
   inset: -16px;
-  transform: rotate(-38deg);
+  --rot: -38deg;
+  animation-delay: -4s;
+}
+@keyframes orbitBreathe {
+  0%,
+  100% {
+    transform: rotate(var(--rot)) scale(1);
+  }
+  50% {
+    transform: rotate(var(--rot)) scale(1.06);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .finance-orbit::before,
+  .finance-orbit::after,
+  .language-glyphs i {
+    animation: none;
+  }
 }
 .finance-orbit i,
 .finance-orbit b,
@@ -1211,8 +1341,7 @@ button:focus-visible {
 .home-marquee > div {
   display: flex;
   width: max-content;
-  gap: 56px;
-  animation: march 52s linear infinite;
+  animation: march 40s linear infinite;
 }
 .home-marquee span {
   font-family: var(--mono);
@@ -1220,6 +1349,7 @@ button:focus-visible {
   letter-spacing: 0.24em;
   color: var(--quiet);
   white-space: nowrap;
+  margin-right: 56px;
 }
 @keyframes march {
   from {
