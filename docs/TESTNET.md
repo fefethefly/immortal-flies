@@ -1,13 +1,13 @@
 # BSC 测试网闭环
 
-当前目标：先把 `ImmortalFly` 部署到 **BNB Smart Chain Testnet（chainId 97）**，再让本地祭台用钱包签名读写同一只果蝇。当前状态：`public/contract/ImmortalFly.deployment.json` 为 `UNDEPLOYED`。注意：生产环境 `/altar` 已重定向到蓝图页；本地 `npm run dev` 仍可打开 `altar.html` 走下面的流程。MaleCNS 全典、迷宫成绩、Flap Vault UI 都不走这条合约。
+当前目标：先把 `ImmortalFly` 部署到 **BNB Smart Chain Testnet（chainId 97）**，再让本地祭坛用钱包签名读写同一只果蝇。当前状态：`public/contract/ImmortalFly.deployment.json` 为 `UNDEPLOYED`。注意：生产环境 `/altar` 已重定向到蓝图页；本地 `npm run dev` 仍可打开 `altar.html` 走下面的流程。MaleCNS 连接组、迷宫成绩、Flap Vault UI 都不走这条合约。
 
 ## 两套前端
 
-| 表面                       | 现在做什么                                                            | 以后做什么                                     |
-| -------------------------- | --------------------------------------------------------------------- | ---------------------------------------------- |
-| 本地祭台（Vite：`altar.html`） | 自己部署的最小链上祭台：切测试网、铸造、训练、休眠、转生、读 `getFly` | 继续做完整实验室与发行说明                     |
-| Flap 页面                  | 不提交这套网站                                                        | 单独打 Vault / Artifact 四文件包，嵌在 flap.sh |
+| 表面                           | 现在做什么                                                            | 以后做什么                                     |
+| ------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------- |
+| 本地祭坛（Vite：`altar.html`） | 自己部署的最小链上祭坛：切测试网、铸造、训练、休眠、转生、读 `getFly` | 继续做完整实验室与发行说明                     |
+| Flap 页面                      | 不提交这套网站                                                        | 单独打 Vault / Artifact 四文件包，嵌在 flap.sh |
 
 连接组实验室 `brain.html` 始终离线，不发送交易。
 
@@ -33,7 +33,7 @@ npm run contracts:deploy:testnet
 1. `npm run dev -- --port 4173`
 2. 浏览器装好钱包，点「署名」
 3. 批准切到 BSC 测试网
-4. 若该地址还没有代币，在祭台铸造（`mint(seed)`，seed 来自当前本地 DNA，0 则用 3700127）
+4. 若该地址还没有代币，在祭坛铸造（`mint(seed)`，seed 来自当前本地 DNA，0 则用 3700127）
 5. 训练 / 休眠 / 转生会弹出签名；成功后页面用 `getFly` 覆盖显示
 6. 链上模式关闭本地每秒 `tick`，避免和合约状态分叉
 7. 迷宫、本地封存/导入仍是本机实验，不会写成合约状态

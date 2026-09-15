@@ -1,12 +1,28 @@
+@import "./fonts.css";
 @import "./locale.css";
 @import "./chrome.css";
+:root {
+  color-scheme: dark;
+  --bg: #0a0907;
+  --text: #f0ead9;
+  --muted: #a89e8c;
+  --quiet: #8a8172;
+  --line: #2f2a1f;
+  --gold: #c9a25e;
+  --display:
+    "Cormorant Garamond", "Iowan Old Style", Palatino, "Songti SC", serif;
+  --mono: "IBM Plex Mono", monospace;
+}
 * {
   box-sizing: border-box;
 }
+html,
 body {
   margin: 0;
-  background: #0a0907;
-  color: #f0ead9;
+  background: var(--bg);
+  color: var(--text);
+}
+body {
   font-family:
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
 }

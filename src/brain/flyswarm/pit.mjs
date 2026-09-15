@@ -1,9 +1,9 @@
 /**
- * 交易坑的 MaleCNS 数据桥（浏览器侧）。
+ * 交易场的 MaleCNS 数据桥（浏览器侧）。
  *
- * 交易坑不再跑 24 节点占位反射：这里加载已入库的真实 MaleCNS 感官-运动子图
+ * 交易场不再跑 24 节点占位反射：这里加载已入库的真实 MaleCNS 感官-运动子图
  * （public/data/malecns-circuit，1,400 节点，同一套 body ID），建内核、绑创世、
- * 逐 tick 走蝇群协议（话语/记忆/聚合），并把内核状态映射成交易坑 UI 的形状。
+ * 逐 tick 走蝇群协议（话语/记忆/聚合），并把内核状态映射成交易场 UI 的形状。
  *
  * 边界声明：
  * - 行情默认纸面游走；可注入只读观测（iff.market-feed/1），audit = SIM。
@@ -117,7 +117,7 @@ export async function restorePitSession(
   saved,
   { graph: injectedGraph = null } = {},
 ) {
-  if (saved?.model !== PIT_MODEL) throw new Error("不是交易坑 colony 快照");
+  if (saved?.model !== PIT_MODEL) throw new Error("不是交易场 colony 快照");
   const graph = injectedGraph || (await loadGraph(MANIFEST_URL));
   const kernel = createKernel(graph, {
     size: 1,
@@ -302,7 +302,7 @@ export function stepPit(session, { compact = true } = {}) {
   });
 }
 
-/** 内核 → 交易坑 UI 形状（组件不变，数据换源）。 */
+/** 内核 → 交易场 UI 形状（组件不变，数据换源）。 */
 export function pitView({ kernel, aux }) {
   const colony = kernel.colony;
   const price = colony.market.price;

@@ -27,10 +27,10 @@ export const NOT_CANON = Object.freeze([
   },
   {
     id: "iff-neural-16-v1",
-    why: "祭台身份原型。行为启发，不是测量连接组。",
+    why: "祭坛身份原型。行为启发，不是测量连接组。",
   },
   {
     id: "iff-swarm-lif-v1",
-    why: "交易坑的占位反射。24 个整数节点，不能写成 MaleCNS。",
+    why: "交易场的占位反射。24 个整数节点，不能写成 MaleCNS。",
   },
 ]);

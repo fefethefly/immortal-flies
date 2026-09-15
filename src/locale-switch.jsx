@@ -3,11 +3,23 @@ import "./locale.css";
 
 export function LocaleSwitch({ locale, onChange }) {
   return (
-    <div className="locale-switch" role="group" aria-label={locale === "zh" ? "语言" : "Language"}>
-      <button type="button" aria-pressed={locale === "en"} onClick={() => onChange("en")}>
+    <div
+      className="locale-switch"
+      role="group"
+      aria-label={locale === "zh" ? "语言" : "Language"}
+    >
+      <button
+        type="button"
+        aria-pressed={locale === "en"}
+        onClick={() => onChange("en")}
+      >
         EN
       </button>
-      <button type="button" aria-pressed={locale === "zh"} onClick={() => onChange("zh")}>
+      <button
+        type="button"
+        aria-pressed={locale === "zh"}
+        onClick={() => onChange("zh")}
+      >
         中文
       </button>
     </div>
@@ -27,12 +39,17 @@ export function SiteLinks({ locale, tx, current }) {
     ["/", "nav.home", "home"],
     ["/swarm.html", "nav.pit", "pit"],
     ["/brain.html", "nav.canon", "canon"],
+    ["/economy.html", "nav.economy", "economy"],
     ["/blueprint.html", "nav.blueprint", "blueprint"],
   ];
   return (
     <>
       {items.map(([href, key, id]) => (
-        <a key={id} href={href} aria-current={current === id ? "page" : undefined}>
+        <a
+          key={id}
+          href={href}
+          aria-current={current === id ? "page" : undefined}
+        >
           {tx(key)}
         </a>
       ))}

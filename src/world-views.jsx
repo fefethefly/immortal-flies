@@ -39,8 +39,8 @@ function Eyebrow({ children }) {
   return <span className="world-eyebrow">{children}</span>;
 }
 
-function SimBadge() {
-  return <span className="sim-badge">PAPER / SIM</span>;
+function SimBadge({ tx }) {
+  return <span className="sim-badge">{tx("view.simBadge")}</span>;
 }
 
 function ViewShell({ tx, title, lead, eyebrow, children, sim = true }) {
@@ -52,7 +52,7 @@ function ViewShell({ tx, title, lead, eyebrow, children, sim = true }) {
           <h1>{title}</h1>
           <p>{lead}</p>
         </div>
-        {sim && <SimBadge />}
+        {sim && <SimBadge tx={tx} />}
       </header>
       {children}
     </section>
@@ -122,7 +122,7 @@ export function ViewNav({ tab, setTab, tx, remote, onExplain }) {
   );
 }
 
-/* ---------- 事件落场 / 因果条 / 压力计 ---------- */
+/* ---------- 事件落地 / 因果条 / 压力计 ---------- */
 
 function EventMark({ event, tx }) {
   const label = tx(KIND_LABEL[event.kind] || "colony.ev.act");
@@ -150,7 +150,7 @@ function EventMark({ event, tx }) {
   );
 }
 
-/** 活场：最近 16 个 tick 的事件按 tick 落列。 */
+/** 现场：最近 16 个 tick 的事件按 tick 逐列。 */
 export function LivingField({ world, tx }) {
   const ticks = useMemo(() => {
     const latest = world.events.slice(-64);
@@ -1031,12 +1031,12 @@ export function VaultView({ world, tx, vaultRemote, remote, onVaultAction }) {
               <b className={h.surplus > 0 ? "buy" : ""}>
                 {formatBnb(h.surplus)}
               </b>
-              <em>realized only</em>
+              <em>{tx("vault.realizedOnly")}</em>
             </div>
             <div className="kpi">
               <small>{tx("vault.buybackBudget")}</small>
               <b>{formatBnb(h.buybackBudget)}</b>
-              <em>not spent</em>
+              <em>{tx("vault.notSpent")}</em>
             </div>
             <div className="kpi">
               <small>{tx("vault.realized")}</small>
@@ -1136,7 +1136,7 @@ function ProtocolPanel({ protocol, tx }) {
         <div className="kpi">
           <small>{tx("proto.costs")}</small>
           <b>{formatBnb(protocol.costs)}</b>
-          <em>SIM accrual</em>
+          <em>{tx("proto.costAccrual")}</em>
         </div>
         <div className="kpi">
           <small>{tx("proto.net")}</small>
@@ -1229,7 +1229,7 @@ export function IfsView({ world, tx, token, credit, remote, onCreditAction }) {
   return (
     <ViewShell
       tx={tx}
-      eyebrow={`$IFS · ${token?.status === "live" ? "LIVE ON BSC" : "UNLAUNCHED"}`}
+      eyebrow={`$IFS · ${token?.status === "live" ? tx("ifs.eyebrowLive") : tx("ifs.eyebrowPending")}`}
       title={tx("ifs.title")}
       lead={tx("ifs.lead")}
     >
@@ -1609,7 +1609,7 @@ export function ExplainDrawer({
                     className={kind === k ? "on" : ""}
                     onClick={() => setKind(k)}
                   >
-                    {k === "all" ? "ALL" : k.toUpperCase()}
+                    {k === "all" ? tx("explain.all") : k.toUpperCase()}
                   </button>
                 ))}
               </div>

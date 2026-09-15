@@ -3,13 +3,16 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/blueprint", "destination": "/blueprint.html" }
+    { "source": "/blueprint", "destination": "/blueprint.html" },
+    { "source": "/economy", "destination": "/economy.html" }
   ],
   "redirects": [
     { "source": "/altar", "destination": "/blueprint", "permanent": false },
-    { "source": "/altar.html", "destination": "/blueprint.html", "permanent": false },
-    { "source": "/economy", "destination": "/blueprint", "permanent": false },
-    { "source": "/economy.html", "destination": "/blueprint.html", "permanent": false }
+    {
+      "source": "/altar.html",
+      "destination": "/blueprint.html",
+      "permanent": false
+    }
   ],
   "headers": [
     {

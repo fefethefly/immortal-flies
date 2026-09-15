@@ -2,7 +2,7 @@
 
 **The Swarm Trades. — 果蝇上链，先学会买卖。**
 
-一个为 BNB Chain 设计的数字生命原型。活着的第一件事是交易：趋近与退避被读成买入与卖出。身份、训练与转生留在祭台；出借、金库与预测是后续金融行为，不另起策略机器人。
+一个为 BNB Chain 设计的数字生命原型。活着的第一件事是交易：趋近与退避被读成买入与卖出。身份、训练与转生留在祭坛；出借、金库与预测是后续金融行为，不另起策略机器人。
 
 ## 启动
 
@@ -21,13 +21,13 @@ npm run server   # http://127.0.0.1:8787 ；契约见 docs/API-V1.md
 
 `npm run dev` 会把 `/v1`、`/health`、`/ready` 反代到 8787。无 `OPENAI_API_KEY` 时解释层降级为本地确定性实现。
 
-打开 http://127.0.0.1:4173/ 看对外主站，http://127.0.0.1:4173/swarm.html 看交易坑，http://127.0.0.1:4173/brain.html 看连接组全典，http://127.0.0.1:4173/blueprint.html 看蓝图。生产环境 `/altar` 与 `/economy` 已重定向到蓝图（见 `vercel.json`）；本地仍可打开 `altar.html`。生产构建：`npm run build`，本地预览：`npm run preview -- --port 4173`。官方代币清单在 `public/token/official.json`，ticker 为 `$IFS`，已在 BSC 主网发射（`0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`），发射记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)。
+打开 http://127.0.0.1:4173/ 看对外主站，http://127.0.0.1:4173/swarm.html 看交易场，http://127.0.0.1:4173/brain.html 看连接组连接组，http://127.0.0.1:4173/economy.html 看情景沙盘，http://127.0.0.1:4173/blueprint.html 看蓝图。生产环境 `/altar` 仍重定向到蓝图（见 `vercel.json`）。生产构建：`npm run build`，本地预览：`npm run preview -- --port 4173`。官方代币清单在 `public/token/official.json`，ticker 为 `$IFS`，已在 BSC 主网发射（`0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`），发射记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)。
 
 ## 这一版可以做什么
 
 - 在真实 MaleCNS 1,400 节点感官-运动子图上，观看 5 只果蝇在纸面账本上买卖 IFL/BNB，注入花蜜、威胁、光或暗，等待退役与繁衍。
-- 交易坑内切换七个产品视图：交易坑 / Colony / Intent / Risk / Execution / Vault / IFS。
-- 活场：六类事件（感觉、行为、记忆、成交、社会、风控）逐 tick 落场；因果条展示「起因 → 转向 → 成交 → 社会」，点击任意一条重放整条链；蜂巢压力计显示聚合买压/卖压。
+- 交易场内切换七个产品视图：交易场 / Colony / Intent / Risk / Execution / Vault / IFS。
+- 现场：六类事件（感觉、行为、记忆、成交、社会、风控）逐 tick 落地；因果条展示「起因 → 转向 → 成交 → 社会」，点击任意一条重放整条链；蜂巢压力计显示聚合买压/卖压。
 - ask 通道：七个固定问题得到带事件引用的确定性回答；API + LLM 可用时支持自由提问，模型缺席仍可运行（P1 退出条件）。
 - LLM 边界抽屉：解释（步骤带证据引用）、检索、候选计划（PASS/REJECT 与原因）、工具白名单（全部只读、不可签名）、策略验证（版本化参数）。
 - Risk / Execution / Vault / IFS 视图披露纸面仓位、流动性、回撤、集中度、信用、回执（滑点/税/裁定）、蜂巢金库与 IFS 纸面面板；用户金库明确标为未接入。
@@ -47,7 +47,7 @@ npm run server   # http://127.0.0.1:8787 ；契约见 docs/API-V1.md
 
 ## 范围与事实
 
-**$IFS 代币已在 BSC 主网发射**（记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)）；但 **NFT 合约主网尚未开放**、测试网合约也未部署（`public/contract/ImmortalFly.deployment.json` 仍是 `UNDEPLOYED`），祭台只是本地仪式。部署后连接钱包会切到 BSC 测试网（97），铸造与训练会发交易。迷宫成绩、本地档案、MaleCNS 全典都不能当作链上资产或官方成绩。
+**$IFS 代币已在 BSC 主网发射**（记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)）；但 **NFT 合约主网尚未开放**、测试网合约也未部署（`public/contract/ImmortalFly.deployment.json` 仍是 `UNDEPLOYED`），祭坛只是本地仪式。部署后连接钱包会切到 BSC 测试网（97），铸造与训练会发交易。迷宫成绩、本地档案、MaleCNS 连接组都不能当作链上资产或官方成绩。
 
 模型名称为 `iff-neural-16-v1`：16 个节点、3 组可训练参数与确定性随机状态。它受到果蝇行为启发，并非完整果蝇脑连接组，更不代表意识上传。页面中复杂的发光线路是美术表现；神经图谱展示的是轻量模型的实际电位与脉冲。
 
@@ -57,7 +57,7 @@ SHA-256 校验用于验证档案完整性，不能证明档案的来源、持有
 
 [contracts/ImmortalFly.sol](contracts/ImmortalFly.sol) 是可编译 ERC-721：固定上限 1024；完整保存轻量模型状态；内置基础 SVG 和元数据；无 burn、管理员、代理升级或任意状态覆写入口。状态由交易推进。
 
-本地祭台（`altar.html`，生产环境已并入蓝图）已写好测试网读写代码：`src/chain.mjs` 负责切链、发现代币、`getFly` / `mint` / `train` / `sleep` / `wake` / `rebirth`。地址写在 `public/contract/ImmortalFly.deployment.json`（当前 `UNDEPLOYED`）。艺术卡面仍用本地图片；链上 SVG 是独立兜底。主网、发行规则和独立安全检查尚未完成，不能承诺“已经在 BNB 永存”。
+本地祭坛（`altar.html`，生产环境已并入蓝图）已写好测试网读写代码：`src/chain.mjs` 负责切链、发现代币、`getFly` / `mint` / `train` / `sleep` / `wake` / `rebirth`。地址写在 `public/contract/ImmortalFly.deployment.json`（当前 `UNDEPLOYED`）。艺术卡面仍用本地图片；链上 SVG 是独立兜底。主网、发行规则和独立安全检查尚未完成，不能承诺“已经在 BNB 永存”。
 
 两套前端：[docs/FRONTENDS.md](docs/FRONTENDS.md)。测试网步骤：[docs/TESTNET.md](docs/TESTNET.md)。Flap Vault UI 是另一包，现在不做。
 
@@ -82,8 +82,8 @@ npm run contracts:check:testnet
 - 10 项连接组内核测试通过：同输入重放、中断后从检查点继续、拒绝重复/过期/乱序/停用输入、新增适配器不改身份、模型迁移可追溯、损坏档案拒绝、Flap 预览不能执行且凭证只能消费一次、只读市场采样拒绝错误链和重组、官方 MaleCNS 子图保留 body ID 并可重放。
 - 12 项本地链测试通过：包括实际铸造 1024 只并拒绝第 1025 只、权限和转让、JS/Solidity 数值一致、完整状态恢复、链上 SVG。
 - 19 项蝇群协议测试通过：schema 语言法、创世内容寻址、名册双层身份、era 分片日志、confidence-hold 三验收向量（分裂必 HOLD / 逐位重放 / 客脑不可写官方 body ID）、内核话语-记忆-聚合闭环、退役不删灵魂与检查点繁衍。
-- 17 项交易世界测试通过：世界只读内核、同种子逐位重放、六类事件落场与回撤警戒、事件哈希链与因果引用有效、因果链按 tick 重放、回执与成交数量/税/名义额守恒、候选计划校验（现金不足/无方向/未知蝇/信用为空 → REJECT）、纸面信用上限、ask 全目录确定性答案、解释步骤带引用、世界快照往返一致、个人分支不被主线污染、压力计与金库历史、计划生成不改内核、结算繁衍事件与因果、快照携带世界、并发 tick/结算互斥不竞态。
-- 浏览器验证（无头 Chrome，桌面 1440px / 768px / 移动 390px）：七视图无横向溢出、活场落列、因果条重放、ask 回答、解释抽屉五个标签、工具白名单、中英文切换、方向键切换视图、ESC 关闭抽屉、dark 刺激、立即结算（血统更新 + spawn 事件）、刷新后世界状态延续、暂停/恢复、无后端与 API 已接两条路径均无页面错误。
+- 17 项交易世界测试通过：世界只读内核、同种子逐位重放、六类事件落地与回撤警戒、事件哈希链与因果引用有效、因果链按 tick 重放、回执与成交数量/税/名义额守恒、候选计划校验（现金不足/无方向/未知蝇/信用为空 → REJECT）、纸面信用上限、ask 全目录确定性答案、解释步骤带引用、世界快照往返一致、个人分支不被主线污染、压力计与金库历史、计划生成不改内核、结算繁衍事件与因果、快照携带世界、并发 tick/结算互斥不竞态。
+- 浏览器验证（无头 Chrome，桌面 1440px / 768px / 移动 390px）：七视图无横向溢出、现场落列、因果条重放、ask 回答、解释抽屉五个标签、工具白名单、中英文切换、方向键切换视图、ESC 关闭抽屉、dark 刺激、立即结算（血统更新 + spawn 事件）、刷新后世界状态延续、暂停/恢复、无后端与 API 已接两条路径均无页面错误。
 - 浏览器验证训练、休眠、转生、挑战、恢复、损坏档案拒绝与 64 步证明。下载完成事件在内置浏览器中未能确认，因此提供并检查了可完整读取的 JSON 备用导出路径。
 - BSC 主网实测：`$IFS` 代币存在于 `0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`，symbol `IFS`、总供应 `1e27`、owner 为 Flap Portal（`0xe2cE6ab80874Fa9Fa2aAE65D277Dd6B8e65C9De0`），与 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md) 发射记录一致。
 
@@ -96,24 +96,24 @@ npm run build        # 产物在 dist/（约 10 MB，含字体/连接组数据/�
 npm run preview      # 本地预览生产构建
 ```
 
-- 静态托管即可上线（Vercel 配置见 `vercel.json`：`/altar`、`/economy` 重定向到蓝图；`/token/official.json` 缓存 60 秒）。
-- **后端是可选的**：不部署 `npm run server` 时，站点完全可用——交易坑七视图、ask、解释层全部回落本地实现，API 徽标显示 LOCAL ONLY。部署后端时把 `/v1`、`/health`、`/ready` 反代到 Node 服务。
-- 上线前自检：`npm test`（123 项）+ `npm run build` + preview 环境过一遍四页（首页/交易坑/全典/蓝图）。
+- 静态托管即可上线（Vercel 配置见 `vercel.json`：`/altar` 重定向到蓝图；`/economy` 与 `/blueprint` 为页面 rewrite；`/token/official.json` 缓存 60 秒）。
+- **后端是可选的**：不部署 `npm run server` 时，站点完全可用——交易场七视图、ask、解释层全部回落本地实现，API 徽标显示 LOCAL ONLY。部署后端时把 `/v1`、`/health`、`/ready` 反代到 Node 服务。
+- 上线前自检：`npm test`（123 项）+ `npm run build` + preview 环境过一遍四页（首页/交易场/连接组/蓝图）。
 - 版本：`v0.2.0`（P0–P5 纸面世界 + 前端全量 + 可选后端，全部 SIM；不含真实资金、借贷与主网 NFT）。
 
 ## 源码导航
 
 | 路径                             | 作用                                                                              |
 | -------------------------------- | --------------------------------------------------------------------------------- |
-| `src/swarm.mjs`                  | 首页纸面场占位：LIF、刺激、记账（不再是交易坑决策）                               |
-| `src/swarm-page.jsx`             | 交易坑：左坑右案、七视图切换（交易坑/六产品视图）                                 |
-| `src/brain/flyswarm/pit.mjs`     | 交易坑数据桥：真实子图 → 内核 → 视图与持久化                                      |
+| `src/swarm.mjs`                  | 首页纸面场占位：LIF、刺激、记账（不再是交易场决策）                               |
+| `src/swarm-page.jsx`             | 交易场：左坑右案、七视图切换（交易场/六产品视图）                                 |
+| `src/brain/flyswarm/pit.mjs`     | 交易场数据桥：真实子图 → 内核 → 视图与持久化                                      |
 | `src/brain/flyswarm/world.mjs`   | 交易纸面世界（L2）：六类事件、因果条、压力、回执、风控、金库/IFS 快照、候选计划   |
 | `src/brain/flyswarm/explain.mjs` | LLM 边界（P1）：解释、检索、ask、工具白名单、策略参数（本地确定性，缺席仍可运行） |
-| `src/world-views.jsx`            | 六视图组件、活场、因果条、ask 通道、解释抽屉                                      |
+| `src/world-views.jsx`            | 六视图组件、现场、因果条、ask 通道、解释抽屉                                      |
 | `src/world.css`                  | 交易世界六视图样式                                                                |
 | `src/swarm-pit.jsx`              | 坑中画布、天平、风琴键、名册                                                      |
-| `src/App.jsx`                    | 祭台页面、交互与操作互斥                                                          |
+| `src/App.jsx`                    | 祭坛页面、交互与操作互斥                                                          |
 | `src/vitruvian.jsx`              | 维特鲁威印记与 Logo                                                               |
 | `src/components.jsx`             | 印记、卡片、弹窗等组件                                                            |
 | `src/brain/`                     | 开放核：ethology / ports / learn / treasury / kernel                              |
@@ -137,13 +137,13 @@ npm run preview      # 本地预览生产构建
 
 阶段划分以 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) 第 12/14 节为准：
 
-1. 蝇群协议 P0（语言与身份）已全部落地：schema 语言法、创世内容寻址、双层名册、era 分片日志、confidence-hold quorum 接入内核（替换朴素多数），交易坑 `/swarm.html` 已改读真实 MaleCNS 1,400 节点子图（`src/brain/flyswarm/pit.mjs`），24 节点占位只剩首页纸面场。
-2. P1「LLM 边界」与 P2「交易纸面世界」前端已落地：交易坑内七视图（交易坑 / Colony / Intent / Risk / Execution / Vault / IFS）、活场（六类事件落场、因果条、蜂巢压力计、ask 通道）与 LLM 边界抽屉（解释/检索/候选计划/工具白名单/策略验证），全部纸面数据并标注 SIM；**HTTP 服务已落地**（`npm run server`，见 [docs/API-V1.md](docs/API-V1.md)），前端已接线（同种子镜像会话 + LLM 解释/ask/计划，断线回落本地确定性实现）。
+1. 蝇群协议 P0（语言与身份）已全部落地：schema 语言法、创世内容寻址、双层名册、era 分片日志、confidence-hold quorum 接入内核（替换朴素多数），交易场 `/swarm.html` 已改读真实 MaleCNS 1,400 节点子图（`src/brain/flyswarm/pit.mjs`），24 节点占位只剩首页纸面场。
+2. P1「LLM 边界」与 P2「交易纸面世界」前端已落地：交易场内七视图（交易场 / Colony / Intent / Risk / Execution / Vault / IFS）、现场（六类事件落地、因果条、蜂巢压力计、ask 通道）与 LLM 边界抽屉（解释/检索/候选计划/工具白名单/策略验证），全部纸面数据并标注 SIM；**HTTP 服务已落地**（`npm run server`，见 [docs/API-V1.md](docs/API-V1.md)），前端已接线（同种子镜像会话 + LLM 解释/ask/计划，断线回落本地确定性实现）。
 3. P3「IFS 会员与模拟 Credit」后端已落地：`iff.credit/1` 信用账本（Free/Locked/Earned/Liquid 四账户、§6.2 公式、衰减/到期/亏损收缩、同一抵押只支撑一次额度）+ IFS 锁仓/解锁/占用模拟，端点 `/v1/sessions/:id/credit*` 与 `/v1/credit/policy`，IFS 视图与 Risk 信用列已接服务端账本（断线回落本地纸面）。全部 SIM；真实 IFS 购买与抵押仍待合约层。
 4. P4「协议自有资金」后端已落地：`iff.protocol/1` 收入层（R/C/N/T/D、35/25/20/10/10 拨定、回购资格与停机规则、哈希链回执，全部 SIM 不动用户资产），Vault 视图新增协议资金面板，端点 `GET /v1/sessions/:id/protocol`。真实执行、外部审计与压力测试仍是上线前置。
 5. P5「用户金库」后端已落地：`iff.vault/1`（按 NAV 铸份额、逐批成本/高水位/已实现损益/费用/Position ID、份额所有权校验、FIFO 退出队列受流动性上限、只有已实现收益可分配），端点 `/v1/vault*`，Vault 视图已接服务端金库（注资/退出/结算表单，断线回落未接入）。真实资金仍需外部审计。
 6. §11「行为/金融解耦」已落地：内核话语升级为 `iff.utterance/2`（只含原生 ethology，无 BUY/SELL/置信度），聚合升级为 `iff.quorum/2`（approach/retreat/still 行为分布，无金融方向）；金融方向只在 TradePort 解释层出现，旧 /1 schema 保留解析与重放。至此 §11 资金缺口全部关闭（份额所有权、分账、浮盈回购、行为解耦、历史恢复）。
-7. 用带 tBNB 的测试网私钥跑 `npm run contracts:deploy:testnet`，再在本地祭台走完铸造 → 训练 → 休眠/转生。
+7. 用带 tBNB 的测试网私钥跑 `npm run contracts:deploy:testnet`，再在本地祭坛走完铸造 → 训练 → 休眠/转生。
 8. 根据实测 gas 决定哪些互动逐笔上链、哪些先在本地预演；P6 借贷/RWA/NFT、Flap 嵌入包、主网 NFT、发行规则和独立安全检查仍在后面。
 
 ## 连接组运行内核（第一版）

@@ -132,7 +132,7 @@ test("确定性重放：同种子同刺激 → 逐位相同的世界视图", asy
   );
 });
 
-test("六类事件落场：sense/act/memory/trade/society 出现，risk 可触发", async () => {
+test("六类事件落地：sense/act/memory/trade/society 出现，risk 可触发", async () => {
   const session = await makeSession();
   // 刺激 → sense；转向 → act；成交 → trade；每 tick quorum → society。
   await drive(session, 120, { food: 85 });
@@ -356,7 +356,7 @@ test("proposePlans 不修改内核与已执行路径", async () => {
   assert.equal(session.kernel.treasury.book.trades >= 0, true);
 });
 
-test("结算/繁衍路径：spawn 社会事件落场并连因果", async () => {
+test("结算/繁衍路径：spawn 社会事件落地并连因果", async () => {
   const session = await makeSession();
   await drive(session, 30, { food: 70 });
   const { settleKernelColony } = await import("../src/brain/kernel.mjs");

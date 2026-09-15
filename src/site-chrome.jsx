@@ -1,5 +1,6 @@
 import React from "react";
 import { FlyMark } from "./vitruvian.jsx";
+import { LocaleContext } from "./locale-context.jsx";
 import { LocaleSwitch } from "./locale-switch.jsx";
 import "./chrome.css";
 
@@ -30,15 +31,6 @@ export function recallFly() {
   }
 }
 
-export function goSite(href, event) {
-  if (!event || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  if (typeof document.startViewTransition !== "function") return;
-  event.preventDefault();
-  document.startViewTransition(() => {
-    location.assign(href);
-  });
-}
-
 export function SiteNav({ tx, current }) {
   return (
     <nav className="site-nav" aria-label={tx("nav.label")}>
@@ -47,9 +39,9 @@ export function SiteNav({ tx, current }) {
           key={id}
           href={href}
           aria-current={current === id ? "page" : undefined}
-          onClick={(event) => goSite(href, event)}
         >
-          <small>{index}</small>{tx(key)}
+          <small>{index}</small>
+          {tx(key)}
         </a>
       ))}
     </nav>
@@ -58,7 +50,7 @@ export function SiteNav({ tx, current }) {
 
 export function SiteBrand({ href = "/", small }) {
   return (
-    <a className="site-brand" href={href} onClick={(event) => goSite(href, event)}>
+    <a className="site-brand" href={href}>
       <FlyMark small={small} />
       <span>
         IMMORTAL<small>FRUIT FLIES</small>
@@ -69,7 +61,7 @@ export function SiteBrand({ href = "/", small }) {
 
 export function SiteLink({ href, className, children, ...rest }) {
   return (
-    <a className={className} href={href} onClick={(event) => goSite(href, event)} {...rest}>
+    <a className={className} href={href} {...rest}>
       {children}
     </a>
   );
@@ -85,5 +77,31 @@ export function SiteBar({ locale, setLocale, tx, current, trailing }) {
         <LocaleSwitch locale={locale} onChange={setLocale} />
       </div>
     </header>
+  );
+}
+
+export function SitePage({
+  current,
+  locale,
+  setLocale,
+  tx,
+  trailing,
+  className,
+  children,
+}) {
+  return (
+    <LocaleContext.Provider value={{ locale, tx }}>
+      <div className={className}>
+        <i className="site-grain" aria-hidden="true" />
+        <SiteBar
+          locale={locale}
+          setLocale={setLocale}
+          tx={tx}
+          current={current}
+          trailing={trailing}
+        />
+        {children}
+      </div>
+    </LocaleContext.Provider>
   );
 }

@@ -15,12 +15,12 @@ import {
   Eye,
 } from "lucide-react";
 import { VitruvianFly } from "./vitruvian.jsx";
-import { SiteBar } from "./site-chrome.jsx";
+import { SitePage } from "./site-chrome.jsx";
 import { captureMarket } from "./brain/chain.mjs";
 import { proposeAction, proposeTrade } from "./brain/policy.mjs";
 import { decodeTrade } from "./swarm.mjs";
 import { SIGNAL_GROUPS } from "./brain/signals.mjs";
-import { LocaleContext, useTx } from "./locale-context.jsx";
+import { useTx } from "./locale-context.jsx";
 import { useLocale } from "./use-locale.mjs";
 import "./fonts.css";
 import "./brain.css";
@@ -563,61 +563,489 @@ function App() {
   const full = data?.manifest,
     enabled = (id) => state?.enabledSources.includes(id);
   return (
-    <LocaleContext.Provider value={{ locale, tx }}>
-      <div className="brain-app">
-        <SiteBar
-          locale={locale}
-          setLocale={setLocale}
-          tx={tx}
-          current="canon"
-        />
-        <main>
-          <div className="brain-title">
-            <div>
-              <div className="eyebrow">
-                THE CONTINUITY EXPERIMENT <span>{tx("brain.eyebrow")}</span>
-              </div>
-              <h1>{tx("brain.h1")}</h1>
-              <p>{tx("brain.lead")}</p>
+    <SitePage
+      className="brain-app"
+      locale={locale}
+      setLocale={setLocale}
+      tx={tx}
+      current="canon"
+    >
+      <main>
+        <div className="brain-title">
+          <div>
+            <div className="eyebrow">
+              THE CONTINUITY EXPERIMENT <span>{tx("brain.eyebrow")}</span>
             </div>
-            <div className="identity-stamp">
-              <span>SEAL ID</span>
-              <strong>GENESIS — 001</strong>
-              <small>{tx("brain.localSeal")}</small>
-            </div>
+            <h1>{tx("brain.h1")}</h1>
+            <p>{tx("brain.lead")}</p>
           </div>
-          <section className="brain-stats" aria-label={tx("brain.statsAria")}>
-            <Stat
-              label={
-                dataset === "full"
-                  ? tx("brain.statNeuronsFull")
-                  : tx("brain.statNeuronsCircuit")
-              }
-              value={count(full?.neurons)}
+          <div className="identity-stamp">
+            <span>SEAL ID</span>
+            <strong>GENESIS — 001</strong>
+            <small>{tx("brain.localSeal")}</small>
+          </div>
+        </div>
+        <section className="brain-stats" aria-label={tx("brain.statsAria")}>
+          <Stat
+            label={
+              dataset === "full"
+                ? tx("brain.statNeuronsFull")
+                : tx("brain.statNeuronsCircuit")
+            }
+            value={count(full?.neurons)}
+          />
+          <Stat label={tx("brain.statEdges")} value={count(full?.edges)} />
+          <Stat label={tx("brain.statLife")} value={count(state?.ticks)} />
+          <Stat
+            label={tx("brain.statActive")}
+            value={count(state?.spikeCount)}
+            accent
+          />
+        </section>
+        <div className="scale-note">
+          <div>
+            <strong>
+              {dataset === "full"
+                ? tx("brain.runningFull")
+                : tx("brain.runningCircuit")}
+            </strong>
+            <p>
+              {dataset === "circuit"
+                ? tx("brain.bodyCircuit")
+                : tx("brain.bodyFull")}
+            </p>
+          </div>
+          <label>
+            {tx("brain.scaleLabel")}
+            <select
+              aria-label={tx("brain.scaleLabel")}
+              disabled={busy || running}
+              value={dataset}
+              onChange={(e) => setDataset(e.target.value)}
+            >
+              <option value="circuit">{tx("brain.optCircuit")}</option>
+              <option value="full">
+                {fullReady
+                  ? tx("brain.optFull", { n: count(FULL_NEURONS) })
+                  : tx("brain.optFullNeed")}
+              </option>
+            </select>
+          </label>
+          <small>
+            {tx("brain.scaleFoot", {
+              official: count(OFFICIAL_NEURONS),
+              full: count(FULL_NEURONS),
+            })}
+          </small>
+        </div>
+        <div className="brain-grid">
+          <aside className="brain-panel inputs-panel">
+            <PanelTitle
+              number="01"
+              title={tx("brain.panel.sense")}
+              english={tx("brain.panel.senseEn")}
             />
-            <Stat label={tx("brain.statEdges")} value={count(full?.edges)} />
-            <Stat label={tx("brain.statLife")} value={count(state?.ticks)} />
-            <Stat
-              label={tx("brain.statActive")}
-              value={count(state?.spikeCount)}
-              accent
-            />
-          </section>
-          <div className="scale-note">
-            <div>
-              <strong>
-                {dataset === "full"
-                  ? tx("brain.runningFull")
-                  : tx("brain.runningCircuit")}
-              </strong>
-              <p>
-                {dataset === "circuit"
-                  ? tx("brain.bodyCircuit")
-                  : tx("brain.bodyFull")}
-              </p>
+            <div className="source-heading">
+              <Radio size={14} />
+              <strong>{tx("brain.env")}</strong>
+              <Toggle
+                label={tx("brain.envToggle")}
+                checked={enabled("environment")}
+                disabled={busy || !state}
+                onChange={() =>
+                  act(() =>
+                    ask({
+                      type: "event",
+                      event: {
+                        type: "source",
+                        sourceId: "environment",
+                        enabled: !enabled("environment"),
+                      },
+                    }),
+                  )
+                }
+              />
             </div>
-            <label>
-              {tx("brain.scaleLabel")}
+            {[
+              ["food", "pit.stim.food"],
+              ["threat", "pit.stim.threat"],
+              ["light", "pit.stim.light"],
+            ].map(([key, label]) => (
+              <Slider
+                key={key}
+                label={tx(label)}
+                value={input[key]}
+                onChange={(v) => setInput({ ...input, [key]: v })}
+              />
+            ))}
+            <button
+              className="brain-primary full"
+              disabled={busy || !enabled("environment")}
+              onClick={() => pulse("environment")}
+            >
+              <Activity size={15} />
+              {tx("brain.inject")}
+              <ChevronRight size={14} />
+            </button>
+            <div className="source-heading market-heading">
+              <Activity size={14} />
+              <strong>{tx("brain.marketSrc")}</strong>
+              <Toggle
+                label={tx("brain.marketToggle")}
+                checked={enabled("market")}
+                disabled={busy || !state}
+                onChange={() =>
+                  act(() =>
+                    ask({
+                      type: "event",
+                      event: {
+                        type: "source",
+                        sourceId: "market",
+                        enabled: !enabled("market"),
+                      },
+                    }),
+                  )
+                }
+              />
+            </div>
+            <Slider
+              label={tx("brain.priceBps")}
+              min={-10000}
+              max={10000}
+              value={market.changeBps}
+              onChange={(v) => setMarket({ ...market, changeBps: v })}
+            />
+            <Slider
+              label={tx("brain.reserve")}
+              value={market.activity}
+              onChange={(v) => setMarket({ ...market, activity: v })}
+            />
+            <button
+              className="brain-secondary full"
+              disabled={busy || !enabled("market")}
+              onClick={() => pulse("market")}
+            >
+              {tx("brain.runMarket")} <ArrowUpRight size={14} />
+            </button>
+            <details className="rpc-input">
+              <summary>{tx("brain.rpc")}</summary>
+              <label>
+                {tx("brain.pair")}
+                <input
+                  aria-label={tx("brain.pair")}
+                  placeholder="0x…"
+                  value={pair}
+                  onChange={(e) => setPair(e.target.value)}
+                />
+              </label>
+              <button
+                className="brain-secondary full"
+                disabled={
+                  busy || !enabled("market") || !/^0x[0-9a-f]{40}$/i.test(pair)
+                }
+                onClick={() =>
+                  act(async () => {
+                    if (!window.ethereum)
+                      throw new Error(tx("brain.needWallet"));
+                    const observation = await captureMarket(
+                      window.ethereum,
+                      pair,
+                    );
+                    await ask({
+                      type: "input",
+                      adapter: "market",
+                      ...observation,
+                    });
+                    await ask({
+                      type: "event",
+                      event: { type: "step", count: 32 },
+                    });
+                    setNotice(
+                      tx("brain.sampled", {
+                        n: observation.provenance.blockNumber,
+                      }),
+                    );
+                  })
+                }
+              >
+                {tx("brain.sample")}
+              </button>
+              <p>{tx("brain.rpcNote")}</p>
+            </details>
+            <div className="input-foot">
+              <span className="small-dot" /> {tx("brain.twoInputs")}
+              <p>{tx("brain.mapNote")}</p>
+            </div>
+          </aside>
+          <section className="brain-panel chamber">
+            <div className="chamber-head">
+              <span>
+                <i className={running ? "live-dot" : "idle-dot"} />
+                {running ? "RUNNING" : "STANDBY"}{" "}
+                <b>{state?.model || "INITIALIZING"}</b>
+              </span>
+              <div className="scene-tabs">
+                <button
+                  aria-pressed={!bodyView}
+                  onClick={() => setBodyView(false)}
+                >
+                  <Network size={13} />
+                  {tx("brain.connectome")}
+                </button>
+                <button
+                  aria-pressed={bodyView}
+                  onClick={() => setBodyView(true)}
+                >
+                  <Eye size={13} />
+                  {tx("brain.body")}
+                </button>
+              </div>
+            </div>
+            <div className="neural-stage">
+              <div className="stage-corner tl" />
+              <div className="stage-corner br" />
+              <NeuralScene
+                nodes={data?.nodes || []}
+                edges={data?.edges || []}
+                state={state}
+                bodyView={bodyView}
+                groups={data?.groups}
+              />
+              <div className="stage-mark">
+                <span>MALE CNS</span>
+                <small>
+                  v1.0 /{" "}
+                  {dataset === "full"
+                    ? tx("brain.fullMark")
+                    : tx("brain.graphMark")}
+                </small>
+              </div>
+              <div className="action-readout">
+                <span>BEHAVIOR → TRADE</span>
+                <strong>
+                  {state?.lastAction
+                    ? tx("brain.act." + state.lastAction)
+                    : tx("brain.waitLoad")}{" "}
+                  · {state ? decodeTrade(state.lastAction) : "—"}
+                </strong>
+                <small>
+                  {state?.body?.energy ?? "—"} / 1000 {tx("brain.energyTrade")}
+                </small>
+              </div>
+              <div className="stage-caption">
+                {bodyView ? tx("brain.captionBody") : tx("brain.captionGraph")}
+              </div>
+            </div>
+            <SignalRack state={state} trace={trace} />
+            <div className="run-controls">
+              <button
+                className="brain-primary"
+                disabled={busy || !state}
+                onClick={() => {
+                  const next = !running;
+                  setRunning(next);
+                  if (running) act(() => save(true));
+                }}
+              >
+                {running ? <Pause size={15} /> : <Play size={15} />}{" "}
+                {running ? tx("brain.pauseClock") : tx("brain.startClock")}
+              </button>
+              <button
+                className="brain-secondary"
+                disabled={busy || !state}
+                onClick={() =>
+                  act(() =>
+                    ask({
+                      type: "event",
+                      event: { type: "step", count: 32 },
+                    }),
+                  )
+                }
+              >
+                {tx("brain.step32")}
+              </button>
+              <span>{busy ? "PROCESSING…" : tx("brain.integer")}</span>
+            </div>
+          </section>
+          <aside className="brain-panel continuity-panel">
+            <PanelTitle
+              number="02"
+              title={tx("brain.panel.cont")}
+              english="CONTINUITY"
+            />
+            <div className="soul-mini">
+              <VitruvianFly />
+              <div>
+                <span>ONE IDENTITY</span>
+                <strong>{tx("brain.archiveTitle")}</strong>
+                <small>{tx("brain.archiveSub")}</small>
+              </div>
+            </div>
+            <dl className="identity-list">
+              <dt>{tx("brain.connectomeLabel")}</dt>
+              <dd>MaleCNS v1.0</dd>
+              <dt>{tx("brain.runtime")}</dt>
+              <dd>{tx("brain.runtimeVal")}</dd>
+              <dt>{tx("brain.events")}</dt>
+              <dd>{count(state?.eventCount)}</dd>
+              <dt>{tx("brain.migrations")}</dt>
+              <dd>
+                {tx("brain.timesUnit", { n: state?.migrationCount || 0 })}
+              </dd>
+            </dl>
+            <div className="hash-box">
+              <label>HISTORY ROOT</label>
+              <code title={state?.historyRoot}>
+                {short(state?.historyRoot, tx("brain.waitRecord"))}
+              </code>
+            </div>
+            <button
+              className="brain-secondary full"
+              disabled={busy || !state}
+              onClick={() =>
+                act(async () => {
+                  setRunning(false);
+                  const r = await ask({ type: "prove" });
+                  setProof(r.result);
+                  setNotice(tx("brain.notice.prove"));
+                })
+              }
+            >
+              <ShieldCheck size={15} />
+              {tx("brain.prove")}
+            </button>
+            {proof && (
+              <div className="proof-result">
+                <ShieldCheck size={14} />{" "}
+                {tx("brain.replayed", { n: count(proof.ticks) })}
+                <small>{short(proof.stateHash, tx("brain.waitRecord"))}</small>
+              </div>
+            )}
+            <div className="archive-buttons">
+              <button disabled={busy || !state} onClick={download}>
+                <Download size={14} />
+                {tx("brain.export")}
+              </button>
+              <button
+                disabled={busy || !state}
+                onClick={() => upload.current.click()}
+              >
+                <Upload size={14} />
+                {tx("brain.restore")}
+              </button>
+            </div>
+            <input
+              hidden
+              type="file"
+              ref={upload}
+              accept="application/json,.json"
+              onChange={importFile}
+            />
+            <button
+              className="text-button"
+              disabled={busy || !state}
+              onClick={() => act(save)}
+            >
+              {tx("brain.saveLocal")} <Database size={12} />
+            </button>
+            <div className="migration">
+              <label htmlFor="model-select">{tx("brain.modelLabel")}</label>
+              <select
+                id="model-select"
+                disabled={busy || !state}
+                value={state?.model || "lif-integer/1"}
+                onChange={(e) => {
+                  const to = e.target.value;
+                  act(async () => {
+                    setRunning(false);
+                    await ask({
+                      type: "event",
+                      event: { type: "migration", from: state.model, to },
+                    });
+                    setProof(null);
+                    setNotice(tx("brain.notice.migrate"));
+                  });
+                }}
+              >
+                <option value="lif-integer/1">{tx("brain.v1")}</option>
+                <option value="lif-integer/2">{tx("brain.v2")}</option>
+              </select>
+              <p>{tx("brain.noLearn")}</p>
+            </div>
+          </aside>
+        </div>
+        <div className="brain-status" role="status">
+          <span>
+            <i />
+            {notice}
+          </span>
+          <span>
+            {full
+              ? `DATA SHA-256 ${short(full.connectivity.sha256, tx("brain.waitRecord"))}`
+              : "CHECKING DATA INTEGRITY"}
+          </span>
+        </div>
+        {error && (
+          <div className="brain-error" role="alert">
+            {error}
+          </div>
+        )}
+        <div className="brain-bottom">
+          <section className="brain-panel history-panel">
+            <PanelTitle
+              number="03"
+              title={tx("brain.panel.journal")}
+              english="EVENT JOURNAL"
+            />
+            <div className="event-list">
+              {events.length ? (
+                events
+                  .slice()
+                  .reverse()
+                  .slice(0, 6)
+                  .map((event, i) => (
+                    <div key={`${state.eventCount}-${i}`}>
+                      <span>
+                        {String(state.eventCount - i).padStart(4, "0")}
+                      </span>
+                      <b>
+                        {event.type === "input"
+                          ? "SENSE"
+                          : event.type === "step"
+                            ? "LIVE"
+                            : event.type === "migration"
+                              ? "EVOLVE"
+                              : "SOURCE"}
+                      </b>
+                      <p>
+                        {event.type === "input"
+                          ? `${event.frame.adapter} · ${event.frame.provenance.kind === "simulation" ? tx("brain.simInput") : tx("brain.chainSample")} · #${event.frame.sequence}`
+                          : event.type === "step"
+                            ? tx("brain.stepped", { n: event.count })
+                            : event.type === "migration"
+                              ? `${event.from} → ${event.to}`
+                              : `${event.sourceId} / ${event.enabled ? tx("brain.on") : tx("brain.off")}`}
+                      </p>
+                      <span>RECORDED</span>
+                    </div>
+                  ))
+              ) : (
+                <p className="empty-journal">{tx("brain.emptyJournal")}</p>
+              )}
+            </div>
+          </section>
+          <section className="brain-panel expansion-panel">
+            <PanelTitle
+              number="04"
+              title={tx("brain.panel.ports")}
+              english="EXTENSION PORTS"
+            />
+            <div className="extension-row">
+              <Network size={19} />
+              <div>
+                <strong>{tx("brain.loader")}</strong>
+                <p>{tx("brain.loaderP")}</p>
+              </div>
               <select
                 aria-label={tx("brain.scaleLabel")}
                 disabled={busy || running}
@@ -631,533 +1059,92 @@ function App() {
                     : tx("brain.optFullNeed")}
                 </option>
               </select>
-            </label>
-            <small>
-              {tx("brain.scaleFoot", {
-                official: count(OFFICIAL_NEURONS),
-                full: count(FULL_NEURONS),
-              })}
-            </small>
-          </div>
-          <div className="brain-grid">
-            <aside className="brain-panel inputs-panel">
-              <PanelTitle
-                number="01"
-                title={tx("brain.panel.sense")}
-                english={tx("brain.panel.senseEn")}
-              />
-              <div className="source-heading">
-                <Radio size={14} />
-                <strong>{tx("brain.env")}</strong>
-                <Toggle
-                  label={tx("brain.envToggle")}
-                  checked={enabled("environment")}
-                  disabled={busy || !state}
-                  onChange={() =>
-                    act(() =>
-                      ask({
-                        type: "event",
-                        event: {
-                          type: "source",
-                          sourceId: "environment",
-                          enabled: !enabled("environment"),
-                        },
-                      }),
-                    )
-                  }
-                />
+            </div>
+            <div className="extension-row">
+              <Database size={19} />
+              <div>
+                <strong>{tx("brain.intent")}</strong>
+                <p>{tx("brain.intentP")}</p>
               </div>
-              {[
-                ["food", "pit.stim.food"],
-                ["threat", "pit.stim.threat"],
-                ["light", "pit.stim.light"],
-              ].map(([key, label]) => (
-                <Slider
-                  key={key}
-                  label={tx(label)}
-                  value={input[key]}
-                  onChange={(v) => setInput({ ...input, [key]: v })}
-                />
-              ))}
-              <button
-                className="brain-primary full"
-                disabled={busy || !enabled("environment")}
-                onClick={() => pulse("environment")}
-              >
-                <Activity size={15} />
-                {tx("brain.inject")}
-                <ChevronRight size={14} />
-              </button>
-              <div className="source-heading market-heading">
-                <Activity size={14} />
-                <strong>{tx("brain.marketSrc")}</strong>
-                <Toggle
-                  label={tx("brain.marketToggle")}
-                  checked={enabled("market")}
-                  disabled={busy || !state}
-                  onChange={() =>
-                    act(() =>
-                      ask({
-                        type: "event",
-                        event: {
-                          type: "source",
-                          sourceId: "market",
-                          enabled: !enabled("market"),
-                        },
-                      }),
-                    )
-                  }
-                />
-              </div>
-              <Slider
-                label={tx("brain.priceBps")}
-                min={-10000}
-                max={10000}
-                value={market.changeBps}
-                onChange={(v) => setMarket({ ...market, changeBps: v })}
-              />
-              <Slider
-                label={tx("brain.reserve")}
-                value={market.activity}
-                onChange={(v) => setMarket({ ...market, activity: v })}
-              />
-              <button
-                className="brain-secondary full"
-                disabled={busy || !enabled("market")}
-                onClick={() => pulse("market")}
-              >
-                {tx("brain.runMarket")} <ArrowUpRight size={14} />
-              </button>
-              <details className="rpc-input">
-                <summary>{tx("brain.rpc")}</summary>
-                <label>
-                  {tx("brain.pair")}
-                  <input
-                    aria-label={tx("brain.pair")}
-                    placeholder="0x…"
-                    value={pair}
-                    onChange={(e) => setPair(e.target.value)}
-                  />
-                </label>
-                <button
-                  className="brain-secondary full"
-                  disabled={
-                    busy ||
-                    !enabled("market") ||
-                    !/^0x[0-9a-f]{40}$/i.test(pair)
-                  }
-                  onClick={() =>
-                    act(async () => {
-                      if (!window.ethereum)
-                        throw new Error(tx("brain.needWallet"));
-                      const observation = await captureMarket(
-                        window.ethereum,
-                        pair,
-                      );
-                      await ask({
-                        type: "input",
-                        adapter: "market",
-                        ...observation,
-                      });
-                      await ask({
-                        type: "event",
-                        event: { type: "step", count: 32 },
-                      });
-                      setNotice(
-                        tx("brain.sampled", {
-                          n: observation.provenance.blockNumber,
-                        }),
-                      );
-                    })
-                  }
-                >
-                  {tx("brain.sample")}
-                </button>
-                <p>{tx("brain.rpcNote")}</p>
-              </details>
-              <div className="input-foot">
-                <span className="small-dot" /> {tx("brain.twoInputs")}
-                <p>{tx("brain.mapNote")}</p>
-              </div>
-            </aside>
-            <section className="brain-panel chamber">
-              <div className="chamber-head">
-                <span>
-                  <i className={running ? "live-dot" : "idle-dot"} />
-                  {running ? "RUNNING" : "STANDBY"}{" "}
-                  <b>{state?.model || "INITIALIZING"}</b>
-                </span>
-                <div className="scene-tabs">
-                  <button
-                    aria-pressed={!bodyView}
-                    onClick={() => setBodyView(false)}
-                  >
-                    <Network size={13} />
-                    {tx("brain.connectome")}
-                  </button>
-                  <button
-                    aria-pressed={bodyView}
-                    onClick={() => setBodyView(true)}
-                  >
-                    <Eye size={13} />
-                    {tx("brain.body")}
-                  </button>
-                </div>
-              </div>
-              <div className="neural-stage">
-                <div className="stage-corner tl" />
-                <div className="stage-corner br" />
-                <NeuralScene
-                  nodes={data?.nodes || []}
-                  edges={data?.edges || []}
-                  state={state}
-                  bodyView={bodyView}
-                  groups={data?.groups}
-                />
-                <div className="stage-mark">
-                  <span>MALE CNS</span>
-                  <small>
-                    v1.0 /{" "}
-                    {dataset === "full"
-                      ? tx("brain.fullMark")
-                      : tx("brain.graphMark")}
-                  </small>
-                </div>
-                <div className="action-readout">
-                  <span>BEHAVIOR → TRADE</span>
-                  <strong>
-                    {state?.lastAction
-                      ? tx("brain.act." + state.lastAction)
-                      : tx("brain.waitLoad")}{" "}
-                    · {state ? decodeTrade(state.lastAction) : "—"}
-                  </strong>
-                  <small>
-                    {state?.body?.energy ?? "—"} / 1000{" "}
-                    {tx("brain.energyTrade")}
-                  </small>
-                </div>
-                <div className="stage-caption">
-                  {bodyView
-                    ? tx("brain.captionBody")
-                    : tx("brain.captionGraph")}
-                </div>
-              </div>
-              <SignalRack state={state} trace={trace} />
-              <div className="run-controls">
-                <button
-                  className="brain-primary"
-                  disabled={busy || !state}
-                  onClick={() => {
-                    const next = !running;
-                    setRunning(next);
-                    if (running) act(() => save(true));
-                  }}
-                >
-                  {running ? <Pause size={15} /> : <Play size={15} />}{" "}
-                  {running ? tx("brain.pauseClock") : tx("brain.startClock")}
-                </button>
-                <button
-                  className="brain-secondary"
-                  disabled={busy || !state}
-                  onClick={() =>
-                    act(() =>
-                      ask({
-                        type: "event",
-                        event: { type: "step", count: 32 },
-                      }),
-                    )
-                  }
-                >
-                  {tx("brain.step32")}
-                </button>
-                <span>{busy ? "PROCESSING…" : tx("brain.integer")}</span>
-              </div>
-            </section>
-            <aside className="brain-panel continuity-panel">
-              <PanelTitle
-                number="02"
-                title={tx("brain.panel.cont")}
-                english="CONTINUITY"
-              />
-              <div className="soul-mini">
-                <VitruvianFly />
-                <div>
-                  <span>ONE IDENTITY</span>
-                  <strong>{tx("brain.archiveTitle")}</strong>
-                  <small>{tx("brain.archiveSub")}</small>
-                </div>
-              </div>
-              <dl className="identity-list">
-                <dt>{tx("brain.connectomeLabel")}</dt>
-                <dd>MaleCNS v1.0</dd>
-                <dt>{tx("brain.runtime")}</dt>
-                <dd>{tx("brain.runtimeVal")}</dd>
-                <dt>{tx("brain.events")}</dt>
-                <dd>{count(state?.eventCount)}</dd>
-                <dt>{tx("brain.migrations")}</dt>
-                <dd>
-                  {tx("brain.timesUnit", { n: state?.migrationCount || 0 })}
-                </dd>
-              </dl>
-              <div className="hash-box">
-                <label>HISTORY ROOT</label>
-                <code title={state?.historyRoot}>
-                  {short(state?.historyRoot, tx("brain.waitRecord"))}
-                </code>
-              </div>
-              <button
-                className="brain-secondary full"
-                disabled={busy || !state}
-                onClick={() =>
-                  act(async () => {
-                    setRunning(false);
-                    const r = await ask({ type: "prove" });
-                    setProof(r.result);
-                    setNotice(tx("brain.notice.prove"));
-                  })
-                }
-              >
-                <ShieldCheck size={15} />
-                {tx("brain.prove")}
-              </button>
-              {proof && (
-                <div className="proof-result">
-                  <ShieldCheck size={14} />{" "}
-                  {tx("brain.replayed", { n: count(proof.ticks) })}
-                  <small>
-                    {short(proof.stateHash, tx("brain.waitRecord"))}
-                  </small>
-                </div>
-              )}
-              <div className="archive-buttons">
-                <button disabled={busy || !state} onClick={download}>
-                  <Download size={14} />
-                  {tx("brain.export")}
-                </button>
-                <button
-                  disabled={busy || !state}
-                  onClick={() => upload.current.click()}
-                >
-                  <Upload size={14} />
-                  {tx("brain.restore")}
-                </button>
-              </div>
-              <input
-                hidden
-                type="file"
-                ref={upload}
-                accept="application/json,.json"
-                onChange={importFile}
-              />
               <button
                 className="text-button"
                 disabled={busy || !state}
-                onClick={() => act(save)}
+                onClick={() =>
+                  act(async () => {
+                    const r = await ask({ type: "commitment" });
+                    setIntent(
+                      await proposeTrade(state, {
+                        checkpointHash: r.result.stateHash,
+                      }),
+                    );
+                  })
+                }
               >
-                {tx("brain.saveLocal")} <Database size={12} />
+                {tx("brain.readOut")} <ArrowUpRight size={14} />
               </button>
-              <div className="migration">
-                <label htmlFor="model-select">{tx("brain.modelLabel")}</label>
-                <select
-                  id="model-select"
-                  disabled={busy || !state}
-                  value={state?.model || "lif-integer/1"}
-                  onChange={(e) => {
-                    const to = e.target.value;
-                    act(async () => {
-                      setRunning(false);
-                      await ask({
-                        type: "event",
-                        event: { type: "migration", from: state.model, to },
-                      });
-                      setProof(null);
-                      setNotice(tx("brain.notice.migrate"));
-                    });
-                  }}
-                >
-                  <option value="lif-integer/1">{tx("brain.v1")}</option>
-                  <option value="lif-integer/2">{tx("brain.v2")}</option>
-                </select>
-                <p>{tx("brain.noLearn")}</p>
-              </div>
-            </aside>
-          </div>
-          <div className="brain-status" role="status">
-            <span>
-              <i />
-              {notice}
-            </span>
-            <span>
-              {full
-                ? `DATA SHA-256 ${short(full.connectivity.sha256, tx("brain.waitRecord"))}`
-                : "CHECKING DATA INTEGRITY"}
-            </span>
-          </div>
-          {error && (
-            <div className="brain-error" role="alert">
-              {error}
             </div>
-          )}
-          <div className="brain-bottom">
-            <section className="brain-panel history-panel">
-              <PanelTitle
-                number="03"
-                title={tx("brain.panel.journal")}
-                english="EVENT JOURNAL"
-              />
-              <div className="event-list">
-                {events.length ? (
-                  events
-                    .slice()
-                    .reverse()
-                    .slice(0, 6)
-                    .map((event, i) => (
-                      <div key={`${state.eventCount}-${i}`}>
-                        <span>
-                          {String(state.eventCount - i).padStart(4, "0")}
-                        </span>
-                        <b>
-                          {event.type === "input"
-                            ? "SENSE"
-                            : event.type === "step"
-                              ? "LIVE"
-                              : event.type === "migration"
-                                ? "EVOLVE"
-                                : "SOURCE"}
-                        </b>
-                        <p>
-                          {event.type === "input"
-                            ? `${event.frame.adapter} · ${event.frame.provenance.kind === "simulation" ? tx("brain.simInput") : tx("brain.chainSample")} · #${event.frame.sequence}`
-                            : event.type === "step"
-                              ? tx("brain.stepped", { n: event.count })
-                              : event.type === "migration"
-                                ? `${event.from} → ${event.to}`
-                                : `${event.sourceId} / ${event.enabled ? tx("brain.on") : tx("brain.off")}`}
-                        </p>
-                        <span>RECORDED</span>
-                      </div>
-                    ))
-                ) : (
-                  <p className="empty-journal">{tx("brain.emptyJournal")}</p>
-                )}
+            <div className="extension-row">
+              <Database size={19} />
+              <div>
+                <strong>{tx("brain.flapPort")}</strong>
+                <p>{tx("brain.flapP")}</p>
               </div>
-            </section>
-            <section className="brain-panel expansion-panel">
-              <PanelTitle
-                number="04"
-                title={tx("brain.panel.ports")}
-                english="EXTENSION PORTS"
-              />
-              <div className="extension-row">
-                <Network size={19} />
-                <div>
-                  <strong>{tx("brain.loader")}</strong>
-                  <p>{tx("brain.loaderP")}</p>
-                </div>
-                <select
-                  aria-label={tx("brain.scaleLabel")}
-                  disabled={busy || running}
-                  value={dataset}
-                  onChange={(e) => setDataset(e.target.value)}
-                >
-                  <option value="circuit">{tx("brain.optCircuit")}</option>
-                  <option value="full">
-                    {fullReady
-                      ? tx("brain.optFull", { n: count(FULL_NEURONS) })
-                      : tx("brain.optFullNeed")}
-                  </option>
-                </select>
-              </div>
-              <div className="extension-row">
-                <Database size={19} />
-                <div>
-                  <strong>{tx("brain.intent")}</strong>
-                  <p>{tx("brain.intentP")}</p>
-                </div>
-                <button
-                  className="text-button"
-                  disabled={busy || !state}
-                  onClick={() =>
-                    act(async () => {
-                      const r = await ask({ type: "commitment" });
-                      setIntent(
-                        await proposeTrade(state, {
-                          checkpointHash: r.result.stateHash,
-                        }),
-                      );
-                    })
-                  }
-                >
-                  {tx("brain.readOut")} <ArrowUpRight size={14} />
-                </button>
-              </div>
-              <div className="extension-row">
-                <Database size={19} />
-                <div>
-                  <strong>{tx("brain.flapPort")}</strong>
-                  <p>{tx("brain.flapP")}</p>
-                </div>
-                <button
-                  className="text-button"
-                  disabled={busy || !state}
-                  onClick={() =>
-                    act(async () => {
-                      const r = await ask({ type: "commitment" });
-                      setIntent(
-                        await proposeAction(state, {
-                          checkpointHash: r.result.stateHash,
-                          budgetWei: "100000000000000000",
-                          perActionWei: "1000000000000000",
-                        }),
-                      );
-                    })
-                  }
-                >
-                  {tx("brain.preview")} <ArrowUpRight size={14} />
-                </button>
-              </div>
-              {intent && (
-                <div className="intent-result">
-                  {intent.action}
-                  {intent.side ? ` · ${intent.side}` : ""} · {intent.amountWei}{" "}
-                  wei{" "}
-                  <small>
-                    {intent.reason} · mode={intent.mode} · {tx("brain.noSend")}
-                  </small>
-                </div>
-              )}
-              <p className="extension-note">{tx("brain.extNote")}</p>
-            </section>
-          </div>
-          {archiveText && (
-            <details className="archive-fallback">
-              <summary>{tx("brain.backup")}</summary>
-              <textarea
-                readOnly
-                aria-label="archive JSON"
-                value={archiveText}
-              />
-            </details>
-          )}
-          <footer className="brain-footer">
-            <span>
-              IMMORTAL / BUILD 01 <b>ONGOING EXISTENCE.</b>
-            </span>
-            <p>
-              {tx("brain.foot")}{" "}
-              <a
-                href="https://male-cns.janelia.org/download/"
-                target="_blank"
-                rel="noreferrer"
+              <button
+                className="text-button"
+                disabled={busy || !state}
+                onClick={() =>
+                  act(async () => {
+                    const r = await ask({ type: "commitment" });
+                    setIntent(
+                      await proposeAction(state, {
+                        checkpointHash: r.result.stateHash,
+                        budgetWei: "100000000000000000",
+                        perActionWei: "1000000000000000",
+                      }),
+                    );
+                  })
+                }
               >
-                FlyEM / MaleCNS · CC BY
-              </a>
-              .
-            </p>
-          </footer>
-        </main>
-      </div>
-    </LocaleContext.Provider>
+                {tx("brain.preview")} <ArrowUpRight size={14} />
+              </button>
+            </div>
+            {intent && (
+              <div className="intent-result">
+                {intent.action}
+                {intent.side ? ` · ${intent.side}` : ""} · {intent.amountWei}{" "}
+                wei{" "}
+                <small>
+                  {intent.reason} · mode={intent.mode} · {tx("brain.noSend")}
+                </small>
+              </div>
+            )}
+            <p className="extension-note">{tx("brain.extNote")}</p>
+          </section>
+        </div>
+        {archiveText && (
+          <details className="archive-fallback">
+            <summary>{tx("brain.backup")}</summary>
+            <textarea readOnly aria-label="archive JSON" value={archiveText} />
+          </details>
+        )}
+        <footer className="brain-footer">
+          <span>
+            IMMORTAL / BUILD 01 <b>ONGOING EXISTENCE.</b>
+          </span>
+          <p>
+            {tx("brain.foot")}{" "}
+            <a
+              href="https://male-cns.janelia.org/download/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              FlyEM / MaleCNS · CC BY
+            </a>
+            .
+          </p>
+        </footer>
+      </main>
+    </SitePage>
   );
 }
 function Stat({ label, value, accent }) {

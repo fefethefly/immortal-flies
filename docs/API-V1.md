@@ -1,6 +1,6 @@
 # Backend API handoff (DeepSeek)
 
-日期：2026-09-16。Node 服务托管交易坑 Session 的完整可重放档案，并把 `iff.explain/1` 接到 OpenAI 兼容 LLM。
+日期：2026-09-16。Node 服务托管交易场 Session 的完整可重放档案，并把 `iff.explain/1` 接到 OpenAI 兼容 LLM。
 
 ## 启动
 

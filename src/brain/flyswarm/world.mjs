@@ -2,7 +2,7 @@
  * iff.paper-world/1 —— 交易纸面世界（L2 World 层，浏览器侧）。
  *
  * 交易世界是第一层「世界」，不是内核。它只读 L0/L1（MaleCNS 会话、蝇群协议）
- * 的每一步结果，把行为解释成金融形状：六类事件落场、因果条、蜂巢压力、
+ * 的每一步结果，把行为解释成金融形状：六类事件落地、因果条、蜂巢压力、
  * 成交回执、风险注解、金库快照、IFS 纸面面板与候选计划。
  *
  * 边界声明：
@@ -31,7 +31,7 @@ export const WORLD_SCHEMA = "iff.paper-world/1";
 export const WORLD_POLICY = Object.freeze({
   id: "paper-world-1",
   version: "1",
-  /** 活场的六类事件 */
+  /** 现场的六类事件 */
   kinds: Object.freeze(["sense", "act", "memory", "trade", "society", "risk"]),
   maxEvents: 120,
   maxCausal: 64,
@@ -158,7 +158,7 @@ export async function stepWorld(
   const fresh = [];
   const windowEvents = recentEvents(world, tick, window + 1);
 
-  // 1) SENSE：外部刺激落场（来源、强度入事件，不进内核语义）。
+  // 1) SENSE：外部刺激落地（来源、强度入事件，不进内核语义）。
   const food = stimulus.food || 0;
   const threat = stimulus.threat || 0;
   const light = stimulus.light || 0;
@@ -178,7 +178,7 @@ export async function stepWorld(
     );
   }
 
-  // 2) ACT：行为话语落场（只落「转向」：动作或倾向明显变化，否则场太吵）。
+  // 2) ACT：行为话语落地（只落「转向」：动作或倾向明显变化，否则场太吵）。
   for (const member of colony.members) {
     if (member.status !== "alive") continue;
     const prev = world.prevIntent[member.id];
@@ -240,7 +240,7 @@ export async function stepWorld(
     );
   }
 
-  // 4) TRADE：本 tick 的纸面成交 → 回执 + 落场。风控注解只标记、不撤回。
+  // 4) TRADE：本 tick 的纸面成交 → 回执 + 落地。风控注解只标记、不撤回。
   const alive = colony.members.filter((m) => m.status === "alive");
   const hiveEquity =
     alive.reduce((sum, m) => sum + equityOf(m.book, price), 0) || 1;
@@ -321,7 +321,7 @@ export async function stepWorld(
     }
   }
 
-  // 5) SOCIETY：quorum 聚合结果落场（分裂是特征，不是故障）。
+  // 5) SOCIETY：quorum 聚合结果落地（分裂是特征，不是故障）。
   const quorum = fs.lastQuorum;
   if (quorum && quorum.tick === tick) {
     const qv = interpretQuorum(quorum);

@@ -124,7 +124,10 @@ const go = (id) =>
   });
 
 export default function App() {
-  const [locale, setLocale, tx] = useLocale("meta.altarTitle", "meta.altarDesc");
+  const [locale, setLocale, tx] = useLocale(
+    "meta.altarTitle",
+    "meta.altarDesc",
+  );
   const [initial] = useState(loadLab),
     [fly, setFly] = useState(initial.fly),
     [events, setEvents] = useState(initial.events),
@@ -638,7 +641,7 @@ export default function App() {
         await pullChainFly(ids[0], `读取测试网灵魂 #${ids[0]}`, "restore");
         notify(`已接入 BSC 测试网 · #${ids[0]}`);
       } else {
-        notify("已切到 BSC 测试网。此地址还没有果蝇，可在祭台铸造。");
+        notify("已切到 BSC 测试网。此地址还没有果蝇，可在祭坛铸造。");
       }
       setModal("wallet");
     } catch (error) {
@@ -719,7 +722,9 @@ export default function App() {
           <button className="wallet-button" onClick={connectWallet}>
             <Wallet size={14} />
             <span>
-              {wallet ? `${wallet.slice(0, 5)}…${wallet.slice(-4)}` : tx("altar.sign")}
+              {wallet
+                ? `${wallet.slice(0, 5)}…${wallet.slice(-4)}`
+                : tx("altar.sign")}
             </span>
             <ArrowUpRight size={13} />
           </button>
@@ -1562,11 +1567,11 @@ export default function App() {
             <ArrowUpRight size={12} />
           </button>
           <a href="/swarm.html">
-            交易坑
+            交易场
             <ArrowUpRight size={12} />
           </a>
           <a href="/brain.html">
-            全典
+            连接组
             <ArrowUpRight size={12} />
           </a>
           <a
@@ -1663,11 +1668,10 @@ export default function App() {
               : "本地实验 / LOCAL PROTOTYPE"}
           </div>
           <p>
-            产品主循环是<a href="/swarm.html">交易坑</a>
-            ：趋近与退避被读成买入与卖出，先跑纸面账本。这一页祭台保存身份、训练与转生，用的是
-            16 个节点、3 组学习参数的确定性模型，不是完整生物连接组。MaleCNS
-            在
-            <a href="/brain.html">全典</a>
+            产品主循环是<a href="/swarm.html">交易场</a>
+            ：趋近与退避被读成买入与卖出，先跑纸面账本。这一页祭坛保存身份、训练与转生，用的是
+            16 个节点、3 组学习参数的确定性模型，不是完整生物连接组。MaleCNS 在
+            <a href="/brain.html">连接组</a>
             中运行。后续才会打开出借、金库与预测。Flap 嵌入界面尚未制作。
           </p>
           <div className="modal-facts">
@@ -1789,7 +1793,7 @@ export default function App() {
               <p>
                 网络 {BSC_TESTNET.name}（{BSC_TESTNET.chainId}）。
                 {tokenId == null
-                  ? " 此地址还没有果蝇，可在祭台免费铸造。"
+                  ? " 此地址还没有果蝇，可在祭坛免费铸造。"
                   : ` 当前灵魂 #${tokenId}，状态以 getFly 为准。`}
               </p>
               {deployment?.address && (
@@ -1858,7 +1862,7 @@ export default function App() {
                   go("lab");
                 }}
               >
-                进入本地祭台
+                进入本地祭坛
                 <ArrowUpRight size={17} />
               </button>
             </>
@@ -1867,7 +1871,7 @@ export default function App() {
               <p>
                 {contractReady
                   ? "连接后会请求切换到 BSC 测试网，并读取你已有的 ImmortalFly。没有代币时可以免费铸造。每次训练都要签名。"
-                  : "测试网合约还没部署。设置 IFF_DEPLOY_KEY 后运行 npm run contracts:deploy:testnet，再刷新本页。在此之前祭台仍是本地仪式。"}
+                  : "测试网合约还没部署。设置 IFF_DEPLOY_KEY 后运行 npm run contracts:deploy:testnet，再刷新本页。在此之前祭坛仍是本地仪式。"}
               </p>
               <div className="note-badge">
                 <LockKeyhole size={14} />
@@ -1881,7 +1885,7 @@ export default function App() {
                   else go("lab");
                 }}
               >
-                {contractReady ? "连接并切换测试网" : "先用本地祭台"}
+                {contractReady ? "连接并切换测试网" : "先用本地祭坛"}
                 <ArrowUpRight size={17} />
               </button>
             </>
@@ -1911,7 +1915,7 @@ export default function App() {
               <span>02</span>
               <section>
                 <h3>再完成测试网闭环</h3>
-                <p>部署 ImmortalFly，用本站祭台铸造并改写状态。</p>
+                <p>部署 ImmortalFly，用本站祭坛铸造并改写状态。</p>
               </section>
               <Clock size={15} />
             </div>

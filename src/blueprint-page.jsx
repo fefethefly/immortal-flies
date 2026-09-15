@@ -1,26 +1,34 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { useLocale } from "./use-locale.mjs";
-import { SiteBar } from "./site-chrome.jsx";
+import { SiteLink, SitePage } from "./site-chrome.jsx";
 import "./public.css";
 import "./blueprint.css";
 
 function App() {
-  const [locale, setLocale, tx] = useLocale("meta.blueprintTitle", "meta.blueprintDesc");
+  const [locale, setLocale, tx] = useLocale(
+    "meta.blueprintTitle",
+    "meta.blueprintDesc",
+  );
   const live = [
     ["01", "nav.pit", "blue.pit", "/swarm.html"],
     ["02", "nav.canon", "blue.canon", "/brain.html"],
+    ["03", "nav.economy", "blue.economy", "/economy.html"],
   ];
   const later = [
-    ["03", "blue.identityTitle", "blue.identity"],
-    ["04", "blue.vaultTitle", "blue.vault"],
-    ["05", "blue.capitalTitle", "blue.capital"],
-    ["06", "blue.portsTitle", "blue.ports"],
+    ["04", "blue.identityTitle", "blue.identity"],
+    ["05", "blue.vaultTitle", "blue.vault"],
+    ["06", "blue.capitalTitle", "blue.capital"],
+    ["07", "blue.portsTitle", "blue.ports"],
   ];
   return (
-    <div className="home blueprint">
-      <i className="home-grain" aria-hidden="true" />
-      <SiteBar locale={locale} setLocale={setLocale} tx={tx} current="blueprint" />
+    <SitePage
+      className="home blueprint"
+      locale={locale}
+      setLocale={setLocale}
+      tx={tx}
+      current="blueprint"
+    >
       <main className="blue-main">
         <p className="kicker">{tx("nav.blueprint")}</p>
         <h1>{tx("blue.h1")}</h1>
@@ -30,11 +38,11 @@ function App() {
           <ol>
             {live.map(([no, title, body, href]) => (
               <li key={no}>
-                <a href={href}>
+                <SiteLink href={href}>
                   <small>{no}</small>
                   <strong>{tx(title)}</strong>
                   <p>{tx(body)}</p>
-                </a>
+                </SiteLink>
               </li>
             ))}
           </ol>
@@ -53,7 +61,7 @@ function App() {
         </section>
         <p className="note">{tx("blue.foot")}</p>
       </main>
-    </div>
+    </SitePage>
   );
 }
 

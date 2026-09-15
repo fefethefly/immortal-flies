@@ -8,11 +8,11 @@ Canon 决策与整条数据流见 [BIOLOGY-SPINE-V6.md](BIOLOGY-SPINE-V6.md)。�
 
 缓存目录：`scripts/data/cache/`（不入库）。
 
-| 角色 | 文件 | 用途 |
-| --- | --- | --- |
-| 注释 | `body-annotations-male-cns-v1.0-minconf-0.5.feather` | 官方神经元编号、类型、侧别、坐标 |
-| 递质 | `body-neurotransmitters-male-cns-v1.0.feather` | 官方递质预测 |
-| 连接 | `connectome-weights-male-cns-v1.0-minconf-0.5-significant-only.feather` | 显著的节段间连接强度 |
+| 角色 | 文件                                                                    | 用途                             |
+| ---- | ----------------------------------------------------------------------- | -------------------------------- |
+| 注释 | `body-annotations-male-cns-v1.0-minconf-0.5.feather`                    | 官方神经元编号、类型、侧别、坐标 |
+| 递质 | `body-neurotransmitters-male-cns-v1.0.feather`                          | 官方递质预测                     |
+| 连接 | `connectome-weights-male-cns-v1.0-minconf-0.5-significant-only.feather` | 显著的节段间连接强度             |
 
 ## 两个规模
 
