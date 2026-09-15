@@ -22,6 +22,10 @@ npm run dev            # Vite 将 /v1 /health /ready 反代到 8787
 - 重启：空闲未过期的会话从 `server/data/sessions/` 恢复；过久未访问只占磁盘，下次请求再载入；超过 `IFF_SESSION_MAX_AGE_MS` 删除
 - 限流：tick / 写 / LLM / 创建会话超限返回 `429 RATE_LIMITED` 与 `Retry-After`
 
+## P3 模拟 Credit（已接入）
+
+`/v1/sessions/:id/credit`（GET 账本视图）、`/credit/stake | unstake | occupy | release`（POST，SIM，需 ownerToken）、`/v1/credit/policy`（版本化参数）。账本是 `iff.credit/1`（`src/brain/flyswarm/credit.mjs`）：四账户 + §6.2 公式 + 不重复抵押 + 到期/亏损/过期收缩；每会话落盘 `credit.json`。前端 IFS 视图与 Risk 信用列已接服务端账本（断线回落本地纸面信用）。
+
 ## 对接建议
 
 1. 创建 `POST /v1/sessions` → 保存 `sessionId` + `ownerToken`

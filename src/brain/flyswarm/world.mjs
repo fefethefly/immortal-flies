@@ -675,6 +675,7 @@ export function worldView({ kernel, aux, world }) {
     const value = Math.trunc((member.book.token * price) / TOKEN_UNIT);
     return {
       flyId: member.id,
+      soulId: member.session.state.soulId,
       gen: member.gen,
       status: member.status,
       bnb: member.book.bnb,

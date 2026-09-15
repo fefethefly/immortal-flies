@@ -74,6 +74,7 @@ function App() {
   const mirrorFailures = useRef(0);
   const booted = useRef(false);
   const [remote, setRemote] = useState(null);
+  const [creditRemote, setCreditRemote] = useState(null);
 
   const stats = useMemo(() => (view ? summarize(view) : null), [view]);
   const fly = view
@@ -115,6 +116,7 @@ function App() {
         };
         remoteRef.current = next;
         setRemote(next);
+        fetchCredit(next);
       } catch {
         /* 无后端：本地确定性解释层照常运行 */
       }
@@ -123,6 +125,39 @@ function App() {
       cancelled = true;
     };
   }, [ready]);
+
+  /** 拉取服务端信用账本；失败回落本地纸面信用。 */
+  async function fetchCredit(r = remoteRef.current) {
+    if (!r) {
+      setCreditRemote(null);
+      return;
+    }
+    try {
+      setCreditRemote(await iffApi.credit(r.sessionId));
+    } catch {
+      setCreditRemote(null);
+    }
+  }
+
+  /** IFS 视图的信用动作（锁仓/占用/释放/解锁，全部 SIM）。 */
+  async function creditAction(kind, body) {
+    const r = remoteRef.current;
+    if (!r) return;
+    const actions = {
+      stake: () => iffApi.creditStake(r.sessionId, r.ownerToken, body),
+      unstake: () => iffApi.creditUnstake(r.sessionId, r.ownerToken, body),
+      occupy: () => iffApi.creditOccupy(r.sessionId, r.ownerToken, body),
+      release: () => iffApi.creditRelease(r.sessionId, r.ownerToken, body),
+    };
+    try {
+      await actions[kind]();
+      setNotice(tx("credit.done"));
+      await fetchCredit();
+    } catch (err) {
+      setNotice(`${tx("credit.err")} · ${err?.message || kind}`);
+      await fetchCredit();
+    }
+  }
 
   /** 向服务端镜像一次动作；连续失败后安静断开，UI 保持本地源。 */
   function mirror(action) {
@@ -242,10 +277,17 @@ function App() {
       mirror((r) => iffApi.settle(r.sessionId, r.ownerToken));
       setError("");
       setNotice(tx("pit.noticeCull"));
+      fetchCredit();
     } catch (err) {
       console.warn("[pit] settle failed:", err?.stack || err);
       setError(err.message);
     }
+  }
+
+  /** 切换视图；进 Risk / IFS 时刷新服务端信用账本。 */
+  function switchTab(next) {
+    setTab(next);
+    if (next === "risk" || next === "ifs") fetchCredit();
   }
 
   function branchNow() {
@@ -309,7 +351,7 @@ function App() {
 
         <ViewNav
           tab={tab}
-          setTab={setTab}
+          setTab={switchTab}
           tx={tx}
           remote={remote}
           onExplain={() => setExplainOpen(true)}
@@ -567,13 +609,22 @@ function App() {
             </section>
           ))}
         {tab === "intent" && world && <IntentView world={world} tx={tx} />}
-        {tab === "risk" && world && <RiskView world={world} tx={tx} />}
+        {tab === "risk" && world && (
+          <RiskView world={world} tx={tx} creditRemote={creditRemote} />
+        )}
         {tab === "execution" && world && (
           <ExecutionView world={world} tx={tx} />
         )}
         {tab === "vault" && world && <VaultView world={world} tx={tx} />}
         {tab === "ifs" && world && (
-          <IfsView world={world} tx={tx} token={token} />
+          <IfsView
+            world={world}
+            tx={tx}
+            token={token}
+            credit={creditRemote}
+            remote={remote}
+            onCreditAction={creditAction}
+          />
         )}
 
         <footer className="pit-footer">

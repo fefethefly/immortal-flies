@@ -1,4 +1,13 @@
-import { mkdir, writeFile, readFile, appendFile, access, constants, readdir, rm } from "node:fs/promises";
+import {
+  mkdir,
+  writeFile,
+  readFile,
+  appendFile,
+  access,
+  constants,
+  readdir,
+  rm,
+} from "node:fs/promises";
 import { join } from "node:path";
 
 /** 磁盘档案：data/sessions/<id>/ 与 branches / llm 审计。 */
@@ -42,6 +51,20 @@ export function createStore(dataDir) {
     await writeJson(join(dir, "meta.json"), meta);
   }
 
+  async function saveCredit(sessionId, credit) {
+    const dir = sessionPath(sessionId);
+    await mkdir(dir, { recursive: true });
+    await writeJson(join(dir, "credit.json"), credit);
+  }
+
+  async function loadCredit(sessionId) {
+    try {
+      return await readJson(join(sessionPath(sessionId), "credit.json"));
+    } catch {
+      return null;
+    }
+  }
+
   async function saveArchive(sessionId, archive) {
     const dir = sessionPath(sessionId);
     await mkdir(dir, { recursive: true });
@@ -63,7 +86,11 @@ export function createStore(dataDir) {
 
   async function appendLlmAudit(record) {
     await mkdir(llmDir, { recursive: true });
-    await appendFile(join(llmDir, "audit.jsonl"), `${JSON.stringify(record)}\n`, "utf8");
+    await appendFile(
+      join(llmDir, "audit.jsonl"),
+      `${JSON.stringify(record)}\n`,
+      "utf8",
+    );
   }
 
   async function listSessionIds() {
@@ -93,5 +120,7 @@ export function createStore(dataDir) {
     saveBranch,
     loadBranch,
     appendLlmAudit,
+    saveCredit,
+    loadCredit,
   };
 }

@@ -368,6 +368,110 @@ paths:
       responses:
         "200":
           description: Validated plans
+  /v1/sessions/{id}/credit:
+    get:
+      summary: iff.credit/1 ledger view (four accounts + stakes, SIM)
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Credit ledger
+  /v1/sessions/{id}/credit/stake:
+    post:
+      summary: Lock IFS as collateral (SIM, bonded minimum enforced)
+      security:
+        - ownerToken: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [soulId, amount]
+              properties:
+                soulId:
+                  type: string
+                amount:
+                  type: integer
+      responses:
+        "200":
+          description: iff.stake/1
+        "400":
+          description: Below bonded minimum, unknown soul, or ledger rule
+  /v1/sessions/{id}/credit/unstake:
+    post:
+      summary: Release a stake after its unlock tick (SIM)
+      security:
+        - ownerToken: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stakeId]
+              properties:
+                stakeId:
+                  type: string
+      responses:
+        "200":
+          description: Released iff.stake/1
+        "400":
+          description: Not unlocked yet or still occupied
+  /v1/sessions/{id}/credit/occupy:
+    post:
+      summary: Occupy one stake for one line of credit (no double collateral)
+      security:
+        - ownerToken: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stakeId]
+              properties:
+                stakeId:
+                  type: string
+                purpose:
+                  type: string
+      responses:
+        "200":
+          description: iff.stake/1
+        "400":
+          description: Already occupied by another line
+  /v1/sessions/{id}/credit/release:
+    post:
+      summary: Release a stake occupation (SIM)
+      security:
+        - ownerToken: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stakeId]
+              properties:
+                stakeId:
+                  type: string
+      responses:
+        "200":
+          description: iff.stake/1
+  /v1/credit/policy:
+    get:
+      summary: Versioned iff.credit-policy/1 parameters
+      responses:
+        "200":
+          description: Credit policy
 components:
   securitySchemes:
     ownerToken:

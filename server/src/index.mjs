@@ -12,12 +12,15 @@ import { createRouter, mountSessionRoutes } from "./sessions/http.mjs";
 import { createOpenAIProvider } from "./llm/provider.mjs";
 import { createLlmService } from "./llm/service.mjs";
 import { mountLlmRoutes } from "./llm/http.mjs";
+import { createCreditService } from "./credit/service.mjs";
+import { mountCreditRoutes } from "./credit/http.mjs";
 
 export async function createApp(options = {}) {
   const config = options.config || createConfig(options.env || process.env);
   const logger = options.logger || createLogger("iff-server");
   const store = options.store || createStore(config.dataDir);
-  const sessions = options.sessions || createSessionService({ config, store, logger });
+  const sessions =
+    options.sessions || createSessionService({ config, store, logger });
   const provider =
     options.provider ||
     createOpenAIProvider({
@@ -26,7 +29,10 @@ export async function createApp(options = {}) {
       model: config.openai.model,
       fetchImpl: options.fetchImpl,
     });
-  const llm = options.llm || createLlmService({ sessions, store, provider, logger });
+  const llm =
+    options.llm || createLlmService({ sessions, store, provider, logger });
+  const credit =
+    options.credit || createCreditService({ sessions, store, logger });
 
   if (!options.skipBoot) {
     await sessions.boot(options.graph || null);
@@ -35,6 +41,7 @@ export async function createApp(options = {}) {
   const router = createRouter();
   mountSessionRoutes({ router, sessions });
   mountLlmRoutes({ router, llm });
+  mountCreditRoutes({ router, credit });
   const limiter = options.limiter || createRateLimiter();
 
   const corsOrigins = new Set(config.corsOrigins);
@@ -44,13 +51,25 @@ export async function createApp(options = {}) {
     const rate = config.rate || {};
     let result = { ok: true };
     if (req.method === "POST" && pathname === "/v1/sessions") {
-      result = limiter.allow(`create:${key}`, { max: rate.createPerMin, windowMs: 60_000 });
+      result = limiter.allow(`create:${key}`, {
+        max: rate.createPerMin,
+        windowMs: 60_000,
+      });
     } else if (req.method === "POST" && pathname.startsWith("/v1/llm/")) {
-      result = limiter.allow(`llm:${key}`, { max: rate.llmPerMin, windowMs: 60_000 });
+      result = limiter.allow(`llm:${key}`, {
+        max: rate.llmPerMin,
+        windowMs: 60_000,
+      });
     } else if (req.method === "POST" && pathname.endsWith("/tick")) {
-      result = limiter.allow(`tick:${key}`, { max: rate.tickPerSec, windowMs: 1000 });
+      result = limiter.allow(`tick:${key}`, {
+        max: rate.tickPerSec,
+        windowMs: 1000,
+      });
     } else if (req.method !== "GET" && pathname.startsWith("/v1/")) {
-      result = limiter.allow(`write:${key}`, { max: rate.writePerMin, windowMs: 60_000 });
+      result = limiter.allow(`write:${key}`, {
+        max: rate.writePerMin,
+        windowMs: 60_000,
+      });
     }
     if (!result.ok) throw limiter.reject(result);
   }
@@ -60,7 +79,10 @@ export async function createApp(options = {}) {
     if (origin && corsOrigins.has(origin)) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Vary", "Origin");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Idempotency-Key");
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, Idempotency-Key",
+      );
       res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
     }
   }
@@ -78,7 +100,10 @@ export async function createApp(options = {}) {
     }
 
     try {
-      const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+      const url = new URL(
+        req.url || "/",
+        `http://${req.headers.host || "localhost"}`,
+      );
       const pathname = url.pathname;
 
       if (req.method === "GET" && pathname === "/health") {
@@ -129,13 +154,16 @@ export async function createApp(options = {}) {
     }
   }
 
-  return { config, logger, store, sessions, llm, provider, handler };
+  return { config, logger, store, sessions, llm, credit, provider, handler };
 }
 
 function sendJson(res, status, body) {
   const payload = JSON.stringify(body);
   res.writeHead(status, {
-    "Content-Type": status >= 400 ? "application/problem+json; charset=utf-8" : "application/json; charset=utf-8",
+    "Content-Type":
+      status >= 400
+        ? "application/problem+json; charset=utf-8"
+        : "application/json; charset=utf-8",
     "Content-Length": Buffer.byteLength(payload),
   });
   res.end(payload);
@@ -144,7 +172,9 @@ function sendJson(res, status, body) {
 export async function startServer(options = {}) {
   const app = await createApp(options);
   const server = createServer(app.handler);
-  await new Promise((resolve) => server.listen(app.config.port, "127.0.0.1", resolve));
+  await new Promise((resolve) =>
+    server.listen(app.config.port, "127.0.0.1", resolve),
+  );
   app.logger.info("listening", { port: app.config.port });
 
   const shutdown = async (signal) => {
@@ -152,7 +182,9 @@ export async function startServer(options = {}) {
     try {
       await app.sessions.flushAll();
     } catch (err) {
-      app.logger.error("flush on shutdown failed", { error: err?.message || String(err) });
+      app.logger.error("flush on shutdown failed", {
+        error: err?.message || String(err),
+      });
     }
     await new Promise((resolve) => server.close(resolve));
     if (!options.keepAlive) process.exit(0);
@@ -163,9 +195,18 @@ export async function startServer(options = {}) {
   return { ...app, server };
 }
 
-if (resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1] || "")) {
+if (
+  resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1] || "")
+) {
   startServer().catch((err) => {
-    console.error(JSON.stringify({ level: "error", msg: "boot failed", error: err?.message, stack: err?.stack }));
+    console.error(
+      JSON.stringify({
+        level: "error",
+        msg: "boot failed",
+        error: err?.message,
+        stack: err?.stack,
+      }),
+    );
     process.exit(1);
   });
 }

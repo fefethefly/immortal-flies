@@ -614,11 +614,17 @@ export function IntentView({ world, tx }) {
 
 /* ---------- RISK ---------- */
 
-export function RiskView({ world, tx }) {
+export function RiskView({ world, tx, creditRemote }) {
   const r = world.risk;
   const top = r.concentration[0];
+  const remoteBySoul = useMemo(() => {
+    const map = new Map();
+    for (const soul of creditRemote?.souls || []) map.set(soul.soulId, soul);
+    return map;
+  }, [creditRemote]);
+  const creditOfFly = (p) => remoteBySoul.get(p.soulId) || p.credit;
   const creditTop = [...r.positions].sort(
-    (a, b) => b.credit.usable - a.credit.usable,
+    (a, b) => creditOfFly(b).usable - creditOfFly(a).usable,
   )[0];
   const policy = policyCard();
   return (
@@ -662,9 +668,13 @@ export function RiskView({ world, tx }) {
           </em>
         </div>
         <div className="kpi">
-          <small>{tx("risk.credit")} · top</small>
+          <small>
+            {tx("risk.credit")} · top{" "}
+            {creditRemote ? `· ${tx("credit.api")}` : ""}
+          </small>
           <b>
-            #{creditTop?.flyId ?? "—"} {creditTop?.credit.usable ?? 0}
+            #{creditTop?.flyId ?? "—"}{" "}
+            {creditOfFly(creditTop || { credit: { usable: 0 } }).usable}
           </b>
           <em>{tx("risk.creditFormula")}</em>
         </div>
@@ -685,26 +695,36 @@ export function RiskView({ world, tx }) {
               </tr>
             </thead>
             <tbody>
-              {r.positions.map((p) => (
-                <tr
-                  key={p.flyId}
-                  className={p.status === "retired" ? "dim" : ""}
-                >
-                  <td>#{p.flyId}</td>
-                  <td>{p.gen}</td>
-                  <td>{formatBnb(p.equity)}</td>
-                  <td>{formatBnb(p.value)}</td>
-                  <td>
-                    <span className="share-cell">
-                      <i
-                        style={{ width: `${Math.min(100, p.shareBps / 100)}%` }}
-                      />
-                      {(p.shareBps / 100).toFixed(1)}%
-                    </span>
-                  </td>
-                  <td>{p.credit.usable}</td>
-                </tr>
-              ))}
+              {r.positions.map((p) => {
+                const credit = creditOfFly(p);
+                return (
+                  <tr
+                    key={p.flyId}
+                    className={p.status === "retired" ? "dim" : ""}
+                  >
+                    <td>#{p.flyId}</td>
+                    <td>{p.gen}</td>
+                    <td>{formatBnb(p.equity)}</td>
+                    <td>{formatBnb(p.value)}</td>
+                    <td>
+                      <span className="share-cell">
+                        <i
+                          style={{
+                            width: `${Math.min(100, p.shareBps / 100)}%`,
+                          }}
+                        />
+                        {(p.shareBps / 100).toFixed(1)}%
+                      </span>
+                    </td>
+                    <td>
+                      {credit.usable}
+                      {creditRemote && (
+                        <small className="credit-api">API</small>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </section>
@@ -965,8 +985,23 @@ export function VaultView({ world, tx }) {
 
 /* ---------- IFS ---------- */
 
-export function IfsView({ world, tx, token }) {
+export function IfsView({ world, tx, token, credit, remote, onCreditAction }) {
   const i = world.ifs;
+  const [soulId, setSoulId] = useState("");
+  const [amount, setAmount] = useState("");
+  const aliveSouls = world.intents || [];
+  const stakes = credit?.stakes || [];
+  const policy = credit?.policy || null;
+  const minStake = policy ? policy.bondedStakeMin : i.bondedStakeMin;
+
+  function runStake(event) {
+    event.preventDefault();
+    const value = Number(amount);
+    if (!soulId || !Number.isSafeInteger(value)) return;
+    onCreditAction?.("stake", { soulId, amount: value });
+    setAmount("");
+  }
+
   return (
     <ViewShell
       tx={tx}
@@ -1011,6 +1046,99 @@ export function IfsView({ world, tx, token }) {
           ) : (
             <p className="empty-inline">{tx("public.tokenError")}</p>
           )}
+
+          {remote && (
+            <>
+              <h2>
+                {tx("credit.ledger")} <small>{tx("credit.sim")}</small>
+              </h2>
+              <ul className="credit-souls">
+                {(credit?.souls || []).map((soul) => (
+                  <li key={soul.soulId}>
+                    <span>{soul.soulId}</span>
+                    <b>{soul.usable}</b>
+                    <em>
+                      {tx("credit.free")} {soul.free} · {tx("risk.credit")}{" "}
+                      {soul.capacity}
+                    </em>
+                  </li>
+                ))}
+              </ul>
+              <form className="credit-stake" onSubmit={runStake}>
+                <select
+                  value={soulId}
+                  onChange={(e) => setSoulId(e.target.value)}
+                  aria-label={tx("credit.soul")}
+                >
+                  <option value="">{tx("credit.soul")}…</option>
+                  {aliveSouls.map((row) => (
+                    <option key={row.soulId} value={row.soulId}>
+                      #{row.flyId} · {row.soulId}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={minStake}
+                  step={1}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder={`${tx("credit.amount")} ≥ ${minStake}`}
+                  aria-label={tx("credit.amount")}
+                />
+                <button type="submit" disabled={!soulId || !amount}>
+                  {tx("credit.stake")}
+                </button>
+              </form>
+              <ul className="credit-stakes">
+                {stakes.map((stake) => (
+                  <li key={stake.id}>
+                    <span>{stake.id}</span>
+                    <b>{stake.amount}</b>
+                    <em>
+                      T{stake.lockedAt}→T{stake.unlockAt}
+                      {stake.occupiedBy
+                        ? ` · ${tx("credit.occupiedBy")} ${stake.occupiedBy.purpose}`
+                        : ""}
+                    </em>
+                    <span className="credit-stake-actions">
+                      {stake.occupiedBy ? (
+                        <button
+                          onClick={() =>
+                            onCreditAction?.("release", { stakeId: stake.id })
+                          }
+                        >
+                          {tx("credit.release")}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() =>
+                            onCreditAction?.("occupy", {
+                              stakeId: stake.id,
+                              purpose: "service",
+                            })
+                          }
+                        >
+                          {tx("credit.occupy")}
+                        </button>
+                      )}
+                      <button
+                        disabled={stake.occupiedBy}
+                        onClick={() =>
+                          onCreditAction?.("unstake", { stakeId: stake.id })
+                        }
+                      >
+                        {tx("credit.unstake")}
+                      </button>
+                    </span>
+                  </li>
+                ))}
+                {!stakes.length && (
+                  <li className="empty-inline">{tx("credit.noStakes")}</li>
+                )}
+              </ul>
+            </>
+          )}
         </section>
         <section className="panel">
           <h2>{tx("ifs.paper")}</h2>
@@ -1027,12 +1155,20 @@ export function IfsView({ world, tx, token }) {
                   ticks: i.bondedUnlockTicks,
                 })}
               </p>
-              <code>locked {i.paperLocked}</code>
+              <code>
+                {remote
+                  ? `${tx("credit.stakes")} ${stakes.length} · ${tx("credit.api")}`
+                  : `locked ${i.paperLocked}`}
+              </code>
             </div>
             <div className="ifs-panel">
               <b>{tx("ifs.collateral")}</b>
               <p>{tx("ifs.collateralNote")}</p>
-              <code>occupied {i.paperLocked}</code>
+              <code>
+                {remote
+                  ? `${tx("credit.occupiedBy")} ${stakes.filter((s) => s.occupiedBy).length}`
+                  : `occupied ${i.paperLocked}`}
+              </code>
             </div>
             <div className="ifs-panel">
               <b>{tx("ifs.fees")}</b>

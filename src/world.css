@@ -1005,6 +1005,100 @@
   color: var(--gold);
   text-decoration: underline;
 }
+.credit-souls,
+.credit-stakes {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.credit-souls li,
+.credit-stakes li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: #14120e;
+  font: 10px var(--mono);
+}
+.credit-souls li span {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.credit-souls li b {
+  font-weight: 400;
+  color: var(--text);
+}
+.credit-souls li em {
+  margin-left: auto;
+  font-style: normal;
+  color: #857d6e;
+  font-size: 9px;
+}
+.credit-stakes li {
+  flex-wrap: wrap;
+}
+.credit-stakes li b {
+  font-weight: 400;
+  color: var(--gold);
+}
+.credit-stakes li em {
+  font-style: normal;
+  color: #857d6e;
+  font-size: 9px;
+}
+.credit-stake-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+.credit-stake-actions button {
+  padding: 5px 10px;
+  border: 1px solid #443c2c;
+  font: 9px var(--mono);
+  color: var(--muted);
+  background: #12100d;
+}
+.credit-stake-actions button:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--text);
+}
+.credit-stake {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.credit-stake select,
+.credit-stake input {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  background: #0f0d0a;
+  color: var(--text);
+  font: 11px var(--mono);
+}
+.credit-stake button {
+  padding: 0 14px;
+  border: 1px solid #6e5f3a;
+  background: #1e1a10;
+  color: var(--gold);
+  font: 10px var(--mono);
+  letter-spacing: 1px;
+}
+.credit-stake button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.credit-api {
+  margin-left: 6px;
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: var(--nerve);
+}
 .ifs-panels {
   display: grid;
   grid-template-columns: 1fr 1fr;
