@@ -1,7 +1,12 @@
 import { bookOf } from "../swarm.mjs";
 import { createAdapters } from "./adapters.mjs";
 import { CANON } from "./canon.mjs";
-import { colonySnapshot, createColony, settleColony, tickColony } from "./colony.mjs";
+import {
+  colonySnapshot,
+  createColony,
+  settleColony,
+  tickColony,
+} from "./colony.mjs";
 import { applyOutcome, createOverlay, outcomeOf } from "./learn.mjs";
 import { createPorts, decodePort } from "./ports.mjs";
 import { createRegistry } from "./registry.mjs";
@@ -37,20 +42,43 @@ import {
  *   quorums   话语 → 群体动作的规则注册表（默认 confidence-hold）
  *   genesis   创世母体（内容寻址，经 bindGenesis 显式绑定）
  */
-export function createKernel(graph, { size = 5, seed = 43, stepsPerTick = 6, adapters, ports, learners, flyswarm = {} } = {}) {
+export function createKernel(
+  graph,
+  {
+    size = 5,
+    seed = 43,
+    stepsPerTick = 6,
+    adapters,
+    ports,
+    learners,
+    flyswarm = {},
+  } = {},
+) {
   const colony = createColony(graph, { size, seed, stepsPerTick });
   const roster = createRoster(FLYSWARM_POLICY);
   colony.members.forEach((member, i) => {
-    roster.register({ soulId: member.session.state.soulId, runnerPub: `paper:${i}`, tier: "bonded", tick: 0 });
+    roster.register({
+      soulId: member.session.state.soulId,
+      runnerPub: `paper:${i}`,
+      tier: "bonded",
+      tick: 0,
+    });
   });
   return {
     schema: "iff.kernel/1",
     canon: CANON.dataset,
     adapters: adapters || createAdapters(),
     ports: ports || createPorts(),
-    learners: learners || createRegistry("learner", [
-      { id: "outcome-gain", version: "1", title: "结果增益", apply: applyOutcome },
-    ]),
+    learners:
+      learners ||
+      createRegistry("learner", [
+        {
+          id: "outcome-gain",
+          version: "1",
+          title: "结果增益",
+          apply: applyOutcome,
+        },
+      ]),
     colony,
     treasury: createTreasury(),
     enabledPorts: ["trade", "vault"],
@@ -73,9 +101,23 @@ export function createKernel(graph, { size = 5, seed = 43, stepsPerTick = 6, ada
 }
 
 /** 显式绑定创世母体：genesisId 一旦算出即对外发布，加入方凭它校验自己复制的是同一只母体。 */
-export async function bindGenesis(kernel, { overlayHash, soulId = "genesis-0", seed = kernel.colony.seed, audit = "SIM" } = {}) {
+export async function bindGenesis(
+  kernel,
+  {
+    overlayHash,
+    soulId = "genesis-0",
+    seed = kernel.colony.seed,
+    audit = "SIM",
+  } = {},
+) {
   const overlay = overlayHash || (await hash(createOverlay()));
-  const genesis = await buildGenesis({ graph: kernel.colony.graph, overlayHash: overlay, soulId, seed, audit });
+  const genesis = await buildGenesis({
+    graph: kernel.colony.graph,
+    overlayHash: overlay,
+    soulId,
+    seed,
+    audit,
+  });
   const genesisId = await genesisIdOf(genesis);
   kernel.flyswarm.genesis = genesis;
   kernel.flyswarm.genesisId = genesisId;
@@ -91,15 +133,25 @@ function appendRecord(fs, entry) {
   return entry;
 }
 
-export async function tickKernel(kernel, stimulus = {}, clock = 1_700_000_000_000) {
+export async function tickKernel(
+  kernel,
+  stimulus = {},
+  clock = 1_700_000_000_000,
+) {
   const before = kernel.colony.members.map((member) => member.book.realized);
   await tickColony(kernel.colony, stimulus, clock);
   const price = kernel.colony.market.price;
   const learner = kernel.learners.get("outcome-gain", "1");
   kernel.colony.members.forEach((member, i) => {
-    const trade = kernel.colony.trades.find((row) => row.tick === kernel.colony.tick && row.flyId === member.id);
+    const trade = kernel.colony.trades.find(
+      (row) => row.tick === kernel.colony.tick && row.flyId === member.id,
+    );
     const pnl = outcomeOf(trade, before[i], member.book.realized);
-    if (learner && pnl) member.overlay = learner.apply(member.overlay, { action: member.ethology?.action, pnl });
+    if (learner && pnl)
+      member.overlay = learner.apply(member.overlay, {
+        action: member.ethology?.action,
+        pnl,
+      });
   });
 
   const fs = kernel.flyswarm;
@@ -131,13 +183,13 @@ export async function tickKernel(kernel, stimulus = {}, clock = 1_700_000_000_00
       fs.lastSenseHash = await hash(sense);
     }
 
-    // 2) 每只在册成员发一条行为话语（ethology + 产品层 side/confidence）。
+    // 2) 每只在册成员发一条行为话语（iff.utterance/2：纯 ethology，无金融语义）。
     for (const member of kernel.colony.members) {
       if (member.status !== "alive") continue;
       const soulId = member.session.state.soulId;
       const rosterEntry = fs.roster.get(soulId);
       const utterance = appendRecord(fs, {
-        schema: "iff.utterance/1",
+        schema: "iff.utterance/2",
         audit: fs.audit,
         soulId,
         runnerPub: rosterEntry?.runnerPub || `paper:${member.id}`,
@@ -153,8 +205,6 @@ export async function tickKernel(kernel, stimulus = {}, clock = 1_700_000_000_00
           left: member.ethology?.left || 0,
           right: member.ethology?.right || 0,
         },
-        side: member.intent?.side || "HOLD",
-        confidence: member.intent?.confidence || 0,
         prevHash: fs.soulPrev.get(soulId) || ZERO_HASH,
       });
       fs.soulPrev.set(soulId, await hash(utterance));
@@ -183,8 +233,8 @@ export async function tickKernel(kernel, stimulus = {}, clock = 1_700_000_000_00
       }
     }
 
-    // 4) 聚合：confidence-hold 把本 tick 话语聚成群体动作，结果同样落账。
-    const quorum = fs.quorums.require("confidence-hold", "1");
+    // 4) 聚合：confidence-hold/2 把本 tick 话语聚成群体行为分布，结果同样落账。
+    const quorum = fs.quorums.require("confidence-hold", "2");
     const record = quorum.run({
       roster: fs.roster,
       utterances: fs.log.windowEntries(tick),
@@ -196,24 +246,35 @@ export async function tickKernel(kernel, stimulus = {}, clock = 1_700_000_000_00
     appendRecord(fs, record);
     fs.lastQuorum = record;
 
-    // 5) 蜂巢账本按公开规则下单：quorum side 回读成聚合 ethology，仍走 vault 端口。
+    // 5) 蜂巢账本：聚合行为由 TradePort 解释成金融方向，仍走 vault 端口。
     if (kernel.enabledPorts.includes("vault")) {
       const q = record;
       const aggregate = {
         schema: "iff.ethology/1",
-        action: q.side === "BUY" ? "FORAGE" : q.side === "SELL" ? "AVOID" : "REST",
-        food: q.buyWeight,
-        threat: q.sellWeight,
+        action:
+          q.approachWeight > q.retreatWeight
+            ? "FORAGE"
+            : q.retreatWeight > q.approachWeight
+              ? "AVOID"
+              : "REST",
+        food: q.approachWeight,
+        threat: q.retreatWeight,
         light: 0,
-        left: q.buyWeight,
-        right: q.sellWeight,
+        left: q.approachWeight,
+        right: q.retreatWeight,
         dataset: CANON.dataset,
       };
       const intent = decodePort(kernel.ports, "vault", "1", aggregate, {
         book: bookOf({ ...kernel.treasury.book }, price),
       });
       const hiveTrade = tradeHive(kernel.treasury, intent, price, tick);
-      if (hiveTrade) kernel.colony.trades.unshift({ ...hiveTrade, flyId: "hive", quorumSide: q.side, split: q.split });
+      if (hiveTrade)
+        kernel.colony.trades.unshift({
+          ...hiveTrade,
+          flyId: "hive",
+          quorumSide: intent.side,
+          split: q.split,
+        });
     }
 
     // 6) era 边界封口：把当前分片铸成哈希根，历史可独立归档镜像。
@@ -228,11 +289,21 @@ export function recordVenue(kernel, notional) {
 }
 
 export function admitCapital(kernel, amount, owner) {
-  return injectCapital(kernel.treasury, amount, owner, kernel.colony.market.price);
+  return injectCapital(
+    kernel.treasury,
+    amount,
+    owner,
+    kernel.colony.market.price,
+  );
 }
 
 export function withdrawCapital(kernel, shares, owner) {
-  return redeemCapital(kernel.treasury, shares, owner, kernel.colony.market.price);
+  return redeemCapital(
+    kernel.treasury,
+    shares,
+    owner,
+    kernel.colony.market.price,
+  );
 }
 
 export function harvestSurplus(kernel) {
@@ -263,7 +334,10 @@ export async function settleKernelColony(kernel) {
     childSoul: result.child.session.state.soulId,
     childSeed: result.childSeed,
     inheritBias: true,
-    mutateRoot: await hash({ childSeed: result.childSeed, parentSeed: result.champ.session.state.rng }),
+    mutateRoot: await hash({
+      childSeed: result.childSeed,
+      parentSeed: result.champ.session.state.rng,
+    }),
     spawnedAt: kernel.colony.tick,
   });
   return { ...result, spawn };

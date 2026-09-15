@@ -129,10 +129,10 @@ npm run contracts:check:testnet
 2. P1「LLM 边界」与 P2「交易纸面世界」前端已落地：交易坑内七视图（交易坑 / Colony / Intent / Risk / Execution / Vault / IFS）、活场（六类事件落场、因果条、蜂巢压力计、ask 通道）与 LLM 边界抽屉（解释/检索/候选计划/工具白名单/策略验证），全部纸面数据并标注 SIM；**HTTP 服务已落地**（`npm run server`，见 [docs/API-V1.md](docs/API-V1.md)），前端已接线（同种子镜像会话 + LLM 解释/ask/计划，断线回落本地确定性实现）。
 3. P3「IFS 会员与模拟 Credit」后端已落地：`iff.credit/1` 信用账本（Free/Locked/Earned/Liquid 四账户、§6.2 公式、衰减/到期/亏损收缩、同一抵押只支撑一次额度）+ IFS 锁仓/解锁/占用模拟，端点 `/v1/sessions/:id/credit*` 与 `/v1/credit/policy`，IFS 视图与 Risk 信用列已接服务端账本（断线回落本地纸面）。全部 SIM；真实 IFS 购买与抵押仍待合约层。
 4. P4「协议自有资金」后端已落地：`iff.protocol/1` 收入层（R/C/N/T/D、35/25/20/10/10 拨定、回购资格与停机规则、哈希链回执，全部 SIM 不动用户资产），Vault 视图新增协议资金面板，端点 `GET /v1/sessions/:id/protocol`。真实执行、外部审计与压力测试仍是上线前置。
-5. 用带 tBNB 的测试网私钥跑 `npm run contracts:deploy:testnet`，再在本地祭台走完铸造 → 训练 → 休眠/转生。
-6. P5「用户金库」后端已落地：`iff.vault/1`（按 NAV 铸份额、逐批成本/高水位/已实现损益/费用/Position ID、份额所有权校验、FIFO 退出队列受流动性上限、只有已实现收益可分配），端点 `/v1/vault*`，Vault 视图已接服务端金库（注资/退出/结算表单，断线回落未接入）。§11 的份额所有权与用户本金分账两项随本层修复；真实资金仍需外部审计。
-7. 修复 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) 第 11 节列出的资金缺口（份额所有权、已实现收益、高水位、行为/金融解耦、完整历史恢复）；修完前不开放用户真实抵押、借贷、金库收益或自动回购。
-8. 根据实测 gas 决定哪些互动逐笔上链、哪些先在本地预演；Flap 嵌入包、主网 NFT、发行规则和独立安全检查仍在后面。
+5. P5「用户金库」后端已落地：`iff.vault/1`（按 NAV 铸份额、逐批成本/高水位/已实现损益/费用/Position ID、份额所有权校验、FIFO 退出队列受流动性上限、只有已实现收益可分配），端点 `/v1/vault*`，Vault 视图已接服务端金库（注资/退出/结算表单，断线回落未接入）。真实资金仍需外部审计。
+6. §11「行为/金融解耦」已落地：内核话语升级为 `iff.utterance/2`（只含原生 ethology，无 BUY/SELL/置信度），聚合升级为 `iff.quorum/2`（approach/retreat/still 行为分布，无金融方向）；金融方向只在 TradePort 解释层出现，旧 /1 schema 保留解析与重放。至此 §11 资金缺口全部关闭（份额所有权、分账、浮盈回购、行为解耦、历史恢复）。
+7. 用带 tBNB 的测试网私钥跑 `npm run contracts:deploy:testnet`，再在本地祭台走完铸造 → 训练 → 休眠/转生。
+8. 根据实测 gas 决定哪些互动逐笔上链、哪些先在本地预演；P6 借贷/RWA/NFT、Flap 嵌入包、主网 NFT、发行规则和独立安全检查仍在后面。
 
 ## 连接组运行内核（第一版）
 

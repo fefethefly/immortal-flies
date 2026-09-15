@@ -19,9 +19,22 @@ import {
   utteranceWeight,
   FLYSWARM_POLICY,
 } from "../src/brain/flyswarm/membership.mjs";
-import { createLog, replayEntries, sameEntries } from "../src/brain/flyswarm/log.mjs";
-import { createQuorums, QUORUM_CONFIDENCE_HOLD } from "../src/brain/flyswarm/quorum.mjs";
-import { bindGenesis, createKernel, kernelSnapshot, settleKernelColony, tickKernel } from "../src/brain/kernel.mjs";
+import {
+  createLog,
+  replayEntries,
+  sameEntries,
+} from "../src/brain/flyswarm/log.mjs";
+import {
+  createQuorums,
+  QUORUM_CONFIDENCE_HOLD,
+} from "../src/brain/flyswarm/quorum.mjs";
+import {
+  bindGenesis,
+  createKernel,
+  kernelSnapshot,
+  settleKernelColony,
+  tickKernel,
+} from "../src/brain/kernel.mjs";
 
 function fixtureGraph() {
   return bindManifest(
@@ -39,7 +52,13 @@ function fixtureGraph() {
           { id: "5001", sign: 1, type: "R1", side: "L" },
           { id: "5002", sign: 0, type: "unc", side: "M" },
         ],
-        groups: { food: [0, 1], threat: [4], light: [6], left: [4], right: [5] },
+        groups: {
+          food: [0, 1],
+          threat: [4],
+          light: [6],
+          left: [4],
+          right: [5],
+        },
       },
       [
         { pre: 0, post: 2, weight: 12 },
@@ -65,7 +84,15 @@ function utterance(partial) {
     tick: 1,
     sequence: 1,
     dataset: CANON.dataset,
-    ethology: { schema: "iff.ethology/1", action: "FORAGE", food: 1, threat: 0, light: 0, left: 1, right: 0 },
+    ethology: {
+      schema: "iff.ethology/1",
+      action: "FORAGE",
+      food: 1,
+      threat: 0,
+      light: 0,
+      left: 1,
+      right: 0,
+    },
     side: "BUY",
     confidence: 25,
     prevHash: ZERO_HASH,
@@ -77,28 +104,50 @@ function utterance(partial) {
 
 test("schema registry validates known records and rejects unknown schemas loudly", () => {
   const schemas = createSchemas();
-  assert.equal(FLYSWARM_SCHEMAS.length, 7);
+  assert.equal(FLYSWARM_SCHEMAS.length, 9);
   const ok = utterance();
   assert.equal(validateRecord(schemas, ok), ok);
-  assert.throws(() => validateRecord(schemas, { ...ok, schema: "iff.mindread/1" }), /未登记/);
-  assert.throws(() => validateRecord(schemas, { ...ok, confidence: 999 }), /超出范围/);
-  assert.throws(() => validateRecord(schemas, { ...ok, audit: "MAINNET-ISH" }), /audit/);
-  assert.throws(() => validateRecord(schemas, { ...ok, prevHash: "0xzz" }), /十六进制/);
+  assert.throws(
+    () => validateRecord(schemas, { ...ok, schema: "iff.mindread/1" }),
+    /未登记/,
+  );
+  assert.throws(
+    () => validateRecord(schemas, { ...ok, confidence: 999 }),
+    /超出范围/,
+  );
+  assert.throws(
+    () => validateRecord(schemas, { ...ok, audit: "MAINNET-ISH" }),
+    /audit/,
+  );
+  assert.throws(
+    () => validateRecord(schemas, { ...ok, prevHash: "0xzz" }),
+    /十六进制/,
+  );
 });
 
 test("schema layer freezes existing records: adding a type never rewrites old ones", () => {
   const schemas = createSchemas();
   const before = schemas.get("iff.utterance", "1");
-  schemas.register({ id: "iff.utterance", version: "2", title: "v2", validate: () => {} });
+  schemas.register({
+    id: "iff.utterance",
+    version: "3",
+    title: "v3",
+    validate: () => {},
+  });
   assert.equal(schemas.get("iff.utterance", "1"), before);
-  assert.ok(schemas.has("iff.utterance", "2"));
+  assert.ok(schemas.has("iff.utterance", "3"));
 });
 
 // ─── Genesis：创世可复制的可验证一半 ───
 
 test("genesisId is a canonical digest: same mother, same id; tamper is rejected", async () => {
   const graph = fixtureGraph();
-  const overlayHash = await hash({ schema: "iff.overlay/1", food: 100, threat: 100, light: 100 });
+  const overlayHash = await hash({
+    schema: "iff.overlay/1",
+    food: 100,
+    threat: 100,
+    light: 100,
+  });
   const genesis = await buildGenesis({ graph, overlayHash, seed: 42 });
   const id = await genesisIdOf(genesis);
   assert.match(id, /^0x[0-9a-f]{64}$/);
@@ -113,9 +162,28 @@ test("genesisId is a canonical digest: same mother, same id; tamper is rejected"
 
 test("roster enforces one-pub-one-soul for bonded, keeps retired souls forever", () => {
   const roster = createRoster();
-  roster.register({ soulId: "s1", runnerPub: "paper:alice", tier: "bonded", tick: 0 });
-  assert.throws(() => roster.register({ soulId: "s2", runnerPub: "paper:alice", tier: "bonded", tick: 0 }), /已持有 bonded/);
-  roster.register({ soulId: "g1", runnerPub: "paper:bob", tier: "guest", tick: 0 });
+  roster.register({
+    soulId: "s1",
+    runnerPub: "paper:alice",
+    tier: "bonded",
+    tick: 0,
+  });
+  assert.throws(
+    () =>
+      roster.register({
+        soulId: "s2",
+        runnerPub: "paper:alice",
+        tier: "bonded",
+        tick: 0,
+      }),
+    /已持有 bonded/,
+  );
+  roster.register({
+    soulId: "g1",
+    runnerPub: "paper:bob",
+    tier: "guest",
+    tick: 0,
+  });
   roster.retire("s1", 10);
   assert.equal(roster.get("s1").status, "retired");
   assert.equal(roster.snapshot().length, 2); // 灵魂不删
@@ -126,11 +194,30 @@ test("roster enforces one-pub-one-soul for bonded, keeps retired souls forever",
 
 test("vote weight: guest listens for free, bonded pays with capped confidence", () => {
   const roster = createRoster();
-  roster.register({ soulId: "g", runnerPub: "paper:g", tier: "guest", tick: 0 });
-  roster.register({ soulId: "b", runnerPub: "paper:b", tier: "bonded", tick: 0 });
-  assert.equal(utteranceWeight(roster, utterance({ soulId: "g", confidence: 100 })), 0);
-  assert.equal(utteranceWeight(roster, utterance({ soulId: "b", confidence: 100 })), FLYSWARM_POLICY.voteCapPerUtterance);
-  assert.equal(utteranceWeight(roster, utterance({ soulId: "b", confidence: 60 })), 25); // 封顶
+  roster.register({
+    soulId: "g",
+    runnerPub: "paper:g",
+    tier: "guest",
+    tick: 0,
+  });
+  roster.register({
+    soulId: "b",
+    runnerPub: "paper:b",
+    tier: "bonded",
+    tick: 0,
+  });
+  assert.equal(
+    utteranceWeight(roster, utterance({ soulId: "g", confidence: 100 })),
+    0,
+  );
+  assert.equal(
+    utteranceWeight(roster, utterance({ soulId: "b", confidence: 100 })),
+    FLYSWARM_POLICY.voteCapPerUtterance,
+  );
+  assert.equal(
+    utteranceWeight(roster, utterance({ soulId: "b", confidence: 60 })),
+    25,
+  ); // 封顶
 });
 
 // ─── 日志：era 分片全序账本 ───
@@ -146,7 +233,8 @@ test("log rejects out-of-order ticks and duplicate sequences within a tick", () 
 
 test("era sealing chains roots: history is a hash chain, shards archive independently", async () => {
   const log = createLog({ eraTicks: 10 });
-  for (let tick = 0; tick <= 10; tick++) log.append(utterance({ tick, sequence: tick + 1 }));
+  for (let tick = 0; tick <= 10; tick++)
+    log.append(utterance({ tick, sequence: tick + 1 }));
   const first = await log.sealEra();
   assert.equal(first.count, 11);
   assert.equal(first.prevRoot, ZERO_HASH);
@@ -160,7 +248,8 @@ test("era sealing chains roots: history is a hash chain, shards archive independ
 
 test("log importArchive restores sealed + current entries and can continue", async () => {
   const log = createLog({ eraTicks: 10 });
-  for (let tick = 0; tick <= 10; tick++) log.append(utterance({ tick, sequence: tick + 1 }));
+  for (let tick = 0; tick <= 10; tick++)
+    log.append(utterance({ tick, sequence: tick + 1 }));
   await log.sealEra();
   log.append(utterance({ tick: 11, sequence: 1 }));
   const snap = log.snapshot();
@@ -187,12 +276,43 @@ test("vector 1 — split gate: buy and sell both over 35% force HOLD and record 
   const roster = createRoster();
   const q = createQuorums().require("confidence-hold", "1");
   const souls = ["a", "b", "c", "d"];
-  souls.forEach((s, i) => roster.register({ soulId: s, runnerPub: `paper:${s}`, tier: "bonded", tick: 0 }));
+  souls.forEach((s, i) =>
+    roster.register({
+      soulId: s,
+      runnerPub: `paper:${s}`,
+      tier: "bonded",
+      tick: 0,
+    }),
+  );
   const votes = [
-    utterance({ soulId: "a", runnerPub: "paper:a", side: "BUY", confidence: 25, sequence: 1 }),
-    utterance({ soulId: "b", runnerPub: "paper:b", side: "BUY", confidence: 25, sequence: 2 }),
-    utterance({ soulId: "c", runnerPub: "paper:c", side: "SELL", confidence: 25, sequence: 3 }),
-    utterance({ soulId: "d", runnerPub: "paper:d", side: "SELL", confidence: 25, sequence: 4 }),
+    utterance({
+      soulId: "a",
+      runnerPub: "paper:a",
+      side: "BUY",
+      confidence: 25,
+      sequence: 1,
+    }),
+    utterance({
+      soulId: "b",
+      runnerPub: "paper:b",
+      side: "BUY",
+      confidence: 25,
+      sequence: 2,
+    }),
+    utterance({
+      soulId: "c",
+      runnerPub: "paper:c",
+      side: "SELL",
+      confidence: 25,
+      sequence: 3,
+    }),
+    utterance({
+      soulId: "d",
+      runnerPub: "paper:d",
+      side: "SELL",
+      confidence: 25,
+      sequence: 4,
+    }),
   ];
   const result = q.run({ roster, utterances: votes, tick: 1 });
   assert.equal(result.side, "HOLD");
@@ -205,17 +325,46 @@ test("vector 1 — split gate: buy and sell both over 35% force HOLD and record 
 test("vector 2 — same inputs replay bit-identically on any machine", () => {
   const buildRoster = () => {
     const roster = createRoster();
-    ["a", "b", "c"].forEach((s) => roster.register({ soulId: s, runnerPub: `paper:${s}`, tier: "bonded", tick: 0 }));
+    ["a", "b", "c"].forEach((s) =>
+      roster.register({
+        soulId: s,
+        runnerPub: `paper:${s}`,
+        tier: "bonded",
+        tick: 0,
+      }),
+    );
     return roster;
   };
   const votes = [
-    utterance({ soulId: "a", runnerPub: "paper:a", side: "BUY", confidence: 40, sequence: 1 }),
-    utterance({ soulId: "b", runnerPub: "paper:b", side: "SELL", confidence: 12, sequence: 2 }),
-    utterance({ soulId: "c", runnerPub: "paper:c", side: "BUY", confidence: 8, sequence: 3 }),
+    utterance({
+      soulId: "a",
+      runnerPub: "paper:a",
+      side: "BUY",
+      confidence: 40,
+      sequence: 1,
+    }),
+    utterance({
+      soulId: "b",
+      runnerPub: "paper:b",
+      side: "SELL",
+      confidence: 12,
+      sequence: 2,
+    }),
+    utterance({
+      soulId: "c",
+      runnerPub: "paper:c",
+      side: "BUY",
+      confidence: 8,
+      sequence: 3,
+    }),
   ];
   const q = createQuorums().require("confidence-hold", "1");
   const one = q.run({ roster: buildRoster(), utterances: votes, tick: 1 });
-  const two = q.run({ roster: buildRoster(), utterances: structuredClone(votes), tick: 1 });
+  const two = q.run({
+    roster: buildRoster(),
+    utterances: structuredClone(votes),
+    tick: 1,
+  });
   assert.equal(canonical(one), canonical(two));
   assert.equal(one.side, "BUY");
   assert.equal(one.buyWeight, 33); // 25（封顶）+ 8
@@ -224,28 +373,70 @@ test("vector 2 — same inputs replay bit-identically on any machine", () => {
 
 test("vector 3 — guest brains cannot move the hive or write official body ids", () => {
   const roster = createRoster();
-  roster.register({ soulId: "b", runnerPub: "paper:b", tier: "bonded", tick: 0 });
-  roster.register({ soulId: "g", runnerPub: "paper:g", tier: "guest", tick: 0 });
+  roster.register({
+    soulId: "b",
+    runnerPub: "paper:b",
+    tier: "bonded",
+    tick: 0,
+  });
+  roster.register({
+    soulId: "g",
+    runnerPub: "paper:g",
+    tier: "guest",
+    tick: 0,
+  });
   const q = createQuorums().require("confidence-hold", "1");
   // 客脑带非官方 dataset：根本不算票
-  const foreign = utterance({ soulId: "g", dataset: "other-brain:v9", side: "SELL", confidence: 100, sequence: 1 });
+  const foreign = utterance({
+    soulId: "g",
+    dataset: "other-brain:v9",
+    side: "SELL",
+    confidence: 100,
+    sequence: 1,
+  });
   // 客脑带官方 dataset：算在册旁听，权重 0
-  const listening = utterance({ soulId: "g", side: "SELL", confidence: 100, sequence: 2 });
-  const member = utterance({ soulId: "b", side: "BUY", confidence: 20, sequence: 3 });
-  const result = q.run({ roster, utterances: [foreign, listening, member], tick: 1 });
+  const listening = utterance({
+    soulId: "g",
+    side: "SELL",
+    confidence: 100,
+    sequence: 2,
+  });
+  const member = utterance({
+    soulId: "b",
+    side: "BUY",
+    confidence: 20,
+    sequence: 3,
+  });
+  const result = q.run({
+    roster,
+    utterances: [foreign, listening, member],
+    tick: 1,
+  });
   assert.equal(result.side, "BUY");
   assert.equal(result.sellWeight, 0);
   assert.equal(result.totalWeight, 20);
   // 客脑话语依然进日志（可重放），但不能冒充官方 body
   const schemas = createSchemas();
-  assert.throws(() => validateRecord(schemas, { ...member, dataset: "other-brain:v9" }), /UTTERANCE_DATASET/);
+  assert.throws(
+    () => validateRecord(schemas, { ...member, dataset: "other-brain:v9" }),
+    /UTTERANCE_DATASET/,
+  );
 });
 
 test("quorum: no votes or zero-confidence abstentions hold without weight", () => {
   const roster = createRoster();
-  roster.register({ soulId: "a", runnerPub: "paper:a", tier: "bonded", tick: 0 });
+  roster.register({
+    soulId: "a",
+    runnerPub: "paper:a",
+    tier: "bonded",
+    tick: 0,
+  });
   const q = createQuorums().require("confidence-hold", "1");
-  const quiet = q.run({ roster, utterances: [utterance({ soulId: "a", side: "HOLD", confidence: 0 })], tick: 1 });
+  const quiet = q.run({
+    roster,
+    utterances: [utterance({ soulId: "a", side: "HOLD", confidence: 0 })],
+    tick: 1,
+  });
   assert.equal(quiet.side, "HOLD");
   assert.equal(quiet.totalWeight, 0);
 });
@@ -253,12 +444,16 @@ test("quorum: no votes or zero-confidence abstentions hold without weight", () =
 // ─── 内核集成：话语 → 记忆 → 聚合 → 蜂巢，逐位可重放 ───
 
 test("two kernels with the same genesis and stimuli replay the flyswarm log bit-identically", async () => {
-  const mk = () => createKernel(fixtureGraph(), { size: 3, seed: 21, stepsPerTick: 4 });
+  const mk = () =>
+    createKernel(fixtureGraph(), { size: 3, seed: 21, stepsPerTick: 4 });
   const a = mk();
   const b = mk();
   const { genesisId } = await bindGenesis(a, { seed: 21 });
   await bindGenesis(b, { seed: 21 });
-  assert.ok(a.flyswarm.genesisId === b.flyswarm.genesisId && a.flyswarm.genesisId === genesisId);
+  assert.ok(
+    a.flyswarm.genesisId === b.flyswarm.genesisId &&
+      a.flyswarm.genesisId === genesisId,
+  );
   const stimuli = [
     { food: 700, threat: 60, light: 200, changeBps: 40 },
     { food: 40, threat: 640, light: 40, changeBps: -90 },
@@ -271,64 +466,256 @@ test("two kernels with the same genesis and stimuli replay the flyswarm log bit-
   const sa = kernelSnapshot(a).flyswarm;
   const sb = kernelSnapshot(b).flyswarm;
   assert.equal(canonical(sa.lastQuorum), canonical(sb.lastQuorum));
-  assert.equal(canonical(a.flyswarm.log.windowEntries(1)), canonical(b.flyswarm.log.windowEntries(1)));
-  assert.equal(sa.lastQuorum.schema, "iff.quorum/1");
+  assert.equal(
+    canonical(a.flyswarm.log.windowEntries(1)),
+    canonical(b.flyswarm.log.windowEntries(1)),
+  );
+  assert.equal(sa.lastQuorum.schema, "iff.quorum/2");
   assert.equal(sa.roster.length, 3);
   // 感觉注入进日志且带来源
-  const senses = a.flyswarm.log.windowEntries(1).filter((e) => e.schema === "iff.sense/1");
+  const senses = a.flyswarm.log
+    .windowEntries(1)
+    .filter((e) => e.schema === "iff.sense/1");
   assert.equal(senses.length, 3);
   assert.equal(senses[0].sourceId, "environment");
 });
 
 test("memories are written every policy interval and carry replayable roots", async () => {
-  const kernel = createKernel(fixtureGraph(), { size: 2, seed: 7, stepsPerTick: 2 });
+  const kernel = createKernel(fixtureGraph(), {
+    size: 2,
+    seed: 7,
+    stepsPerTick: 2,
+  });
   await bindGenesis(kernel, { seed: 7 });
   const every = kernel.flyswarm.policy.memoryEveryTicks;
-  for (let i = 0; i < every; i++) await tickKernel(kernel, { food: 100 + (i % 7) * 50, threat: 30, light: 80, changeBps: (i % 5) * 6 - 12 });
-  const memories = kernel.flyswarm.log.windowEntries(every).filter((e) => e.schema === "iff.experience/1");
+  for (let i = 0; i < every; i++)
+    await tickKernel(kernel, {
+      food: 100 + (i % 7) * 50,
+      threat: 30,
+      light: 80,
+      changeBps: (i % 5) * 6 - 12,
+    });
+  const memories = kernel.flyswarm.log
+    .windowEntries(every)
+    .filter((e) => e.schema === "iff.experience/1");
   assert.equal(memories.length, 2);
   for (const m of memories) {
     assert.match(m.checkpointHash, /^0x[0-9a-f]{64}$/);
-    assert.equal(m.eventRoot, kernel.colony.members.find((x) => x.session.state.soulId === m.soulId).session.state.historyRoot);
+    assert.equal(
+      m.eventRoot,
+      kernel.colony.members.find((x) => x.session.state.soulId === m.soulId)
+        .session.state.historyRoot,
+    );
   }
 });
 
 test("hive book trades on the quorum side, never on an individual's whim", async () => {
-  const kernel = createKernel(fixtureGraph(), { size: 3, seed: 21, stepsPerTick: 4 });
+  const kernel = createKernel(fixtureGraph(), {
+    size: 3,
+    seed: 21,
+    stepsPerTick: 4,
+  });
   await bindGenesis(kernel, { seed: 21 });
-  for (let i = 0; i < 5; i++) await tickKernel(kernel, { food: 800, threat: 20, light: 150, changeBps: 60 });
+  for (let i = 0; i < 5; i++)
+    await tickKernel(kernel, {
+      food: 800,
+      threat: 20,
+      light: 150,
+      changeBps: 60,
+    });
   const hive = kernel.colony.trades.find((t) => t.flyId === "hive");
   const q = kernel.flyswarm.lastQuorum;
   if (hive) {
-    assert.equal(hive.quorumSide, q.side);
+    const side =
+      q.approachWeight > q.retreatWeight
+        ? "BUY"
+        : q.retreatWeight > q.approachWeight
+          ? "SELL"
+          : "HOLD";
+    assert.equal(
+      hive.quorumSide,
+      side,
+      "蜂巢交易方向必须等于端口对聚合行为的解释",
+    );
     assert.ok(["BUY", "SELL", "HOLD"].includes(hive.side));
   }
-  assert.equal(q.schema, "iff.quorum/1");
+  assert.equal(q.schema, "iff.quorum/2");
+  assert.equal("side" in q, false, "协议层聚合不得携带金融方向");
   assert.ok(q.totalWeight >= 0);
 });
 
 test("settlement retires the weakest soul without deleting it, and spawns from the champion checkpoint", async () => {
-  const kernel = createKernel(fixtureGraph(), { size: 3, seed: 9, stepsPerTick: 3 });
+  const kernel = createKernel(fixtureGraph(), {
+    size: 3,
+    seed: 9,
+    stepsPerTick: 3,
+  });
   await bindGenesis(kernel, { seed: 9 });
-  for (let i = 0; i < 4; i++) await tickKernel(kernel, { food: 500, threat: 100, light: 60, changeBps: 20 });
-  const aliveBefore = kernel.colony.members.filter((m) => m.status === "alive").length;
+  for (let i = 0; i < 4; i++)
+    await tickKernel(kernel, {
+      food: 500,
+      threat: 100,
+      light: 60,
+      changeBps: 20,
+    });
+  const aliveBefore = kernel.colony.members.filter(
+    (m) => m.status === "alive",
+  ).length;
   const result = await settleKernelColony(kernel);
   assert.ok(result);
   // 一退一增，活口数不变；退役是状态不是删除
-  assert.equal(kernel.colony.members.filter((m) => m.status === "alive").length, aliveBefore);
+  assert.equal(
+    kernel.colony.members.filter((m) => m.status === "alive").length,
+    aliveBefore,
+  );
   assert.equal(result.worst.status, "retired");
-  assert.equal(kernel.flyswarm.roster.get(result.worst.session.state.soulId).status, "retired");
-  assert.equal(kernel.flyswarm.roster.get(result.worst.session.state.soulId).retiredTick, kernel.colony.tick);
+  assert.equal(
+    kernel.flyswarm.roster.get(result.worst.session.state.soulId).status,
+    "retired",
+  );
+  assert.equal(
+    kernel.flyswarm.roster.get(result.worst.session.state.soulId).retiredTick,
+    kernel.colony.tick,
+  );
   // 子代：亲本检查点分叉，世代 +1，overlay 向中性回拉一半，账本全新
   assert.equal(result.child.gen, result.champ.gen + 1);
   assert.equal(result.child.parent, result.champ.id);
-  assert.equal(result.child.overlay.food, Math.round((result.champ.overlay.food + 100) / 2));
-  assert.equal(result.child.overlay.threat, Math.round((result.champ.overlay.threat + 100) / 2));
+  assert.equal(
+    result.child.overlay.food,
+    Math.round((result.champ.overlay.food + 100) / 2),
+  );
+  assert.equal(
+    result.child.overlay.threat,
+    Math.round((result.champ.overlay.threat + 100) / 2),
+  );
   assert.equal(result.child.book.realized, 0);
   // 繁殖是协议事件：血统 + iff.spawn/1 进日志，名册同步
   assert.equal(kernel.colony.lineage[0].child, result.child.id);
-  const spawns = kernel.flyswarm.log.windowEntries(kernel.colony.tick).filter((e) => e.schema === "iff.spawn/1");
+  const spawns = kernel.flyswarm.log
+    .windowEntries(kernel.colony.tick)
+    .filter((e) => e.schema === "iff.spawn/1");
   assert.equal(spawns.length, 1);
   assert.equal(spawns[0].childSoul, result.child.session.state.soulId);
-  assert.equal(kernel.flyswarm.roster.get(result.child.session.state.soulId).tier, "bonded");
+  assert.equal(
+    kernel.flyswarm.roster.get(result.child.session.state.soulId).tier,
+    "bonded",
+  );
+});
+
+test("行为/金融解耦：utterance/2 拒绝金融语义，quorum/2 只聚合原生行为", async () => {
+  const schemas = createSchemas();
+  const base = utterance();
+  const v2 = {
+    ...base,
+    schema: "iff.utterance/2",
+  };
+  delete v2.side;
+  delete v2.confidence;
+  assert.equal(validateRecord(schemas, v2), v2, "纯 ethology 话语必须合法");
+  assert.throws(
+    () => validateRecord(schemas, { ...v2, side: "BUY" }),
+    /不得携带金融方向/,
+  );
+  assert.throws(
+    () => validateRecord(schemas, { ...v2, confidence: 30 }),
+    /不得携带产品层置信度/,
+  );
+
+  // quorum/2：按 left/right 压池，票权 = 行为强度封顶
+  const roster = createRoster();
+  roster.register({
+    soulId: "soul-a",
+    runnerPub: "paper:a",
+    tier: "bonded",
+    tick: 0,
+  });
+  roster.register({
+    soulId: "soul-b",
+    runnerPub: "paper:b",
+    tier: "bonded",
+    tick: 0,
+  });
+  roster.register({
+    soulId: "soul-c",
+    runnerPub: "paper:c",
+    tier: "bonded",
+    tick: 0,
+  });
+  const utterancesV2 = [
+    {
+      ...v2,
+      soulId: "soul-a",
+      sequence: 1,
+      ethology: { ...v2.ethology, left: 6, right: 0 },
+    },
+    {
+      ...v2,
+      soulId: "soul-b",
+      sequence: 2,
+      ethology: { ...v2.ethology, left: 0, right: 5 },
+    },
+    {
+      ...v2,
+      soulId: "soul-c",
+      sequence: 3,
+      ethology: { ...v2.ethology, left: 0, right: 0 },
+    },
+  ];
+  const q2 = createQuorums().require("confidence-hold", "2");
+  const result = q2.run({
+    roster,
+    utterances: utterancesV2,
+    tick: 1,
+    policy: FLYSWARM_POLICY,
+  });
+  assert.equal(result.schema, "iff.quorum/2");
+  assert.equal(result.approachWeight, 6);
+  assert.equal(result.retreatWeight, 5);
+  assert.equal(result.stillWeight, 0);
+  assert.equal("side" in result, false);
+  assert.equal("buyWeight" in result, false);
+  // 强度封顶：单条超过 voteCapPerUtterance 被截断
+  const heavy = [
+    {
+      ...v2,
+      tick: 2,
+      soulId: "soul-a",
+      sequence: 1,
+      ethology: { ...v2.ethology, left: 80, right: 0 },
+    },
+  ];
+  const capped = q2.run({
+    roster,
+    utterances: heavy,
+    tick: 2,
+    policy: FLYSWARM_POLICY,
+  });
+  assert.equal(capped.approachWeight, FLYSWARM_POLICY.voteCapPerUtterance);
+});
+
+test("内核话语升级为 /2：日志不再出现 BUY/SELL，旧 /1 仍可解析重放", async () => {
+  const kernel = createKernel(fixtureGraph(), {
+    size: 3,
+    seed: 31,
+    stepsPerTick: 4,
+  });
+  await bindGenesis(kernel, { seed: 31 });
+  for (let i = 0; i < 3; i++)
+    await tickKernel(kernel, {
+      food: 600,
+      threat: 80,
+      light: 120,
+      changeBps: 30,
+    });
+  const entries = kernel.flyswarm.log.windowEntries(1);
+  const utterancesV2 = entries.filter((e) => e.schema === "iff.utterance/2");
+  assert.equal(utterancesV2.length, 9, "每 tick 每活体一条 v2 话语");
+  for (const u of utterancesV2) {
+    assert.equal("side" in u, false);
+    assert.equal("confidence" in u, false);
+    assert.ok(u.ethology.left >= 0 && u.ethology.right >= 0);
+  }
+  // 旧版 /1 仍可校验（历史重放路径不破坏）
+  const old = utterance();
+  assert.equal(validateRecord(kernel.flyswarm.schemas, old), old);
 });

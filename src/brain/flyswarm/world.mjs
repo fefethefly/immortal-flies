@@ -324,19 +324,20 @@ export async function stepWorld(
   // 5) SOCIETY：quorum 聚合结果落场（分裂是特征，不是故障）。
   const quorum = fs.lastQuorum;
   if (quorum && quorum.tick === tick) {
+    const qv = interpretQuorum(quorum);
     const society = await emit(world, {
       tick,
       kind: "society",
-      side: quorum.side,
+      side: qv.side,
       payload: {
         quorum: quorum.quorum,
         quorumVersion: quorum.quorumVersion,
-        side: quorum.side,
+        side: qv.side,
         split: quorum.split,
-        buyWeight: quorum.buyWeight,
-        sellWeight: quorum.sellWeight,
-        holdWeight: quorum.holdWeight,
-        totalWeight: quorum.totalWeight,
+        buyWeight: qv.buyWeight,
+        sellWeight: qv.sellWeight,
+        holdWeight: qv.holdWeight,
+        totalWeight: qv.totalWeight,
       },
     });
     fresh.push(society);
@@ -372,9 +373,10 @@ export async function stepWorld(
   }
 
   // 6) 蜂巢压力：quorum 权重压入历史，gauge 只表达压力方向。
-  const buy = quorum && quorum.tick === tick ? quorum.buyWeight : 0;
-  const sell = quorum && quorum.tick === tick ? quorum.sellWeight : 0;
-  const hold = quorum && quorum.tick === tick ? quorum.holdWeight : 0;
+  const qv2 = quorum && quorum.tick === tick ? interpretQuorum(quorum) : null;
+  const buy = qv2 ? qv2.buyWeight : 0;
+  const sell = qv2 ? qv2.sellWeight : 0;
+  const hold = qv2 ? qv2.holdWeight : 0;
   const totalW = buy + sell + hold;
   const gauge =
     totalW === 0
@@ -460,8 +462,9 @@ export function proposePlans(session) {
   const fs = kernel.flyswarm;
   const tick = colony.tick;
   const quorum = fs.lastQuorum;
+  const qv3 = quorum && quorum.tick === tick ? interpretQuorum(quorum) : null;
   const plans = [];
-  if (quorum && quorum.tick === tick && quorum.side !== "HOLD") {
+  if (qv3 && qv3.side !== "HOLD") {
     const cash = kernel.treasury.book.bnb;
     plans.push({
       schema: "iff.plan/1",
@@ -469,11 +472,11 @@ export function proposePlans(session) {
       tick,
       kind: "hive",
       flyId: null,
-      side: quorum.side,
+      side: qv3.side,
       budget: Math.trunc(cash / 4),
       confidence: Math.trunc(
-        (100 * (quorum.side === "BUY" ? quorum.buyWeight : quorum.sellWeight)) /
-          Math.max(1, quorum.totalWeight),
+        (100 * (qv3.side === "BUY" ? qv3.buyWeight : qv3.sellWeight)) /
+          Math.max(1, qv3.totalWeight),
       ),
       source: "quorum",
     });
@@ -613,15 +616,41 @@ export function replayChain(world, eventId) {
 }
 
 /** 社会状态：quorum 结果 + 分裂判定，缺席与无 quorum 分开。 */
+
+/**
+ * 产品层解释：把 iff.quorum/2 的行为分布读成金融方向。
+ * BUY/SELL/HOLD 只在这里出现（TradePort 语义），协议层只表达 approach/retreat/still。
+ */
+export function interpretQuorum(q) {
+  if (!q) return { status: "STALE", side: "HOLD", split: false };
+  if (q.schema === "iff.quorum/2") {
+    return {
+      ...q,
+      side:
+        q.approachWeight > q.retreatWeight
+          ? "BUY"
+          : q.retreatWeight > q.approachWeight
+            ? "SELL"
+            : "HOLD",
+      buyWeight: q.approachWeight,
+      sellWeight: q.retreatWeight,
+      holdWeight: q.stillWeight,
+    };
+  }
+  return { ...q }; // 旧版 /1 已含 side/buyWeight（仅重放路径）
+}
+
 export function societyOf(kernel) {
   const fs = kernel.flyswarm;
   const q = fs.lastQuorum;
   const tick = kernel.colony.tick;
   if (!q || q.tick !== tick)
     return { status: "STALE", side: "HOLD", split: false };
-  if (q.split) return { status: "SPLIT", ...q };
-  if (q.totalWeight === 0) return { status: "NO_QUORUM", ...q };
-  return { status: "CONSENSUS", ...q };
+  const interpreted = interpretQuorum(q);
+  if (interpreted.split) return { status: "SPLIT", ...interpreted };
+  if (interpreted.totalWeight === 0)
+    return { status: "NO_QUORUM", ...interpreted };
+  return { status: "CONSENSUS", ...interpreted };
 }
 
 /** 影响边：因果链 + 结算/繁衍事件 → 「谁影响谁」。 */

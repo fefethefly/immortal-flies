@@ -48,14 +48,33 @@ export function createRoster(policy = FLYSWARM_POLICY) {
   function register({ soulId, runnerPub, tier = "guest", tick = 0 }) {
     identifier(soulId, "soulId");
     isRunner(runnerPub, "runnerPub");
-    requireValue(policy.tiers.includes(tier), "ROSTER_TIER", `tier 必须是 ${policy.tiers.join("/")}`);
-    requireValue(!souls.has(soulId), "ROSTER_DUPLICATE", `灵魂 ${soulId} 已在册`);
+    requireValue(
+      policy.tiers.includes(tier),
+      "ROSTER_TIER",
+      `tier 必须是 ${policy.tiers.join("/")}`,
+    );
+    requireValue(
+      !souls.has(soulId),
+      "ROSTER_DUPLICATE",
+      `灵魂 ${soulId} 已在册`,
+    );
     integer(tick, 0, Number.MAX_SAFE_INTEGER, "tick");
     // 一公钥一灵魂只对 bonded 强制执行：有成本身份才有资格守唯一性。
     if (tier === "bonded") {
-      requireValue(!pubs.has(runnerPub), "ROSTER_PUB", `运行器 ${runnerPub} 已持有 bonded 灵魂`);
+      requireValue(
+        !pubs.has(runnerPub),
+        "ROSTER_PUB",
+        `运行器 ${runnerPub} 已持有 bonded 灵魂`,
+      );
     }
-    const entry = { soulId, runnerPub, tier, status: "active", sinceTick: tick, retiredTick: null };
+    const entry = {
+      soulId,
+      runnerPub,
+      tier,
+      status: "active",
+      sinceTick: tick,
+      retiredTick: null,
+    };
     souls.set(soulId, entry);
     if (!pubs.has(runnerPub)) pubs.set(runnerPub, new Set());
     pubs.get(runnerPub).add(soulId);
@@ -67,7 +86,11 @@ export function createRoster(policy = FLYSWARM_POLICY) {
     requireValue(entry, "ROSTER_UNKNOWN", `灵魂 ${soulId} 不在册`);
     requireValue(policy.tiers.includes(tier), "ROSTER_TIER");
     if (tier === "bonded" && entry.tier !== "bonded") {
-      requireValue(!pubs.has(entry.runnerPub) || byPub(entry.runnerPub).every((e) => e.soulId === soulId), "ROSTER_PUB");
+      requireValue(
+        !pubs.has(entry.runnerPub) ||
+          byPub(entry.runnerPub).every((e) => e.soulId === soulId),
+        "ROSTER_PUB",
+      );
     }
     entry.tier = tier;
     return entry;
@@ -88,7 +111,12 @@ export function createRoster(policy = FLYSWARM_POLICY) {
   function reinstate(soulId, tick) {
     const entry = get(soulId);
     requireValue(entry, "ROSTER_UNKNOWN", `灵魂 ${soulId} 不在册`);
-    integer(tick, entry.retiredTick || entry.sinceTick, Number.MAX_SAFE_INTEGER, "tick");
+    integer(
+      tick,
+      entry.retiredTick || entry.sinceTick,
+      Number.MAX_SAFE_INTEGER,
+      "tick",
+    );
     entry.status = "active";
     entry.retiredTick = null;
     return entry;
@@ -102,19 +130,35 @@ export function createRoster(policy = FLYSWARM_POLICY) {
     return snapshot().filter((e) => e.status === "active");
   }
 
-  return { policy, register, get, byPub, setTier, retire, reinstate, snapshot, active };
+  return {
+    policy,
+    register,
+    get,
+    byPub,
+    setTier,
+    retire,
+    reinstate,
+    snapshot,
+    active,
+  };
 }
 
 /**
- * 一条 utterance 的票权：guest 默认 0（旁听），bonded 按置信封顶。
+ * 一条 utterance 的票权：guest 默认 0（旁听），bonded 按封顶。
+ * v1 话语用产品层 confidence；v2 话语用原生行为强度（left+right）。
  * 纯函数：同一输入任何机器得到同一权重。
  */
 export function utteranceWeight(roster, utterance, policy = FLYSWARM_POLICY) {
   const entry = roster.get(utterance.soulId);
   if (!entry || entry.status !== "active") return 0;
-  if (entry.tier === "bonded") return Math.min(utterance.confidence, policy.voteCapPerUtterance);
+  const raw =
+    utterance.schema === "iff.utterance/1"
+      ? utterance.confidence
+      : (utterance.ethology?.left || 0) + (utterance.ethology?.right || 0);
+  const capped = Math.min(raw, policy.voteCapPerUtterance);
+  if (entry.tier === "bonded") return capped;
   if (policy.guestTreasuryBps > 0) {
-    return Math.trunc((Math.min(utterance.confidence, policy.voteCapPerUtterance) * policy.guestTreasuryBps) / 10000);
+    return Math.trunc((capped * policy.guestTreasuryBps) / 10000);
   }
   return 0;
 }
