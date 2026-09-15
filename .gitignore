@@ -8,4 +8,5 @@ artifacts/
 test-results/
 scripts/data/cache/
 public/data/malecns-full/
+server/data/
 .vercel

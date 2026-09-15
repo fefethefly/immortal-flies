@@ -15,6 +15,7 @@ import { canonical, hash, integer, requireValue } from "../codec.mjs";
 export function createLog({ eraTicks = 1000, audit = "SIM" } = {}) {
   integer(eraTicks, 1, 1_000_000, "eraTicks");
   const eras = []; // 已封口: {id, startTick, endTick, count, root, prevRoot}
+  const sealedEntries = []; // 封口后的条目备份，供完整档案 / 重放
   let currentId = 0;
   let currentStart = 0;
   let entries = [];
@@ -51,6 +52,7 @@ export function createLog({ eraTicks = 1000, audit = "SIM" } = {}) {
       prevRoot,
     };
     eras.push(record);
+    sealedEntries.push(...entries);
     entries = [];
     currentId += 1;
     currentStart = record.endTick + 1;
@@ -68,6 +70,11 @@ export function createLog({ eraTicks = 1000, audit = "SIM" } = {}) {
     return entries.filter((e) => e.tick >= fromTick);
   }
 
+  /** 全部历史条目（已封口 + 当前 era），供 colony archive。 */
+  function allEntries() {
+    return [...sealedEntries, ...entries];
+  }
+
   function snapshot() {
     return {
       audit,
@@ -78,7 +85,41 @@ export function createLog({ eraTicks = 1000, audit = "SIM" } = {}) {
     };
   }
 
-  return { audit, eraTicks, append, sealEra, current, currentRoot, windowEntries, snapshot, eras };
+  /**
+   * 从档案恢复：按已封口 era.count 切开条目，当前 era 保持未封口。
+   * 恢复后 snapshot.sealed / allEntries 与归档时逐位一致，并可继续 append。
+   */
+  function importArchive({ entries: all = [], sealed = [] } = {}) {
+    const copy = all.map((entry) => structuredClone(entry));
+    eras.length = 0;
+    sealedEntries.length = 0;
+    let offset = 0;
+    currentId = 0;
+    currentStart = 0;
+    lastTick = -1;
+    for (const era of sealed) {
+      integer(era.count, 0, 1_000_000, "era.count");
+      const chunk = copy.slice(offset, offset + era.count);
+      requireValue(chunk.length === era.count, "LOG_ARCHIVE", `era ${era.id} 条目数与档案不一致`);
+      sealedEntries.push(...chunk);
+      eras.push({
+        id: era.id,
+        startTick: era.startTick,
+        endTick: era.endTick,
+        count: era.count,
+        root: era.root,
+        prevRoot: era.prevRoot,
+      });
+      offset += era.count;
+      currentId = era.id + 1;
+      currentStart = era.endTick + 1;
+    }
+    entries = copy.slice(offset);
+    lastTick = entries.length ? entries[entries.length - 1].tick : -1;
+    return snapshot();
+  }
+
+  return { audit, eraTicks, append, sealEra, current, currentRoot, windowEntries, allEntries, importArchive, snapshot, eras };
 }
 
 /** 纯函数重放：同一条目序列 + 同一 reduce，任何机器得到同一结果。 */

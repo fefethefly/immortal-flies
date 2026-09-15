@@ -158,6 +158,22 @@ test("era sealing chains roots: history is a hash chain, shards archive independ
   assert.equal(log.snapshot().sealed.length, 2);
 });
 
+test("log importArchive restores sealed + current entries and can continue", async () => {
+  const log = createLog({ eraTicks: 10 });
+  for (let tick = 0; tick <= 10; tick++) log.append(utterance({ tick, sequence: tick + 1 }));
+  await log.sealEra();
+  log.append(utterance({ tick: 11, sequence: 1 }));
+  const snap = log.snapshot();
+  const all = log.allEntries();
+  const replayed = createLog({ eraTicks: 10 });
+  replayed.importArchive({ entries: all, sealed: snap.sealed });
+  assert.ok(sameEntries(replayed.allEntries(), all));
+  assert.equal(replayed.snapshot().sealed.length, 1);
+  assert.equal(replayed.snapshot().currentCount, 1);
+  replayed.append(utterance({ tick: 12, sequence: 2 }));
+  assert.equal(replayed.allEntries().length, all.length + 1);
+});
+
 test("replay is a pure function: same entries, same reduce, bit-identical result", () => {
   const entries = [1, 2, 3, 4].map((n) => ({ n }));
   const reduce = (acc, e) => acc + e.n;
