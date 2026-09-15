@@ -23,9 +23,25 @@ import {
   saveWorld,
   worldView,
 } from "../../../src/brain/flyswarm/world.mjs";
-import { createMarketFeed, offerObservation, restoreMarket } from "../../../src/brain/flyswarm/market.mjs";
-import { LAYER_IDS, paperLayer, paperLayers } from "../../../src/brain/flyswarm/layers.mjs";
-import { AppError, badRequest, conflict, notFound, tooMany, unauthorized } from "../shared/errors.mjs";
+import {
+  createMarketFeed,
+  offerObservation,
+  restoreMarket,
+} from "../../../src/brain/flyswarm/market.mjs";
+import { protocolView } from "../../../src/brain/flyswarm/protocol.mjs";
+import {
+  LAYER_IDS,
+  paperLayer,
+  paperLayers,
+} from "../../../src/brain/flyswarm/layers.mjs";
+import {
+  AppError,
+  badRequest,
+  conflict,
+  notFound,
+  tooMany,
+  unauthorized,
+} from "../shared/errors.mjs";
 import { hashToken, tokensMatch } from "../shared/tokens.mjs";
 
 const ARCHIVE_SCHEMA = "iff.colony-archive/1";
@@ -42,7 +58,8 @@ function bearer(req) {
 
 function mapBrainError(err) {
   if (err instanceof BrainError) {
-    const status = err.code === "JOURNAL_LIMIT" || err.code === "REPLAY_LIMIT" ? 409 : 400;
+    const status =
+      err.code === "JOURNAL_LIMIT" || err.code === "REPLAY_LIMIT" ? 409 : 400;
     return new AppError(err.code, status, err.message);
   }
   if (err instanceof Error && /刺激冷却/.test(err.message)) {
@@ -62,7 +79,8 @@ export function createSessionService({ config, store, logger }) {
   let graphReady = false;
   let graphError = null;
 
-  const clock = () => (typeof config.now === "function" ? config.now() : Date.now());
+  const clock = () =>
+    typeof config.now === "function" ? config.now() : Date.now();
   const idleMs = () => config.session?.idleMs ?? 2 * 60 * 60 * 1000;
   const maxAgeMs = () => config.session?.maxAgeMs ?? 24 * 60 * 60 * 1000;
   const maxLive = () => config.session?.maxLive ?? 64;
@@ -78,7 +96,11 @@ export function createSessionService({ config, store, logger }) {
       try {
         graph = await loadGraphFromDir(config.graphDir);
         graphReady = true;
-        logger.info("graph loaded", { neurons: graph.n, edges: graph.e, dir: config.graphDir });
+        logger.info("graph loaded", {
+          neurons: graph.n,
+          edges: graph.e,
+          dir: config.graphDir,
+        });
       } catch (err) {
         graphReady = false;
         graphError = err?.message || String(err);
@@ -103,21 +125,34 @@ export function createSessionService({ config, store, logger }) {
           purged += 1;
           continue;
         }
-        const recentlyActive = !idleMs() || now - (meta.updatedAt || createdAt) <= idleMs();
+        const recentlyActive =
+          !idleMs() || now - (meta.updatedAt || createdAt) <= idleMs();
         if (!recentlyActive) continue;
         if (live.size >= maxLive()) break;
         await loadFromDisk(sessionId, meta);
         restored += 1;
       } catch (err) {
-        logger.warn("session restore skipped", { sessionId, error: err?.message || String(err) });
+        logger.warn("session restore skipped", {
+          sessionId,
+          error: err?.message || String(err),
+        });
       }
     }
-    logger.info("sessions restored", { restored, purged, live: live.size, disk: ids.length });
+    logger.info("sessions restored", {
+      restored,
+      purged,
+      live: live.size,
+      disk: ids.length,
+    });
   }
 
   function requireGraph() {
     if (!graphReady || !graph) {
-      throw new AppError("GRAPH_UNAVAILABLE", 503, graphError || "Connectome graph not loaded");
+      throw new AppError(
+        "GRAPH_UNAVAILABLE",
+        503,
+        graphError || "Connectome graph not loaded",
+      );
     }
   }
 
@@ -175,7 +210,8 @@ export function createSessionService({ config, store, logger }) {
         // ignore unreadable leftovers
       }
     }
-    if (evicted || purged) logger.info("session sweep", { evicted, purged, live: live.size });
+    if (evicted || purged)
+      logger.info("session sweep", { evicted, purged, live: live.size });
     return { evicted, purged, live: live.size };
   }
 
@@ -242,7 +278,14 @@ export function createSessionService({ config, store, logger }) {
     }
   }
 
-  function installLive({ sessionId, ownerTokenHash, running, createdAt, lastAccessAt, session }) {
+  function installLive({
+    sessionId,
+    ownerTokenHash,
+    running,
+    createdAt,
+    lastAccessAt,
+    session,
+  }) {
     const row = {
       sessionId,
       ownerTokenHash,
@@ -282,7 +325,10 @@ export function createSessionService({ config, store, logger }) {
       try {
         await persistFull(row);
       } catch (err) {
-        logger.error("flush failed", { sessionId: row.sessionId, error: err?.message || String(err) });
+        logger.error("flush failed", {
+          sessionId: row.sessionId,
+          error: err?.message || String(err),
+        });
       }
     }
   }
@@ -291,13 +337,17 @@ export function createSessionService({ config, store, logger }) {
     const pack = payload.flyswarmLog;
     if (!pack) return;
     const log = kernel.flyswarm.log;
-    if (typeof log.importArchive === "function" && Array.isArray(pack.entries)) {
+    if (
+      typeof log.importArchive === "function" &&
+      Array.isArray(pack.entries)
+    ) {
       log.importArchive({
         entries: pack.entries,
         sealed: pack.snapshot?.sealed || [],
       });
     }
-    if (payload.lastQuorum) kernel.flyswarm.lastQuorum = structuredClone(payload.lastQuorum);
+    if (payload.lastQuorum)
+      kernel.flyswarm.lastQuorum = structuredClone(payload.lastQuorum);
     if (payload.soulHashes) {
       kernel.flyswarm.soulPrev = new Map(Object.entries(payload.soulHashes));
     }
@@ -305,8 +355,16 @@ export function createSessionService({ config, store, logger }) {
 
   async function sessionFromArchive(payload) {
     requireGraph();
-    if (Array.isArray(payload.members) && payload.members.length && payload.members[0]?.archive) {
-      const kernel = createKernel(graph, { size: 1, seed: payload.seed, stepsPerTick: 6 });
+    if (
+      Array.isArray(payload.members) &&
+      payload.members.length &&
+      payload.members[0]?.archive
+    ) {
+      const kernel = createKernel(graph, {
+        size: 1,
+        seed: payload.seed,
+        stepsPerTick: 6,
+      });
       kernel.colony.members = [];
       for (const member of payload.members) {
         const session = await BrainSession.restore(member.archive, graph);
@@ -335,7 +393,8 @@ export function createSessionService({ config, store, logger }) {
           tier: entry.tier,
           tick: entry.sinceTick,
         });
-        if (entry.status === "retired") roster.retire(entry.soulId, entry.retiredTick ?? entry.sinceTick);
+        if (entry.status === "retired")
+          roster.retire(entry.soulId, entry.retiredTick ?? entry.sinceTick);
       }
       kernel.flyswarm.roster = roster;
       await bindGenesis(kernel, { seed: payload.seed });
@@ -401,7 +460,9 @@ export function createSessionService({ config, store, logger }) {
         prices: structuredClone(session.aux.prices),
         settleAt: session.aux.settleAt,
         market: session.aux.market ? structuredClone(session.aux.market) : null,
-        baseline: session.aux.baseline ? structuredClone(session.aux.baseline) : null,
+        baseline: session.aux.baseline
+          ? structuredClone(session.aux.baseline)
+          : null,
       },
       members,
       lineage: structuredClone(session.kernel.colony.lineage),
@@ -413,7 +474,9 @@ export function createSessionService({ config, store, logger }) {
       soulHashes: Object.fromEntries(session.kernel.flyswarm.soulPrev),
       flyswarmLog: {
         snapshot: log.snapshot(),
-        entries: log.allEntries ? structuredClone(log.allEntries()) : structuredClone(log.windowEntries(0)),
+        entries: log.allEntries
+          ? structuredClone(log.allEntries())
+          : structuredClone(log.windowEntries(0)),
       },
       world: saveWorld(session.world),
       pitSnapshot: savePitSession(session),
@@ -442,7 +505,11 @@ export function createSessionService({ config, store, logger }) {
       session,
     });
     await persistFull(row);
-    logger.info("session created", { sessionId, seed: session.aux.seed, tick: 0 });
+    logger.info("session created", {
+      sessionId,
+      seed: session.aux.seed,
+      tick: 0,
+    });
     return {
       sessionId,
       ownerToken,
@@ -453,13 +520,18 @@ export function createSessionService({ config, store, logger }) {
 
   async function getSession(sessionId) {
     const row = await getLive(sessionId);
-    return { sessionId, genesisId: row.session.kernel.flyswarm.genesisId, view: composeView(row.session) };
+    return {
+      sessionId,
+      genesisId: row.session.kernel.flyswarm.genesisId,
+      view: composeView(row.session),
+    };
   }
 
   async function tick(sessionId, req) {
     const row = await getLive(sessionId);
     assertOwner(row, req);
-    const key = req.headers["idempotency-key"] || req.headers["Idempotency-Key"];
+    const key =
+      req.headers["idempotency-key"] || req.headers["Idempotency-Key"];
     if (key) {
       const cached = row.idempotency.get(String(key));
       if (cached) return cached;
@@ -487,7 +559,10 @@ export function createSessionService({ config, store, logger }) {
     assertOwner(row, req);
     const kind = body?.kind;
     if (!["food", "threat", "light", "dark"].includes(kind)) {
-      throw badRequest("INVALID_STIMULUS", "kind must be food|threat|light|dark");
+      throw badRequest(
+        "INVALID_STIMULUS",
+        "kind must be food|threat|light|dark",
+      );
     }
     const intensity = body?.intensity == null ? 0.6 : Number(body.intensity);
     try {
@@ -554,7 +629,11 @@ export function createSessionService({ config, store, logger }) {
     let equal = true;
     for (const member of row.session.kernel.colony.members) {
       const proof = await member.session.prove();
-      proofs.push({ id: member.id, soulId: member.session.state.soulId, ...proof });
+      proofs.push({
+        id: member.id,
+        soulId: member.session.state.soulId,
+        ...proof,
+      });
       if (!proof.equal) equal = false;
     }
     const worldHash = await hash(saveWorld(row.session.world));
@@ -562,7 +641,11 @@ export function createSessionService({ config, store, logger }) {
     const logEntries = log.allEntries ? log.allEntries() : log.windowEntries(0);
     const logEqual = Array.isArray(logEntries);
     const stateHash = await hash({
-      members: proofs.map((p) => ({ id: p.id, stateHash: p.stateHash, historyRoot: p.historyRoot })),
+      members: proofs.map((p) => ({
+        id: p.id,
+        stateHash: p.stateHash,
+        historyRoot: p.historyRoot,
+      })),
       worldHash,
       tick: row.session.kernel.colony.tick,
     });
@@ -584,7 +667,10 @@ export function createSessionService({ config, store, logger }) {
   async function listEvents(sessionId, query) {
     const row = await getLive(sessionId);
     const from = Number.parseInt(query.from || "0", 10) || 0;
-    const limit = Math.min(100, Math.max(1, Number.parseInt(query.limit || "20", 10) || 20));
+    const limit = Math.min(
+      100,
+      Math.max(1, Number.parseInt(query.limit || "20", 10) || 20),
+    );
     const events = row.session.world.events || [];
     const items = events.filter((e) => e.seq > from).slice(0, limit);
     const next = items.length ? items[items.length - 1].seq : from;
@@ -594,10 +680,13 @@ export function createSessionService({ config, store, logger }) {
   async function branch(sessionId, body, req) {
     const row = await getLive(sessionId);
     assertOwner(row, req);
-    const label = typeof body?.label === "string" ? body.label.slice(0, 64) : "";
+    const label =
+      typeof body?.label === "string" ? body.label.slice(0, 64) : "";
     const branchObj = createBranch(row.session, label);
     const eventId = body?.eventId || null;
-    const chain = eventId ? replayChain(row.session.world, eventId) : { nodes: [], links: [] };
+    const chain = eventId
+      ? replayChain(row.session.world, eventId)
+      : { nodes: [], links: [] };
     const record = {
       ...branchObj,
       sessionId,
@@ -606,7 +695,11 @@ export function createSessionService({ config, store, logger }) {
     };
     await store.saveBranch(branchObj.id, record);
     await persistFull(row);
-    return { branchId: branchObj.id, tick: branchObj.tick, label: branchObj.label };
+    return {
+      branchId: branchObj.id,
+      tick: branchObj.tick,
+      label: branchObj.label,
+    };
   }
 
   async function getBranch(branchId) {
@@ -620,6 +713,11 @@ export function createSessionService({ config, store, logger }) {
   async function getWorld(sessionId) {
     const row = await getLive(sessionId);
     return { sessionId, world: paperLayers(row.session) };
+  }
+
+  async function getProtocol(sessionId) {
+    const row = await getLive(sessionId);
+    return { sessionId, protocol: protocolView(row.session.protocol) };
   }
 
   async function getLayer(sessionId, layer) {
@@ -657,7 +755,10 @@ export function createSessionService({ config, store, logger }) {
     const row = await getLive(sessionId);
     const roster = row.session.kernel.flyswarm.roster.snapshot();
     const entry = roster.find((r) => r.soulId === soulId) || null;
-    const member = row.session.kernel.colony.members.find((m) => m.session.state.soulId === soulId) || null;
+    const member =
+      row.session.kernel.colony.members.find(
+        (m) => m.session.state.soulId === soulId,
+      ) || null;
     return {
       soulId,
       sessionId,
@@ -677,7 +778,9 @@ export function createSessionService({ config, store, logger }) {
 
   function readiness() {
     return {
-      graph: graphReady ? { status: "ok", neurons: graph?.n, edges: graph?.e } : { status: "error", detail: graphError },
+      graph: graphReady
+        ? { status: "ok", neurons: graph?.n, edges: graph?.e }
+        : { status: "error", detail: graphError },
       store: { status: "pending" },
       llm: {
         status: config.openai.apiKey ? "configured" : "degraded",
@@ -691,7 +794,9 @@ export function createSessionService({ config, store, logger }) {
   async function readinessAsync() {
     await sweep();
     const checks = readiness();
-    checks.store = (await store.writable()) ? { status: "ok" } : { status: "error", detail: "data dir not writable" };
+    checks.store = (await store.writable())
+      ? { status: "ok" }
+      : { status: "error", detail: "data dir not writable" };
     const ok = checks.graph.status === "ok" && checks.store.status === "ok";
     return {
       status: ok ? "ok" : "degraded",
@@ -719,6 +824,7 @@ export function createSessionService({ config, store, logger }) {
     getBranch,
     getSoul,
     getWorld,
+    getProtocol,
     getLayer,
     offerMarket,
     readinessAsync,

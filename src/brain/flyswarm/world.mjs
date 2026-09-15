@@ -16,6 +16,7 @@
 import { hash, ZERO_HASH } from "../codec.mjs";
 import { FLYSWARM_POLICY } from "./membership.mjs";
 import { surplusOf, treasurySnapshot } from "../treasury.mjs";
+import { protocolView } from "./protocol.mjs";
 import {
   SLIP_BPS,
   TAX_BPS,
@@ -651,7 +652,7 @@ export function influenceEdges(world, colony) {
 }
 
 /** 纸面世界 → UI 形状。纯读，无副作用。 */
-export function worldView({ kernel, aux, world }) {
+export function worldView({ kernel, aux, world, protocol }) {
   const colony = kernel.colony;
   const fs = kernel.flyswarm;
   const price = colony.market.price;
@@ -802,6 +803,7 @@ export function worldView({ kernel, aux, world }) {
     },
     plans: world.plans,
     branches: world.branches,
+    protocol: protocol ? protocolView(protocol) : null,
   };
 }
 

@@ -979,7 +979,110 @@ export function VaultView({ world, tx }) {
           </ul>
         </section>
       </div>
+
+      {world.protocol && <ProtocolPanel protocol={world.protocol} tx={tx} />}
     </ViewShell>
+  );
+}
+
+/* ---------- 协议自有资金（P4） ---------- */
+
+function ProtocolPanel({ protocol, tx }) {
+  const last = protocol.last;
+  return (
+    <section className="panel protocol-panel">
+      <h2>
+        {tx("proto.title")} <small>{tx("proto.sim")}</small>
+        {protocol.halted && (
+          <span className="halt-badge">{tx("proto.halted")}</span>
+        )}
+      </h2>
+      <div className="kpi-grid four">
+        <div className="kpi">
+          <small>{tx("proto.revenue")}</small>
+          <b>
+            {formatBnb(
+              protocol.revenue.perfFees +
+                protocol.revenue.serviceFees +
+                protocol.revenue.realizedPnl,
+            )}
+          </b>
+          <em>
+            {tx("proto.perfFees")} {formatBnb(protocol.revenue.perfFees)} ·{" "}
+            {tx("proto.serviceFees")} {formatBnb(protocol.revenue.serviceFees)}
+          </em>
+        </div>
+        <div className="kpi">
+          <small>{tx("proto.costs")}</small>
+          <b>{formatBnb(protocol.costs)}</b>
+          <em>SIM accrual</em>
+        </div>
+        <div className="kpi">
+          <small>{tx("proto.net")}</small>
+          <b className={protocol.net >= 0 ? "buy" : "neg"}>
+            {formatBnb(protocol.net)}
+          </b>
+          <em>
+            {tx("proto.distributable")}{" "}
+            {last ? formatBnb(last.distributable) : "0.0000"}
+          </em>
+        </div>
+        <div className="kpi">
+          <small>{tx("proto.buyback")}</small>
+          <b className={protocol.buyback.eligible ? "buy" : ""}>
+            {formatBnb(protocol.buyback.budget)}
+          </b>
+          <em>
+            {protocol.buyback.eligible
+              ? tx("proto.eligible")
+              : `${tx("proto.blocked")}${
+                  protocol.haltedReason ? ` · ${protocol.haltedReason}` : ""
+                }`}
+          </em>
+        </div>
+      </div>
+      <div className="protocol-row">
+        <ul className="policy-list protocol-alloc">
+          <li>
+            <span>{tx("proto.allocation")}</span>
+            <b>
+              {tx("proto.ifsBudget")} {protocol.allocation.ifsBudget}
+            </b>
+          </li>
+          <li>
+            <span>{tx("proto.reserve")}</span>
+            <b>{protocol.reserve}</b>
+          </li>
+          <li>
+            <span>{tx("proto.ownCapital")}</span>
+            <b>{protocol.allocation.ownCapital}</b>
+          </li>
+          <li>
+            <span>{tx("proto.stakeRewards")}</span>
+            <b>{protocol.allocation.stakeRewards}</b>
+          </li>
+          <li>
+            <span>{tx("proto.ecosystem")}</span>
+            <b>{protocol.allocation.ecosystem}</b>
+          </li>
+        </ul>
+        <div className="protocol-receipts">
+          <small>{tx("proto.records")}</small>
+          <ul>
+            {protocol.records.map((record) => (
+              <li key={record.id}>
+                <span>T{record.tick}</span>
+                <b>N {formatBnb(record.net)}</b>
+                <em>
+                  D {formatBnb(record.distributable)}
+                  {record.halted ? ` · ${tx("proto.halted")}` : ""}
+                </em>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
   );
 }
 

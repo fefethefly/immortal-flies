@@ -19,7 +19,8 @@ function matchPath(pattern, pathname) {
   if (pp.length !== ss.length) return null;
   const params = {};
   for (let i = 0; i < pp.length; i++) {
-    if (pp[i].startsWith(":")) params[pp[i].slice(1)] = decodeURIComponent(ss[i]);
+    if (pp[i].startsWith(":"))
+      params[pp[i].slice(1)] = decodeURIComponent(ss[i]);
     else if (pp[i] !== ss[i]) return null;
   }
   return params;
@@ -32,30 +33,40 @@ export function mountSessionRoutes({ router, sessions }) {
     return sessions.createSession({ seed: body.seed });
   });
 
-  router.add("GET", "/v1/sessions/:id", async (_req, params) => sessions.getSession(params.id));
+  router.add("GET", "/v1/sessions/:id", async (_req, params) =>
+    sessions.getSession(params.id),
+  );
 
-  router.add("POST", "/v1/sessions/:id/tick", async (req, params) => sessions.tick(params.id, req));
+  router.add("POST", "/v1/sessions/:id/tick", async (req, params) =>
+    sessions.tick(params.id, req),
+  );
 
   router.add("POST", "/v1/sessions/:id/stimulus", async (req, params) => {
     const body = await readJson(req);
     return sessions.stimulus(params.id, body, req);
   });
 
-  router.add("POST", "/v1/sessions/:id/settle", async (req, params) => sessions.settle(params.id, req));
+  router.add("POST", "/v1/sessions/:id/settle", async (req, params) =>
+    sessions.settle(params.id, req),
+  );
 
   router.add("PATCH", "/v1/sessions/:id/running", async (req, params) => {
     const body = await readJson(req);
     return sessions.setRunning(params.id, body, req);
   });
 
-  router.add("GET", "/v1/sessions/:id/archive", async (req, params) => sessions.getArchive(params.id, req));
+  router.add("GET", "/v1/sessions/:id/archive", async (req, params) =>
+    sessions.getArchive(params.id, req),
+  );
 
   router.add("POST", "/v1/sessions/:id/restore", async (req, params) => {
     const body = await readJson(req);
     return sessions.restoreFromArchive(params.id, body, req);
   });
 
-  router.add("POST", "/v1/sessions/:id/prove", async (req, params) => sessions.prove(params.id, req));
+  router.add("POST", "/v1/sessions/:id/prove", async (req, params) =>
+    sessions.prove(params.id, req),
+  );
 
   router.add("GET", "/v1/sessions/:id/events", async (req, params) => {
     const url = new URL(req.url, "http://localhost");
@@ -68,11 +79,21 @@ export function mountSessionRoutes({ router, sessions }) {
     return sessions.branch(params.id, body, req);
   });
 
-  router.add("GET", "/v1/branches/:id", async (_req, params) => sessions.getBranch(params.id));
+  router.add("GET", "/v1/branches/:id", async (_req, params) =>
+    sessions.getBranch(params.id),
+  );
 
-  router.add("GET", "/v1/souls/:soulId", async (_req, params) => sessions.getSoul(params.soulId));
+  router.add("GET", "/v1/souls/:soulId", async (_req, params) =>
+    sessions.getSoul(params.soulId),
+  );
 
-  router.add("GET", "/v1/sessions/:id/world", async (_req, params) => sessions.getWorld(params.id));
+  router.add("GET", "/v1/sessions/:id/world", async (_req, params) =>
+    sessions.getWorld(params.id),
+  );
+
+  router.add("GET", "/v1/sessions/:id/protocol", async (_req, params) =>
+    sessions.getProtocol(params.id),
+  );
 
   router.add("GET", "/v1/sessions/:id/layers/:layer", async (_req, params) =>
     sessions.getLayer(params.id, params.layer),
@@ -117,7 +138,11 @@ export function createRouter() {
         if (!params) continue;
         return route.handler(req, params);
       }
-      throw new AppError("NOT_FOUND", 404, `No route ${req.method} ${pathname}`);
+      throw new AppError(
+        "NOT_FOUND",
+        404,
+        `No route ${req.method} ${pathname}`,
+      );
     },
   };
 }

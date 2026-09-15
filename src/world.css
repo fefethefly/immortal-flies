@@ -909,6 +909,68 @@
   gap: 16px;
   align-items: start;
 }
+.protocol-panel {
+  margin-top: 16px;
+}
+.halt-badge {
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid #6e3f36;
+  background: #2c1a17;
+  color: #e8a58f;
+  font: 9px var(--mono);
+  letter-spacing: 1.2px;
+}
+.protocol-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 16px;
+  align-items: start;
+}
+.protocol-alloc li b {
+  color: var(--text);
+}
+.protocol-receipts > small {
+  display: block;
+  margin-bottom: 8px;
+  font: 8px var(--mono);
+  color: #857d6e;
+  letter-spacing: 1.4px;
+}
+.protocol-receipts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 5px;
+}
+.protocol-receipts li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  background: #14120e;
+  font: 9px var(--mono);
+}
+.protocol-receipts li span {
+  color: #857d6e;
+}
+.protocol-receipts li b {
+  font-weight: 400;
+  color: var(--text);
+}
+.protocol-receipts li em {
+  margin-left: auto;
+  font-style: normal;
+  color: #857d6e;
+}
+@media (max-width: 900px) {
+  .protocol-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .vault-user {
   display: grid;
   gap: 12px;

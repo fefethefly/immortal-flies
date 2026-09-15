@@ -21,6 +21,12 @@ import { BrainSession } from "../session.mjs";
 import { createRoster, FLYSWARM_POLICY } from "./membership.mjs";
 import { createWorld, restoreWorld, saveWorld, stepWorld } from "./world.mjs";
 import {
+  createProtocolFunds,
+  restoreProtocol,
+  saveProtocol,
+  stepProtocol,
+} from "./protocol.mjs";
+import {
   createMarketFeed,
   restoreMarket,
   saveMarket,
@@ -66,11 +72,17 @@ export async function createPitSession({
   await bindGenesis(kernel, { seed: seed >>> 0 });
   const aux = freshAux(seed);
   aux.baseline = snapshotBaseline(kernel);
-  return { graph, kernel, aux, world: createWorld(seed) };
+  return {
+    graph,
+    kernel,
+    aux,
+    world: createWorld(seed),
+    protocol: createProtocolFunds(),
+  };
 }
 
 /** 状态级快照（localStorage）。不是完整可重放档案。 */
-export function savePitSession({ kernel, aux, world }) {
+export function savePitSession({ kernel, aux, world, protocol }) {
   return {
     model: PIT_MODEL,
     seed: aux.seed,
@@ -94,6 +106,7 @@ export function savePitSession({ kernel, aux, world }) {
     nextId: kernel.colony.nextId,
     roster: kernel.flyswarm.roster.snapshot(),
     world: world ? saveWorld(world) : null,
+    protocol: protocol ? saveProtocol(protocol) : null,
     market: saveMarket(aux.market),
     baseline: aux.baseline ? structuredClone(aux.baseline) : null,
   };
@@ -156,6 +169,7 @@ export async function restorePitSession(
       baseline: saved.baseline ? structuredClone(saved.baseline) : null,
     },
     world: restoreWorld(saved.world) || createWorld(saved.seed),
+    protocol: restoreProtocol(saved.protocol),
   };
 }
 
@@ -210,6 +224,17 @@ export function pulsePit({ kernel, aux }, kind, intensity = 0.6) {
   });
 }
 
+/** 旧档案恢复的会话没有协议层：惰性初始化并把水位线对齐当前金库（历史余额不追溯计收）。 */
+function ensureProtocol(session) {
+  if (session.protocol) return session.protocol;
+  session.protocol = createProtocolFunds();
+  session.protocol._watermark = {
+    feesIn: session.kernel.treasury.feesIn || 0,
+    realized: session.kernel.treasury.book?.realized || 0,
+  };
+  return session.protocol;
+}
+
 /** 立即结算（退役/繁衍），同步纸面世界并返回新视图。 */
 export function settleNow(session) {
   return serializePit(async () => {
@@ -219,6 +244,11 @@ export function settleNow(session) {
         session.kernel.colony.tick + FLYSWARM_POLICY.settleEveryTicks;
       await stepWorld(session, { settled: result });
     }
+    await stepProtocol(ensureProtocol(session), session.kernel.treasury, {
+      tick: session.kernel.colony.tick,
+      ifsPrice: session.kernel.colony.market.price,
+      exits: 0,
+    });
     return pitView(session);
   });
 }
@@ -263,6 +293,11 @@ export function stepPit(session, { compact = true } = {}) {
     if (compact && kernel.colony.tick % COMPACT_EVERY === 0)
       compactSessions(kernel);
     await stepWorld(session, { stimulus, settled });
+    await stepProtocol(ensureProtocol(session), kernel.treasury, {
+      tick: kernel.colony.tick,
+      ifsPrice: kernel.colony.market.price,
+      exits: 0,
+    });
     return pitView(session);
   });
 }
