@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
 import {
   Activity,
   ArrowUpRight,
@@ -14,11 +13,8 @@ import {
   Radio,
   Eye,
 } from "lucide-react";
-import { VitruvianFly } from "./vitruvian.jsx";
-import { SitePage } from "./site-chrome.jsx";
-import { captureMarket } from "./brain/chain.mjs";
-import { proposeAction, proposeTrade } from "./brain/policy.mjs";
-import { decodeTrade } from "./swarm.mjs";
+import { FlyMark } from "./vitruvian.jsx";
+import { SiteLink, SitePage } from "./site-chrome.jsx";
 import { SIGNAL_GROUPS } from "./brain/signals.mjs";
 import { useTx } from "./locale-context.jsx";
 import { useLocale } from "./use-locale.mjs";
@@ -27,6 +23,14 @@ import "./brain.css";
 
 const OFFICIAL_NEURONS = 166700;
 const FULL_NEURONS = 161839;
+const WORKER_RESET = "iff.worker.reset";
+const LIFE_CHIPS = ["L0", "Soul", "Session", "Replay"];
+
+function journalKind(type) {
+  if (type === "step") return "ACT";
+  if (type === "migration") return "MEMORY";
+  return "SENSE";
+}
 
 const count = (n) => Number(n || 0).toLocaleString("en-US");
 const short = (s, wait) => (s ? `${s.slice(0, 12)}…${s.slice(-6)}` : wait);
@@ -342,7 +346,7 @@ function SignalRack({ state, trace }) {
   );
 }
 
-function App() {
+export function CanonPage() {
   const [locale, setLocale, tx] = useLocale("brain.title", "meta.canonDesc");
   const worker = useRef(),
     pending = useRef(new Map()),
@@ -360,14 +364,16 @@ function App() {
     [proof, setProof] = useState(null),
     [bodyView, setBodyView] = useState(false),
     [archiveText, setArchiveText] = useState(""),
-    [intent, setIntent] = useState(null),
-    [pair, setPair] = useState(""),
     [input, setInput] = useState({ food: 650, threat: 100, light: 300 }),
     [market, setMarket] = useState({ changeBps: 1200, activity: 350 }),
     [trace, setTrace] = useState([]),
     [fullReady, setFullReady] = useState(false);
   const ask = (command) =>
     new Promise((resolve, reject) => {
+      if (!worker.current) {
+        reject(new Error(WORKER_RESET));
+        return;
+      }
       const id = ++serial.current;
       pending.current.set(id, { resolve, reject });
       worker.current.postMessage({ ...command, id });
@@ -380,6 +386,7 @@ function App() {
     try {
       return await fn();
     } catch (e) {
+      if (e.message === WORKER_RESET) return;
       setError(e.message);
       setRunning(false);
     } finally {
@@ -417,10 +424,12 @@ function App() {
       pending.current.clear();
     };
     return () => {
+      worker.current = null;
       w.terminate();
       for (const p of pending.current.values())
-        p.reject(new Error(tx("brain.workerClosed")));
+        p.reject(new Error(WORKER_RESET));
       pending.current.clear();
+      busyRef.current = false;
     };
   }, []);
   useEffect(() => {
@@ -452,40 +461,46 @@ function App() {
     let cancelled = false;
     setRunning(false);
     setProof(null);
-    setIntent(null);
-    act(async () => {
-      setTrace([]);
-      setNotice(
-        dataset === "full"
-          ? tx("brain.notice.full")
-          : tx("brain.notice.circuit"),
-      );
-      let r;
+    setTrace([]);
+    setNotice(
+      dataset === "full" ? tx("brain.notice.full") : tx("brain.notice.circuit"),
+    );
+    setBusy(true);
+    (async () => {
       try {
-        r = await ask({
+        const r = await ask({
           type: "load",
           url: `/data/malecns-${dataset}/manifest.json`,
         });
+        if (cancelled) return;
+        setData(r.result);
+        try {
+          const archive = await store.get(dataset);
+          if (cancelled) return;
+          if (archive) {
+            await ask({ type: "restore", archive });
+            if (!cancelled) setNotice(tx("brain.notice.restored"));
+          } else if (!cancelled) setNotice(tx("brain.notice.ready"));
+        } catch (e) {
+          if (cancelled || e.message === WORKER_RESET) return;
+          setNotice(tx("brain.notice.loaded"));
+          setError(tx("brain.restoreFail", { msg: e.message }));
+        }
       } catch (e) {
-        throw new Error(
+        if (cancelled || e.message === WORKER_RESET) return;
+        setError(
           dataset === "full"
             ? tx("brain.fullNeed", { msg: e.message })
             : e.message,
         );
+        setRunning(false);
+      } finally {
+        if (!cancelled) {
+          busyRef.current = false;
+          setBusy(false);
+        }
       }
-      if (cancelled) return;
-      setData(r.result);
-      try {
-        const archive = await store.get(dataset);
-        if (archive) {
-          await ask({ type: "restore", archive });
-          setNotice(tx("brain.notice.restored"));
-        } else setNotice(tx("brain.notice.ready"));
-      } catch (e) {
-        setNotice(tx("brain.notice.loaded"));
-        setError(tx("brain.restoreFail", { msg: e.message }));
-      }
-    });
+    })();
     return () => {
       cancelled = true;
     };
@@ -574,14 +589,23 @@ function App() {
         <div className="brain-title">
           <div>
             <div className="eyebrow">
-              THE CONTINUITY EXPERIMENT <span>{tx("brain.eyebrow")}</span>
+              LIFE CORE / L0 <span>{tx("brain.eyebrow")}</span>
             </div>
             <h1>{tx("brain.h1")}</h1>
             <p>{tx("brain.lead")}</p>
+            <ul className="layer-chips" aria-label={tx("brain.chipsAria")}>
+              {LIFE_CHIPS.map((chip) => (
+                <li key={chip}>{chip}</li>
+              ))}
+            </ul>
+            <p className="brain-align">
+              {tx("brain.align")}{" "}
+              <SiteLink href="/swarm.html">{tx("brain.openPit")}</SiteLink>
+            </p>
           </div>
           <div className="identity-stamp">
-            <span>SEAL ID</span>
-            <strong>GENESIS — 001</strong>
+            <span>{tx("brain.soulStamp")}</span>
+            <strong>{tx("brain.sessionStamp")}</strong>
             <small>{tx("brain.localSeal")}</small>
           </div>
         </div>
@@ -727,51 +751,6 @@ function App() {
             >
               {tx("brain.runMarket")} <ArrowUpRight size={14} />
             </button>
-            <details className="rpc-input">
-              <summary>{tx("brain.rpc")}</summary>
-              <label>
-                {tx("brain.pair")}
-                <input
-                  aria-label={tx("brain.pair")}
-                  placeholder="0x…"
-                  value={pair}
-                  onChange={(e) => setPair(e.target.value)}
-                />
-              </label>
-              <button
-                className="brain-secondary full"
-                disabled={
-                  busy || !enabled("market") || !/^0x[0-9a-f]{40}$/i.test(pair)
-                }
-                onClick={() =>
-                  act(async () => {
-                    if (!window.ethereum)
-                      throw new Error(tx("brain.needWallet"));
-                    const observation = await captureMarket(
-                      window.ethereum,
-                      pair,
-                    );
-                    await ask({
-                      type: "input",
-                      adapter: "market",
-                      ...observation,
-                    });
-                    await ask({
-                      type: "event",
-                      event: { type: "step", count: 32 },
-                    });
-                    setNotice(
-                      tx("brain.sampled", {
-                        n: observation.provenance.blockNumber,
-                      }),
-                    );
-                  })
-                }
-              >
-                {tx("brain.sample")}
-              </button>
-              <p>{tx("brain.rpcNote")}</p>
-            </details>
             <div className="input-foot">
               <span className="small-dot" /> {tx("brain.twoInputs")}
               <p>{tx("brain.mapNote")}</p>
@@ -821,12 +800,11 @@ function App() {
                 </small>
               </div>
               <div className="action-readout">
-                <span>BEHAVIOR → TRADE</span>
+                <span>{tx("brain.behavior")}</span>
                 <strong>
                   {state?.lastAction
                     ? tx("brain.act." + state.lastAction)
-                    : tx("brain.waitLoad")}{" "}
-                  · {state ? decodeTrade(state.lastAction) : "—"}
+                    : tx("brain.waitLoad")}
                 </strong>
                 <small>
                   {state?.body?.energy ?? "—"} / 1000 {tx("brain.energyTrade")}
@@ -871,21 +849,23 @@ function App() {
             <PanelTitle
               number="02"
               title={tx("brain.panel.cont")}
-              english="CONTINUITY"
+              english={tx("brain.panel.contEn")}
             />
             <div className="soul-mini">
-              <VitruvianFly />
+              <FlyMark />
               <div>
-                <span>ONE IDENTITY</span>
+                <span>SOUL</span>
                 <strong>{tx("brain.archiveTitle")}</strong>
                 <small>{tx("brain.archiveSub")}</small>
               </div>
             </div>
             <dl className="identity-list">
+              <dt>{tx("brain.soulLabel")}</dt>
+              <dd>{tx("brain.soulVal")}</dd>
+              <dt>{tx("brain.sessionLabel")}</dt>
+              <dd>{tx("brain.runtimeVal")}</dd>
               <dt>{tx("brain.connectomeLabel")}</dt>
               <dd>MaleCNS v1.0</dd>
-              <dt>{tx("brain.runtime")}</dt>
-              <dd>{tx("brain.runtimeVal")}</dd>
               <dt>{tx("brain.events")}</dt>
               <dd>{count(state?.eventCount)}</dd>
               <dt>{tx("brain.migrations")}</dt>
@@ -995,7 +975,7 @@ function App() {
             <PanelTitle
               number="03"
               title={tx("brain.panel.journal")}
-              english="EVENT JOURNAL"
+              english={tx("brain.panel.journalEn")}
             />
             <div className="event-list">
               {events.length ? (
@@ -1008,15 +988,7 @@ function App() {
                       <span>
                         {String(state.eventCount - i).padStart(4, "0")}
                       </span>
-                      <b>
-                        {event.type === "input"
-                          ? "SENSE"
-                          : event.type === "step"
-                            ? "LIVE"
-                            : event.type === "migration"
-                              ? "EVOLVE"
-                              : "SOURCE"}
-                      </b>
+                      <b>{journalKind(event.type)}</b>
                       <p>
                         {event.type === "input"
                           ? `${event.frame.adapter} · ${event.frame.provenance.kind === "simulation" ? tx("brain.simInput") : tx("brain.chainSample")} · #${event.frame.sequence}`
@@ -1038,7 +1010,7 @@ function App() {
             <PanelTitle
               number="04"
               title={tx("brain.panel.ports")}
-              english="EXTENSION PORTS"
+              english={tx("brain.panel.portsEn")}
             />
             <div className="extension-row">
               <Network size={19} />
@@ -1061,63 +1033,15 @@ function App() {
               </select>
             </div>
             <div className="extension-row">
-              <Database size={19} />
+              <ArrowUpRight size={19} />
               <div>
-                <strong>{tx("brain.intent")}</strong>
-                <p>{tx("brain.intentP")}</p>
+                <strong>{tx("brain.pitDoor")}</strong>
+                <p>{tx("brain.pitDoorP")}</p>
               </div>
-              <button
-                className="text-button"
-                disabled={busy || !state}
-                onClick={() =>
-                  act(async () => {
-                    const r = await ask({ type: "commitment" });
-                    setIntent(
-                      await proposeTrade(state, {
-                        checkpointHash: r.result.stateHash,
-                      }),
-                    );
-                  })
-                }
-              >
-                {tx("brain.readOut")} <ArrowUpRight size={14} />
-              </button>
+              <SiteLink className="text-button" href="/swarm.html">
+                {tx("brain.openPit")} <ArrowUpRight size={14} />
+              </SiteLink>
             </div>
-            <div className="extension-row">
-              <Database size={19} />
-              <div>
-                <strong>{tx("brain.flapPort")}</strong>
-                <p>{tx("brain.flapP")}</p>
-              </div>
-              <button
-                className="text-button"
-                disabled={busy || !state}
-                onClick={() =>
-                  act(async () => {
-                    const r = await ask({ type: "commitment" });
-                    setIntent(
-                      await proposeAction(state, {
-                        checkpointHash: r.result.stateHash,
-                        budgetWei: "100000000000000000",
-                        perActionWei: "1000000000000000",
-                      }),
-                    );
-                  })
-                }
-              >
-                {tx("brain.preview")} <ArrowUpRight size={14} />
-              </button>
-            </div>
-            {intent && (
-              <div className="intent-result">
-                {intent.action}
-                {intent.side ? ` · ${intent.side}` : ""} · {intent.amountWei}{" "}
-                wei{" "}
-                <small>
-                  {intent.reason} · mode={intent.mode} · {tx("brain.noSend")}
-                </small>
-              </div>
-            )}
             <p className="extension-note">{tx("brain.extNote")}</p>
           </section>
         </div>
@@ -1129,7 +1053,7 @@ function App() {
         )}
         <footer className="brain-footer">
           <span>
-            IMMORTAL / BUILD 01 <b>ONGOING EXISTENCE.</b>
+            IMMORTAL / L0 LIFE CORE <b>SOUL · SESSION · REPLAY.</b>
           </span>
           <p>
             {tx("brain.foot")}{" "}
@@ -1195,4 +1119,3 @@ function Slider({ label, value, onChange, min = 0, max = 1000 }) {
     </label>
   );
 }
-createRoot(document.getElementById("root")).render(<App />);

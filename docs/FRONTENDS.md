@@ -4,7 +4,7 @@ Immoral / Immortal 需要两套互不替代的界面。
 
 ## 1. 自己部署的站点（本仓库）
 
-Vite 多页：`/swarm.html` 交易蜂群、`/` 对外主站、`/brain.html` 连接组连接组、`/economy.html` 情景沙盘、`/blueprint.html` 蓝图。五页共用 `SiteBar` / `SitePage`。生产环境 `/altar` 仍重定向到蓝图（见 `vercel.json`）。
+单页壳：`src/site-app.jsx` 读路径，在同文档里切 `/`、`/swarm.html`、`/brain.html`、`/economy.html`、`/blueprint.html`。五个 HTML 只是同一壳的入口，刷新可深链。顶栏点击不再整页卸载。生产环境 `/altar` 仍重定向到蓝图（见 `vercel.json`）。
 
 这是对外主站。蜂群是当前产品主循环，只跑纸面账本。测试网合约部署后，本地祭坛读写 `ImmortalFly`；生产环境祭坛已并入蓝图。连接组与经济页不发交易。`$IFS` 已在 BSC 主网发射（见 `docs/FLAP-LAUNCH.md`），金库地址未公布。
 
