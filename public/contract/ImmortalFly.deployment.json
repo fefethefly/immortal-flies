@@ -1,0 +1,9 @@
+{
+  "status": "UNDEPLOYED",
+  "chainId": 97,
+  "address": null,
+  "fromBlock": 0,
+  "model": "iff-neural-16-v1",
+  "explorer": "https://testnet.bscscan.com",
+  "note": "设置 IFF_DEPLOY_KEY 后运行 npm run contracts:deploy:testnet。不要把私钥写进这个文件。"
+}

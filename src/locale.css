@@ -1,0 +1,18 @@
+.locale-switch {
+  display: inline-flex;
+  flex: none;
+  border: 1px solid var(--line, #2a261c);
+  overflow: hidden;
+}
+.locale-switch button {
+  font-family: var(--mono, "IBM Plex Mono", monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  padding: 5px 8px;
+  color: var(--quiet, #6e675c);
+  background: transparent;
+}
+.locale-switch button[aria-pressed="true"] {
+  color: var(--bg, #070706);
+  background: var(--text, #e8e2d6);
+}

@@ -1,0 +1,55 @@
+.blue-main {
+  max-width: 920px;
+  padding: 72px 6% 96px;
+}
+.blue-main .kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  margin: 0 0 16px;
+}
+.blue-main h1 {
+  font-family: var(--display);
+  font-size: clamp(44px, 7vw, 80px);
+  font-weight: 500;
+  line-height: 0.92;
+  margin: 0 0 18px;
+}
+.blue-main .lead {
+  color: var(--muted);
+  max-width: 38em;
+  margin: 0 0 48px;
+}
+.blue-main section { margin: 0 0 48px; }
+.blue-main h2 {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0 0 16px;
+}
+.blue-main ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.blue-main li,
+.blue-main a {
+  display: block;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.blue-main small {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+}
+.blue-main strong {
+  display: block;
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 500;
+  margin: 4px 0 6px;
+}
+.blue-main p { margin: 0; color: var(--muted); }

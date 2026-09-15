@@ -1,0 +1,35 @@
+{
+  "schema": "iff.token/1",
+  "name": "Immortal Fly",
+  "symbol": "IFS",
+  "chainId": 56,
+  "status": "live",
+  "address": "0x65b66bb4adb0e244e19d290b6aaa0381b81a7777",
+  "vault": null,
+  "flapUrl": "https://flap.sh/bnb/0x65b66bb4adb0e244e19d290b6aaa0381b81a7777",
+  "website": "https://immortalflies.com",
+  "twitter": "https://x.com/phyllis70ya2",
+  "buyTaxBps": 100,
+  "sellTaxBps": 100,
+  "hiveBps": 8000,
+  "opsBps": 2000,
+  "quote": "BNB",
+  "rejected": [
+    {
+      "symbol": "IFF",
+      "why": "2026-09-15 BSC 上已有同名 immortal fruit flies / IFF 税币，地址以 7777 结尾，不是本仓库发射的。"
+    },
+    {
+      "symbol": "FLY",
+      "why": "通用词，Flap 上已有多枚。"
+    },
+    {
+      "symbol": "FRUITFLIES",
+      "why": "同日已被抢注。"
+    },
+    {
+      "symbol": "IFLY",
+      "why": "本仓库曾选用，未发射，已改成 IFS。"
+    }
+  ]
+}

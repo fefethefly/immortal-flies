@@ -1,0 +1,31 @@
+{
+  "name": "immortal-fruit-flies",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/*.test.mjs",
+    "connectome:prepare": "python3 scripts/data/prepare_malecns.py",
+    "contracts:compile": "node scripts/compile-contracts.mjs",
+    "contracts:test": "node scripts/test-contracts.mjs",
+    "contracts:check:testnet": "node scripts/deploy-testnet.mjs --check",
+    "contracts:deploy:testnet": "node scripts/deploy-testnet.mjs",
+    "flap:prepare": "node scripts/flap-launch.mjs",
+    "format": "prettier --write src tests scripts index.html README.md DESIGN.md docs"
+  },
+  "dependencies": {
+    "ethers": "6.15.0",
+    "lucide-react": "0.468.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "5.4.0",
+    "prettier": "3.6.2",
+    "solc": "0.8.30",
+    "vite": "6.4.2"
+  }
+}

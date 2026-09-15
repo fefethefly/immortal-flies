@@ -1,0 +1,11 @@
+node_modules/
+dist/
+artifacts/
+.env
+.env.local
+*.log
+.DS_Store
+test-results/
+scripts/data/cache/
+public/data/malecns-full/
+.vercel
