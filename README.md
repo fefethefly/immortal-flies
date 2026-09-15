@@ -89,6 +89,18 @@ npm run contracts:check:testnet
 
 本地 gas 样本：mint 181,608，32 步 train 约 629,000，rebirth 39,811。不是 BSC 的实时报价，不能据此承诺费用。生成的明细位于 `artifacts/contract-test-report.json`。
 
+## 生产部署（最小可上线版本）
+
+```sh
+npm run build        # 产物在 dist/（约 10 MB，含字体/连接组数据/代币清单）
+npm run preview      # 本地预览生产构建
+```
+
+- 静态托管即可上线（Vercel 配置见 `vercel.json`：`/altar`、`/economy` 重定向到蓝图；`/token/official.json` 缓存 60 秒）。
+- **后端是可选的**：不部署 `npm run server` 时，站点完全可用——交易坑七视图、ask、解释层全部回落本地实现，API 徽标显示 LOCAL ONLY。部署后端时把 `/v1`、`/health`、`/ready` 反代到 Node 服务。
+- 上线前自检：`npm test`（123 项）+ `npm run build` + preview 环境过一遍四页（首页/交易坑/全典/蓝图）。
+- 版本：`v0.2.0`（P0–P5 纸面世界 + 前端全量 + 可选后端，全部 SIM；不含真实资金、借贷与主网 NFT）。
+
 ## 源码导航
 
 | 路径                             | 作用                                                                              |
