@@ -1,0 +1,367 @@
+.home-mesh {
+  position: relative;
+  margin: 1px 0 0;
+  padding: clamp(48px, 7vh, 88px) var(--rail) clamp(40px, 6vh, 72px);
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(
+      ellipse 46% 50% at 92% 8%,
+      rgba(156, 171, 141, 0.08),
+      transparent 58%
+    ),
+    var(--bg);
+}
+
+.mesh-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.7fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: end;
+  margin: 0 0 clamp(28px, 4vh, 40px);
+}
+
+.mesh-kicker {
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+.home-mesh h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(34px, 5vw, 58px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.home-mesh h2 em {
+  display: block;
+  margin-top: 0.08em;
+  color: var(--gold-bright);
+  font-style: normal;
+}
+
+.mesh-lead {
+  max-width: 46ch;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.mesh-coverage {
+  justify-self: end;
+  text-align: right;
+  padding-bottom: 4px;
+}
+
+.mesh-coverage small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--quiet);
+}
+
+.mesh-coverage strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-family: var(--display);
+  font-size: clamp(48px, 6vw, 72px);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.mesh-coverage span {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mesh-coverage i {
+  margin: 0 6px;
+  font-style: normal;
+  color: var(--quiet);
+}
+
+.mesh-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.62fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.mesh-stage {
+  background: #0c0b09;
+  display: grid;
+  grid-template-rows: minmax(360px, 52vh) auto;
+}
+
+.mesh-field {
+  min-height: 360px;
+  height: 100%;
+  border-bottom: 1px solid var(--line);
+}
+
+.mesh-field-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  cursor: crosshair;
+}
+
+.mesh-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+}
+
+.mesh-legend li {
+  background: #100e0b;
+  padding: 10px 10px 9px;
+  display: grid;
+  gap: 5px;
+  animation: meshIn 0.55s var(--ease) both;
+  animation-delay: calc(var(--i) * 50ms);
+}
+
+.mesh-legend small,
+.mesh-legend em {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.mesh-legend small {
+  color: var(--gold);
+}
+
+.mesh-legend span {
+  font-size: 12px;
+}
+
+.mesh-legend i {
+  display: block;
+  height: 2px;
+  background: #221e18;
+}
+
+.mesh-legend i b {
+  display: block;
+  height: 100%;
+  background: var(--neural);
+}
+
+.mesh-legend em {
+  font-style: normal;
+  color: var(--quiet);
+}
+
+.mesh-legend .is-live em {
+  color: var(--neural);
+}
+
+.mesh-legend .is-partial em,
+.mesh-legend .is-stale em {
+  color: var(--gold-bright);
+}
+
+.mesh-side {
+  background: rgba(10, 9, 7, 0.96);
+  padding: 18px 18px 16px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.mesh-side-head,
+.mesh-order {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+}
+
+.mesh-side-head small,
+.mesh-order em {
+  color: var(--quiet);
+  font-style: normal;
+}
+
+.mesh-side ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.mesh-side li {
+  border-bottom: 1px solid var(--line);
+}
+
+.mesh-side li button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 10px 0;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+}
+
+.mesh-side li.is-focus span,
+.mesh-side li.is-focus button span {
+  color: var(--text);
+}
+
+.mesh-side li b {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--neural);
+}
+
+.mesh-side li small {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--quiet);
+}
+
+.mesh-side li.is-you span {
+  color: var(--gold-bright);
+}
+
+.mesh-order strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.mesh-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  align-items: center;
+  margin: 22px 0 0;
+}
+
+.mesh-host {
+  padding: 12px 18px 11px;
+  border: 1px solid #665c4c;
+  background: #16130f;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  transition:
+    transform 0.18s var(--ease),
+    border-color 0.22s var(--ease),
+    color 0.22s var(--ease);
+}
+
+.mesh-host:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+.mesh-host:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.mesh-host:disabled {
+  cursor: default;
+  color: var(--quiet);
+  border-color: var(--line);
+}
+
+.mesh-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  border-bottom: 1px solid #665c4c;
+  padding-bottom: 4px;
+}
+
+.mesh-go:hover {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+}
+
+.mesh-error,
+.mesh-note {
+  margin: 16px 0 0;
+  max-width: 72ch;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--quiet);
+}
+
+.mesh-error {
+  color: #d7b4a8;
+}
+
+@keyframes meshIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mesh-cell {
+    animation: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .mesh-head,
+  .mesh-board {
+    grid-template-columns: 1fr;
+  }
+
+  .mesh-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mesh-coverage {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .mesh-stage {
+    grid-template-rows: minmax(300px, 46vh) auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .mesh-side li button {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

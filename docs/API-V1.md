@@ -43,4 +43,14 @@ npm run dev            # Vite 将 /v1 /health /ready 反代到 8787
 5. P2 纸面世界：`GET /v1/sessions/:id/world`（Colony / Intent / Risk / Execution + 买持基线与净成本）；单层 `GET .../layers/{colony|intent|risk|execution|market|baseline}`
 6. 只读行情：`POST /v1/sessions/:id/market` 注入 `changeBps` 观测（可带 `chain-observation` provenance）。禁止 calldata / 签名；下一 tick 消耗，过期回落纸面游走
 
+## 托管网（架子，未挂路由）
+
+域模型已在 `src/brain/flyswarm/mesh.mjs` 与 `hosting.mjs`。计划中的只读/SIM 端点，**尚未 mount**：
+
+- `GET /v1/mesh` → `meshView()`（分区、节点、覆盖率；不含 body ID / 电位）
+- `GET /v1/hosting` → `hostingView()`
+- `POST /v1/hosting/quote | escrow | assign | start | settle | refund | renew`
+
+接入不得改写 `officialNeurons`。IFS 托管走现有 `occupyCredit`；BNB 不得占用质押。合约自动扣款未开放。
+
 Life Core 仍在 `src/brain/`；LLM 与 HTTP 只在 `server/`。行情与分层视图在 World 层（`src/brain/flyswarm/market.mjs`、`layers.mjs`）。

@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import { ArrowUpRight } from "lucide-react";
+import {
+  Activity,
+  ArrowUpRight,
+  BookOpen,
+  Compass,
+  Cpu,
+  Landmark,
+  Layers,
+  Radio,
+} from "lucide-react";
 import { loadOfficialToken } from "./token.mjs";
 import { useLocale } from "./use-locale.mjs";
 import { LocaleContext } from "./locale-context.jsx";
@@ -8,9 +16,21 @@ import { SiteBar, SiteLink } from "./site-chrome.jsx";
 import { SealBar } from "./seal-bar.jsx";
 import { useHomeSwarm } from "./home-field.jsx";
 import { HomeObservatory } from "./home-observatory.jsx";
+import { HomeMeshAtlas } from "./home-mesh.jsx";
 import { HomeLiveDecks } from "./home-live.jsx";
+import { LifeGlyph } from "./life-glyphs.jsx";
+import { tiltHandlers, usePrefersReduced } from "./rite.jsx";
 import { formatPrice, formatToken, reflexOf } from "./swarm.mjs";
 import "./public.css";
+
+const DOOR_ICONS = [Compass, Activity, Cpu, Landmark, Layers];
+const LOG_ICONS = {
+  ACT: Activity,
+  SENSE: Radio,
+  MEMORY: BookOpen,
+  BOOK: Landmark,
+  HOLD: Compass,
+};
 
 const DOORS = [
   ["/", "nav.home", "public.doorHome"],
@@ -122,7 +142,7 @@ function useReveal() {
   }, []);
 }
 
-function App() {
+export function HomePage() {
   const [locale, setLocale, tx] = useLocale("meta.homeTitle", "meta.homeDesc");
   const [token, setToken] = useState(null);
   const { swarm, selectedId, select, paused, togglePause } = useHomeSwarm();
@@ -138,6 +158,8 @@ function App() {
   }, [locale]);
   const live = token?.status === "live" && token.address;
   const log = colonyLog(swarm, champ, tx);
+  const reduced = usePrefersReduced();
+  const tilt = tiltHandlers(reduced);
   return (
     <LocaleContext.Provider value={{ locale, tx }}>
       <div className="home">
@@ -171,6 +193,8 @@ function App() {
           onPause={togglePause}
         />
 
+        <HomeMeshAtlas tx={tx} />
+
         <HomeLiveDecks swarm={swarm} fly={champ} onSelect={select} />
 
         <section
@@ -184,17 +208,23 @@ function App() {
           </div>
           <p className="event-note">{tx("public.logHint")}</p>
           <div className="event-grid">
-            {log.map((row, i) => (
-              <div
-                className={`event-row ${row.tone}`}
-                key={row.key}
-                style={{ "--event-delay": `${i * 90}ms` }}
-              >
-                <b>{row.kind}</b>
-                <span>{row.text}</span>
-                <em>{String(row.tick % 100000).padStart(4, "0")}</em>
-              </div>
-            ))}
+            {log.map((row, i) => {
+              const Icon = LOG_ICONS[row.kind] || Radio;
+              return (
+                <div
+                  className={`event-row ${row.tone}`}
+                  key={row.key}
+                  style={{ "--event-delay": `${i * 90}ms` }}
+                >
+                  <b>
+                    <Icon size={11} />
+                    {row.kind}
+                  </b>
+                  <span>{row.text}</span>
+                  <em>{String(row.tick % 100000).padStart(4, "0")}</em>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -208,74 +238,65 @@ function App() {
             <small>{tx("public.worldSide")}</small>
           </div>
           <div className="world-map-grid">
-            <article className="world-map-card life-card">
+            <article className="world-map-card life-card rite-tilt" {...tilt}>
               <span className="world-index">{tx("public.world1k")}</span>
               <i className="world-ghost" aria-hidden="true">
                 01
               </i>
-              <div className="world-stack" aria-hidden="true">
-                <b />
-                <b />
-                <b />
-                <b />
-              </div>
+              <Cpu size={18} />
+              <LifeGlyph kind="life" />
               <h2>
                 {tx("public.world1a")}
                 <br />
                 <em>{tx("public.world1em")}</em>
               </h2>
               <p>{tx("public.world1p")}</p>
-              <a href="/brain.html">{tx("public.world1go")} ↗</a>
+              <SiteLink href="/brain.html">{tx("public.world1go")} ↗</SiteLink>
             </article>
-            <article className="world-map-card social-card">
+            <article className="world-map-card social-card rite-tilt" {...tilt}>
               <span className="world-index">{tx("public.world2k")}</span>
               <i className="world-ghost" aria-hidden="true">
                 02
               </i>
-              <div className="language-glyphs" aria-hidden="true">
-                <b>SENSE</b>
-                <i>→</i>
-                <b>ACT</b>
-                <i>→</i>
-                <b>MEMORY</b>
-              </div>
+              <Radio size={18} />
+              <LifeGlyph kind="language" />
               <h2>
                 {tx("public.world2a")}
                 <br />
                 <em>{tx("public.world2em")}</em>
               </h2>
               <p>{tx("public.world2p")}</p>
-              <a href="/swarm.html">{tx("public.world2go")} ↗</a>
+              <SiteLink href="/swarm.html">{tx("public.world2go")} ↗</SiteLink>
             </article>
-            <article className="world-map-card finance-card">
+            <article className="world-map-card finance-card rite-tilt" {...tilt}>
               <span className="world-index">{tx("public.world3k")}</span>
               <i className="world-ghost" aria-hidden="true">
                 03
               </i>
-              <div className="finance-orbit" aria-hidden="true">
-                <span>$IFS</span>
-                <i>Credit</i>
-                <b>Vault</b>
-                <em>Trade</em>
-              </div>
+              <Landmark size={18} />
+              <LifeGlyph kind="finance" />
               <h2>
                 {tx("public.world3a")}
                 <br />
                 <em>{tx("public.world3em")}</em>
               </h2>
               <p>{tx("public.world3p")}</p>
-              <a href="/economy.html">{tx("public.world3go")} ↗</a>
+              <SiteLink href="/economy.html">{tx("public.world3go")} ↗</SiteLink>
             </article>
           </div>
           <div className="doors" aria-label={tx("public.doorsLabel")}>
             <small>{tx("public.doorsLabel")}</small>
-            {DOORS.map(([href, nameKey, hintKey], i) => (
-              <SiteLink key={href} href={href}>
-                <em>{String(i + 1).padStart(2, "0")}</em>
-                <span>{tx(nameKey)}</span>
-                <small>{tx(hintKey)}</small>
-              </SiteLink>
-            ))}
+            {DOORS.map(([href, nameKey, hintKey], i) => {
+              const Icon = DOOR_ICONS[i];
+              return (
+                <SiteLink key={href} href={href}>
+                  <em>{String(i + 1).padStart(2, "0")}</em>
+                  <Icon size={14} />
+                  <span>{tx(nameKey)}</span>
+                  <small>{tx(hintKey)}</small>
+                </SiteLink>
+              );
+            })}
           </div>
         </section>
 
@@ -293,10 +314,10 @@ function App() {
             <h2>{tx("public.laterTitle")}</h2>
             <p>{tx("public.laterLead")}</p>
           </div>
-          <a href="/blueprint.html">
+          <SiteLink href="/blueprint.html">
             {tx("nav.blueprint")}
             <ArrowUpRight size={15} />
-          </a>
+          </SiteLink>
         </section>
 
         <p className="note disclaimer">{tx("public.disclaimer")}</p>
@@ -333,9 +354,3 @@ function App() {
     </LocaleContext.Provider>
   );
 }
-
-createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);

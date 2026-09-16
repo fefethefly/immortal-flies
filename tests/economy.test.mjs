@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculateEconomy, FEE_SPLIT, teamVested } from "../src/economy.mjs";
+import {
+  calculateEconomy,
+  FEE_SPLIT,
+  teamVested,
+  splitProtocol,
+} from "../src/economy.mjs";
 test("fee routing conserves receipts and excludes marketplace sellers principal", () => {
   const r = calculateEconomy({ players: 10000 });
   assert.equal(r.revenue, 40000);
@@ -41,4 +46,17 @@ test("team cliff releases nothing for 12 months and linearly vests over the next
   assert.equal(teamVested(30), 75000000);
   assert.equal(teamVested(48), 150000000);
   assert.equal(teamVested(60), 150000000);
+});
+test("protocol surplus fills reserve from positive N before D, and allocates 35/25/20/10/10", () => {
+  const r = splitProtocol({ revenue: 40000, cost: 18000, reserveGap: 6000 });
+  assert.equal(r.N, 22000);
+  assert.equal(r.T, 6000);
+  assert.equal(r.D, 16000);
+  assert.equal(r.ifsBudget, 5600);
+  assert.equal(r.reserve, 4000);
+  assert.equal(r.capital, 3200);
+  const loss = splitProtocol({ revenue: 1000, cost: 5000, reserveGap: 1000 });
+  assert.equal(loss.N, -4000);
+  assert.equal(loss.T, 0);
+  assert.equal(loss.D, 0);
 });

@@ -3,3 +3,6 @@ scripts/data/cache
 artifacts
 test-results
 node_modules
+server
+contracts
+.env.example

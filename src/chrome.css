@@ -2,6 +2,11 @@ html {
   background: #0a0907;
 }
 
+.site-boot {
+  min-height: 100dvh;
+  background: #0a0907;
+}
+
 .site-grain,
 .home-grain {
   position: fixed;

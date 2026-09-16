@@ -117,7 +117,7 @@ npm run preview      # 本地预览生产构建
 | `src/vitruvian.jsx`              | 维特鲁威印记与 Logo                                                               |
 | `src/components.jsx`             | 印记、卡片、弹窗等组件                                                            |
 | `src/brain/`                     | 开放核：ethology / ports / learn / treasury / kernel                              |
-| `src/brain/flyswarm/`            | 蝇群协议：schemas / genesis / membership / log / quorum                           |
+| `src/brain/flyswarm/`            | 蝇群协议：schemas / genesis / membership / log / quorum / mesh / hosting           |
 | `server/`                        | Session / Replay / P1 LLM HTTP 服务（`docs/API-V1.md`）                           |
 | `src/api-client.mjs`             | 前端 API 封装：可选后端镜像与 LLM 解释/ask/计划（断线回落本地）                   |
 | `src/brain-page.jsx`             | 活体实验室入口                                                                    |
@@ -146,6 +146,7 @@ npm run preview      # 本地预览生产构建
 7. 用带 tBNB 的测试网私钥跑 `npm run contracts:deploy:testnet`，再在本地祭坛走完铸造 → 训练 → 休眠/转生。
 8. 质押权益模型（SIM）已落地：质押 IFS 越多权益越多——①质押分红：协议 `stakeRewards` 池按锁定质押量比例分配（单魂单次封顶 10%、超额滚回准备金、停机自动冻结、水位线防重启重复）；②RWA 配额：锁定质押 × 2 兑换股票篓子认购额度（上限可治理，仅资格模拟不构成债权）。IFS 视图信用账本展示每人分红累计与认购额度。真实分红与 RWA 发行仍待合约层。
 9. 根据实测 gas 决定哪些互动逐笔上链、哪些先在本地预演；P6 借贷/RWA/NFT、Flap 嵌入包、主网 NFT、发行规则和独立安全检查仍在后面。
+10. 托管网架子已立（`iff.mesh/1` + `iff.hosting/1`）：首页展示分区/节点/覆盖，接入只改运行器覆盖、不改官方 MaleCNS 普查。IFS 托管占用质押，BNB 只作轨道；自动续费有预算上限。HTTP 与链上 ServiceEscrow 仍未接线。
 
 ## 连接组运行内核（第一版）
 

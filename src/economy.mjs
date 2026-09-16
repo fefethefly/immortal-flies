@@ -59,3 +59,33 @@ export function teamVested(month) {
   if (!Number.isFinite(month) || month < 0) throw new Error("Invalid month");
   return 150000000 * Math.min(1, Math.max(0, month - 12) / 36);
 }
+
+/** PRODUCT-LATEST §8.2. Hypothesis only — not a quote or a payout. */
+export const PROTOCOL_SPLIT = Object.freeze([
+  { key: "ifsBudget", rate: 0.35, color: "#c9a25e" },
+  { key: "reserve", rate: 0.25, color: "#9c855f" },
+  { key: "capital", rate: 0.2, color: "#a89e8c" },
+  { key: "lockReward", rate: 0.1, color: "#93a181" },
+  { key: "eco", rate: 0.1, color: "#b57660" },
+]);
+
+export function splitProtocol({ revenue = 0, cost = 0, reserveGap = 0 } = {}) {
+  for (const [key, value] of Object.entries({ revenue, cost, reserveGap })) {
+    if (!Number.isFinite(value) || value < 0) {
+      throw new Error(`Invalid protocol input: ${key}`);
+    }
+  }
+  const R = revenue;
+  const C = cost;
+  const N = R - C;
+  const T = Math.min(Math.max(N, 0), reserveGap);
+  const D = Math.max(N - T, 0);
+  return {
+    R,
+    C,
+    N,
+    T,
+    D,
+    ...Object.fromEntries(PROTOCOL_SPLIT.map((row) => [row.key, D * row.rate])),
+  };
+}

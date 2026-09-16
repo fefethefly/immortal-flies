@@ -3,7 +3,10 @@ import { ArrowUpRight, Pause, Play, ScanLine } from "lucide-react";
 import { formatBnb, formatPrice, layerFires, summarize } from "./swarm.mjs";
 import { colonyPosition } from "./observatory-art.mjs";
 import { createObservatoryRenderer } from "./observatory-renderer.mjs";
+import { SiteLink } from "./site-chrome.jsx";
 import "./home-observatory.css";
+
+const LIFE_CHIPS = ["L0", "Soul", "Society", "First world"];
 
 const MODES = ["neural", "society", "market"];
 const COLORS = { neural: "#a9c4bb", society: "#c9a25e", market: "#93a181" };
@@ -42,7 +45,8 @@ const words = {
     lineageWait: "尚无代际事件，个体继续积累经历。",
     credit: "自主算力补给",
     vault: "金库与结算",
-    planned: "待接入",
+    planned: "MESH / SIM",
+    vaultState: "待接入",
     token: "了解 $IFS",
     economyNote: "交易是第一个小世界。IFS 连接更广阔的经济层。",
     signal: "神经脉冲 → 行为解码 → 模拟成交",
@@ -87,7 +91,8 @@ const words = {
       "No lineage events yet. Life continues to accumulate experience.",
     credit: "Autonomous compute",
     vault: "Vault & settlement",
-    planned: "PLANNED",
+    planned: "MESH / SIM",
+    vaultState: "PLANNED",
     token: "Explore $IFS",
     economyNote:
       "Trading is the first small world. IFS connects the economy beyond it.",
@@ -290,18 +295,23 @@ export function HomeObservatory({
           <h1>
             {w.title} <em>{w.accent}</em>
           </h1>
+          <ul className="obs-chips" aria-hidden="true">
+            {LIFE_CHIPS.map((chip) => (
+              <li key={chip}>{chip}</li>
+            ))}
+          </ul>
         </div>
         <div className="obs-intro-side">
           <p>{w.lead}</p>
           <div className="obs-actions">
-            <a className="obs-enter" href="/swarm.html">
+            <SiteLink className="obs-enter" href="/swarm.html">
               {w.enter}
               <ArrowUpRight size={15} />
-            </a>
-            <a href="/brain.html">
+            </SiteLink>
+            <SiteLink href="/brain.html">
               {w.canon}
               <ArrowUpRight size={14} />
-            </a>
+            </SiteLink>
           </div>
         </div>
       </div>
@@ -463,9 +473,9 @@ export function HomeObservatory({
                   <p>{w.lineageWait}</p>
                 )}
               </div>
-              <a className="obs-panel-link" href="/brain.html">
+              <SiteLink className="obs-panel-link" href="/brain.html">
                 SOUL → MEMORY → BRANCH <ArrowUpRight size={12} />
-              </a>
+              </SiteLink>
             </Panel>
           </div>
           <div className="obs-stage">
@@ -590,12 +600,12 @@ export function HomeObservatory({
               </div>
               <div className="obs-planned">
                 <span>{w.vault}</span>
-                <small>{w.planned}</small>
+                <small>{w.vaultState}</small>
               </div>
-              <a className="obs-panel-link" href="/economy.html">
+              <SiteLink className="obs-panel-link" href="/economy.html">
                 {w.token}
                 <ArrowUpRight size={12} />
-              </a>
+              </SiteLink>
             </Panel>
           </div>
         </div>

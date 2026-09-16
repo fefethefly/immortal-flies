@@ -1,14 +1,26 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+import {
+  Cpu,
+  DoorOpen,
+  Fingerprint,
+  Globe,
+  Landmark,
+  Network,
+  Route,
+  Wallet,
+} from "lucide-react";
+import { LayerCabinet, PhaseSpine } from "./blueprint-rite.jsx";
+import { tiltHandlers, usePrefersReduced, useReveal } from "./rite.jsx";
 import { useLocale } from "./use-locale.mjs";
 import { SiteLink, SitePage } from "./site-chrome.jsx";
 import "./public.css";
 import "./blueprint.css";
 
 const LAYERS = [
-  ["L0", "blue.l0", "blue.l0p", "/brain.html", "nav.canon"],
-  ["L1", "blue.l1", "blue.l1p", "/swarm.html", "nav.pit"],
-  ["L2", "blue.l2", "blue.l2p", "/swarm.html", "nav.pit"],
-  ["L3", "blue.l3", "blue.l3p", "/economy.html", "nav.economy"],
+  ["L0", "blue.l0", "blue.l0p", "/brain.html", "nav.canon", Cpu],
+  ["L1", "blue.l1", "blue.l1p", "/swarm.html", "nav.pit", Network],
+  ["L2", "blue.l2", "blue.l2p", "/swarm.html", "nav.pit", Globe],
+  ["L3", "blue.l3", "blue.l3p", "/economy.html", "nav.economy", Landmark],
 ];
 
 const PHASES = [
@@ -23,10 +35,10 @@ const PHASES = [
 ];
 
 const DRAWN = [
-  ["01", "blue.identityTitle", "blue.identity"],
-  ["02", "blue.vaultTitle", "blue.vault"],
-  ["03", "blue.capitalTitle", "blue.capital"],
-  ["04", "blue.portsTitle", "blue.ports"],
+  ["01", "blue.identityTitle", "blue.identity", Fingerprint],
+  ["02", "blue.vaultTitle", "blue.vault", Landmark],
+  ["03", "blue.capitalTitle", "blue.capital", Wallet],
+  ["04", "blue.portsTitle", "blue.ports", DoorOpen],
 ];
 
 export function BlueprintPage() {
@@ -34,6 +46,15 @@ export function BlueprintPage() {
     "meta.blueprintTitle",
     "meta.blueprintDesc",
   );
+  const [active, setActive] = useState(-1);
+  const reduced = usePrefersReduced();
+  const tilt = tiltHandlers(reduced);
+  const labels = useMemo(
+    () => LAYERS.map((row) => tx(row[1])),
+    [locale, tx],
+  );
+  useReveal(locale);
+
   return (
     <SitePage
       className="home blueprint"
@@ -42,16 +63,43 @@ export function BlueprintPage() {
       tx={tx}
       current="blueprint"
     >
-      <main className="blue-main">
-        <p className="kicker">{tx("nav.blueprint")}</p>
-        <h1>{tx("blue.h1")}</h1>
-        <p className="lead">{tx("blue.lead")}</p>
+      <main className="blue-main rite-main">
+        <header className="rite-hero">
+          <div>
+            <p className="kicker">{tx("nav.blueprint")}</p>
+            <h1>{tx("blue.h1")}</h1>
+            <p className="lead">{tx("blue.lead")}</p>
+            <p className="blue-dep">{tx("blue.depNote")}</p>
+          </div>
+          <LayerCabinet
+            key={locale}
+            labels={labels}
+            active={active}
+            onActive={setActive}
+            caption={tx("blue.stackCaption")}
+          />
+        </header>
 
-        <section>
+        <section data-reveal>
           <h2>{tx("blue.layers")}</h2>
           <div className="blue-layers">
-            {LAYERS.map(([id, title, body, href, go]) => (
-              <SiteLink key={id} href={href} className="blue-layer">
+            {LAYERS.map(([id, title, body, href, go, Icon], i) => (
+              <SiteLink
+                key={id}
+                href={href}
+                className={`blue-layer rite-card rite-tilt ${active === i ? "is-hot" : ""}`}
+                style={{ "--i": i }}
+                onPointerMove={tilt.onPointerMove}
+                onPointerEnter={() => setActive(i)}
+                onPointerLeave={(event) => {
+                  tilt.onPointerLeave?.(event);
+                  setActive(-1);
+                }}
+                onFocus={() => setActive(i)}
+                onBlur={() => setActive(-1)}
+              >
+                <span className="blue-layer-mark">{id}</span>
+                <Icon size={18} />
                 <small>{id}</small>
                 <strong>{tx(title)}</strong>
                 <p>{tx(body)}</p>
@@ -61,27 +109,34 @@ export function BlueprintPage() {
           </div>
         </section>
 
-        <section>
-          <h2>{tx("blue.phases")}</h2>
-          <ol className="blue-phases">
-            {PHASES.map(([id, title, body, state]) => (
-              <li key={id} data-state={state}>
-                <small>{id}</small>
-                <div>
-                  <strong>{tx(title)}</strong>
-                  <p>{tx(body)}</p>
-                </div>
-                <em>{tx(`blue.state.${state}`)}</em>
-              </li>
-            ))}
-          </ol>
+        <section data-reveal>
+          <h2>
+            <Route size={18} />
+            {tx("blue.phases")}
+          </h2>
+          <div className="blue-phase-wrap">
+            <PhaseSpine count={PHASES.length} nowCount={3} />
+            <ol className="blue-phases">
+              {PHASES.map(([id, title, body, state], i) => (
+                <li key={id} data-state={state} style={{ "--i": i }}>
+                  <small>{id}</small>
+                  <div>
+                    <strong>{tx(title)}</strong>
+                    <p>{tx(body)}</p>
+                  </div>
+                  <em>{tx(`blue.state.${state}`)}</em>
+                </li>
+              ))}
+            </ol>
+          </div>
         </section>
 
-        <section>
+        <section data-reveal>
           <h2>{tx("blue.later")}</h2>
-          <ol>
-            {DRAWN.map(([no, title, body]) => (
-              <li key={no}>
+          <ol className="blue-drawn">
+            {DRAWN.map(([no, title, body, Icon]) => (
+              <li key={no} className="rite-card rite-tilt" {...tilt}>
+                <Icon size={18} />
                 <small>{no}</small>
                 <strong>{tx(title)}</strong>
                 <p>{tx(body)}</p>

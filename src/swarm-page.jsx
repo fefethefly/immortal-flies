@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
 import { Moon, Pause, Play, Sun, Utensils, Zap } from "lucide-react";
+import { LifeGlyph } from "./life-glyphs.jsx";
 import {
   FINANCIAL_PORTS,
   STIMULI,
@@ -55,7 +55,7 @@ import "./world.css";
 
 const ICONS = { food: Utensils, threat: Zap, light: Sun, dark: Moon };
 
-function App() {
+export function PitPage() {
   const [locale, setLocale, tx] = useLocale("meta.pitTitle", "meta.pitDesc");
   const [view, setView] = useState(null);
   const [world, setWorld] = useState(null);
@@ -72,7 +72,6 @@ function App() {
   const sessionRef = useRef(null);
   const remoteRef = useRef(null);
   const mirrorFailures = useRef(0);
-  const booted = useRef(false);
   const [remote, setRemote] = useState(null);
   const [creditRemote, setCreditRemote] = useState(null);
   const [vaultRemote, setVaultRemote] = useState(null);
@@ -213,8 +212,6 @@ function App() {
 
   // 启动：加载真实 MaleCNS 子图 → 内核 → 绑定创世（或从快照恢复）。
   useEffect(() => {
-    if (booted.current) return undefined;
-    booted.current = true;
     let cancelled = false;
     (async () => {
       try {
@@ -229,6 +226,7 @@ function App() {
         setWorld(worldView(session));
         setReady(true);
       } catch (err) {
+        if (cancelled) return;
         console.warn("[pit] boot failed:", err?.stack || err);
         setError(err.message || tx("pit.bootFail"));
       }
@@ -340,10 +338,12 @@ function App() {
             current="pit"
           />
           <section className="pit">
-            <div className="stage">
-              <p className="pit-error" role="alert">
+            <div className="stage pit-boot-stage">
+              <LifeGlyph kind="boot" tall />
+              <p className="pit-error" role="status">
                 {error || tx("pit.loading")}
               </p>
+              <small>{tx("pit.bootCaption")}</small>
             </div>
           </section>
         </div>
@@ -389,8 +389,21 @@ function App() {
 
         {tab === "pit" && (
           <>
+            <div className="pit-hero">
+              <div>
+                <p className="pit-kicker">L2 / TRADING WORLD</p>
+                <ol className="pit-flow" aria-label={tx("pit.flowCaption")}>
+                  <li>SENSE</li>
+                  <li>ACT</li>
+                  <li>PORT</li>
+                </ol>
+              </div>
+              <p>{tx("pit.flowCaption")}</p>
+            </div>
             <section className="pit">
               <div className="stage">
+                <span className="stage-frame tl" />
+                <span className="stage-frame br" />
                 <div className="stage-notes">
                   <span>MALECNS / 1400 NODES / TRADER</span>
                   <span>
@@ -418,7 +431,7 @@ function App() {
                 <div className="path">
                   {FINANCIAL_PORTS.map((port, i) => (
                     <React.Fragment key={port.id}>
-                      {i > 0 && <i />}
+                      {i > 0 && <i className="path-flow" />}
                       <span className={port.status}>{port.label}</span>
                     </React.Fragment>
                   ))}
@@ -697,5 +710,3 @@ function App() {
     </LocaleContext.Provider>
   );
 }
-
-createRoot(document.getElementById("root")).render(<App />);

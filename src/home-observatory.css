@@ -24,8 +24,9 @@
 .obs-eyebrow > span {
   width: 5px;
   height: 5px;
-  background: #b3a488;
-  box-shadow: 0 0 12px #b3a48877;
+  background: #c9a25e;
+  box-shadow: 0 0 0 0 rgba(201, 162, 94, 0.45);
+  animation: obs-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 .obs-intro h1 {
   font: 500 clamp(38px, 4.7vw, 76px) / 1.1 var(--display);
@@ -36,6 +37,21 @@
   display: inline-block;
   font-weight: 400;
   color: #c9a25e;
+}
+.obs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+.obs-chips li {
+  font: 9px var(--mono);
+  letter-spacing: 1.4px;
+  color: #c9a25e;
+  border: 1px solid #443c2c;
+  padding: 5px 9px;
 }
 .obs-intro-side {
   max-width: 530px;
@@ -76,7 +92,9 @@
   position: relative;
   border: 1px solid #342e22;
   background: #0a0907;
-  box-shadow: 0 20px 90px #0006;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 230, 0.05),
+    0 28px 90px rgba(0, 0, 0, 0.45);
   color: #d9d0bb;
 }
 .obs-console::before,
@@ -124,8 +142,18 @@
   border-radius: 50%;
 }
 .obs-system > i.is-live {
-  background: #b3a488;
-  box-shadow: 0 0 10px #b3a48880;
+  background: #c9a25e;
+  box-shadow: 0 0 0 0 rgba(201, 162, 94, 0.45);
+  animation: obs-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes obs-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 162, 94, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(201, 162, 94, 0);
+  }
 }
 .obs-system > b {
   font: 500 12px var(--mono);
@@ -910,6 +938,7 @@
 @media (prefers-reduced-motion: reduce) {
   .observatory * {
     transition: none !important;
+    animation: none !important;
   }
 }
 /* Dense colonies retain every keyboard target without overlapping every label. */

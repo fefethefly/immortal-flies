@@ -328,6 +328,79 @@ const quorumV2 = {
   },
 };
 
+/**
+ * iff.mesh-node/1：托管网节点。用户接入登记的是运行器，不是新的官方神经元。
+ * 官方 MaleCNS body ID 不出现在这条记录里。
+ */
+export const MESH_NODE_STATUSES = Object.freeze([
+  "PENDING",
+  "LIVE",
+  "STALE",
+  "OFFLINE",
+]);
+const meshNode = {
+  id: "iff.mesh-node",
+  version: "1",
+  title: "托管网节点",
+  validate(r) {
+    schemaMeta(r, "iff.mesh-node/1");
+    identifier(r.nodeId, "nodeId");
+    identifier(r.soulId, "soulId");
+    isRunner(r.runnerPub, "runnerPub");
+    requireValue(r.dataset === DATASET_CANON, "MESH_DATASET");
+    requireValue(MESH_NODE_STATUSES.includes(r.status), "MESH_STATUS");
+    integer(r.joinedAt, 0, Number.MAX_SAFE_INTEGER, "joinedAt");
+    integer(r.lastBeat, 0, Number.MAX_SAFE_INTEGER, "lastBeat");
+    return r;
+  },
+};
+
+/**
+ * iff.hosting-order/1：计算托管单。IFS 占用质押买额度；BNB 只是算力轨道。
+ * 单本身不能改连接组，也不能把自动续费写成无限扣款。
+ */
+export const HOSTING_ASSETS = Object.freeze(["IFS", "BNB"]);
+export const HOSTING_ORDER_STATUSES = Object.freeze([
+  "ESCROWED",
+  "ASSIGNED",
+  "RUNNING",
+  "SETTLED",
+  "REFUNDED",
+  "HELD",
+]);
+const hostingOrder = {
+  id: "iff.hosting-order",
+  version: "1",
+  title: "计算托管单",
+  validate(r) {
+    schemaMeta(r, "iff.hosting-order/1");
+    identifier(r.id, "id");
+    identifier(r.soulId, "soulId");
+    isRunner(r.runnerPub, "runnerPub");
+    requireValue(HOSTING_ASSETS.includes(r.asset), "HOSTING_ASSET");
+    integer(r.amount, 1, Number.MAX_SAFE_INTEGER, "amount");
+    identifier(r.regionId, "regionId");
+    if (r.shardId != null) identifier(r.shardId, "shardId");
+    requireValue(HOSTING_ORDER_STATUSES.includes(r.status), "HOSTING_STATUS");
+    integer(r.createdAt, 0, Number.MAX_SAFE_INTEGER, "createdAt");
+    integer(r.expiresAt, r.createdAt, Number.MAX_SAFE_INTEGER, "expiresAt");
+    requireValue(r.policy && typeof r.policy === "object", "HOSTING_POLICY");
+    requireValue(typeof r.policy.autoRenew === "boolean", "HOSTING_AUTO");
+    integer(r.policy.maxRenewals, 0, 100, "maxRenewals");
+    integer(r.policy.tickBudget, 0, Number.MAX_SAFE_INTEGER, "tickBudget");
+    integer(r.policy.renewalsUsed, 0, r.policy.maxRenewals, "renewalsUsed");
+    if (r.asset === "IFS") identifier(r.stakeId, "stakeId");
+    if (r.asset === "BNB") {
+      requireValue(
+        r.stakeId == null,
+        "HOSTING_BNB_STAKE",
+        "BNB 轨道不得占用 IFS 质押",
+      );
+    }
+    return r;
+  },
+};
+
 export const FLYSWARM_SCHEMAS = Object.freeze([
   genesis,
   join,
@@ -338,6 +411,8 @@ export const FLYSWARM_SCHEMAS = Object.freeze([
   sense,
   quorum,
   quorumV2,
+  meshNode,
+  hostingOrder,
 ]);
 
 /** 协议 schema 注册表：新消息类型 = register 一个新三元组，旧类型永不改写。 */

@@ -190,6 +190,29 @@ h1 span {
   line-height: 1.8;
   margin: 0;
 }
+.layer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.layer-chips li {
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  color: #c9a25e;
+  border: 1px solid #443c2c;
+  padding: 5px 9px;
+}
+.brain-align {
+  margin-top: 10px !important;
+}
+.brain-align a {
+  color: #c9a25e;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .identity-stamp {
   text-align: right;
   display: grid;
@@ -544,15 +567,19 @@ h1 span {
   align-items: center;
   overflow: hidden;
 }
-.soul-mini {
-  overflow: visible;
-}
+.soul-mini .fly-mark,
 .soul-mini .vitruvian {
-  width: 88px;
-  height: 88px;
+  width: 72px;
+  height: 72px;
   flex: none;
-  margin: 0 8px 0 4px;
+  margin: 0 10px 0 2px;
   color: #f0ead9;
+}
+.soul-mini .vitruvian img,
+.soul-mini .vf-plate {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
 }
 .soul-mini > div {
   display: grid;
@@ -766,8 +793,11 @@ h1 span {
   border: 1px solid #443c2c;
   padding: 9px;
 }
-.extension-row button {
+.extension-row button,
+.extension-row a.text-button {
   margin-left: auto;
+  text-decoration: none;
+  white-space: nowrap;
 }
 .extension-note {
   font-size: 9px;
