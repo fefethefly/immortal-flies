@@ -34,6 +34,8 @@ import {
 } from "./market.mjs";
 import { snapshotBaseline } from "./layers.mjs";
 import { clamp, START_PRICE } from "../../swarm.mjs";
+import { genomeOf } from "./genome.mjs";
+import { phenotypeOf } from "./phenotype.mjs";
 
 export const PIT_MODEL = "iff-pit-colony-v1";
 export const PIT_STORE = "iff-pit-colony-v1";
@@ -101,6 +103,7 @@ export function savePitSession({ kernel, aux, world, protocol }) {
       state: structuredClone(member.session.state),
       book: structuredClone(member.book),
       overlay: structuredClone(member.overlay),
+      genome: structuredClone(member.genome || genomeOf(member)),
     })),
     lineage: structuredClone(kernel.colony.lineage),
     nextId: kernel.colony.nextId,
@@ -132,6 +135,13 @@ export async function restorePitSession(
     session: new BrainSession(graph, structuredClone(member.state)),
     book: structuredClone(member.book),
     overlay: structuredClone(member.overlay),
+    genome: structuredClone(member.genome || genomeOf({
+      soulId: member.state?.soulId,
+      seed: member.genome?.seed || member.state?.rng,
+      id: member.id,
+      gen: member.gen,
+      parent: member.parent,
+    })),
     ethology: null,
     intent: null,
   }));
@@ -311,8 +321,10 @@ export function pitView({ kernel, aux }) {
     gen: member.gen,
     parent: member.parent,
     status: member.status,
-    seed: member.session.state.rng,
-    fingerprint: member.session.state.rng.toString(16).padStart(8, "0"),
+    seed: member.genome?.seed || member.session.state.rng,
+    fingerprint: (member.genome?.seed || member.session.state.rng)
+      .toString(16)
+      .padStart(8, "0"),
     bnb: member.book.bnb,
     token: member.book.token,
     costBnb: member.book.costBnb,
@@ -330,6 +342,8 @@ export function pitView({ kernel, aux }) {
       hold: member.intent?.side === "HOLD" ? 1 : 0,
     },
     soulId: member.session.state.soulId,
+    genome: member.genome || genomeOf(member),
+    phenotype: phenotypeOf(member.genome || member),
   }));
   return {
     model: PIT_MODEL,

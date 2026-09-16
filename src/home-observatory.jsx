@@ -4,9 +4,11 @@ import { formatBnb, formatPrice, layerFires, summarize } from "./swarm.mjs";
 import { colonyPosition } from "./observatory-art.mjs";
 import { createObservatoryRenderer } from "./observatory-renderer.mjs";
 import { SiteLink } from "./site-chrome.jsx";
+import { phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
+import { PhenotypeReadout } from "./phenotype-view.jsx";
 import "./home-observatory.css";
 
-const LIFE_CHIPS = ["L0", "Soul", "Society", "First world"];
+const LIFE_CHIPS = ["L0", "Soul", "Genome", "Society"];
 
 const MODES = ["neural", "society", "market"];
 const COLORS = { neural: "#a9c4bb", society: "#c9a25e", market: "#93a181" };
@@ -35,15 +37,21 @@ const words = {
     capital: "群体账本",
     economy: "IFS 经济层",
     inspect: "选择外围节点，追踪一只果蝇",
-    schematic: "全息形态示意 · 24 节点简化模型",
-    annotation: "粒子是形态表达，读数来自本地模拟。",
+    schematic: "长相由基因组决定 · 不是随机皮肤",
+    annotation: "粒子组成身体外形。体色、眼型、体型、条纹由出生种子固定算出。",
+    genome: "基因组决定的长相",
+    genomeClaim: "长相由基因组决定，不是另外贴上去的皮肤。",
+    genomeNote:
+      "64 个方格是基因组格子，由出生种子展开。它们不是神经元，也不是 MaleCNS 的连接权重。",
+    genomeMint: "铸造提交的是基因组。解码器以后上线，已经铸造的灵魂也会长出对应长相。",
+    notSkin: "不看叠加层、盈亏或 IFS。休眠只改变辉光。",
     price: "模拟价格 / BNB",
     cash: "纸面现金",
     fills: "保留成交",
     observed: "当前观察",
     waiting: "等待首次成交",
     lineageWait: "尚无代际事件，个体继续积累经历。",
-    credit: "自主算力补给",
+    credit: "自主算力",
     vault: "金库与结算",
     planned: "MESH / SIM",
     vaultState: "待接入",
@@ -79,9 +87,16 @@ const words = {
     capital: "Colony book",
     economy: "IFS economy",
     inspect: "Select a satellite to follow its life",
-    schematic: "ARTISTIC MORPHOLOGY / 24-NODE PAPER MODEL",
+    schematic: "PHENOTYPE IS A GENOME READOUT / NOT A SKIN",
     annotation:
-      "Artistic particle geometry. Readouts from the local simulation.",
+      "Particle geometry is form. Colour, eyes, size and stripes are a deterministic readout of the birth seed.",
+    genome: "Genome readout",
+    genomeClaim: "Looks are a readout of the genome, not a separately minted skin.",
+    genomeNote:
+      "The 64 squares are genome chips expanded from the birth seed. They are not neurons, and not MaleCNS weights.",
+    genomeMint:
+      "Mint commits the genome. A later decoder can express every existing soul.",
+    notSkin: "Overlay, PnL and IFS never paint the body. Sleep only changes the glow.",
     price: "SIM PRICE / BNB",
     cash: "Paper cash",
     fills: "Retained fills",
@@ -270,6 +285,7 @@ export function HomeObservatory({
   const mode = manual || MODES[Math.floor(swarm.tick / 9) % MODES.length];
   const stats = summarize(swarm),
     fly = swarm.flies.find((f) => f.id === selectedId) || swarm.flies[0];
+  const pheno = fly ? phenotypeOf(fly) : null;
   const living = swarm.flies.filter((f) => f.status === "alive");
   const layers = layerFires(fly?.brain?.spikes || 0),
     spikes = layers.reduce((n, l) => n + l.count, 0);
@@ -497,19 +513,24 @@ export function HomeObservatory({
               >
                 {living.map((f, i) => {
                   const p = colonyPosition(i, living.length);
+                  const look = phenotypeOf(f);
                   return (
                     <button
                       type="button"
                       key={f.id}
                       className={`obs-node ${f.id === selectedId ? "selected" : ""} ${f.lastSide.toLowerCase()}`}
-                      style={{ left: `${p.x}%`, top: `${p.y}%` }}
-                      aria-label={`Fly ${f.id} · ${f.lastSide}`}
+                      style={{
+                        left: `${p.x}%`,
+                        top: `${p.y}%`,
+                        "--pheno": look.art.body,
+                      }}
+                      aria-label={`Fly ${f.id} · ${look.summary[locale === "zh" ? "zh" : "en"]}`}
                       aria-pressed={f.id === selectedId}
                       onClick={() => onSelect(f.id)}
                     >
                       <i />
                       <span>#{String(f.id).padStart(3, "0")}</span>
-                      <small>{f.lastSide}</small>
+                      <small>{look.hue[locale === "zh" ? "zh" : "en"]}</small>
                     </button>
                   );
                 })}
@@ -519,9 +540,11 @@ export function HomeObservatory({
                   {w.observed} / #{String(fly?.id ?? 0).padStart(4, "0")}
                 </span>
                 <strong>
-                  IMMORTAL<span> / </span>FLY
+                  {pheno ? pheno.hue[locale === "zh" ? "zh" : "en"].toUpperCase() : "IMMORTAL"}
+                  <span> / </span>
+                  FLY
                 </strong>
-                <small>{w.schematic}</small>
+                <small>{pheno ? pheno.summary[locale === "zh" ? "zh" : "en"] : w.schematic}</small>
               </div>
             </div>
             <div className="obs-stage-bottom">
@@ -622,8 +645,25 @@ export function HomeObservatory({
       </div>
       <div className="obs-caption">
         <span>{w.annotation}</span>
-        <span>01 — LIFE IS A PROCESS, NOT A MOMENT.</span>
+        <span>01 — LOOKS ARE A READOUT OF THE GENOME.</span>
       </div>
+      <aside className="obs-genome" aria-label={w.genome}>
+        <PhenotypeReadout
+          fly={fly}
+          locale={locale}
+          compact
+          caption={w.genomeClaim}
+          note={w.genomeNote}
+        />
+        <div className="obs-genome-copy">
+          <p>{w.genomeMint}</p>
+          <p>{w.notSkin}</p>
+          <SiteLink href="/blueprint.html">
+            {locale === "zh" ? "蓝图里的身份规则" : "Identity rules on the blueprint"}
+            <ArrowUpRight size={12} />
+          </SiteLink>
+        </div>
+      </aside>
     </section>
   );
 }

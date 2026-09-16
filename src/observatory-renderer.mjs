@@ -1,4 +1,5 @@
 import { createFlyCloud, colonyPosition } from "./observatory-art.mjs";
+import { phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
 
 const TAU = Math.PI * 2;
 const CLOUD = createFlyCloud();
@@ -33,12 +34,8 @@ export function createObservatoryRenderer(canvas, read) {
     ghosts = [];
   const pointer = { x: 0, y: 0 };
   const sprites = new Map();
-  for (const color of [
-    ...Object.values(COLORS),
-    "#b57660",
-    "#e6e0cf",
-    "#d9a86a",
-  ]) {
+  function sprite(color) {
+    if (sprites.has(color)) return sprites.get(color);
     const surface = document.createElement("canvas");
     surface.width = surface.height = 64;
     const brush = surface.getContext("2d"),
@@ -50,11 +47,19 @@ export function createObservatoryRenderer(canvas, read) {
     brush.fillStyle = gradient;
     brush.fillRect(0, 0, 64, 64);
     sprites.set(color, surface);
+    return surface;
   }
+  for (const color of [
+    ...Object.values(COLORS),
+    "#b57660",
+    "#e6e0cf",
+    "#d9a86a",
+  ])
+    sprite(color);
   function light(x, y, radius, color, alpha = 1) {
     ctx.globalAlpha = alpha;
     ctx.drawImage(
-      sprites.get(color),
+      sprite(color),
       x - radius,
       y - radius,
       radius * 2,
@@ -110,6 +115,11 @@ export function createObservatoryRenderer(canvas, read) {
       unit = Math.min(width / 620, height / 550);
     const color = COLORS[mode],
       fly = swarm.flies.find((f) => f.id === selectedId) || swarm.flies[0];
+    const pheno = fly ? phenotypeOf(fly) : null;
+    const bodyColor = pheno?.art.body || "#c9a25e";
+    const eyeColor = pheno?.art.eye || "#b57660";
+    const bodyScale = pheno?.art.scale || 1;
+    const stripeCount = pheno?.art.stripes ?? 2;
     const spikes = fly?.brain?.spikes || 0,
       spikeCount = countBits(spikes);
     const trade = swarm.trades[0],
@@ -287,7 +297,7 @@ export function createObservatoryRenderer(canvas, read) {
       }
     const yaw = 0.2 + Math.sin(t * 0.48) * 0.22 + pointer.x * 0.2,
       tilt = -0.16 + Math.sin(t * 0.7) * 0.04 + pointer.y * 0.1;
-    const scale = unit * 1.55,
+    const scale = unit * 1.55 * bodyScale,
       bob = reduced ? 0 : Math.sin(t * 2.3) * 5 * unit;
     function project(x, y, z) {
       const xx = x * Math.cos(yaw) + z * Math.sin(yaw),
@@ -341,14 +351,20 @@ export function createObservatoryRenderer(canvas, read) {
       let alpha = 0.4 + (z + 65) / 280 + scan * 0.55 + running * 0.3;
       const colorPoint =
         p.material === "eye"
-          ? "#b57660"
+          ? eyeColor
           : p.material === "wing"
             ? color
             : p.material === "vein"
               ? "#e6e0cf"
-              : "#c9a25e";
+              : p.material === "gold"
+                ? "#c9a25e"
+                : bodyColor;
       if (p.material === "wing") alpha *= 0.65;
-      if (p.material === "abdomen" && Math.sin(p.y * 0.29) > 0.3) alpha *= 0.35;
+      if (p.material === "abdomen" && stripeCount > 0) {
+        const band = Math.abs(Math.sin(p.y * (0.16 + stripeCount * 0.07)));
+        if (band > 0.62) alpha *= 0.28;
+      } else if (p.material === "abdomen" && Math.sin(p.y * 0.29) > 0.3)
+        alpha *= 0.35;
       ctx.globalAlpha = Math.min(0.95, alpha);
       ctx.fillStyle = colorPoint;
       const size =
@@ -358,7 +374,7 @@ export function createObservatoryRenderer(canvas, read) {
       ctx.arc(x, y, size, 0, TAU);
       ctx.fill();
       if (p.material === "eye" && p.seed > 0.95)
-        light(x, y, 9 * unit, "#b57660", 0.3);
+        light(x, y, 9 * unit, eyeColor, 0.3);
       else if (p.seed > 0.87 && (scan > 0.5 || running > 0.6))
         light(
           x,

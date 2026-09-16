@@ -13,8 +13,12 @@ import { LayerCabinet, PhaseSpine } from "./blueprint-rite.jsx";
 import { tiltHandlers, usePrefersReduced, useReveal } from "./rite.jsx";
 import { useLocale } from "./use-locale.mjs";
 import { SiteLink, SitePage } from "./site-chrome.jsx";
+import { createFly } from "./engine.mjs";
+import { PhenotypeReadout } from "./phenotype-view.jsx";
 import "./public.css";
 import "./blueprint.css";
+
+const SPECIMENS = [3700127, 20260916, 777];
 
 const LAYERS = [
   ["L0", "blue.l0", "blue.l0p", "/brain.html", "nav.canon", Cpu],
@@ -47,6 +51,8 @@ export function BlueprintPage() {
     "meta.blueprintDesc",
   );
   const [active, setActive] = useState(-1);
+  const [specimenSeed, setSpecimenSeed] = useState(SPECIMENS[0]);
+  const specimen = useMemo(() => createFly(specimenSeed), [specimenSeed]);
   const reduced = usePrefersReduced();
   const tilt = tiltHandlers(reduced);
   const labels = useMemo(
@@ -129,6 +135,32 @@ export function BlueprintPage() {
               ))}
             </ol>
           </div>
+        </section>
+
+        <section data-reveal className="blue-pheno">
+          <h2>
+            <Fingerprint size={18} />
+            {tx("pheno.claim")}
+          </h2>
+          <p className="blue-pheno-lead">{tx("pheno.mint")}</p>
+          <div className="blue-pheno-seeds" role="group" aria-label="seed">
+            {SPECIMENS.map((seed) => (
+              <button
+                key={seed}
+                type="button"
+                className={seed === specimenSeed ? "is-on" : ""}
+                onClick={() => setSpecimenSeed(seed)}
+              >
+                seed {seed}
+              </button>
+            ))}
+          </div>
+          <PhenotypeReadout
+            fly={specimen}
+            locale={locale}
+            caption={tx("pheno.claim")}
+            note={tx("pheno.note")}
+          />
         </section>
 
         <section data-reveal>

@@ -6,6 +6,8 @@ import { decodeFinance } from "./finance.mjs";
 import { CANON } from "./canon.mjs";
 import { fillBook, seedBook } from "./book.mjs";
 import { createOverlay, modulate } from "./learn.mjs";
+import { buildGenome, mutateRootOf } from "./flyswarm/genome.mjs";
+import { phenotypeOf } from "./flyswarm/phenotype.mjs";
 import {
   START_PRICE,
   bookOf,
@@ -30,6 +32,7 @@ export function createColony(graph, { size = 5, seed = 43, stepsPerTick = 6 } = 
   for (let i = 0; i < size; i++) {
     rng = random32(rng) || 1;
     const state = createState(graph, { soulId: `colony-${i}`, branchId: "paper", seed: rng });
+    const genome = buildGenome({ soulId: `colony-${i}`, seed: rng, generation: 0 });
     members.push({
       id: i,
       gen: 0,
@@ -38,6 +41,7 @@ export function createColony(graph, { size = 5, seed = 43, stepsPerTick = 6 } = 
       session: new BrainSession(graph, state),
       book: seedBook(),
       overlay: createOverlay(),
+      genome,
       ethology: null,
       intent: null,
     });
@@ -112,6 +116,8 @@ export function colonySnapshot(colony) {
       equity: equityOf(member.book, colony.market.price),
       ticks: member.session.state.ticks,
       soulId: member.session.state.soulId,
+      seed: member.genome?.seed || member.session.state.rng,
+      phenotype: phenotypeOf(member.genome || member.session.state),
     })),
     trades: colony.trades.slice(0, 20),
   };
@@ -163,6 +169,14 @@ export function settleColony(colony, price = colony.market.price, tick = colony.
     session: new BrainSession(colony.graph, childState),
     book: seedBook(),
     overlay: inheritOverlay(champ.overlay),
+    genome: buildGenome({
+      soulId: `colony-${id}`,
+      seed: childSeed,
+      generation: champ.gen + 1,
+      parentSouls: [champ.session.state.soulId],
+      inheritBias: true,
+      mutateRoot: mutateRootOf(champ.genome?.seed || champ.session.state.rng, childSeed),
+    }),
     ethology: null,
     intent: null,
   };

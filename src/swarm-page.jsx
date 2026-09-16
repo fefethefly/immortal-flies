@@ -19,6 +19,7 @@ import {
   settleNow,
   stepPit,
 } from "./brain/flyswarm/pit.mjs";
+import { PhenotypeReadout } from "./phenotype-view.jsx";
 import {
   Balance,
   BookSplit,
@@ -464,6 +465,13 @@ export function PitPage() {
                       </div>
                       <code>{fly.fingerprint}</code>
                     </div>
+                    <PhenotypeReadout
+                      fly={fly}
+                      locale={locale}
+                      compact
+                      caption={tx("pheno.claim")}
+                      note={tx("pheno.note")}
+                    />
                     <BookSplit fly={fly} price={view.market.price} />
                     <Balance fly={fly} />
                   </>

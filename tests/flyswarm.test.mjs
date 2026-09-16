@@ -104,7 +104,7 @@ function utterance(partial) {
 
 test("schema registry validates known records and rejects unknown schemas loudly", () => {
   const schemas = createSchemas();
-  assert.equal(FLYSWARM_SCHEMAS.length, 11);
+  assert.equal(FLYSWARM_SCHEMAS.length, 12);
   const ok = utterance();
   assert.equal(validateRecord(schemas, ok), ok);
   assert.throws(

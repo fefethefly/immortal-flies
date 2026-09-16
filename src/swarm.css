@@ -418,6 +418,16 @@ button:active:not(:disabled) {
   font: 11px var(--mono);
   color: #938a79;
 }
+.lectern .pheno {
+  padding-top: 4px;
+  border-top: 1px solid #2f2a1f;
+}
+.roster button {
+  --pheno: #c9a25e;
+}
+.roster .fly-mark {
+  color: var(--pheno);
+}
 
 .book-split {
   display: grid;

@@ -287,6 +287,35 @@
   }
 }
 
+.blue-pheno-lead {
+  color: var(--muted);
+  max-width: 42em;
+  margin: 0 0 16px;
+}
+.blue-pheno-seeds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+.blue-pheno-seeds button {
+  font: 10px var(--mono);
+  letter-spacing: 0.08em;
+  color: #a89e8c;
+  border: 1px solid #2f2a1f;
+  padding: 7px 10px;
+  background: #100e0b;
+}
+.blue-pheno-seeds button.is-on {
+  color: #f0ead9;
+  border-color: #c9a25e;
+}
+.blue-pheno .pheno {
+  padding: 16px 18px;
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rite-orb,
   .blue-phases li,

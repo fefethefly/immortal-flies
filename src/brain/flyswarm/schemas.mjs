@@ -69,6 +69,29 @@ const schemaMeta = (record, id) => {
   return record;
 };
 
+/** iff.genome/1：出生承诺。表型只读这份记录，解码器升级不得改写它。 */
+const genome = {
+  id: "iff.genome",
+  version: "1",
+  title: "出生基因组",
+  validate(r) {
+    schemaMeta(r, "iff.genome/1");
+    identifier(r.soulId, "soulId");
+    integer(r.seed, 1, 0xffffffff, "seed");
+    isHash(r.genesisId, "genesisId");
+    requireValue(
+      Array.isArray(r.parentSouls) && r.parentSouls.length <= 2,
+      "GENOME_PARENTS",
+      "亲本最多两名",
+    );
+    r.parentSouls.forEach((id) => identifier(id, "parentSoul"));
+    isHash(r.mutateRoot, "mutateRoot");
+    integer(r.generation, 0, 1_000_000, "generation");
+    requireValue(typeof r.inheritBias === "boolean", "GENOME_INHERIT");
+    return r;
+  },
+};
+
 /** iff.genesis/1：创世母体清单。genesisId = 本记录的 canonical 哈希（见 genesis.mjs）。 */
 const genesis = {
   id: "iff.genesis",
@@ -402,6 +425,7 @@ const hostingOrder = {
 };
 
 export const FLYSWARM_SCHEMAS = Object.freeze([
+  genome,
   genesis,
   join,
   spawn,

@@ -70,6 +70,7 @@ import {
   RuleTile,
 } from "./components.jsx";
 import { SwarmTape } from "./swarm-tape.jsx";
+import { PhenotypeReadout } from "./phenotype-view.jsx";
 import { LocaleContext } from "./locale-context.jsx";
 import { useLocale } from "./use-locale.mjs";
 import { LocaleSwitch } from "./locale-switch.jsx";
@@ -1093,6 +1094,13 @@ export default function App() {
                     className={`status-dot ${fly.brain.dormant ? "amber" : ""}`}
                   />
                 </div>
+                <PhenotypeReadout
+                  fly={fly}
+                  locale={locale}
+                  compact
+                  caption={tx("pheno.claim")}
+                  note={tx("pheno.note")}
+                />
                 <div className="energy-label">
                   <span>生命能量</span>
                   <strong>
@@ -1206,7 +1214,7 @@ export default function App() {
                     <span>
                       测试网还没有属于你的果蝇
                       <small>
-                        铸造会把当前 DNA 写成 seed，状态随后以合约为准
+                        铸造会把当前 DNA 写成出生种子，状态随后以合约为准
                       </small>
                     </span>
                   </div>
@@ -1268,7 +1276,7 @@ export default function App() {
           <div className="section-heading">
             <div>
               <h2>
-                1,024 个被量过的身体。
+                1,024 个量过尺寸的身体。
                 <br />
                 <span>各自不同的以后。</span>
               </h2>
@@ -1287,7 +1295,7 @@ export default function App() {
               index="0001"
               name="AMBER"
               tone="gold"
-              descriptor="琥珀躯干 / 被量过的第一只"
+              descriptor="琥珀躯干 / 量过尺寸的第一只"
               brain={fly.brain}
               onOpen={() =>
                 setModal({
@@ -1348,7 +1356,7 @@ export default function App() {
               <span>果蝇被写回生命。</span>
             </h2>
             <p>
-              身份被量过，状态被写下。
+              身份量过尺寸，状态被写下。
               <br />
               一次新的苏醒，仍是同一只。
             </p>
@@ -1669,7 +1677,7 @@ export default function App() {
           </div>
           <p>
             产品主循环是<a href="/swarm.html">交易场</a>
-            ：趋近与退避被读成买入与卖出，先跑纸面账本。这一页祭坛保存身份、训练与转生，用的是
+            ：趋近与退避会被解读成买入与卖出，先跑纸面账本。这一页祭坛保存身份、训练与转生，用的是
             16 个节点、3 组学习参数的确定性模型，不是完整生物连接组。MaleCNS 在
             <a href="/brain.html">连接组</a>
             中运行。后续才会打开出借、金库与预测。Flap 嵌入界面尚未制作。
@@ -1935,7 +1943,7 @@ export default function App() {
               go("lab");
             }}
           >
-            先认识第一只被量过的果蝇
+            先认识第一只量过尺寸的果蝇
             <ArrowUpRight size={16} />
           </button>
         </Modal>

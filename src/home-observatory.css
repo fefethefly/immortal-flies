@@ -471,7 +471,8 @@
 .obs-node > i {
   width: 6px;
   height: 6px;
-  border: 1px solid currentColor;
+  border: 1px solid var(--pheno, currentColor);
+  background: color-mix(in srgb, var(--pheno, currentColor) 55%, transparent);
   border-radius: 50%;
   grid-row: 1/3;
   align-self: center;
@@ -657,6 +658,35 @@
   font: 8px var(--mono);
   color: #d8c9a4;
 }
+.obs-genome {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.8fr);
+  gap: 28px;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+}
+.obs-genome-copy {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding-top: 18px;
+}
+.obs-genome-copy p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #a89e8c;
+}
+.obs-genome-copy a {
+  font: 10px var(--mono);
+  letter-spacing: 0.08em;
+  color: #c9a25e;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .obs-caption {
   display: flex;
   justify-content: space-between;
@@ -748,6 +778,13 @@
   }
   .obs-caption > span:last-child {
     display: none;
+  }
+  .obs-genome {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .obs-genome-copy {
+    padding-top: 0;
   }
   .obs-specimen-label {
     bottom: 30px;

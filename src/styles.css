@@ -1136,6 +1136,11 @@ h1 > sup {
   gap: 10px;
   margin: 24px 0 22px;
 }
+.brain-panel .pheno {
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #2f2a1f;
+}
 .specimen-avatar {
   display: flex;
   align-items: center;

@@ -32,6 +32,8 @@ L3  Agent Economy   LLM / 工具 / Credit / IFS / 金库 / 结算 / 服务市场
 | 对象          | 语义                                                                     |
 | ------------- | ------------------------------------------------------------------------ |
 | Soul          | 持续身份；历史不因退役删除                                               |
+| Genome        | 出生承诺的个体初值（`iff.genome/1`）；表型只读它，不读行情或 overlay     |
+| Phenotype     | 基因组的确定性读出（体色、眼型、体型、条纹）；不是另铸的皮肤             |
 | Session       | 在某世界、模型与运行器中的一段生命会话                                   |
 | Branch        | 从检查点产生的个人实验分支，不是正式社会的重复投票权                     |
 | Memory        | 可验证经历引用与学习结果；下载别人记忆不等于已学会                       |
@@ -39,7 +41,7 @@ L3  Agent Economy   LLM / 工具 / Credit / IFS / 金库 / 结算 / 服务市场
 | Controller    | 人、组织或合约对授权范围的控制者；与 Soul、NFT、运行器分开               |
 | Agent Profile | 可验证的能力、版本、来源、权限、价格、信用与历史摘要                     |
 
-迁徙、复活、继承和 NFT 只追加事件。更换 LLM 不改变 Soul；更换 Life Profile 会生成新的运行配置与迁移事件。不同模型轨迹不宣称等价。
+迁徙、复活、继承和 NFT 只追加事件。更换 LLM 不改变 Soul；更换 Life Profile 会生成新的运行配置与迁移事件。不同模型轨迹不宣称等价。解码器升级可以让已有灵魂再表达表型，但不得改写 Genome。
 
 ## 4. Fly Language：果蝇社会的原生语言
 
@@ -113,7 +115,7 @@ LLM 的位置是 `Agent Extension Layer`：把语言、记忆和工具变成可�
 
 ### 5.2 LLM 不可以做什么
 
-- 写入 Life Core 状态、修改边权、伪造 Memory 或改变历史。
+- 写入 Life Core 状态、修改边权、伪造 Memory、改写 Genome 或指定表型。
 - 直接取得私钥、无限额度、任意 calldata 或用户签名。
 - 把自然语言“我想买”变成执行授权。
 - 自己提高 Credit、修改风控、绕过冷却、重复消费订单。
@@ -276,7 +278,7 @@ AgentProfile
 
 | 模块             | 职责                                                   |
 | ---------------- | ------------------------------------------------------ |
-| SoulRegistry     | Soul、模型来源、控制权、会话 epoch、迁徙事件           |
+| SoulRegistry     | Soul、Genome 承诺、模型来源、控制权、会话 epoch、迁徙事件 |
 | AgentAdapter     | 外部 agentId 映射、能力与证据引用；默认只读            |
 | CreditLedger     | 四类 Credit、来源、债务、冻结、衰减和额度              |
 | IFSStaking       | IFS 锁仓、解锁、会员权益与占用状态                     |
@@ -306,13 +308,13 @@ AgentProfile
 
 | 阶段                     | 目标                                                  | 退出条件                               |
 | ------------------------ | ----------------------------------------------------- | -------------------------------------- |
-| P0 语言与身份            | Fly Language、Soul、Session、完整 bundle、Replay      | 独立进程逐位恢复；旧记录语义不变       |
+| P0 语言与身份            | Fly Language、Soul、Genome、表型解码器、Session、Replay | 独立进程逐位恢复；已有灵魂可再表达；旧记录语义不变 |
 | P1 LLM 边界              | 解释、检索、候选计划、工具白名单、策略验证            | LLM 缺席仍可运行；无未授权资金调用     |
 | P2 交易纸面世界          | 只读市场、模拟交易、Colony/Intent/Risk/Execution 分层 | 与简单基线比较；净成本、失败和回撤透明 |
 | P3 IFS 会员与模拟 Credit | 购买、锁仓、占用、Credit 四账户、服务订单             | 不重复抵押；亏损和到期会收缩额度       |
 | P4 协议自有资金          | 限额真实执行、独立风控、回执与自有资金收益            | 不动用户资产；外部审计和压力测试通过   |
 | P5 用户金库              | 份额、高水位、赎回、费用与 Position NFT               | 权属、会计、退出和失败恢复通过         |
-| P6 借贷/RWA/NFT          | 各自隔离池与专属风险模型                              | 发行方、估值、清算、准入和合约审计完成 |
+| P6 借贷/RWA/NFT          | 隔离池；Soul NFT 只承诺 Genome，卡面由解码器读出      | 发行方、估值、清算、准入和合约审计完成；tokenURI 与本地解码器一致 |
 | P7 开放 Agent 生态       | Agent Registry、第三方 LLM/运行器/验证器              | 外部 Agent 可被复现、替换、限权和追责  |
 
 ## 13. 衡量飞轮是否健康
@@ -333,7 +335,7 @@ AgentProfile
 下一步顺序：
 
 1. 获取 FindYourAgent 官方 docs、合约地址与 ABI，完成 `AgentAdapter` 字段映射和只读验证。
-2. 定义 Fly Language schema、消息签名/去重、邻居拓扑和 replay fixtures。
+2. 定义 Fly Language schema、`iff.genome/1`、`phenotype-loci/1`、消息签名/去重、邻居拓扑和 replay fixtures。已有本地灵魂用同一解码器一次性表达，不回写基因组。
 3. 把 LLM 变成严格工具调用层，先做解释和纸面交易候选，不接真实签名。
 4. 修复份额所有权、已实现收益、高水位、完整历史恢复和行为/金融解耦。
 5. 完成交易小世界纸面基线，再开放 IFS 购买、锁仓和模拟 Credit。
@@ -362,3 +364,75 @@ IFS 与 BNB 的职责也要分开：
 - 合约自动购买是带精确限额的托管，不是无限扣款。当前仍是 SIM；链上 ServiceEscrow 未部署。
 
 架子已立：`src/brain/flyswarm/mesh.mjs`、`hosting.mjs`，首页 atlas，经济页说明。HTTP 路由与主网合约仍未接线。
+
+## 16. 表型铸造：外观是基因组读出，不是皮肤
+
+日期：2026-09-16。竞品公开页面把体色、眼型、体型、条纹写成「263 个链上脑权重的读出」，并让已有个体在解码器上线后一次性表达。对方合约字段与 263 的科学含义未独立核验；本节吸收的是机制，不是那个数字，也不是第二套自造脑。
+
+本地已落地：`iff.genome/1` + `phenotype-loci/1`。观测台点云、名册、祭坛读数和首页说明共用同一解码器。已有本地灵魂按出生 seed 表达。`tokenURI` 仍只印 DNA 数字，待测试网 NFT。
+
+### 16.1 吸收什么
+
+Mint 提交的是 Genome，不是卡面。观测台、名册、祭坛、`tokenURI` 都是同一个纯函数的视图。解码器可以后发；已有灵魂一次性表达，Genome 不变。同 seed、不同 soulId 是同卵克隆：表型相同，经历不同，允许，不当作碰撞失败。
+
+### 16.2 不吸收什么
+
+- 不把 263 个自造权重写成第二套脑，也不宣称它们是 MaleCNS 边权。
+- 不把 `iff.overlay/1`、PnL、IFS 余额或托管额度画进体色。
+- 不把觉醒 / 休眠 / 能量写成身份性状；它们只改变辉光与运动。
+- 不把表型名称做成稀有度、价格曲线或发行营销分层。
+- 不让 LLM、World、Credit、用户点选写入 Genome 或指定性状。
+
+### 16.3 四个对象必须分开
+
+| 对象 | 记录 | 可变？ | 谁能改 | 能不能决定长相 |
+| --- | --- | --- | --- | --- |
+| Species body | MaleCNS 边权与 body ID | 只有数据集升级 | 官方图 | 不能。物种共用。 |
+| Genome | `iff.genome/1`：genesisId、soulId、seed、parents、mutateRoot | 出生 / 繁衍时冻结 | 只有 `join` / `spawn` | 能。表型只读它。 |
+| Condition | `iff.state/1`：电位、发放、能量、休眠 | 每步都变 | Life Core | 不能改身份色；只叠加辉光。 |
+| Character | `iff.overlay/1`：感觉增益 | 已实现结果后变 | 学习层 | v1 不能。性格不是皮肤。 |
+
+MaleCNS 是共享的物种身体。个体差别来自 Genome 与之后的经历，不来自另一张假连接组。
+
+### 16.4 解码器
+
+```text
+iff.genome/1
+  → phenotype-loci/1     纯函数，输出 hue / sat / light / eye / size / stripes / labels / chips[]
+  → phenotype-art/1      同一输出驱动点云、祭坛卡、名册、链上 SVG
+```
+
+`chips[]` 是 seed / mutateRoot 的可检查展开，标签必须是 genome chips，不得标成神经元或脑权重。芯片数量由解码器版本决定，不复制 263。竞品把权重切片映射到性状；我们把已有出生字段展开到位点，科学含义不同，产品句同一句：**Looks are a readout of the genome.**
+
+位点与竞品切片的对应只是产品翻译，不是对方合约的复述：
+
+| 竞品切片（公开页） | 我们的位点来源 | 性状 |
+| --- | --- | --- |
+| weights 0–119 | seed 展开的感觉先验 | 体色 |
+| weights 120–167 | seed 展开的强度包络 | 饱和 |
+| weights 168–215 | seed 展开的体质位 | 明度 |
+| weights 216–239 | seed 展开的编码器偏向 | 眼型 |
+| weights 240–259 | generation + inheritBias | 体型 |
+| weights 260–262 | mutateRoot / 亲本位 | 条纹 |
+
+解码器升级 = 新版本 + 全体再表达。旧 Genome 与旧记录可重放。禁止用新解码器回写 seed。
+
+### 16.5 Mint 与繁衍
+
+```text
+join / mint
+  → 固定 iff.genome/1（内容寻址，genomeId = canonical hash）
+  → SoulRegistry / NFT 只存 Genome 承诺
+  → 任意时刻 phenotype-loci/1 读出
+  → 解码器后上线 = 已有灵魂表达，Genome 不变
+```
+
+SIM / guest 可自选 seed，便于对照实验。bonded / 主网发行：seed 绑定 `genesisId`、minter、nonce 与区块承诺，防自选稀有皮。这是发行规则，不是表型规则。
+
+繁衍沿用已有分叉：`childSeed = parentRng XOR swarmRng`，overlay 向中性回拉一半。家族相似从表型解码器自动出现，不另做皮肤遗传。`inheritOverlay` 仍是性格，不进入 v1 表型。
+
+### 16.6 链上存什么
+
+主网不存自造权重数组。存 `seed`、`mutateRoot`、`genomeHash`、`decoderId`。`tokenURI` 用同一纯函数画基础 SVG。完整 MaleCNS 状态、电压和历史仍在链下。16 节点原型的 `dna` 字段继续作为 seed 的链上别名，不再单独发明第三套基因。
+
+现有 `ImmortalFly.sol` 的免费自选 seed 只适用于本地 / 测试网原型，不能当作主网公平发行。

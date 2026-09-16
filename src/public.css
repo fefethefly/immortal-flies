@@ -856,6 +856,48 @@ button:focus-visible {
   transform: translate(2px, -2px);
 }
 
+.home-pheno-band {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 36px;
+  align-items: start;
+  margin: 0 auto;
+  width: min(1600px, 92%);
+  padding: 36px 0 8px;
+}
+.home-pheno-band span {
+  font: 10px var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--gold);
+}
+.home-pheno-band h2 {
+  margin: 10px 0 12px;
+  font: 400 clamp(28px, 3.4vw, 44px) / 1.15 var(--display);
+}
+.home-pheno-band h2 em {
+  display: block;
+  color: var(--gold);
+  font-style: normal;
+}
+.home-pheno-band p {
+  margin: 0 0 16px;
+  max-width: 36em;
+  color: #a89e8c;
+  line-height: 1.7;
+}
+.home-pheno-band a {
+  font: 11px var(--mono);
+  letter-spacing: 0.08em;
+  color: #c9a25e;
+}
+@media (max-width: 850px) {
+  .home-pheno-band {
+    grid-template-columns: 1fr;
+    width: 94%;
+    gap: 20px;
+  }
+}
+
 /* ---------- colony log ---------- */
 .home-event-stream {
   position: relative;

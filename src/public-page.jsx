@@ -16,6 +16,7 @@ import { SiteBar, SiteLink } from "./site-chrome.jsx";
 import { SealBar } from "./seal-bar.jsx";
 import { useHomeSwarm } from "./home-field.jsx";
 import { HomeObservatory } from "./home-observatory.jsx";
+import { PhenotypeReadout } from "./phenotype-view.jsx";
 import { HomeMeshAtlas } from "./home-mesh.jsx";
 import { HomeLiveDecks } from "./home-live.jsx";
 import { LifeGlyph } from "./life-glyphs.jsx";
@@ -192,6 +193,23 @@ export function HomePage() {
           paused={paused}
           onPause={togglePause}
         />
+
+        <section
+          className="home-pheno-band"
+          aria-label={tx("public.phenoKicker")}
+          data-reveal="wait"
+        >
+          <div>
+            <span>{tx("public.phenoKicker")}</span>
+            <h2>
+              {tx("public.phenoTitle")}
+              <em>{tx("public.phenoEm")}</em>
+            </h2>
+            <p>{tx("public.phenoP")}</p>
+            <SiteLink href="/swarm.html">{tx("public.phenoGo")} ↗</SiteLink>
+          </div>
+          <PhenotypeReadout fly={champ} locale={locale} compact />
+        </section>
 
         <HomeMeshAtlas tx={tx} />
 

@@ -7,7 +7,8 @@ import {
   formatToken,
   reflexOf,
 } from "./swarm.mjs";
-import { useTx } from "./locale-context.jsx";
+import { LocaleContext, useTx } from "./locale-context.jsx";
+import { phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
 
 const WASH = {
   food: [176, 138, 74],
@@ -341,36 +342,41 @@ export function OrganStops({
 
 export function Roster({ board, selectedId, onSelect }) {
   const tx = useTx();
+  const locale = React.useContext(LocaleContext).locale === "zh" ? "zh" : "en";
   if (!board.length) return <p className="empty">{tx("pit.emptySwarm")}</p>;
   return (
     <ul className="roster" aria-label={tx("pit.listedRetired")}>
-      {board.map((row, i) => (
-        <li key={row.id}>
-          <button
-            className={`${row.id === selectedId ? "selected" : ""} ${row.status}`}
-            onClick={() => onSelect(row.id)}
-          >
-            <FlyMark small />
-            <span>
-              <b>
-                {i + 1} · #{row.id}
-              </b>
-              <small>
-                GEN {row.gen} ·{" "}
-                {row.status === "alive" ? tx("pit.alive") : tx("pit.dead")}
-              </small>
-            </span>
-            <em className={row.lastSide.toLowerCase()}>{row.lastSide}</em>
-            <strong>
-              {formatBnb(row.equity)}
-              <small>
-                {row.roi >= 0 ? "+" : ""}
-                {(row.roi / 10).toFixed(1)}%
-              </small>
-            </strong>
-          </button>
-        </li>
-      ))}
+      {board.map((row, i) => {
+        const look = row.phenotype || phenotypeOf(row);
+        return (
+          <li key={row.id}>
+            <button
+              className={`${row.id === selectedId ? "selected" : ""} ${row.status}`}
+              onClick={() => onSelect(row.id)}
+              style={{ "--pheno": look.art.body }}
+            >
+              <FlyMark small />
+              <span>
+                <b>
+                  {i + 1} · #{row.id}
+                </b>
+                <small>
+                  GEN {row.gen} · {look.hue[locale]} ·{" "}
+                  {row.status === "alive" ? tx("pit.alive") : tx("pit.dead")}
+                </small>
+              </span>
+              <em className={row.lastSide.toLowerCase()}>{row.lastSide}</em>
+              <strong>
+                {formatBnb(row.equity)}
+                <small>
+                  {row.roi >= 0 ? "+" : ""}
+                  {(row.roi / 10).toFixed(1)}%
+                </small>
+              </strong>
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }

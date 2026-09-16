@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0907" />
+    <title>IMMORTAL FLY — Site Launch</title>
+    <meta
+      name="description"
+      content="Official site launch film for Immortal Fly. $IFS is live on BSC. The pit is paper."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      @font-face {
+        font-family: "Cormorant Garamond";
+        font-style: normal;
+        font-weight: 500;
+        font-display: block;
+        src: url("../fonts/cormorant-500.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "Cormorant Garamond";
+        font-style: normal;
+        font-weight: 600;
+        font-display: block;
+        src: url("../fonts/cormorant-600.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "Barlow Condensed";
+        font-style: normal;
+        font-weight: 500;
+        font-display: block;
+        src: url("../fonts/barlow-condensed-500.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+        src: url("../fonts/ibm-plex-mono-400.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        font-style: normal;
+        font-weight: 500;
+        font-display: block;
+        src: url("../fonts/ibm-plex-mono-500.ttf") format("truetype");
+      }
+
+      :root {
+        --bg: #0a0907;
+        --text: #f0ead9;
+        --muted: #a39a8b;
+        --quiet: #7a7266;
+        --line: #2f2a1f;
+        --gold: #c9a25e;
+        --neural: #9cab8d;
+        --display: "Cormorant Garamond", Palatino, serif;
+        --cond: "Barlow Condensed", "Helvetica Neue", sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        background: #050403;
+        color: var(--text);
+        overflow: hidden;
+      }
+      body {
+        display: grid;
+        place-items: center;
+      }
+
+      .stage-wrap {
+        width: 1920px;
+        height: 1080px;
+        transform-origin: center center;
+      }
+
+      .stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            ellipse 58% 52% at 18% 28%,
+            rgba(201, 162, 94, 0.15),
+            transparent 62%
+          ),
+          radial-gradient(
+            ellipse 48% 42% at 88% 80%,
+            rgba(156, 171, 141, 0.09),
+            transparent 58%
+          ),
+          radial-gradient(
+            ellipse 90% 80% at 50% 50%,
+            transparent 36%,
+            rgba(0, 0, 0, 0.5) 100%
+          ),
+          #0a0907;
+      }
+
+      .vignette,
+      .grain,
+      .finder {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .vignette {
+        z-index: 20;
+        box-shadow: inset 0 0 220px 48px rgba(0, 0, 0, 0.55);
+      }
+      .grain {
+        z-index: 21;
+        opacity: 0.055;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 180px 180px;
+      }
+      .finder {
+        z-index: 22;
+      }
+      .finder i {
+        position: absolute;
+        width: 34px;
+        height: 34px;
+        border-color: rgba(201, 162, 94, 0.42);
+        border-style: solid;
+      }
+      .finder .tl {
+        top: 38px;
+        left: 48px;
+        border-width: 1px 0 0 1px;
+      }
+      .finder .tr {
+        top: 38px;
+        right: 48px;
+        border-width: 1px 1px 0 0;
+      }
+      .finder .bl {
+        bottom: 38px;
+        left: 48px;
+        border-width: 0 0 1px 1px;
+      }
+      .finder .br {
+        bottom: 38px;
+        right: 48px;
+        border-width: 0 1px 1px 0;
+      }
+
+      .hud {
+        position: absolute;
+        z-index: 18;
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--quiet);
+        white-space: nowrap;
+      }
+      .hud-l {
+        top: 52px;
+        left: 96px;
+      }
+      .hud-r {
+        top: 52px;
+        right: 96px;
+      }
+      .hud b {
+        color: var(--gold);
+        font-weight: 500;
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        will-change: opacity, transform;
+      }
+
+      .ghost {
+        position: absolute;
+        left: -40px;
+        top: 210px;
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 320px;
+        letter-spacing: -0.04em;
+        line-height: 0.8;
+        color: rgba(240, 234, 217, 0.035);
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      .seal-wrap {
+        position: absolute;
+        left: 50%;
+        top: 46%;
+        width: 420px;
+        height: 420px;
+        transform: translate(-50%, -50%);
+      }
+      .ring {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        border: 1px solid rgba(201, 162, 94, 0.28);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .ring-a {
+        width: 420px;
+        height: 420px;
+      }
+      .ring-b {
+        width: 348px;
+        height: 348px;
+        border-color: rgba(240, 234, 217, 0.12);
+      }
+      .crosshair span {
+        position: absolute;
+        background: rgba(201, 162, 94, 0.55);
+      }
+      .crosshair .n,
+      .crosshair .s {
+        left: 50%;
+        width: 1px;
+        height: 22px;
+        transform: translateX(-50%);
+      }
+      .crosshair .n {
+        top: -2px;
+      }
+      .crosshair .s {
+        bottom: -2px;
+      }
+      .crosshair .e,
+      .crosshair .w {
+        top: 50%;
+        height: 1px;
+        width: 22px;
+        transform: translateY(-50%);
+      }
+      .crosshair .e {
+        right: -2px;
+      }
+      .crosshair .w {
+        left: -2px;
+      }
+      .seal {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 268px;
+        height: 268px;
+        transform: translate(-50%, -50%);
+        filter: drop-shadow(0 0 28px rgba(201, 162, 94, 0.22));
+      }
+      .note {
+        position: absolute;
+        left: 50%;
+        top: 78%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+      .note .line {
+        font-family: var(--display);
+        font-size: 40px;
+        letter-spacing: 0.08em;
+        color: var(--text);
+      }
+      .note .en {
+        margin-top: 14px;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+
+      .copy {
+        position: absolute;
+        left: 160px;
+        top: 250px;
+        width: 1320px;
+      }
+      .kicker {
+        font-family: var(--cond);
+        font-size: 22px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 28px;
+      }
+      h1 {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 108px;
+        line-height: 0.98;
+        letter-spacing: -0.03em;
+      }
+      h1 .gold {
+        color: var(--gold);
+      }
+      .lead {
+        margin-top: 36px;
+        max-width: 980px;
+        font-family: var(--display);
+        font-size: 32px;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+      .rule {
+        margin-top: 40px;
+        width: 220px;
+        height: 1px;
+        background: var(--gold);
+        transform-origin: left center;
+      }
+
+      .lang {
+        position: absolute;
+        left: 140px;
+        right: 140px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .lang-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 64px;
+      }
+      .lang-head .kicker {
+        margin: 0;
+      }
+      .lang-head p {
+        font-family: var(--display);
+        font-size: 28px;
+        color: var(--muted);
+      }
+      .prims {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+      }
+      .prim {
+        padding-top: 22px;
+        border-top: 1px solid rgba(201, 162, 94, 0.55);
+        transform-origin: left top;
+      }
+      .prim strong {
+        display: block;
+        font-family: var(--cond);
+        font-weight: 500;
+        font-size: 72px;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        color: var(--text);
+      }
+      .prim em {
+        display: block;
+        margin: 16px 0 18px;
+        font-family: var(--display);
+        font-style: normal;
+        font-size: 30px;
+        color: var(--gold);
+      }
+      .prim span {
+        display: block;
+        font-family: var(--mono);
+        font-size: 16px;
+        line-height: 1.55;
+        letter-spacing: 0.04em;
+        color: var(--quiet);
+      }
+
+      .split {
+        position: absolute;
+        left: 140px;
+        right: 140px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+      }
+      .plate {
+        min-height: 540px;
+        padding: 48px 52px;
+        background: rgba(18, 17, 14, 0.62);
+        border: 1px solid rgba(201, 162, 94, 0.16);
+        box-shadow: inset 0 1px 0 rgba(240, 234, 217, 0.06);
+        border-top: 1px solid rgba(201, 162, 94, 0.55);
+      }
+      .plate .kicker {
+        margin-bottom: 22px;
+      }
+      .plate h2 {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 64px;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+      .plate p {
+        margin-top: 22px;
+        font-family: var(--display);
+        font-size: 28px;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+      .meta {
+        margin-top: 36px;
+        font-family: var(--mono);
+        font-size: 16px;
+        line-height: 1.8;
+        letter-spacing: 0.04em;
+        color: var(--quiet);
+      }
+      .meta b {
+        color: var(--gold);
+        font-weight: 500;
+      }
+
+      .end {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .end img {
+        width: 196px;
+        height: 196px;
+        filter: drop-shadow(0 0 24px rgba(201, 162, 94, 0.28));
+      }
+      .end .brand {
+        margin-top: 28px;
+        margin-right: -0.28em;
+        font-family: var(--cond);
+        font-size: 22px;
+        letter-spacing: 0.28em;
+        color: var(--gold);
+      }
+      .end h2 {
+        margin-top: 10px;
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 92px;
+        letter-spacing: -0.03em;
+      }
+      .end .url {
+        margin-top: 18px;
+        font-family: var(--mono);
+        font-size: 28px;
+        letter-spacing: 0.18em;
+        color: var(--text);
+      }
+      .end .foot {
+        margin-top: 28px;
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--quiet);
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        display: grid;
+        place-items: center;
+        background: rgba(5, 4, 3, 0.28);
+        cursor: pointer;
+      }
+      .overlay[hidden],
+      body.capture .overlay,
+      body.capture .progress {
+        display: none;
+      }
+      .play {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        color: var(--text);
+      }
+      .play button {
+        width: 72px;
+        height: 72px;
+        border: 1px solid rgba(201, 162, 94, 0.7);
+        border-radius: 50%;
+        position: relative;
+        background: transparent;
+        cursor: pointer;
+      }
+      .play button i,
+      .play button::after {
+        pointer-events: none;
+      }
+      .play button::after {
+        content: "";
+        position: absolute;
+        left: 28px;
+        top: 24px;
+        border-style: solid;
+        border-width: 12px 0 12px 18px;
+        border-color: transparent transparent transparent var(--gold);
+      }
+      .play small {
+        font-family: var(--mono);
+        letter-spacing: 0.28em;
+        font-size: 13px;
+        color: var(--gold);
+      }
+      .play a {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        color: var(--quiet);
+        text-decoration: none;
+      }
+      .progress {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 30;
+        height: 3px;
+        background: rgba(47, 42, 31, 0.8);
+      }
+      .progress > span {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: var(--gold);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage-wrap" id="wrap">
+      <div class="stage" id="stage">
+        <div class="ghost" id="ghost">IMMORTAL</div>
+        <div class="hud hud-l" id="hudL">IFS.LAUNCH / 16 SEP 2026</div>
+        <div class="hud hud-r" id="hudR"><b>$IFS</b> · BSC</div>
+
+        <section class="scene" id="s1">
+          <div class="seal-wrap" id="sealWrap">
+            <div class="ring ring-a" id="ringA"></div>
+            <div class="ring ring-b" id="ringB"></div>
+            <div class="ring ring-a crosshair">
+              <span class="n"></span><span class="s"></span><span class="e"></span
+              ><span class="w"></span>
+            </div>
+            <img class="seal" id="seal" src="../assets/fly-seal.png" alt="" />
+          </div>
+          <div class="note" id="s1note">
+            <div class="line">Measured. Written. Able to wake.</div>
+            <div class="en">Site launch</div>
+          </div>
+        </section>
+
+        <section class="scene" id="s2">
+          <div class="copy">
+            <div class="kicker" id="s2k">Immortal Flies / Digital Life Observatory</div>
+            <h1 id="s2a">Small lives.</h1>
+            <h1 id="s2b"><span class="gold">Infinite worlds.</span></h1>
+            <p class="lead" id="s2lead">
+              From a neural spark to a society of autonomous agents.<br />Trading is the first verifiable world.
+            </p>
+            <div class="rule" id="s2rule"></div>
+          </div>
+        </section>
+
+        <section class="scene" id="s3">
+          <div class="lang">
+            <div class="lang-head">
+              <div class="kicker">Fly Language / Four primitives</div>
+              <p>They do not speak buy or sell. Finance is translated only at the port.</p>
+            </div>
+            <div class="prims">
+              <article class="prim" id="p1">
+                <strong>SENSE</strong>
+                <em>Receive</em>
+                <span>What arrives<br />from whom, when it expires</span>
+              </article>
+              <article class="prim" id="p2">
+                <strong>ACT</strong>
+                <em>Tend</em>
+                <span>Present tendency<br />and intensity</span>
+              </article>
+              <article class="prim" id="p3">
+                <strong>MEMORY</strong>
+                <em>Remember</em>
+                <span>What was lived<br />checkpoints that replay</span>
+              </article>
+              <article class="prim" id="p4">
+                <strong>PROPOSE</strong>
+                <em>Ask</em>
+                <span>What the society<br />may do from the catalog</span>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="scene" id="s4">
+          <div class="split">
+            <article class="plate" id="pl1">
+              <div class="kicker">First world</div>
+              <h2>The pit is<br />still paper.</h2>
+              <p>Watch the turn before the order. Colony, intent, risk and fills stay in separate layers.</p>
+              <div class="meta">THE PIT · PAPER ONLY<br />USER VAULT NOT OPEN</div>
+            </article>
+            <article class="plate" id="pl2">
+              <div class="kicker">Official token</div>
+              <h2>$IFS is<br />live on BSC.</h2>
+              <p>1% buy and sell tax. Vault address not posted. No yield claim. No buyback claim.</p>
+              <div class="meta">
+                <b>0x65b6…81a7777</b><br />
+                FLAP.SH · IMMORTALFLIES.COM
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="scene" id="s5">
+          <div class="end">
+            <img id="endSeal" src="../assets/fly-seal.png" alt="" />
+            <div class="brand" id="endBrand">OFFICIAL SITE</div>
+            <h2 id="endTitle">Immortal Fly</h2>
+            <div class="url" id="endUrl">immortalflies.com</div>
+            <div class="foot" id="endFoot">$IFS · BSC · Enter the observatory</div>
+          </div>
+        </section>
+
+        <div class="vignette"></div>
+        <div class="grain"></div>
+        <div class="finder" aria-hidden="true">
+          <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay">
+      <div class="play">
+        <button type="button" id="playBtn"><i></i></button>
+        <small>PLAY / 20S</small>
+        <a href="./immortal-fly-site-launch.mp4" download>Download MP4</a>
+      </div>
+    </div>
+    <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+
+    <script>
+      const DURATION = 20;
+      const capture = new URLSearchParams(location.search).has("capture");
+      if (capture) document.body.classList.add("capture");
+
+      const $ = (id) => document.getElementById(id);
+      const clamp = (t, a, b) => Math.max(a, Math.min(b, t));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const expoOut = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+      const cubicOut = (t) => 1 - Math.pow(1 - t, 3);
+      const cubicIn = (t) => t * t * t;
+      const sineInOut = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
+      const quartOut = (t) => 1 - Math.pow(1 - t, 4);
+
+      function gate(t, start, dur, ease = cubicOut) {
+        if (dur <= 0) return t >= start ? 1 : 0;
+        return ease(clamp((t - start) / dur, 0, 1));
+      }
+      function windowFade(t, a, b, fadeIn, fadeOut) {
+        if (t < a || t > b) return 0;
+        if (fadeIn && t < a + fadeIn) return cubicOut((t - a) / fadeIn);
+        if (fadeOut && t > b - fadeOut) return 1 - cubicIn((t - (b - fadeOut)) / fadeOut);
+        return 1;
+      }
+      function setOp(el, v) {
+        el.style.opacity = String(v);
+        el.style.visibility = v <= 0.001 ? "hidden" : "visible";
+      }
+      function setXf(el, xf) {
+        el.style.transform = xf;
+      }
+
+      function apply(t) {
+        t = clamp(t, 0, DURATION);
+        $("bar").style.width = `${(t / DURATION) * 100}%`;
+
+        const hud = windowFade(t, 0.15, 19.7, 0.5, 0.35);
+        setOp($("hudL"), hud);
+        setOp($("hudR"), hud);
+        setOp($("ghost"), windowFade(t, 3.6, 16.8, 0.8, 0.6) * 1);
+
+        const g = 0.035 + Math.sin(t * 0.35) * 0.008;
+        $("ghost").style.color = `rgba(240,234,217,${g})`;
+        $("ghost").style.transform = `translateX(${lerp(-24, 18, sineInOut(t / DURATION))}px)`;
+
+        const s1 = windowFade(t, 0, 4.15, 0.35, 0.55);
+        setOp($("s1"), s1);
+        const sealIn = gate(t, 0.28, 1.15, expoOut);
+        setXf(
+          $("sealWrap"),
+          `translate(-50%,-50%) scale(${lerp(0.86, 1, sealIn)})`,
+        );
+        $("seal").style.opacity = String(gate(t, 0.22, 0.9, quartOut));
+        $("ringA").style.transform = `translate(-50%,-50%) rotate(${t * 9}deg)`;
+        $("ringB").style.transform = `translate(-50%,-50%) rotate(${-t * 7}deg)`;
+        const noteIn = gate(t, 1.35, 0.7, cubicOut);
+        setOp($("s1note"), s1 * noteIn);
+        setXf($("s1note"), `translate(-50%, ${lerp(18, 0, noteIn)}px)`);
+
+        const s2 = windowFade(t, 3.65, 8.02, 0.45, 0);
+        setOp($("s2"), s2);
+        const k2 = gate(t, 3.85, 0.45, cubicOut);
+        setOp($("s2k"), k2);
+        setXf($("s2k"), `translateX(${lerp(-36, 0, k2)}px)`);
+        const a2 = gate(t, 4.1, 0.7, expoOut);
+        setOp($("s2a"), a2);
+        setXf($("s2a"), `translateY(${lerp(46, 0, a2)}px)`);
+        const b2 = gate(t, 4.55, 0.75, expoOut);
+        setOp($("s2b"), b2);
+        setXf($("s2b"), `translateY(${lerp(40, 0, b2)}px)`);
+        const l2 = gate(t, 5.15, 0.7, cubicOut);
+        setOp($("s2lead"), l2);
+        setXf($("s2lead"), `translateY(${lerp(24, 0, l2)}px)`);
+        const r2 = gate(t, 5.4, 0.55, quartOut);
+        $("s2rule").style.transform = `scaleX(${r2})`;
+        $("s2rule").style.opacity = String(s2);
+
+        const s3 = windowFade(t, 8.0, 13.28, 0, 0.45);
+        setOp($("s3"), s3);
+        ["p1", "p2", "p3", "p4"].forEach((id, i) => {
+          const g3 = gate(t, 8.08 + i * 0.16, 0.48, expoOut);
+          setOp($(id), s3 * g3);
+          setXf($(id), `translateY(${lerp(36, 0, g3)}px)`);
+          $(id).style.filter = `blur(${lerp(6, 0, g3)}px)`;
+        });
+
+        const s4 = windowFade(t, 12.95, 17.15, 0.4, 0.4);
+        setOp($("s4"), s4);
+        const pl1 = gate(t, 13.1, 0.55, cubicOut);
+        const pl2 = gate(t, 13.35, 0.6, expoOut);
+        setOp($("pl1"), s4 * pl1);
+        setOp($("pl2"), s4 * pl2);
+        setXf($("pl1"), `translateX(${lerp(-48, 0, pl1)}px)`);
+        setXf($("pl2"), `translateX(${lerp(48, 0, pl2)}px)`);
+
+        const s5 = windowFade(t, 16.7, 20, 0.5, 0);
+        setOp($("s5"), s5);
+        const es = gate(t, 16.85, 0.7, expoOut);
+        $("endSeal").style.opacity = String(es);
+        $("endSeal").style.transform = `scale(${lerp(0.88, 1, es)})`;
+        const eb = gate(t, 17.2, 0.4, cubicOut);
+        setOp($("endBrand"), eb);
+        const et = gate(t, 17.4, 0.65, expoOut);
+        setOp($("endTitle"), et);
+        setXf($("endTitle"), `translateY(${lerp(28, 0, et)}px)`);
+        const eu = gate(t, 17.85, 0.45, cubicOut);
+        setOp($("endUrl"), eu);
+        const ef = gate(t, 18.2, 0.4, cubicOut);
+        setOp($("endFoot"), ef);
+      }
+
+      window.__DURATION = DURATION;
+      window.__seek = apply;
+      window.__ready = false;
+
+      function fit() {
+        if (capture) {
+          $("wrap").style.transform = "none";
+          return;
+        }
+        const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+        $("wrap").style.transform = `scale(${s})`;
+      }
+      addEventListener("resize", fit);
+      fit();
+
+      let raf = 0;
+      let playing = false;
+      function playFrom(start) {
+        playing = true;
+        $("overlay").hidden = true;
+        const t0 = performance.now() - start * 1000;
+        const tick = (now) => {
+          const t = Math.min(DURATION, (now - t0) / 1000);
+          apply(t);
+          if (t < DURATION) raf = requestAnimationFrame(tick);
+          else {
+            playing = false;
+            $("overlay").hidden = false;
+          }
+        };
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(tick);
+      }
+
+      $("playBtn").addEventListener("click", () => playFrom(0));
+      $("overlay").addEventListener("click", (e) => {
+        if (e.target.closest("a")) return;
+        playFrom(0);
+      });
+      addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (!playing) playFrom(0);
+        }
+      });
+
+      document.fonts.ready.then(() => {
+        apply(capture ? 0 : 0.9);
+        window.__ready = true;
+        if (!capture) $("overlay").hidden = false;
+      });
+    </script>
+  </body>
+</html>
