@@ -1,0 +1,58 @@
+name: segment-replay
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/brain/**"
+      - "scripts/segment-replay*"
+      - "scripts/ensure-malecns-full.mjs"
+      - "scripts/data/prepare_malecns.py"
+      - "public/data/**"
+      - "reports/segment-replay-full-v1.json"
+      - "tests/segment-replay.test.mjs"
+      - ".github/workflows/segment-replay.yml"
+  pull_request:
+    paths:
+      - "src/brain/**"
+      - "scripts/segment-replay*"
+      - "scripts/ensure-malecns-full.mjs"
+      - "scripts/data/prepare_malecns.py"
+      - "public/data/**"
+      - "reports/segment-replay-full-v1.json"
+      - "tests/segment-replay.test.mjs"
+      - ".github/workflows/segment-replay.yml"
+jobs:
+  linux-little-endian:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      SEGMENT_REPLAY_FULL: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache MaleCNS full graph
+        id: cache-full
+        uses: actions/cache@v4
+        with:
+          path: |
+            public/data/malecns-full/graph.bin
+            public/data/malecns-full/metadata.json
+            scripts/data/cache
+          key: malecns-full-${{ hashFiles('public/data/malecns-full/manifest.json', 'scripts/data/prepare_malecns.py') }}
+      - name: Prepare MaleCNS full graph
+        if: steps.cache-full.outputs.cache-hit != 'true'
+        run: |
+          python3 -m pip install --user pyarrow pandas
+          python3 scripts/data/prepare_malecns.py --full
+          git checkout -- public/data/malecns-full/manifest.json public/data/malecns-full/provenance.json public/data/malecns-full/README.md
+      - name: Check full graph hashes
+        run: node scripts/ensure-malecns-full.mjs --check
+      - run: npm install
+      - name: Verify circuit + full 1000-step L=10 vectors
+        run: node scripts/segment-replay.mjs verify

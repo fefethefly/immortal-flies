@@ -7,6 +7,7 @@ artifacts/
 .DS_Store
 test-results/
 scripts/data/cache/
-public/data/malecns-full/
+public/data/malecns-full/graph.bin
+public/data/malecns-full/metadata.json
 server/data/
 .vercel

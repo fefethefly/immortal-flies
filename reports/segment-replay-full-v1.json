@@ -1,0 +1,128 @@
+{
+  "schema": "iff.segment-replay/1",
+  "profile": "iff.segment-replay/1",
+  "plan": {
+    "seed": 43,
+    "soulId": "segment-replay-v1",
+    "branchId": "canonical",
+    "food": 800,
+    "steps": 1000,
+    "checkpointEvery": 100,
+    "leafEvery": 10,
+    "now": 1
+  },
+  "endian": {
+    "host": "little",
+    "graphFile": "little",
+    "magic": "IFF1",
+    "magicBytes": [
+      49,
+      70,
+      70,
+      73
+    ]
+  },
+  "runtime": {
+    "model": "lif-integer/1",
+    "encoder": "sensory-groups/1",
+    "decoder": "motor-balance/1"
+  },
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v23.11.0"
+  },
+  "sources": {
+    "src/brain/runtime.mjs": "0x00f717609258047ab5ae9445aafe19afb18e32d09a4601ee79171c7dfa7842d4",
+    "src/brain/codec.mjs": "0x25fead0acbfc75e67ef5d18d5a0fa16d29ce66edcffa0a3a5936525678c3baa2",
+    "src/brain/graph.mjs": "0x9dc97b781d629b3dcbedcc3b11f3f676a7e525047c645b14e663e69311d37fca",
+    "src/brain/endian.mjs": "0x66c9b920682604b5f0e4fc7dc6357a17fe32afe6611575ccfbd79f9f39ff8b6b",
+    "src/brain/adapters.mjs": "0x7feaeff166bebfaacc3d9ef43333c723cfb1805d24fc981262c6a95c4f3d4614",
+    "src/brain/ethology.mjs": "0x08bab90af94bf414a2cebd5e8cdbbaf24bab277992449b954010b431ae21fd55",
+    "src/brain/flyswarm/segment.mjs": "0x61ea9e378a0b8d8574e1df41b14e9ae19eb5a74e8256b94feacd8b705fe7f278",
+    "scripts/segment-replay-core.mjs": "0x7b8ca480c5ead79cf3179ba4cd5cfc0124d454f01de96ecd98133fe99d65dd4e"
+  },
+  "datasets": {
+    "malecns-circuit": {
+      "dataset": "male-cns:v1.0",
+      "graphId": "malecns-circuit",
+      "neurons": 12000,
+      "edges": 477021,
+      "datasetHash": "0xe269ed3d16c7f08a3e035e37edb44c8f30b96480646f865d960eb2e02388f64b",
+      "metadataHash": "0x53d5be94c7d2bcadd7daf110d922ea1f8d03a1e0f81117fd034b35c593fd7524",
+      "startRoot": "0x6c56e7b700ebd205551fb3c28f3058a899f45706be39df24972a2bc9caf51cee",
+      "batchedRoot": "0x1583331eddb65f05b8d9af6cbc52252194f6b4667b2c24e86a31afcef26ba239",
+      "commitment": {
+        "schema": "iff.segment-commitment/1",
+        "audit": "SIM",
+        "steps": 1000,
+        "checkpointEvery": 100,
+        "leafEvery": 10,
+        "startRoot": "0x6c56e7b700ebd205551fb3c28f3058a899f45706be39df24972a2bc9caf51cee",
+        "finalRoot": "0x1583331eddb65f05b8d9af6cbc52252194f6b4667b2c24e86a31afcef26ba239",
+        "root": "0x723c9ca56688ff928881cb62a12d39cec3faac0252c1a3c6ff9b8fbcb55b27a1",
+        "checkpointRoots": [
+          "0x6c56e7b700ebd205551fb3c28f3058a899f45706be39df24972a2bc9caf51cee",
+          "0x2cb3408663c1f94d683bbd7f8506c9d37526481565721213e5cdf30818c9075f",
+          "0x799aa98e4f65810762a20c4d43dc88f670f17ce03832d235b9381de1d3991aa6",
+          "0x3c239951f547fa4c15ebf7f1131010d33137f8f0eb607f71098d824035a4a258",
+          "0x2b42721a4d34b74f5d43a2dbe5e4ea92a9c6372f7428725df745e62fdc31654a",
+          "0x01881ca7b51b847670bf094de3d07dc6f1d7053ecf8bc35cc7f8b8af973fa3fe",
+          "0xc89651d611c96e089cb21da97b59413a10cd0ded0405ead3e0f55d78f930ade5",
+          "0x76f2349c311d6653d0c79c18f5dd08f1d0b0340b07e170d2f3951333dadc20a5",
+          "0xbb16908e810ae2c07b35c340f271855bfed549e0203ceaf772f3b2ee28599188",
+          "0xcfb6dcd89aac6812631b7b7d3a631320c44203301ccbed2d75e8139846f1236a"
+        ]
+      },
+      "probes": {
+        "seed": "0xa91cfb8cc69d352829727837325c5e81bbfcc25a4f8ce9e18cb88dc43a9d3d8e",
+        "positions": [
+          310,
+          640,
+          840
+        ]
+      }
+    },
+    "malecns-full": {
+      "dataset": "male-cns:v1.0",
+      "graphId": "malecns-full",
+      "neurons": 161839,
+      "edges": 2749558,
+      "datasetHash": "0x7fe1b3bcc79019917ec9d0a3f568ca43f3fccc0e2099732da9e00bbaba0516f8",
+      "metadataHash": "0xfc0e12ef3ac204aa09762343b1b5cd093e322c5ade54347f8ccc5a9ce6625c5d",
+      "startRoot": "0xcbefb5475aa4a7c82d486787035e4519209d1306a2bcd4520dc60fd7642e6074",
+      "batchedRoot": "0x73c6e0b3420328cd636cb839816643f96b1b7aafbba727e557ecf4146e855588",
+      "commitment": {
+        "schema": "iff.segment-commitment/1",
+        "audit": "SIM",
+        "steps": 1000,
+        "checkpointEvery": 100,
+        "leafEvery": 10,
+        "startRoot": "0xcbefb5475aa4a7c82d486787035e4519209d1306a2bcd4520dc60fd7642e6074",
+        "finalRoot": "0x73c6e0b3420328cd636cb839816643f96b1b7aafbba727e557ecf4146e855588",
+        "root": "0x9a7241bef30ebda9243c0c1c9f01a993a6424b407ac35b732d121bfffc0c47c3",
+        "checkpointRoots": [
+          "0xcbefb5475aa4a7c82d486787035e4519209d1306a2bcd4520dc60fd7642e6074",
+          "0xd27382e2d53080683b41cb17ba1435218ded158fbaf77184803c0318473efdbb",
+          "0x98b4d425118249b61a2e20a7ff75f3fe55703e07bc37e96ec6bee378c4788215",
+          "0x08f4664574bbad0da1b2439579dbe295e99b1fb9c6fa9d2d3c8d321727315528",
+          "0x7af03247d591b37b8d7de2a8f14e4892a5782dc73875e558dde37f1ca511ffd0",
+          "0xc66d2a791a2f2e9a35f5b74fa52c3d1e996b0bbc1fa8e512a0e27a6b9b7055c0",
+          "0x8a8d5f5e658fcd21b9c538eb898fd06a65a7b1b8887c6cfa39d542424f7c1708",
+          "0x9105b790fad1aff9ed70067c6594e6925b3201c604ef1b50f2edec307be5d336",
+          "0x3b07329b9541349c4ce4133d1b3cc06a9412c5043717e23da759630b40bf2b44",
+          "0x4effa8d2b0cda2ed5e4fe501d7d612685226ce19d31864e13460d45c8232490d"
+        ]
+      },
+      "probes": {
+        "seed": "0xa0a322047d85cb1a98b07ec667ffa6ae7605963d954a495d12c6ce29099b73b9",
+        "positions": [
+          290,
+          670,
+          690
+        ]
+      }
+    }
+  },
+  "sha256": "0xcf1dd0ad0856e96c89bdc1decb02bcda3ca9ef69f69c99a52479dece7f8ce045"
+}
