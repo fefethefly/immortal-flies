@@ -54,6 +54,20 @@ graph compatibility. The current focused tests pass 12/12, but fixture/report
 tests do not establish that the live graph and side file still match.
 Resolve provenance compatibility before attempting any further study.
 
+Follow-up diagnosis (no simulation): the working tree subsequently contained
+an uncommitted 12,000-node / 477,021-edge graph and a modified side file;
+their binding check now passes. The precise transient file-update ordering
+behind the earlier failure is unknown. An isolated archive of c823e40 passes
+binding with the historical 1,400-node / 42,031-edge graph. Both old reports
+bind the committed binary, not the current working-tree binary:
+
+- Historical SHA256: `4278c3cae84471b8a808391d5de5eddf8e54a2b75e01f8596743ec07e2f1e843`
+- Working-tree SHA256 at diagnosis: `e269ed3d16c7f08a3e035e37edb44c8f30b96480646f865d960eb2e02388f64b`
+
+No data was reverted, no binding was bypassed, and no runtime defect was
+established. Reproduce old reports against their committed historical dataset;
+a newer graph requires a separate versioned study, not relabeling old results.
+
 The practical conclusion remains seed/order sensitivity, not robust navigation
 or isolated node attribution. Larger validation and the 80-node scan are paused.
 
