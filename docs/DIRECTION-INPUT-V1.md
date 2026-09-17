@@ -105,40 +105,102 @@ depends on stimulated group size, so traces are compared per direction only;
 motor-group activity is read-only ethology, no directional current enters
 left/right groups; no re-sensing, learning, behavior or foraging claim.
 
-## Closed-loop stage (iff.direction-closed-loop/1)
+## Historical closed-loop stage: interpretation corrected
 
-`scripts/run-direction-closed-loop.mjs` + `reports/direction-closed-loop-v1.json`.
-Three arms share the world, start state, observation layer and the UNMODIFIED
-production kernel; only stimulus routing differs: directional (side-route/1),
-swapped (left/right exchanged control), legacy (full-group scalar). Sensing is
-recomputed every round from the moved body; movement comes only from the
-kernel's own motor decode; no directional current enters motor groups. Trace
-entries carry a round-0 baseline, so metrics stay defined out of sensor range.
+The preserved `iff.direction-closed-loop/1` report used 20 seeds x 36 rounds.
+All arms collected zero. Its divergence metric compared whole-state hashes,
+including RNG, exposure and energy: **20/20 unequal hashes alone do not prove
+20/20 different body paths**. Threat exposure differences cannot be attributed
+to larger current without controlled interventions. In particular, 64 threat
+nodes overlap motor readouts, so the old blanket claim of no direct motor-group
+stimulation is withdrawn for hazard-containing experiments. Keeping kernel
+source unchanged does not remove this overlap.
 
-20 seeds x 36 rounds on the 1400-node subgraph, replays 20/20:
+A synthetic same-side sensory-to-motor graph collecting food demonstrates that
+software components can compose. It does NOT localize the real graph's failure
+to wiring. The earlier assertion that circuit wiring was the established
+remaining bottleneck, and full the next remedy, is withdrawn.
 
-- Behavioral divergence: directional final states differ from legacy 20/20 —
-  side routing changes the neural-to-behavior trajectory in closed loop.
-- No foraging benefit demonstrated: collected = 0 in all arms; directional vs
-  swapped diverges in only 6/20 seeds (targets are mostly beyond the 1000
-  local radius in a 10000-wide world within 36 rounds).
-- Cost signal: directional threat exposure 27 vs legacy 6 across seeds;
-  larger total injected current has behavioral consequences.
-- Mechanism check (standalone, not a committed report): a synthetic graph with
-  same-side sensory-to-motor wiring collects 1/1 under directional routing
-  while legacy collects 0 — encoding, plan, view-graph routing, kernel motor
-  decode, movement and pickup all compose end to end.
+## Circuit/full audit and bounded study (2026-09-17)
 
-Reading: with side-route/1 held fixed, the remaining bottleneck is the circuit
-wiring between the routed sensory sides and the left/right motor readout
-groups in the malecns-circuit subgraph, not the direction interface. A
-malecns-full study is the next lever, separately versioned. Sides locate
-neuron position, not response tuning; no biological or significance claim.
+New reports: `iff.direction-paths/1` and `iff.direction-full-study/1`.
+Circuit: 1,400 nodes / 42,031 edges; full: 161,839 / 2,749,558.
+Full is a filtered annotated graph, not every biological synapse. Thresholds
+are 8 and 10 respectively, so full is not a strict edge superset: circuit's
+single direct food-right to motor-right edge of weight 8 is absent in full.
+Indices are remapped by official body ID; the selected sensory and motor ID
+cohorts match across graphs. Anatomical side is not response-tuning evidence.
 
-## Next gate
+Two-hop food walks (counts; weight products and signed sums in the report):
 
-Closed-loop study only, separately versioned: re-sense each round while moving,
-verify direction-informed trajectories differ behaviorally, then foraging
-outcomes. Do not touch the legacy baseline path or motor readout groups; do not
-claim biological directional olfaction from side-of-soma annotation.
+| Source → target | circuit | full |
+| --- | ---: | ---: |
+| L → L | 32 | 112 |
+| L → R | 47 | 93 |
+| R → L | 214 | 266 |
+| R → R | 347 | 491 |
+
+Both graphs contain two-hop food-to-motor walks. Walks allow repeated nodes;
+products of two edge weights are not synapse counts or LIF efficacy. Signed
+sums apply the project's transmitter rule; zero/negative sums do not establish
+absence of functional paths. Longer paths and threshold dynamics remain open.
+
+Paired study: four initial seeds (43–46), four placements at distance 600,
+36 closed-loop steps and six open-loop neural steps; food only, no hazards.
+Food routes explicitly reject overlap with motor readouts. Each of the 96
+closed-loop arm runs (2 graphs × 16 scenarios × 3 arms) is replayed and its
+entire returned trace/state compared. Paths are x/y/heading, not whole-state
+hashes. The scenario worlds and paths are stored, and source fingerprints are
+checked before/after execution.
+
+| Measurement | circuit | full |
+| --- | ---: | ---: |
+| Left/right open-loop neural records differ | 4/4 | 4/4 |
+| Directional vs legacy body paths differ | 16/16 | 16/16 |
+| Directional vs swapped body paths differ | 8/16 | 8/16 |
+| Directional collections | 0 | 1 |
+| Swapped collections | 0 | 1 |
+| Legacy collections | 4 | 4 |
+
+Full does not establish a directional advantage: swapped matches directional
+collection and legacy is higher. Four seeds are a bounded pilot, not a
+significance test. Left/right group sizes (23/57), current budget, RNG draws,
+forward-drive suppression, graph threshold and horizon remain confounds.
+Next work should control these before increasing scale or claiming navigation.
+
+A one-off instrumented circuit replay (all 16 scenarios) matched the original
+runner's bodies and final states exactly. Ahead/behind have zero drive and
+motion by mapping design. Lateral cases have sensory spikes and 15–34 moving
+ticks; their closest observed distance was about 471.84, outside radius 400.
+This does not prove broken wiring. Geometry permits collection: initial distance
+600 requires 200 approach, while 36 steps permit up to 1260 per axis. Legacy
+actually collects ahead at tick 11 (circuit) or 9 (full); full directional
+collects on seed 44/right at tick 35, swapped on seed 46/right at tick 34.
+Do not change budget merely to force a positive result.
+
+## Reproduction and workspace handoff
+
+Run from the repository root:
+
+```sh
+node scripts/audit-direction-paths.mjs
+node scripts/study-direction-full.mjs
+node --test tests/direction-paths.test.mjs tests/direction-full-study.test.mjs
+```
+
+Full files are intentionally ignored by git. Reproduction needs the local
+hash-matching `public/data/malecns-full` dataset (the existing preparation
+instructions describe regeneration); neither this study nor the commit adds
+those large files. Existing diagnostic reports and production source are not
+rewritten.
+
+During this session 205 modified/untracked files were fingerprinted for
+coordination (excluding scratch IDE directories); none of those files changed
+between that snapshot and completed validation. This is not a lock or proof
+that other developers have stopped. The staging area was initially empty.
+Only this research line's named files are staged; no stash, reset, broad add,
+push, deployment or unrelated commit is performed. Frontend/life/contracts and
+server/package edits remain with their owners. Before each separate owner
+commit: inspect the exact staged diff, verify that source fingerprints did not
+change during tests, and run that slice's tests plus integration checks.
 
