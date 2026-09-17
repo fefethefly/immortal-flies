@@ -74,6 +74,23 @@ try {
     assert.equal(await tick(),'02 / 32','admission examples must not alter historical replay');
   }
 
+  assert.ok(await wait(`document.querySelector('[data-run-integrity]')?.textContent.includes('完整性校验通过')`));
+  for(const [arm,reason,input,target] of [['valid','ACCEPTED_INPUT','0 → 216',2],['duplicate','DUPLICATE','0 → 216',2],['mixed','ENVIRONMENT_MISMATCH','0 → 216',2],['environment','ENVIRONMENT_MISMATCH','0 → 0',2],['expired','EXPIRED','0 → 0',3],['conflict','ID_CONFLICT','0 → 0',2]]) {
+    await evaluate(`document.querySelector('[data-run-arm="${arm}"]').click()`);
+    assert.equal(await evaluate(`document.querySelector('[data-run-tick]').textContent`),'0 / 32');
+    for(let i=0;i<target;i++)await evaluate(`document.querySelector('[aria-label="任务下一拍"]').click()`);
+    assert.ok(await wait(`!!document.querySelector('[data-run-decision="${reason}"]')`));
+    assert.equal(await evaluate(`document.querySelector('[data-run-input="1"]').textContent`),input);
+    assert.equal(await tick(),'02 / 32','new task replay must not change old report');
+  }
+  await evaluate(`document.querySelector('[data-run-arm="off"]').click()`);
+  await evaluate(`document.querySelector('[data-run-play]').click()`);
+  assert.ok(await wait(`document.querySelector('[data-run-tick]').textContent !== '0 / 32'`));
+  await evaluate(`document.querySelector('[data-run-play]').click()`);
+  const paused=await evaluate(`document.querySelector('[data-run-tick]').textContent`);
+  await new Promise(r=>setTimeout(r,700));
+  assert.equal(await evaluate(`document.querySelector('[data-run-tick]').textContent`),paused);
+  assert.ok(await evaluate(`!!document.querySelector('a[download="admission-replay-v1.json"]')`));
   assert.ok(await evaluate(`!!document.querySelector('a[download="protocol-replay-smoke-v1.json"]')`));
   assert.deepEqual(errors, []);
   console.log('PASS /protocol.html: 4 arms switch, receiver input 0/216/216/0 at tick 2, bundle hash verified, no page errors.');
