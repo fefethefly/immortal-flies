@@ -1,0 +1,17 @@
+{
+  "schema": "iff.direction-subset-plan/1",
+  "policy": "food-subset-order/1",
+  "graph": "malecns-circuit",
+  "seeds": [101, 102, 103, 104, 105, 106, 107, 108],
+  "headings": [0, 90, 180, 270],
+  "placements": ["ahead", "left", "right", "behind"],
+  "arms": ["directional", "swapped", "neutral"],
+  "orders": ["index", "subset-A", "subset-B", "subset-C"],
+  "axialPolicy": "bilateral",
+  "distance": 600,
+  "pickupRadius": 400,
+  "rounds": 36,
+  "ordering": "index baseline or ascending SHA256(salt + colon + side + colon + official body ID), lexical body ID tie-break",
+  "primary": "paired collection wins/ties/losses directional vs neutral and swapped, separately per ordering",
+  "limits": "Seeds are reused for sensitivity, not a new holdout. Ordering changes subsets and RNG-to-node assignment; rotations are correlated. No best-order selection."
+}
