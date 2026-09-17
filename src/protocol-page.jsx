@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import bundle from "../reports/protocol-replay-smoke-v1.json";
 import bundleUrl from "../reports/protocol-replay-smoke-v1.json?url";
 import { hash } from "./brain/codec.mjs";
+import { AdmissionPanel } from "./protocol-admission-panel.jsx";
 import "./fonts.css";
 import "./protocol.css";
 
@@ -47,6 +48,7 @@ export function ProtocolPage() {
     </section><section className="protocol-panel"><div className="panel-title"><h2>02 / 输入 → 行为</h2><span>本拍记录</span></div>{bodies.map((b,i) => <article className="protocol-life" key={i}><h3>生命 {i} <small>{i ? '接收者' : '观察者'}</small></h3><dl><dt>本地 food / own</dt><dd>{frames[i]?.own.food ?? '—'}</dd><dt>施加 food / applied</dt><dd data-input={i}>{frames[i]?.applied.food ?? '—'}</dd><dt>动作 / action</dt><dd>{frames[i]?.action ?? '初始状态'}</dd><dt>位置 x, y</dt><dd>{b.x}, {b.y}</dd><dt>本拍采集事件</dt><dd>{run.ledger.filter(e => e.round === tick && e.taker === i).length}</dd></dl></article>)}</section></div>
     <section className="protocol-panel protocol-events"><div className="panel-title"><h2>03 / 消息证据</h2><span>观察 {sent.length} · 原始投递 {wire.length} · 接收 {receipts.length}</span></div><div className="event-columns"><div><h3>观察 / 发送</h3>{sent.length ? sent.map(m => <p key={m.id}><code>{m.id}</code><br/>生命 {m.from} 观察 {m.channel} ({m.x}, {m.y})<br/>第 {m.deliveryRound} 拍送达</p>) : <p>本拍无新消息</p>}</div><div><h3>传输 / 含重复</h3>{wire.length ? wire.map((m,i) => <p key={i}><code>{m.messageId}</code> → 生命 {m.to}<br/>副本 {m.copy + 1} · {m.payloadBytes} B<br/>载荷 ({m.deliveredX}, {m.deliveredY})</p>) : <p>本拍无投递</p>}</div><div><h3>去重 / 接收</h3>{receipts.length ? receipts.map((m,i) => <p key={i}><code>{m.messageId}</code> → 生命 {m.to}<br/>候选强度 {m.value}<br/>收到 ≠ 输入增加；按 max 与 own 合并</p>) : <p>本拍无接收回执</p>}</div></div></section>
     <section id="comparison" className="protocol-panel"><div className="panel-title"><h2>04 / 四臂结果</h2><span>全程汇总，非当前拍</span></div><div className="protocol-table"><table><thead><tr>{['实验臂','采集','输入变化拍数','原始 / 有效投递','原始 / 有效载荷 B'].map(s => <th key={s}>{s}</th>)}</tr></thead><tbody>{Object.entries(bundle.summary).map(([key,s]) => <tr key={key} className={key === arm ? 'selected' : ''}><th>{arms[key]}</th><td>{s.collected}</td><td>{s.changedInputs}</td><td>{s.rawDeliveries} / {s.acceptedDeliveries}</td><td>{s.rawPayloadBytes} / {s.acceptedPayloadBytes}</td></tr>)}</tbody></table></div></section>
+    <AdmissionPanel />
     <footer className="protocol-evidence"><p role="status">{integrity} · 浏览器仅校验包哈希，不执行神经重算。</p><code>{bundle.bundleHash}</code><p>独立完整重放：在项目目录执行 <code>node scripts/protocol-replay.mjs verify</code></p><p>不连接钱包、不发送交易、不写入生命状态。数据来自固定历史复算包。</p></footer>
   </main>;
 }

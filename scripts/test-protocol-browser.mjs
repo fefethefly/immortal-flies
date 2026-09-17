@@ -67,6 +67,13 @@ try {
     assert.equal(await evaluate(`document.querySelector('[data-input="1"]').textContent`), input, `${key} receiver input at tick 2`);
   }
   assert.ok(await evaluate(`document.body.innerText.includes('SIM')`));
+  for (const [kind,reason,value] of [['valid','ACCEPTED_INPUT','216'],['duplicate','DUPLICATE','216'],['conflict','ID_CONFLICT','0'],['environment','ENVIRONMENT_MISMATCH','0'],['expired','EXPIRED','0'],['no-gain','ACCEPTED_NO_GAIN','500']]) {
+    await evaluate(`document.querySelector('[data-admission="${kind}"]').click()`);
+    assert.ok(await wait(`!!document.querySelector('[data-decision="${reason}"]')`), `${kind} decision rendered`);
+    assert.equal(await evaluate(`document.querySelector('[data-admission-input]').textContent`),value);
+    assert.equal(await tick(),'02 / 32','admission examples must not alter historical replay');
+  }
+
   assert.ok(await evaluate(`!!document.querySelector('a[download="protocol-replay-smoke-v1.json"]')`));
   assert.deepEqual(errors, []);
   console.log('PASS /protocol.html: 4 arms switch, receiver input 0/216/216/0 at tick 2, bundle hash verified, no page errors.');
