@@ -92,6 +92,12 @@ try {
   assert.equal(await evaluate(`document.querySelector('[data-run-tick]').textContent`),paused);
   assert.ok(await evaluate(`!!document.querySelector('a[download="admission-replay-v1.json"]')`));
   assert.ok(await evaluate(`!!document.querySelector('a[download="protocol-replay-smoke-v1.json"]')`));
+  assert.equal(await evaluate(`document.querySelectorAll('[data-task-row]').length`),3);
+  const expectedTask={off:['0 / 0','未采集','0','64','0','0, 0','0','0 / 0'],simple:['0 / 0','未采集','0','64','31','30, -30','31','4035 / 4035'],admitted:['0 / 0','未采集','0','64','31','30, -30','31','10088 / 10088']};
+  for(const [arm,cells] of Object.entries(expectedTask)) {
+    assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('[data-task-row="${arm}"] td'),el=>el.textContent)`),cells);
+  }
+  assert.ok(await evaluate(`document.querySelector('[data-task-conclusion]').textContent.includes('没有证明任务收益')`));
   assert.deepEqual(errors, []);
   console.log('PASS /protocol.html: 4 arms switch, receiver input 0/216/216/0 at tick 2, bundle hash verified, no page errors.');
 } finally {

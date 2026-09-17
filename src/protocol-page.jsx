@@ -4,6 +4,7 @@ import bundleUrl from "../reports/protocol-replay-smoke-v1.json?url";
 import { hash } from "./brain/codec.mjs";
 import { AdmissionPanel } from "./protocol-admission-panel.jsx";
 import { AdmissionReplayPanel } from "./protocol-admission-replay.jsx";
+import { TaskComparisonPanel } from "./protocol-task-comparison.jsx";
 import "./fonts.css";
 import "./protocol.css";
 
@@ -51,6 +52,7 @@ export function ProtocolPage() {
     <section id="comparison" className="protocol-panel"><div className="panel-title"><h2>04 / 四臂结果</h2><span>全程汇总，非当前拍</span></div><div className="protocol-table"><table><thead><tr>{['实验臂','采集','输入变化拍数','原始 / 有效投递','原始 / 有效载荷 B'].map(s => <th key={s}>{s}</th>)}</tr></thead><tbody>{Object.entries(bundle.summary).map(([key,s]) => <tr key={key} className={key === arm ? 'selected' : ''}><th>{arms[key]}</th><td>{s.collected}</td><td>{s.changedInputs}</td><td>{s.rawDeliveries} / {s.acceptedDeliveries}</td><td>{s.rawPayloadBytes} / {s.acceptedPayloadBytes}</td></tr>)}</tbody></table></div></section>
     <AdmissionPanel />
     <AdmissionReplayPanel />
+    <TaskComparisonPanel />
     <footer className="protocol-evidence"><p role="status">{integrity} · 浏览器仅校验包哈希，不执行神经重算。</p><code>{bundle.bundleHash}</code><p>独立完整重放：在项目目录执行 <code>node scripts/protocol-replay.mjs verify</code></p><p>不连接钱包、不发送交易、不写入生命状态。数据来自固定历史复算包。</p></footer>
   </main>;
 }
