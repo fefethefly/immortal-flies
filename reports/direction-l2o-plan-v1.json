@@ -1,0 +1,17 @@
+{
+  "schema": "iff.direction-l2o-plan/1",
+  "policy": "food-leave-one-out/1",
+  "graph": "malecns-circuit",
+  "seeds": [201, 202, 203, 204],
+  "headings": [0, 90, 180, 270],
+  "placements": ["ahead", "left", "right", "behind"],
+  "arms": ["directional", "neutral"],
+  "order": "index",
+  "axialPolicy": "bilateral",
+  "distance": 600,
+  "pickupRadius": 400,
+  "rounds": 36,
+  "exclusions": "one cohort member removed at a time (all 23 left and 57 right members), plus a full-cohort control per seed/heading/placement",
+  "primary": "paired directional-vs-neutral wins/ties/losses and collected totals per excluded node, compared against the full-cohort control",
+  "limits": "Fresh seeds 201-204 fixed before execution; 16 correlated rotations/placements per seed. Removing a node changes both the rotating subset and RNG-to-node identity; k stays 22 and attempts stay matched, but closed-loop effective current is not claimed equal. Descriptive attribution only; no significance claim and no node is promoted or condemned on this evidence alone."
+}
