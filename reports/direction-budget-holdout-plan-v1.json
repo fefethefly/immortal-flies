@@ -1,0 +1,17 @@
+{
+  "schema": "iff.budget-holdout-plan/1",
+  "policy": "equal-food-budget-holdout/1",
+  "graph": "malecns-circuit",
+  "seeds": [101, 102, 103, 104, 105, 106, 107, 108],
+  "headings": [0, 90, 180, 270],
+  "placements": ["ahead", "left", "right", "behind"],
+  "arms": ["directional", "swapped", "neutral"],
+  "axialPolicies": ["bilateral", "silent"],
+  "distance": 600,
+  "pickupRadius": 400,
+  "rounds": 36,
+  "selection": "same rotating sorted-index cohorts as equal-food-budget/1",
+  "primary": "paired collection wins/ties/losses vs neutral within each axial policy",
+  "secondary": "paired vs swapped; axial-policy differences; heading/placement/seed strata; body paths",
+  "limits": "Eight held-out seeds, repeated placements/headings are not independent samples. No post-result parameter tuning. Silent suppresses both ahead and behind whenever current right component equals zero."
+}
