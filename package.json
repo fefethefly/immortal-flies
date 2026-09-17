@@ -15,6 +15,20 @@
     "contracts:test": "node scripts/test-contracts.mjs",
     "contracts:check:testnet": "node scripts/deploy-testnet.mjs --check",
     "contracts:deploy:testnet": "node scripts/deploy-testnet.mjs",
+    "life:compile": "node scripts/compile-life.mjs",
+    "life:test": "node scripts/test-life.mjs",
+    "life:genesis": "node scripts/build-life-genesis.mjs",
+    "life:field": "node scripts/build-life-field.mjs",
+    "life:phenotype": "node scripts/build-life-phenotype.mjs",
+    "life:check:testnet": "node scripts/deploy-life-testnet.mjs --check",
+    "life:deploy:testnet": "node scripts/deploy-life-testnet.mjs",
+    "life:hatch:testnet": "node scripts/hatch-life-testnet.mjs",
+    "life:check:mainnet": "node scripts/deploy-life-mainnet.mjs --check",
+    "life:deploy:mainnet": "node scripts/deploy-life-mainnet.mjs",
+    "life:check:kin-fee": "node scripts/deploy-soulkin-fee.mjs --check",
+    "life:deploy:kin-fee:testnet": "node scripts/deploy-soulkin-fee.mjs",
+    "life:check:market": "node scripts/deploy-soul-market.mjs --check",
+    "life:deploy:market:testnet": "node scripts/deploy-soul-market.mjs",
     "flap:prepare": "node scripts/flap-launch.mjs",
     "format": "prettier --write src tests scripts server index.html README.md DESIGN.md docs"
   },
@@ -22,7 +36,8 @@
     "ethers": "6.15.0",
     "lucide-react": "0.468.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "three": "^0.186.0"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "5.4.0",

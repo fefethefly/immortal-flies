@@ -1,0 +1,175 @@
+.fly-live {
+  --live-gold: #f0b90b;
+  --live-bone: #f0ead9;
+  min-height: 100dvh;
+  background: #070605;
+  color: var(--live-bone);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Arial, sans-serif;
+}
+
+.fly-live-stage {
+  position: relative;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.fly-live-game {
+  position: absolute;
+  inset: 0;
+}
+
+.fly-live-game canvas,
+.fly-live-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100dvh;
+  cursor: crosshair;
+}
+
+.fly-live-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 22px 26px 20px;
+}
+
+.fly-live-hud > * {
+  pointer-events: auto;
+}
+
+.fly-live-top,
+.fly-live-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.fly-live-top b,
+.fly-live-act b {
+  display: block;
+  font-family: "Barlow Condensed", "Helvetica Neue", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  font-size: 13px;
+}
+
+.fly-live-top small,
+.fly-live-hint,
+.fly-live-tick {
+  color: #8a8173;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.fly-live-top a {
+  color: var(--live-bone);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(240, 185, 11, 0.35);
+}
+
+.fly-live-act {
+  align-self: end;
+}
+
+.fly-live-act strong {
+  display: block;
+  margin-top: 4px;
+  font-family: "Cormorant Garamond", Palatino, serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--live-gold);
+}
+
+.fly-live-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.fly-live-controls button {
+  appearance: none;
+  border: 1px solid #2f2a1f;
+  background: rgba(10, 9, 7, 0.62);
+  color: var(--live-bone);
+  font: 600 11px/1 "Barlow Condensed", sans-serif;
+  letter-spacing: 0.14em;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.fly-live-controls button[aria-pressed="true"] {
+  border-color: var(--live-gold);
+  color: var(--live-gold);
+}
+
+.fly-live-controls button:active {
+  transform: translateY(1px);
+}
+
+.fly-live-hint {
+  max-width: 46ch;
+}
+
+.fly-live-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #070503;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.fly-live-game.is-travel + .fly-live-hud .fly-live-veil,
+.fly-live-game.is-travel {
+  outline: none;
+}
+
+.fly-live-stage:has(.is-travel)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #050302;
+  opacity: 0.72;
+}
+
+.fly-live.is-pilot .fly-live-stage::before,
+.fly-live.is-pilot .fly-live-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fly-live.is-pilot .fly-live-stage::before {
+  background:
+    radial-gradient(circle at 32% 40%, rgba(240, 185, 11, 0.05), transparent 18%),
+    radial-gradient(circle at 68% 40%, rgba(240, 185, 11, 0.05), transparent 18%);
+  mix-blend-mode: screen;
+}
+
+.fly-live.is-pilot .fly-live-stage::after {
+  background:
+    radial-gradient(ellipse at 50% 54%, transparent 16%, rgba(6, 3, 2, 0.42) 48%, rgba(2, 1, 0, 0.9) 78%),
+    repeating-radial-gradient(circle at 50% 54%, transparent 0 14px, rgba(0, 0, 0, 0.08) 15px 16px);
+}
+
+@media (max-width: 720px) {
+  .fly-live-hud {
+    padding: 16px;
+  }
+  .fly-live-top,
+  .fly-live-bottom {
+    flex-direction: column;
+  }
+  .fly-live-controls {
+    justify-content: flex-start;
+  }
+}

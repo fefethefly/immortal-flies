@@ -1,0 +1,11 @@
+{
+  "status": "LOCAL_PACKAGE_UNPUBLISHED",
+  "decoder": "phenotype-loci/2",
+  "genesisRoot": "0x4eefc9a51eb0171327148f9ec62acf4d15dd34006df6c4af741a089c4a3edba5",
+  "speciesHash": "0x9982b08d178f6fa1f80771d7f100915c224fb47d364959c0a70a237cbe347c19",
+  "modelHash": "0xd7286cdbee0d23302ed59f9df2b633f64c9b1196fc811a8c9a34578eb1d7d9a7",
+  "manifestPath": "/life-genesis/4eefc9a51eb0171327148f9ec62acf4d15dd34006df6c4af741a089c4a3edba5/manifest.json",
+  "neurons": 161839,
+  "edges": 2749558,
+  "previousGenesisRoot": "0xe45cb0c66f29a3229fa9d8c20b805b0c6a1dd1b3023f0bbb26a7238f4efee091"
+}

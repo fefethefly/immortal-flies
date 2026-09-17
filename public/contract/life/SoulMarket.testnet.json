@@ -1,0 +1,14 @@
+{
+  "status": "BSC_TESTNET",
+  "chainId": 97,
+  "address": "0xC09452de32e965E45B765a32d6DDada2B5968A76",
+  "soul": "0x3487A2802AF82F12Bb7a3dd40B262394f4819A5a",
+  "hive": "0xc2FcdA8D7abbff26FbF0CD27D4Dc45b59c8419F2",
+  "feeBps": 200,
+  "operator": "0xc2FcdA8D7abbff26FbF0CD27D4Dc45b59c8419F2",
+  "fromBlock": 131508976,
+  "txHash": "0xe7c700788696cdea02b89ee7ce29bc93ecbb54bee8118e3b9f473f28e566d92c",
+  "explorer": "https://testnet.bscscan.com/address/0xC09452de32e965E45B765a32d6DDada2B5968A76",
+  "deployedAt": "2026-09-17T06:15:09.475Z",
+  "note": "Independent satellite. Not a Soul module. Do not setModule. Not OpenSea. 2% hive fee is not a buyback."
+}

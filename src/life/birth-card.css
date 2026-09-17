@@ -1,0 +1,116 @@
+@import "../fonts.css";
+
+.birth-veil {
+  position: fixed;
+  inset: 72px 0 0;
+  z-index: 24;
+  display: grid;
+  place-items: center;
+  padding: 28px 18px 36px;
+  overflow: auto;
+  background:
+    radial-gradient(
+      720px 480px at 72% 42%,
+      rgba(240, 185, 11, 0.16),
+      transparent 58%
+    ),
+    radial-gradient(
+      1200px 700px at 30% 90%,
+      rgba(28, 20, 8, 0.55),
+      transparent 62%
+    ),
+    #050300;
+}
+.birth-stage {
+  width: min(680px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+.birth-lead {
+  margin: 0;
+  color: #fff4d6;
+  font:
+    500 28px/1.05 "Cormorant Garamond",
+    serif;
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+.birth-card {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: #0a0907;
+  box-shadow:
+    0 0 0 1px rgba(240, 185, 11, 0.16),
+    0 28px 80px rgba(0, 0, 0, 0.55);
+}
+.birth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.birth-share,
+.birth-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font:
+    13px/1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.04em;
+}
+.birth-share {
+  background: var(--gold-bright, #fcd535);
+  color: var(--gold-ink, #0b0e11);
+}
+.birth-copy {
+  background: transparent;
+  color: #fff4d6;
+  box-shadow: inset 0 0 0 1px rgba(240, 185, 11, 0.35);
+}
+.birth-share:disabled,
+.birth-copy:disabled {
+  opacity: 0.55;
+}
+.birth-url {
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #8a8172;
+  font:
+    11px/1.45 "IBM Plex Mono",
+    monospace;
+  text-align: center;
+  user-select: all;
+}
+.birth-status,
+.birth-close {
+  margin: 0;
+  color: #8a8172;
+  font:
+    12px/1.4 "IBM Plex Mono",
+    monospace;
+}
+.birth-close {
+  border: 0;
+  background: transparent;
+  padding: 4px 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+@media (max-width: 720px) {
+  .birth-lead {
+    font-size: 22px;
+  }
+  .birth-card {
+    border-radius: 4px;
+  }
+}

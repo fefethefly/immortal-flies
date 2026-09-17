@@ -1,0 +1,269 @@
+{
+  "schema": "iff.phenotype-loci/2",
+  "decoder": "phenotype-loci/2",
+  "supply": 1024,
+  "rollModulus": 10000,
+  "rules": [
+    "Each locus folds its chips with x * 31 + chip, then rolls against a 10000-bps table.",
+    "Bone body locks Light to light. That lock is visible, not a hidden bonus.",
+    "tokenURI carries filterable attributes only. No rarity rank, grade, or price.",
+    "Collection rank is computed after mint from the live set and changes until sold out."
+  ],
+  "traits": {
+    "hue": [
+      {
+        "id": "amber",
+        "bps": 1600,
+        "pct": 16,
+        "expectedPer1024": 163.84
+      },
+      {
+        "id": "umber",
+        "bps": 1500,
+        "pct": 15,
+        "expectedPer1024": 153.6
+      },
+      {
+        "id": "olive",
+        "bps": 1300,
+        "pct": 13,
+        "expectedPer1024": 133.12
+      },
+      {
+        "id": "slate",
+        "bps": 400,
+        "pct": 4,
+        "expectedPer1024": 40.96
+      },
+      {
+        "id": "ink",
+        "bps": 350,
+        "pct": 3.5,
+        "expectedPer1024": 35.84
+      },
+      {
+        "id": "wine",
+        "bps": 850,
+        "pct": 8.5,
+        "expectedPer1024": 87.04
+      },
+      {
+        "id": "rust",
+        "bps": 900,
+        "pct": 9,
+        "expectedPer1024": 92.16
+      },
+      {
+        "id": "sand",
+        "bps": 1300,
+        "pct": 13,
+        "expectedPer1024": 133.12
+      },
+      {
+        "id": "copper",
+        "bps": 700,
+        "pct": 7,
+        "expectedPer1024": 71.68
+      },
+      {
+        "id": "pine",
+        "bps": 650,
+        "pct": 6.5,
+        "expectedPer1024": 66.56
+      },
+      {
+        "id": "indigo",
+        "bps": 250,
+        "pct": 2.5,
+        "expectedPer1024": 25.6
+      },
+      {
+        "id": "bone",
+        "bps": 200,
+        "pct": 2,
+        "expectedPer1024": 20.48
+      }
+    ],
+    "sat": [
+      {
+        "id": "muted",
+        "bps": 5000,
+        "pct": 50,
+        "expectedPer1024": 512
+      },
+      {
+        "id": "clear",
+        "bps": 3500,
+        "pct": 35,
+        "expectedPer1024": 358.4
+      },
+      {
+        "id": "vivid",
+        "bps": 1500,
+        "pct": 15,
+        "expectedPer1024": 153.6
+      }
+    ],
+    "light": [
+      {
+        "id": "dark",
+        "bps": 3000,
+        "pct": 30,
+        "expectedPer1024": 307.2
+      },
+      {
+        "id": "mid",
+        "bps": 5200,
+        "pct": 52,
+        "expectedPer1024": 532.48
+      },
+      {
+        "id": "light",
+        "bps": 1800,
+        "pct": 18,
+        "expectedPer1024": 184.32
+      }
+    ],
+    "eye": [
+      {
+        "id": "wild",
+        "bps": 4200,
+        "pct": 42,
+        "expectedPer1024": 430.08
+      },
+      {
+        "id": "cinnabar",
+        "bps": 1800,
+        "pct": 18,
+        "expectedPer1024": 184.32
+      },
+      {
+        "id": "sepia",
+        "bps": 1400,
+        "pct": 14,
+        "expectedPer1024": 143.36
+      },
+      {
+        "id": "vermilion",
+        "bps": 1600,
+        "pct": 16,
+        "expectedPer1024": 163.84
+      },
+      {
+        "id": "white",
+        "bps": 700,
+        "pct": 7,
+        "expectedPer1024": 71.68
+      },
+      {
+        "id": "pale",
+        "bps": 300,
+        "pct": 3,
+        "expectedPer1024": 30.72
+      }
+    ],
+    "size": [
+      {
+        "id": "petite",
+        "bps": 2400,
+        "pct": 24,
+        "expectedPer1024": 245.76
+      },
+      {
+        "id": "typical",
+        "bps": 5600,
+        "pct": 56,
+        "expectedPer1024": 573.44
+      },
+      {
+        "id": "large",
+        "bps": 2000,
+        "pct": 20,
+        "expectedPer1024": 204.8
+      }
+    ],
+    "stripes": [
+      {
+        "id": "0",
+        "bps": 1100,
+        "pct": 11,
+        "expectedPer1024": 112.64,
+        "count": 0
+      },
+      {
+        "id": "1",
+        "bps": 2200,
+        "pct": 22,
+        "expectedPer1024": 225.28,
+        "count": 1
+      },
+      {
+        "id": "2",
+        "bps": 3800,
+        "pct": 38,
+        "expectedPer1024": 389.12,
+        "count": 2
+      },
+      {
+        "id": "3",
+        "bps": 2200,
+        "pct": 22,
+        "expectedPer1024": 225.28,
+        "count": 3
+      },
+      {
+        "id": "4",
+        "bps": 700,
+        "pct": 7,
+        "expectedPer1024": 71.68,
+        "count": 4
+      }
+    ],
+    "mark": [
+      {
+        "id": "none",
+        "bps": 6400,
+        "pct": 64,
+        "expectedPer1024": 655.36
+      },
+      {
+        "id": "bar",
+        "bps": 2600,
+        "pct": 26,
+        "expectedPer1024": 266.24
+      },
+      {
+        "id": "spots",
+        "bps": 1000,
+        "pct": 10,
+        "expectedPer1024": 102.4
+      }
+    ]
+  },
+  "market": {
+    "tokenUriContains": [
+      "Body",
+      "Saturation",
+      "Light",
+      "Eyes",
+      "Size",
+      "Stripes",
+      "Mark",
+      "Generation"
+    ],
+    "tokenUriMustNotContain": [
+      "Rarity",
+      "Rank",
+      "Legendary",
+      "Epic",
+      "Common",
+      "Rare",
+      "Mythic",
+      "price",
+      "floor"
+    ],
+    "listingKey": "chainId + collection + tokenId + lifeId",
+    "clones": "Same looks may exist. Looks are not a unique key.",
+    "transfer": "ERC-721 transfer clears authorizedRunner and increments controlEpoch."
+  }
+}

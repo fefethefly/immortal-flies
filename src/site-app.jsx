@@ -18,6 +18,18 @@ const PAGES = {
   "/blueprint.html": lazy(() =>
     import("./blueprint-page.jsx").then((m) => ({ default: m.BlueprintPage })),
   ),
+  "/field.html": lazy(() =>
+    import("./life/field-page.jsx").then((m) => ({ default: m.FieldPage })),
+  ),
+  "/habitat.html": lazy(() =>
+    import("./life/habitat-page.jsx").then((m) => ({ default: m.HabitatPage })),
+  ),
+  "/market.html": lazy(() =>
+    import("./life/market-page.jsx").then((m) => ({ default: m.MarketPage })),
+  ),
+  "/live.html": lazy(() =>
+    import("./fly-live/page.jsx").then((m) => ({ default: m.FlyLivePage })),
+  ),
 };
 
 function SiteApp() {
@@ -36,7 +48,23 @@ function SiteApp() {
         history.pushState({}, "", dest);
       }
       setPath(next);
-      if (!url.hash) window.scrollTo(0, 0);
+      if (!url.hash) {
+        window.scrollTo(0, 0);
+        return;
+      }
+      const id = decodeURIComponent(url.hash.slice(1));
+      const jump = (n = 0) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({
+            behavior: reduced ? "auto" : "smooth",
+            block: "start",
+          });
+          return;
+        }
+        if (n < 24) requestAnimationFrame(() => jump(n + 1));
+      };
+      jump();
     };
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (typeof document.startViewTransition === "function" && !reduced) {

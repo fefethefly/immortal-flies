@@ -1,4 +1,11 @@
+import { getAddress } from "ethers";
+
 export const TOKEN_PATH = "/token/official.json";
+
+function optionalAddress(value) {
+  if (!value) return null;
+  return getAddress(String(value).toLowerCase());
+}
 
 export function normalizeToken(raw) {
   if (!raw || raw.schema !== "iff.token/1") throw new Error("TOKEN_SCHEMA");
@@ -10,7 +17,8 @@ export function normalizeToken(raw) {
     chainId: raw.chainId,
     status: raw.status === "live" ? "live" : "unlaunched",
     address: raw.address || null,
-    vault: raw.vault || null,
+    vault: optionalAddress(raw.vault),
+    ops: optionalAddress(raw.ops),
     flapUrl: raw.flapUrl || null,
     website: raw.website || null,
     twitter: raw.twitter || null,
@@ -33,6 +41,12 @@ export function explorerToken(address, chainId = 56) {
   if (!address) return null;
   const host = chainId === 97 ? "testnet.bscscan.com" : "bscscan.com";
   return `https://${host}/token/${address}`;
+}
+
+export function explorerAddress(address, chainId = 56) {
+  if (!address) return null;
+  const host = chainId === 97 ? "testnet.bscscan.com" : "bscscan.com";
+  return `https://${host}/address/${address}`;
 }
 
 export function flapToken(address) {

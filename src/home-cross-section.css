@@ -1,0 +1,520 @@
+.cross-hero {
+  position: relative;
+  min-height: 100dvh;
+  margin: -72px 0 0;
+  background: #080705;
+  overflow: clip;
+  contain: layout style paint;
+}
+.cross-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+.cross-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: #d9d0bb;
+}
+.cross-hud a,
+.cross-hud button,
+.cross-hud input,
+.cross-desk {
+  pointer-events: auto;
+}
+.cross-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 92px 4% 0;
+}
+.cross-lead {
+  min-width: 0;
+}
+.cross-top h1 {
+  margin: 0;
+  max-width: 34ch;
+  font: 400 clamp(19px, 2.2vw, 30px) / 1.35 var(--sans);
+  letter-spacing: -0.02em;
+  color: #e6dcc4;
+  text-wrap: pretty;
+}
+.cross-truth {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font: 10.5px / 1.5 var(--mono);
+  letter-spacing: 0.1em;
+  color: #8a8172;
+}
+.cross-truth [data-live="true"] {
+  color: #93a181;
+}
+.cross-truth [data-paper="true"] {
+  color: #7a7165;
+}
+.cross-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.cross-tools button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #3a3428;
+  color: #d9d0bb;
+}
+.cross-tools .cross-hatch {
+  width: auto;
+  min-width: 44px;
+  height: 44px;
+  white-space: nowrap;
+  color: var(--gold-ink, #0b0e11);
+}
+.cross-tools button:active,
+.cross-hatch:active {
+  transform: scale(0.98);
+}
+.cross-hatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  background: var(--gold-bright, #fcd535);
+  color: var(--gold-ink, #0b0e11);
+  font: 500 13px / 1 var(--sans);
+  letter-spacing: 0.04em;
+}
+.cross-hatch:hover {
+  background: var(--gold, #f0b90b);
+  color: var(--gold-ink, #0b0e11);
+}
+.cross-tools .cross-hatch[aria-expanded="true"] {
+  background: #16130f;
+  color: #e6dcc4;
+  border: 1px solid #3a3428;
+}
+.cross-desk {
+  position: absolute;
+  top: 148px;
+  right: 4%;
+  z-index: 4;
+  width: min(360px, 46vw);
+  padding: 16px 16px 14px;
+  border: 1px solid #3a3428;
+  background: rgba(10, 9, 7, 0.92);
+  pointer-events: auto;
+}
+.cross-desk .hatch {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.cross-desk .eyebrow {
+  font: 9px var(--mono);
+  letter-spacing: 0.16em;
+  color: #93a181;
+}
+.cross-desk .hatch-note,
+.cross-desk .hatch-meta {
+  max-width: none;
+  margin: 8px 0;
+  font: 11px / 1.45 var(--sans);
+  color: #9a9182;
+}
+.cross-desk .hatch-name {
+  display: grid;
+  gap: 6px;
+  max-width: none;
+  margin: 0 0 10px;
+  font: 11px var(--mono);
+  color: #8a8172;
+}
+.cross-desk .hatch-name input {
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+  color: #f0ead9;
+  padding: 8px;
+  font: 12px var(--mono);
+}
+.cross-desk .hatch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+.cross-desk button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #2f2a1f;
+  background: #16130f;
+  color: #f0ead9;
+  font: 12px / 1 var(--mono);
+  letter-spacing: 0.06em;
+}
+.cross-desk button.primary {
+  background: var(--gold-bright, #fcd535);
+  color: var(--gold-ink, #0b0e11);
+  border-color: var(--gold-bright, #fcd535);
+}
+.cross-desk button.ghost {
+  background: transparent;
+}
+.cross-desk .hatch-go {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin: 8px 0 0;
+  padding: 0 12px;
+  border: 1px solid var(--gold-bright, #fcd535);
+  background: var(--gold-bright, #fcd535);
+  color: var(--gold-ink, #0b0e11);
+  font: 12px / 1 var(--mono);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+.cross-desk .pit-error {
+  margin: 8px 0 0;
+  color: #b07a6a;
+  font: 12px / 1.4 var(--sans);
+}
+.cross-tape {
+  position: absolute;
+  left: 4%;
+  top: 36%;
+  width: min(260px, 24vw);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  border-left: 1px solid #342e22;
+  padding-left: 14px;
+}
+.cross-tape li {
+  display: grid;
+  gap: 2px;
+}
+.cross-tape b {
+  font: 9px var(--mono);
+  letter-spacing: 0.16em;
+  color: #8a8172;
+}
+.cross-tape span {
+  font: 12px / 1.45 var(--mono);
+  color: #d4cbb4;
+}
+.cross-tape [data-kind="ACT"] b,
+.cross-tape [data-kind="WATCH"] b {
+  color: var(--gold, #f0b90b);
+}
+.cross-tape [data-kind="FILL"] b {
+  color: #93a181;
+}
+.cross-watch small {
+  font: 11px / 1.45 var(--sans);
+  color: #9a9182;
+}
+.cross-rail {
+  position: absolute;
+  right: 4%;
+  top: 36%;
+  width: min(220px, 20vw);
+  display: grid;
+  gap: 6px;
+  text-align: right;
+  opacity: 0.78;
+  transition: opacity 0.4s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.cross-rail[data-hot="true"] {
+  opacity: 1;
+}
+/* Hatching takes focus: the price rail hands the column to the desk. */
+.cross-hero[data-hatch="open"] .cross-rail {
+  opacity: 0;
+}
+.cross-rail span,
+.cross-rail em {
+  font: 9px var(--mono);
+  letter-spacing: 0.16em;
+  color: #8a8172;
+}
+.cross-rail strong {
+  font: 22px / 1 var(--mono);
+  letter-spacing: -0.04em;
+  color: #f0ead9;
+}
+.cross-rail small {
+  font: 11px var(--mono);
+}
+.cross-rail .buy {
+  color: #c4b07a;
+}
+.cross-rail .sell {
+  color: #b07a6a;
+}
+.cross-rail em {
+  margin-top: 10px;
+}
+.cross-book {
+  font-size: 16px;
+}
+.cross-book small {
+  font-size: 10px;
+  color: #8a8172;
+}
+.cross-split {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.cross-split li {
+  display: grid;
+  grid-template-columns: 36px 1fr 18px;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+}
+.cross-split b {
+  font: 9px var(--mono);
+  letter-spacing: 0.08em;
+}
+.cross-split i {
+  display: block;
+  height: 3px;
+  background: #2a261c;
+}
+.cross-split em {
+  display: block;
+  height: 3px;
+  margin: 0;
+  background: currentColor;
+}
+.cross-split .buy {
+  color: #c4b07a;
+}
+.cross-split .hold {
+  color: #8a8172;
+}
+.cross-split .sell {
+  color: #b07a6a;
+}
+.cross-split strong {
+  font: 11px var(--mono);
+  text-align: right;
+}
+.cross-foot {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px 28px;
+  align-items: end;
+}
+.cross-cause {
+  margin: 0;
+  font: 14px / 1.4 var(--mono);
+  letter-spacing: 0.05em;
+  color: #f4ecd6;
+}
+.cross-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cross-modes button {
+  min-height: 36px;
+  padding: 0 10px;
+  font: 10px var(--mono);
+  letter-spacing: 0.14em;
+  color: #8a8172;
+  border-bottom: 1px solid transparent;
+}
+.cross-modes button[aria-pressed="true"] {
+  color: var(--gold, #f0b90b);
+  border-bottom-color: var(--gold, #f0b90b);
+}
+.cross-modes .cross-auto {
+  color: #d9d0bb;
+}
+/* Scroll cue: a quiet drift under the HUD columns, above the foot. */
+.cross-scroll {
+  position: absolute;
+  left: 50%;
+  bottom: 82px;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  color: #8a8172;
+  animation: cross-scroll-drift 2.6s var(--ease, cubic-bezier(0.16, 1, 0.3, 1))
+    infinite;
+}
+@keyframes cross-scroll-drift {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, 6px);
+    opacity: 0.95;
+  }
+}
+.cross-hero[data-hatch="open"] .cross-scroll {
+  opacity: 0;
+}
+/* Mobile-only telemetry strip: keeps price, drift and book visible
+   where the tape and rail are hidden. */
+.cross-mobile-rail {
+  display: none;
+}
+.cross-hero[data-hatch="open"] .cross-mobile-rail {
+  opacity: 0;
+}
+.cross-hero[data-paused="true"] .cross-canvas {
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .cross-hero {
+    margin-top: -72px;
+  }
+  .cross-top {
+    padding-top: 88px;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .cross-tools {
+    align-self: flex-start;
+  }
+  .cross-tape,
+  .cross-rail {
+    display: none;
+  }
+  .cross-mobile-rail {
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: 114px;
+    bottom: calc(114px + env(safe-area-inset-bottom));
+    display: grid;
+    gap: 8px;
+    transition: opacity 0.3s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .cross-mobile-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+  .cross-mobile-row span {
+    font: 9px var(--mono);
+    letter-spacing: 0.16em;
+    color: #8a8172;
+  }
+  .cross-mobile-row strong {
+    font: 20px / 1 var(--mono);
+    letter-spacing: -0.03em;
+    color: #f0ead9;
+  }
+  .cross-mobile-row small {
+    font: 11px var(--mono);
+  }
+  .cross-mobile-row .buy {
+    color: #c4b07a;
+  }
+  .cross-mobile-row .sell {
+    color: #b07a6a;
+  }
+  .cross-mobile-row b {
+    margin-left: auto;
+    font: 400 11px var(--mono);
+    color: #d4cbb4;
+  }
+  .cross-mobile-row b i {
+    font-style: normal;
+    font-size: 9px;
+    color: #8a8172;
+  }
+  .cross-mobile-split {
+    display: flex;
+    gap: 2px;
+    height: 3px;
+    background: #2a261c;
+  }
+  .cross-mobile-split em {
+    display: block;
+    height: 100%;
+  }
+  .cross-mobile-split .buy {
+    background: #c4b07a;
+  }
+  .cross-mobile-split .hold {
+    background: #8a8172;
+  }
+  .cross-mobile-split .sell {
+    background: #b07a6a;
+  }
+  .cross-truth {
+    gap: 6px 12px;
+    font-size: 10px;
+  }
+  .cross-desk {
+    top: auto;
+    bottom: 118px;
+    bottom: calc(118px + env(safe-area-inset-bottom));
+    right: 4%;
+    left: 4%;
+    width: auto;
+  }
+  .cross-foot {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    bottom: 22px;
+    bottom: calc(22px + env(safe-area-inset-bottom));
+  }
+  .cross-cause {
+    font-size: 12px;
+  }
+  .cross-modes button {
+    min-height: 40px;
+    padding: 0 12px;
+  }
+  .cross-scroll {
+    bottom: 192px;
+  }
+}
+
+@media (max-width: 760px) and (max-height: 600px) {
+  .cross-mobile-rail {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cross-hatch,
+  .cross-tools button {
+    transition: none;
+  }
+  .cross-scroll {
+    animation: none;
+    opacity: 0.7;
+  }
+}

@@ -1,7 +1,10 @@
-import { rmSync } from "node:fs";
+import { verifyGenesisAssets } from "./scripts/verify-life-genesis.mjs";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  optimizeDeps: {
+    include: ["three"],
+  },
   server: {
     proxy: {
       "/v1": {
@@ -27,14 +30,20 @@ export default defineConfig({
         brain: "brain.html",
         swarm: "swarm.html",
         blueprint: "blueprint.html",
+        field: "field.html",
+        habitat: "habitat.html",
+        market: "market.html",
+        live: "live.html",
       },
     },
   },
   plugins: [
     {
-      name: "omit-full-connectome",
-      closeBundle() {
-        rmSync("dist/data/malecns-full", { recursive: true, force: true });
+      name: "verify-pinned-genesis",
+      apply: "build",
+      async buildStart() {
+        const result = await verifyGenesisAssets();
+        console.log(`Verified ${result.verifiedFiles} pinned genesis assets`);
       },
     },
   ],

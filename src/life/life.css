@@ -1,0 +1,800 @@
+.life-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(
+      900px 640px at 68% 46%,
+      rgba(92, 64, 22, 0.28),
+      transparent 52%
+    ),
+    radial-gradient(
+      1400px 800px at 30% 80%,
+      rgba(28, 20, 10, 0.55),
+      transparent 62%
+    ),
+    #090806;
+  color: #f0ead9;
+}
+html:has(.life-shell.is-locked),
+body:has(.life-shell.is-locked) {
+  height: 100%;
+  overflow: hidden;
+}
+.life-page:has(.life-shell.is-locked) {
+  background: #090806;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.life-page:has(.life-shell.is-locked) .site-bar {
+  flex-shrink: 0;
+}
+.life-shell {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  min-height: calc(100dvh - 72px);
+}
+.life-shell.is-locked {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.life-shell.is-habitat {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+}
+.life-rail {
+  padding: 28px 24px 48px;
+  border-right: 1px solid rgba(47, 42, 31, 0.9);
+  background: rgba(12, 11, 9, 0.72);
+  backdrop-filter: blur(16px);
+}
+.life-shell.is-locked .life-rail {
+  overflow-y: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+.life-shell.is-habitat .life-rail {
+  border-right: 0;
+  border-left: 1px solid rgba(47, 42, 31, 0.9);
+}
+.life-rail h1 {
+  margin: 8px 0 12px;
+  font:
+    500 34px/0.95 "Cormorant Garamond",
+    serif;
+  letter-spacing: -0.03em;
+}
+.life-rail h1 small,
+.life-rail h3 small {
+  display: inline-block;
+  margin-left: 10px;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.12em;
+  color: #8a8172;
+}
+.life-rail > p,
+.life-note,
+.life-meta,
+.life-thought {
+  color: #9a9184;
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 42ch;
+}
+.life-stage {
+  position: relative;
+  min-height: 72dvh;
+}
+.life-shell.is-locked .life-stage {
+  min-height: 0;
+  height: auto;
+  overflow: hidden;
+}
+.life-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: calc(100dvh - 72px);
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+.life-shell.is-locked .life-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.life-canvas:active {
+  cursor: grabbing;
+}
+.life-canvas.is-feed {
+  cursor: crosshair;
+}
+.life-canvas.is-gust {
+  cursor: cell;
+}
+.life-tools {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  pointer-events: none;
+}
+.life-tools > * {
+  pointer-events: auto;
+}
+.life-tools-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding-right: 12px;
+  margin-right: 2px;
+  border-right: 1px solid rgba(47, 42, 31, 0.85);
+}
+.life-tools button,
+.life-tools a.ghost {
+  padding: 6px 10px;
+  background: rgba(13, 11, 7, 0.82);
+  backdrop-filter: blur(8px);
+}
+.life-find {
+  display: flex;
+  margin-left: auto;
+  border: 1px solid #2f2a1f;
+  background: rgba(13, 11, 7, 0.82);
+  backdrop-filter: blur(8px);
+}
+.life-find.is-roster {
+  margin: 0 0 8px;
+  width: 100%;
+}
+.life-find.is-roster input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+.life-find input {
+  width: 11rem;
+  border: 0;
+  background: transparent;
+  color: #f0ead9;
+  padding: 7px 10px;
+  font:
+    12px "IBM Plex Mono",
+    monospace;
+}
+.life-find button {
+  border: 0;
+  border-left: 1px solid #2f2a1f;
+  background: transparent;
+  padding: 7px 12px;
+}
+.life-cross {
+  display: inline-block;
+  margin: 4px 0 12px;
+  color: var(--gold);
+  font:
+    12px/1.4 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+.life-cross:hover {
+  color: #f0ead9;
+}
+.life-shell.is-habitat .life-thought {
+  top: auto;
+  bottom: 18px;
+}
+.life-holo {
+  margin: 18px 0 8px;
+  display: grid;
+  gap: 10px;
+}
+.life-holo-canvas {
+  width: 100%;
+  height: 220px;
+  border: 1px solid rgba(90, 160, 164, 0.22);
+  background:
+    linear-gradient(180deg, rgba(20, 36, 34, 0.35), rgba(8, 7, 5, 0.2)), #0a0c0a;
+  cursor: grab;
+}
+.life-holo-name {
+  display: grid;
+  gap: 2px;
+  color: #e6dcc4;
+  font:
+    14px/1.3 "Cormorant Garamond",
+    serif;
+}
+.life-holo-name small {
+  color: #8a8172;
+  font:
+    10px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+}
+.life-hunger {
+  display: grid;
+  gap: 6px;
+}
+.life-hunger i {
+  display: block;
+  height: 6px;
+  width: 100%;
+  border-radius: 99px;
+  background: #2b2515;
+  position: relative;
+}
+.life-hunger i::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--e, 0%);
+  border-radius: inherit;
+  background: var(--gold);
+}
+.life-hunger[data-hunger="hungry"] i::after {
+  background: #c98f1e;
+}
+.life-hunger[data-hunger="faint"] i::after,
+.life-hunger[data-hunger="collapsed"] i::after {
+  background: #c45a4a;
+}
+.life-hunger span {
+  display: block;
+  margin-top: 8px;
+  font:
+    10px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  color: #8a8172;
+}
+.life-hunger[data-hunger="collapsed"] span {
+  color: #c45a4a;
+}
+.life-vitals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+.life-vitals dt {
+  font:
+    10px "IBM Plex Mono",
+    monospace;
+  color: #8a8172;
+}
+.life-vitals dd {
+  margin: 2px 0 0;
+  color: #e6dcc4;
+  font:
+    13px "IBM Plex Mono",
+    monospace;
+}
+.life-legend {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  font:
+    10px/1.2 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.06em;
+  color: #8a8172;
+  pointer-events: none;
+}
+.life-legend i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+}
+.life-thought {
+  position: absolute;
+  left: 20px;
+  top: 18px;
+  max-width: 48ch;
+  padding: 10px 12px;
+  border: 1px solid rgba(47, 42, 31, 0.85);
+  background: rgba(12, 11, 9, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.life-desk {
+  margin-top: 22px;
+  display: grid;
+  gap: 12px;
+}
+.life-chip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: baseline;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+}
+.life-chip strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+.life-actions,
+.life-stim {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.life-journal {
+  display: grid;
+  gap: 10px;
+  padding: 12px 0 4px;
+  border-top: 1px solid #2f2a1f;
+}
+.life-journal h3 {
+  margin: 0;
+  font:
+    12px/1.2 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c4b89a;
+}
+.life-journal dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.life-journal dt {
+  font:
+    9px/1.4 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+.life-journal dd {
+  margin: 4px 0 0;
+  font:
+    12px/1.45 "IBM Plex Mono",
+    monospace;
+  color: #e6dcc4;
+}
+.life-journal dd[data-state="recorded"],
+.life-journal dd[data-state="matched"] {
+  color: #93a181;
+}
+.life-journal dd[data-state="empty"],
+.life-journal dd[data-state="idle"],
+.life-journal dd[data-state="nograph"],
+.life-journal dd[data-state="unread"],
+.life-journal dd[data-state="eventsMiss"] {
+  color: #8a8172;
+}
+.life-journal dd[data-state="pending"],
+.life-journal dd[data-state="loading"] {
+  color: #c4b07a;
+}
+.life-page button {
+  border: 1px solid #2f2a1f;
+  background: #16130f;
+  color: #f0ead9;
+  padding: 8px 12px;
+  font:
+    12px/1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.06em;
+}
+.life-page button.primary {
+  background: var(--gold-bright, #fcd535);
+  color: var(--gold-ink, #0b0e11);
+  border-color: var(--gold-bright, #fcd535);
+}
+.life-page button.ghost,
+.life-page a.ghost {
+  background: transparent;
+  border: 1px solid #2f2a1f;
+  color: #f0ead9;
+  padding: 8px 12px;
+  font:
+    12px/1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+.life-page button.is-on,
+.life-page button:active {
+  transform: scale(0.98);
+  border-color: var(--gold);
+}
+.life-page button:disabled {
+  opacity: 0.4;
+}
+.life-list ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+}
+.life-list button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 10px auto 1fr;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+}
+.life-list i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.life-list em {
+  color: #8a8172;
+  font-style: normal;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.life-desk label {
+  display: grid;
+  gap: 6px;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  color: #8a8172;
+}
+.life-desk input,
+.life-desk select {
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+  color: #f0ead9;
+  padding: 8px;
+  font:
+    12px "IBM Plex Mono",
+    monospace;
+}
+.life-kin {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0 4px;
+  border-top: 1px solid rgba(47, 42, 31, 0.85);
+}
+.life-kin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.life-kin-row button {
+  min-width: 7.5rem;
+  display: grid;
+  gap: 3px;
+  text-align: left;
+  padding: 8px 10px;
+}
+.life-kin-row button small,
+.life-kin-row button span {
+  color: #8a8172;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.life-kin-row button em {
+  color: #c8bfb0;
+  font-style: normal;
+  font-size: 11px;
+}
+.life-kin-row.is-self button {
+  border-color: rgba(240, 185, 11, 0.55);
+}
+.life-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9a9184;
+  font-size: 13px;
+}
+@media (max-width: 900px) {
+  .life-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas: "stage" "rail";
+  }
+  .life-shell.is-locked {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(200px, 55%) minmax(0, 1fr);
+    grid-template-areas: "stage" "rail";
+  }
+  .life-stage {
+    grid-area: stage;
+  }
+  .life-shell.is-locked .life-stage {
+    height: auto;
+    min-height: 0;
+  }
+  .life-rail,
+  .life-shell.is-locked .life-rail {
+    grid-area: rail;
+    border: 0;
+    border-top: 1px solid #2f2a1f;
+  }
+  .life-canvas {
+    min-height: 62dvh;
+  }
+  .life-shell.is-locked .life-canvas {
+    min-height: 0;
+  }
+  /* One natural page scroll: canvas pinned on top, care tools flow below. */
+  html:has(.life-shell.is-locked),
+  body:has(.life-shell.is-locked) {
+    height: auto;
+    overflow: visible;
+  }
+  .life-page:has(.life-shell.is-locked) {
+    height: auto;
+    overflow: visible;
+    display: block;
+  }
+  .life-shell.is-locked {
+    overflow: visible;
+    grid-template-rows: 52dvh auto;
+  }
+  .life-shell.is-locked .life-stage {
+    height: 52dvh;
+    min-height: 52dvh;
+  }
+  .life-shell.is-locked .life-rail {
+    overflow: visible;
+  }
+}
+.life-shell.is-market {
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  min-height: calc(100dvh - 72px);
+}
+.life-stage.is-market {
+  min-height: 72dvh;
+  display: flex;
+  flex-direction: column;
+}
+.life-market-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  padding: 22px 24px 0;
+}
+.life-market-head h2 {
+  margin: 6px 0 0;
+  font:
+    500 28px/1 "Cormorant Garamond",
+    serif;
+}
+.life-market-head small {
+  color: #8a8172;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+.life-market-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.life-market-filters .ghost {
+  align-self: end;
+}
+.life-market-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: end;
+  padding: 20px 24px 0;
+}
+.life-market-filters label {
+  display: grid;
+  gap: 6px;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  color: #8a8172;
+}
+.life-market-filters select,
+.life-market-filters input {
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+  color: #f0ead9;
+  padding: 8px;
+  min-width: 8rem;
+  font:
+    12px "IBM Plex Mono",
+    monospace;
+}
+.life-market-filters small {
+  color: #8a8172;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+.life-market-grid {
+  list-style: none;
+  margin: 0;
+  padding: 20px 24px 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.life-market-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #2f2a1f;
+  background: rgba(12, 11, 9, 0.72);
+}
+.life-market-card.is-focus {
+  border-color: rgba(240, 185, 11, 0.55);
+}
+.life-market-thumb {
+  width: 100%;
+  height: 148px;
+  display: block;
+  border: 1px solid rgba(90, 160, 164, 0.18);
+  background:
+    radial-gradient(
+      120px 80px at 50% 60%,
+      rgba(48, 92, 96, 0.28),
+      transparent 70%
+    ),
+    #0a0c0a;
+}
+.life-market-card strong {
+  font:
+    500 20px/1.1 "Cormorant Garamond",
+    serif;
+}
+.life-market-card strong em {
+  font-style: normal;
+  color: #8a8172;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+.life-market-card p {
+  margin: 0;
+  color: #9a9184;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.life-market-card dl {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.life-market-card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+.life-market-card dt {
+  color: #8a8172;
+}
+.life-market-card dd {
+  margin: 0;
+  color: #e6dcc4;
+}
+.life-market-mine h3 {
+  margin: 8px 0 6px;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  color: #8a8172;
+}
+.life-market-mine ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.life-market-mine li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+}
+.life-market-mine button {
+  width: 100%;
+  text-align: left;
+}
+.life-market-tape {
+  padding: 8px 24px 48px;
+}
+.life-market-tape h3 {
+  margin: 0 0 6px;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  color: #8a8172;
+}
+.life-market-tape ol {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.life-market-tape li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font:
+    12px "IBM Plex Mono",
+    monospace;
+  color: #c8bfb0;
+}
+.life-market-tape a {
+  color: var(--gold, #f0b90b);
+  text-decoration: none;
+}
+.life-market-tape em {
+  font-style: normal;
+  color: #e6dcc4;
+}
+.life-market-tape .who {
+  color: #8a8172;
+}
+.life-market-buy-card .life-market-thumb {
+  height: 120px;
+}
+.life-market-buy {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(8, 7, 5, 0.72);
+}
+.life-market-buy-card {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+}
+.life-market-buy-card h2 {
+  margin: 0;
+  font:
+    500 26px/1 "Cormorant Garamond",
+    serif;
+}
+@media (max-width: 900px) {
+  .life-shell.is-market {
+    grid-template-columns: 1fr;
+  }
+}

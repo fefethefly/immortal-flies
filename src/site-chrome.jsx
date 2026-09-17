@@ -1,18 +1,40 @@
-import React, { createContext, useContext } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { FlyMark } from "./vitruvian.jsx";
 import { LocaleContext } from "./locale-context.jsx";
 import { LocaleSwitch } from "./locale-switch.jsx";
+import { SiteCa } from "./seal-bar.jsx";
 import "./chrome.css";
 
 export const FOCUS_FLY = "iff.focusFly";
 
-export const NAV = [
-  ["/", "nav.home", "home", "01"],
-  ["/swarm.html", "nav.pit", "pit", "02"],
-  ["/brain.html", "nav.canon", "canon", "03"],
-  ["/economy.html", "nav.economy", "economy", "04"],
-  ["/blueprint.html", "nav.blueprint", "blueprint", "05"],
+export const NAV_GROUPS = [
+  {
+    verb: "nav.lifeGroup",
+    items: [
+      ["/", "nav.home", "home", "01"],
+      ["/habitat.html", "nav.habitat", "habitat", "02"],
+      ["/field.html", "nav.field", "field", "03"],
+      ["/market.html", "nav.market", "market", "04"],
+    ],
+  },
+  {
+    verb: "nav.exploreGroup",
+    items: [
+      ["/brain.html", "nav.canon", "canon", "04"],
+      ["/blueprint.html", "nav.blueprint", "blueprint", "05"],
+      ["/swarm.html", "nav.pit", "pit", "06"],
+      ["/economy.html", "nav.economy", "economy", "07"],
+    ],
+  },
 ];
+
+export const NAV = NAV_GROUPS.flatMap((group) => group.items);
 
 const ROUTE_ALIASES = {
   "/": "/",
@@ -25,6 +47,14 @@ const ROUTE_ALIASES = {
   "/economy.html": "/economy.html",
   "/blueprint": "/blueprint.html",
   "/blueprint.html": "/blueprint.html",
+  "/field": "/field.html",
+  "/field.html": "/field.html",
+  "/habitat": "/habitat.html",
+  "/habitat.html": "/habitat.html",
+  "/market": "/market.html",
+  "/market.html": "/market.html",
+  "/live": "/live.html",
+  "/live.html": "/live.html",
 };
 
 export const SiteGoContext = createContext(null);
@@ -72,20 +102,28 @@ export function recallFly() {
   }
 }
 
-export function SiteNav({ tx, current }) {
+export function SiteNav({ tx, current, onNavigate }) {
   const go = useSiteGo();
   return (
     <nav className="site-nav" aria-label={tx("nav.label")}>
-      {NAV.map(([href, key, id, index]) => (
-        <a
-          key={id}
-          href={href}
-          aria-current={current === id ? "page" : undefined}
-          onClick={(event) => goFromClick(go, href, event)}
-        >
-          <small>{index}</small>
-          {tx(key)}
-        </a>
+      {NAV_GROUPS.map((group) => (
+        <span key={group.verb || "home"} className="site-nav-group">
+          <span className="site-nav-caption">{tx(group.verb)}</span>
+          {group.items.map(([href, key, id, index]) => (
+            <a
+              key={id}
+              href={href}
+              aria-current={current === id ? "page" : undefined}
+              onClick={(event) => {
+                onNavigate?.();
+                goFromClick(go, href, event);
+              }}
+            >
+              <small>{index}</small>
+              {tx(key)}
+            </a>
+          ))}
+        </span>
       ))}
     </nav>
   );
@@ -121,12 +159,39 @@ export function SiteLink({ href, className, children, ...rest }) {
   );
 }
 
-export function SiteBar({ locale, setLocale, tx, current, trailing }) {
+export function SiteBar({ locale, setLocale, tx, current, trailing, token }) {
+  const [open, setOpen] = useState(false);
+  const toggle = useRef(null);
+  useEffect(() => {
+    setOpen(false);
+  }, [current]);
   return (
-    <header className="site-bar">
-      <SiteBrand href="/" small />
-      <div className="site-bar-tools">
-        <SiteNav tx={tx} current={current} />
+    <header
+      className={`site-bar${open ? " is-menu-open" : ""}`}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) {
+          setOpen(false);
+          toggle.current?.focus();
+        }
+      }}
+    >
+      <div className="site-bar-lead">
+        <SiteBrand href="/" small />
+        <SiteCa token={token} tx={tx} />
+      </div>
+      <button
+        className="site-menu-toggle"
+        type="button"
+        ref={toggle}
+        aria-expanded={open}
+        aria-controls="site-navigation"
+        onClick={() => setOpen(!open)}
+      >
+        {tx(open ? "nav.closeMenu" : "nav.openMenu")}{" "}
+        <span aria-hidden="true">{open ? "−" : "+"}</span>
+      </button>
+      <div className="site-bar-tools" id="site-navigation">
+        <SiteNav tx={tx} current={current} onNavigate={() => setOpen(false)} />
         {trailing}
         <LocaleSwitch locale={locale} onChange={setLocale} />
       </div>
@@ -140,6 +205,7 @@ export function SitePage({
   setLocale,
   tx,
   trailing,
+  token,
   className,
   children,
 }) {
@@ -153,6 +219,7 @@ export function SitePage({
           tx={tx}
           current={current}
           trailing={trailing}
+          token={token}
         />
         {children}
       </div>

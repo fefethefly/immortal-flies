@@ -1,0 +1,102 @@
+.wallet-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 28;
+  display: grid;
+  place-items: end center;
+  padding: 18px;
+  background: rgba(5, 3, 0, 0.72);
+}
+.wallet-sheet {
+  width: min(420px, 100%);
+  max-height: min(84dvh, 720px);
+  overflow: auto;
+  padding: 22px 20px 18px;
+  border: 1px solid #5f5544;
+  background: #12100c;
+  color: #f0ead9;
+}
+.wallet-sheet h2 {
+  margin: 0 0 8px;
+  font:
+    500 22px/1.15 "Cormorant Garamond",
+    "Songti SC",
+    Georgia,
+    serif;
+}
+.wallet-sheet > p {
+  margin: 0 0 18px;
+  color: #b6ad9e;
+  font-size: 13px;
+}
+.wallet-sheet section + section {
+  margin-top: 18px;
+}
+.wallet-sheet h3 {
+  margin: 0 0 8px;
+  color: #a89e8c;
+  font: 12px/1.3 var(--mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.wallet-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  border: 1px solid #393328;
+  background: #18150f;
+  color: inherit;
+  text-align: left;
+}
+.wallet-row:hover {
+  border-color: #f0b90b;
+}
+.wallet-row:active {
+  transform: scale(0.99);
+}
+.wallet-row img,
+.wallet-mark {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.wallet-row img {
+  object-fit: contain;
+}
+.wallet-mark {
+  display: grid;
+  place-items: center;
+  background: #0a0907;
+  color: #f0b90b;
+  font: 10px/1 var(--mono, "IBM Plex Mono", monospace);
+  font-style: normal;
+  letter-spacing: 0.04em;
+}
+.wallet-row span {
+  flex: 1;
+  min-width: 0;
+}
+.wallet-row small {
+  color: #f0b90b;
+  font: 11px/1 var(--mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.08em;
+}
+.wallet-cancel {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 14px;
+  border: 0;
+  background: transparent;
+  color: #9c9383;
+  letter-spacing: 0.08em;
+}
+@media (min-width: 720px) {
+  .wallet-veil {
+    place-items: center;
+  }
+}

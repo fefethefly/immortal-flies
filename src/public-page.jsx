@@ -7,7 +7,10 @@ import {
   Cpu,
   Landmark,
   Layers,
+  Orbit,
+  Tag,
   Radio,
+  Sparkles,
 } from "lucide-react";
 import { loadOfficialToken } from "./token.mjs";
 import { useLocale } from "./use-locale.mjs";
@@ -15,16 +18,30 @@ import { LocaleContext } from "./locale-context.jsx";
 import { SiteBar, SiteLink } from "./site-chrome.jsx";
 import { SealBar } from "./seal-bar.jsx";
 import { useHomeSwarm } from "./home-field.jsx";
-import { HomeObservatory } from "./home-observatory.jsx";
+import { HomeCrossSection } from "./home-cross-section.jsx";
 import { PhenotypeReadout } from "./phenotype-view.jsx";
 import { HomeMeshAtlas } from "./home-mesh.jsx";
 import { HomeLiveDecks } from "./home-live.jsx";
 import { LifeGlyph } from "./life-glyphs.jsx";
 import { tiltHandlers, usePrefersReduced } from "./rite.jsx";
 import { formatPrice, formatToken, reflexOf } from "./swarm.mjs";
+import { ProtocolResearch } from "./home-protocol.jsx";
 import "./public.css";
 
-const DOOR_ICONS = [Compass, Activity, Cpu, Landmark, Layers];
+const INDEX = [
+  {
+    items: [
+      ["/field.html", "nav.field", "public.doorField", Orbit],
+      ["/habitat.html", "nav.habitat", "public.doorHabitat", Sparkles],
+      ["/market.html", "nav.market", "public.doorMarket", Tag],
+      ["/#mesh", "nav.mesh", "public.doorMesh", Layers],
+      ["/brain.html", "nav.canon", "public.doorCanon", Cpu],
+      ["/blueprint.html", "nav.blueprint", "public.doorBlueprint", Compass],
+      ["/swarm.html", "nav.pit", "public.doorPit", Activity],
+      ["/economy.html", "nav.economy", "public.doorEconomy", Landmark],
+    ],
+  },
+];
 const LOG_ICONS = {
   ACT: Activity,
   SENSE: Radio,
@@ -32,14 +49,6 @@ const LOG_ICONS = {
   BOOK: Landmark,
   HOLD: Compass,
 };
-
-const DOORS = [
-  ["/", "nav.home", "public.doorHome"],
-  ["/swarm.html", "nav.pit", "public.doorPit"],
-  ["/brain.html", "nav.canon", "public.doorCanon"],
-  ["/economy.html", "nav.economy", "public.doorEconomy"],
-  ["/blueprint.html", "nav.blueprint", "public.doorBlueprint"],
-];
 
 function popcount(value) {
   let n = value >>> 0;
@@ -146,7 +155,8 @@ function useReveal() {
 export function HomePage() {
   const [locale, setLocale, tx] = useLocale("meta.homeTitle", "meta.homeDesc");
   const [token, setToken] = useState(null);
-  const { swarm, selectedId, select, paused, togglePause } = useHomeSwarm();
+  const { swarm, selectedId, select, poke, paused, togglePause } =
+    useHomeSwarm();
   const champ =
     swarm.flies.find((row) => row.id === selectedId) ||
     swarm.flies.find((row) => row.status === "alive") ||
@@ -170,6 +180,7 @@ export function HomePage() {
           setLocale={setLocale}
           tx={tx}
           current="home"
+          token={token}
           trailing={
             token?.twitter ? (
               <a
@@ -183,16 +194,23 @@ export function HomePage() {
             ) : null
           }
         />
-        <SealBar token={token} tx={tx} />
-
-        <HomeObservatory
+        <HomeCrossSection
           swarm={swarm}
           selectedId={champ?.id}
           onSelect={select}
+          onPoke={poke}
           locale={locale}
           paused={paused}
           onPause={togglePause}
+          tx={tx}
         />
+
+        <details className="home-token-disclosure">
+          <summary>
+            {tx("nav.verifyToken")} <span aria-hidden="true">↗</span>
+          </summary>
+          <SealBar token={token} tx={tx} />
+        </details>
 
         <section
           className="home-pheno-band"
@@ -210,8 +228,6 @@ export function HomePage() {
           </div>
           <PhenotypeReadout fly={champ} locale={locale} compact />
         </section>
-
-        <HomeMeshAtlas tx={tx} />
 
         <HomeLiveDecks swarm={swarm} fly={champ} onSelect={select} />
 
@@ -245,6 +261,17 @@ export function HomePage() {
             })}
           </div>
         </section>
+
+        <header className="protocol-section-head protocol-research">
+          <span>03 / DISTRIBUTED COMPUTE</span>
+          <small>
+            {locale === "zh"
+              ? "运行器网络 · 本地托管沙盘"
+              : "Runner network · local hosting sandbox"}
+          </small>
+        </header>
+        <HomeMeshAtlas tx={tx} />
+        <ProtocolResearch locale={locale} />
 
         <section
           className="world-map"
@@ -286,7 +313,10 @@ export function HomePage() {
               <p>{tx("public.world2p")}</p>
               <SiteLink href="/swarm.html">{tx("public.world2go")} ↗</SiteLink>
             </article>
-            <article className="world-map-card finance-card rite-tilt" {...tilt}>
+            <article
+              className="world-map-card finance-card rite-tilt"
+              {...tilt}
+            >
               <span className="world-index">{tx("public.world3k")}</span>
               <i className="world-ghost" aria-hidden="true">
                 03
@@ -299,22 +329,31 @@ export function HomePage() {
                 <em>{tx("public.world3em")}</em>
               </h2>
               <p>{tx("public.world3p")}</p>
-              <SiteLink href="/economy.html">{tx("public.world3go")} ↗</SiteLink>
+              <SiteLink href="/economy.html">
+                {tx("public.world3go")} ↗
+              </SiteLink>
             </article>
           </div>
-          <div className="doors" aria-label={tx("public.doorsLabel")}>
+          <div
+            className="doors site-index"
+            aria-label={tx("public.doorsLabel")}
+          >
             <small>{tx("public.doorsLabel")}</small>
-            {DOORS.map(([href, nameKey, hintKey], i) => {
-              const Icon = DOOR_ICONS[i];
-              return (
-                <SiteLink key={href} href={href}>
-                  <em>{String(i + 1).padStart(2, "0")}</em>
-                  <Icon size={14} />
-                  <span>{tx(nameKey)}</span>
-                  <small>{tx(hintKey)}</small>
-                </SiteLink>
-              );
-            })}
+            {INDEX.map((group, groupIndex) => (
+              <div
+                key={groupIndex}
+                className={`site-index-group${group.items.length === 1 ? " is-single" : ""}`}
+              >
+                {group.items.map(([href, nameKey, hintKey, Icon], i) => (
+                  <SiteLink key={href} href={href}>
+                    <em>{String(i + 1).padStart(2, "0")}</em>
+                    <Icon size={14} />
+                    <span>{tx(nameKey)}</span>
+                    <small>{tx(hintKey)}</small>
+                  </SiteLink>
+                ))}
+              </div>
+            ))}
           </div>
         </section>
 

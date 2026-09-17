@@ -1,5 +1,6 @@
 import React from "react";
 import { chipFill, phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
+import { formatExpected, formatRate } from "./brain/flyswarm/phenotype-loci.mjs";
 import "./phenotype.css";
 
 export function PhenotypeReadout({
@@ -19,7 +20,10 @@ export function PhenotypeReadout({
     ["eye", ph.eye],
     ["size", ph.size],
     ["stripes", ph.stripes],
+    ["mark", ph.mark],
   ];
+  const scarce = ph.scarcity;
+  const expected = scarce ? formatExpected(scarce.expectedPer1024) : null;
   return (
     <div
       className={`pheno ${compact ? "is-compact" : ""}`}
@@ -50,18 +54,35 @@ export function PhenotypeReadout({
         ))}
       </div>
       <dl className="pheno-traits">
-        {traits.map(([key, row]) => (
-          <div key={key}>
-            <dt>{key}</dt>
-            <dd>
-              {key === "hue" ? <b style={{ background: ph.art.body }} /> : null}
-              {key === "eye" ? <b style={{ background: ph.art.eye }} /> : null}
-              {row[lang] || row.en}
-            </dd>
-          </div>
-        ))}
+        {traits.map(([key, row]) => {
+          const locked = key === "light" && scarce?.rates.lightLocked;
+          return (
+            <div key={key}>
+              <dt>{key}</dt>
+              <dd>
+                {key === "hue" ? <b style={{ background: ph.art.body }} /> : null}
+                {key === "eye" ? <b style={{ background: ph.art.eye }} /> : null}
+                <span>{row[lang] || row.en}</span>
+                <small>
+                  {locked
+                    ? lang === "zh"
+                      ? "骨白锁定"
+                      : "albino lock"
+                    : `${formatRate(row.bps)}%`}
+                </small>
+              </dd>
+            </div>
+          );
+        })}
       </dl>
       <p className="pheno-summary">{ph.summary[lang]}</p>
+      {expected ? (
+        <p className="pheno-scarce">
+          {lang === "zh"
+            ? `这一组合在 1024 只 Gen0 里预期约 ${expected} 只。出现率不是定价。`
+            : `This combination is expected in about ${expected} of 1024 Gen0. Occurrence is not a price.`}
+        </p>
+      ) : null}
       {note ? <p className="pheno-note">{note}</p> : null}
     </div>
   );

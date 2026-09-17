@@ -10,3 +10,4 @@ scripts/data/cache/
 public/data/malecns-full/
 server/data/
 .vercel
+scripts/data/.deps/

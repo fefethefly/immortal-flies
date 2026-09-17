@@ -1,5 +1,5 @@
 .pheno {
-  --pheno-body: #c9a25e;
+  --pheno-body: #f0b90b;
   --pheno-eye: #b57660;
   display: grid;
   gap: 10px;
@@ -57,6 +57,12 @@
   align-items: center;
   gap: 8px;
 }
+.pheno-traits small {
+  margin-left: auto;
+  font: 10px var(--mono);
+  letter-spacing: 0.04em;
+  color: #8a8172;
+}
 .pheno-traits b {
   width: 9px;
   height: 9px;
@@ -66,7 +72,13 @@
 .pheno-summary {
   font: 11px var(--mono);
   letter-spacing: 0.04em;
-  color: #c9a25e;
+  color: #f0b90b;
+}
+.pheno-scarce {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #c4b49a;
 }
 .pheno-note {
   font-size: 11px;
