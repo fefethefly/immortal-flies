@@ -1,8 +1,14 @@
 {
   "schema": "iff.protocol-scale-plan/1",
   "policy": "protocol-relay-scale/1",
-  "preregistered": true,
-  "status": "PLAN ONLY - results must not exist before this file is committed",
+  "preregistered": false,
+  "status": "PAUSED - NOT AUTHORIZED FOR EXECUTION",
+  "pauseReasons": [
+    "Seeds 1000-1099 were already observed in local-relay experiments; changing envId does not change world geometry. This is not fresh held-out validation.",
+    "Delta 0.2 and hazard cap 0.5 lack an agreed task-value or sample-size rationale. They are draft values, not accepted promotion criteria.",
+    "A positive scrambled-minus-off estimate is not by itself a safety failure; this proposed rule conflates an intervention diagnostic with safety.",
+    "The user requested next-step advice, not execution. No scale report was generated. Supersedes the preregistration claim in commit 139a6c3 without erasing history."
+  ],
   "graph": {
     "id": "malecns-circuit",
     "sourceCommit": "df7b372cba4079bbd488f0fcbe5eb182feece3aa",
