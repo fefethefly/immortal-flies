@@ -30,6 +30,9 @@ const PAGES = {
   "/live.html": lazy(() =>
     import("./fly-live/page.jsx").then((m) => ({ default: m.FlyLivePage })),
   ),
+  "/protocol.html": lazy(() =>
+    import("./protocol-page.jsx").then((m) => ({ default: m.ProtocolPage })),
+  ),
 };
 
 function SiteApp() {

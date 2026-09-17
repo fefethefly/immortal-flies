@@ -55,6 +55,8 @@ const ROUTE_ALIASES = {
   "/market.html": "/market.html",
   "/live": "/live.html",
   "/live.html": "/live.html",
+  "/protocol": "/protocol.html",
+  "/protocol.html": "/protocol.html",
 };
 
 export const SiteGoContext = createContext(null);

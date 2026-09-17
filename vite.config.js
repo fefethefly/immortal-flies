@@ -34,6 +34,7 @@ export default defineConfig({
         habitat: "habitat.html",
         market: "market.html",
         live: "live.html",
+        protocol: "protocol.html",
       },
     },
   },

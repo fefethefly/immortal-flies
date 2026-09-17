@@ -9,7 +9,8 @@
     { "source": "/market", "destination": "/market.html" },
     { "source": "/field", "destination": "/field.html" },
     { "source": "/swarm", "destination": "/swarm.html" },
-    { "source": "/brain", "destination": "/brain.html" }
+    { "source": "/brain", "destination": "/brain.html" },
+    { "source": "/protocol", "destination": "/protocol.html" }
   ],
   "redirects": [
     { "source": "/altar", "destination": "/blueprint", "permanent": false },
