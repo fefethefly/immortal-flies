@@ -1,0 +1,122 @@
+{
+  "schema": "iff.side-mapping-audit/1",
+  "audit": "READ-ONLY",
+  "dataset": {
+    "path": "public/data/malecns-circuit",
+    "manifest": {
+      "schema": "iff.dataset/1",
+      "id": "malecns-circuit",
+      "title": "MaleCNS v1.0 sensory-motor subgraph",
+      "dataset": "male-cns:v1.0",
+      "license": "CC BY",
+      "source": "https://male-cns.janelia.org/download/",
+      "neurons": 1400,
+      "edges": 42031,
+      "metadata": {
+        "path": "metadata.json",
+        "bytes": 134660,
+        "sha256": "0x7623082c058a626759164e83e666b628396669d115eeaeb1c8afef654a1adca9"
+      },
+      "connectivity": {
+        "path": "graph.bin",
+        "bytes": 341864,
+        "sha256": "0x4278c3cae84471b8a808391d5de5eddf8e54a2b75e01f8596743ec07e2f1e843"
+      },
+      "provenance": {
+        "path": "provenance.json",
+        "bytes": 1878,
+        "sha256": "0x582b57616f86c6b11d45761287787ccf495df1d49022108e2e548eb9a1ef7cbc"
+      }
+    }
+  },
+  "annotations": {
+    "file": "body-annotations-male-cns-v1.0-minconf-0.5.feather",
+    "sha256": "0x2177e246113e4cfbf1e7772ec37c6da1955ff22e8063d0b1f833101f99a9a3b2"
+  },
+  "sideColumns": {
+    "somaSide": "official soma side",
+    "rootSide": "official root side"
+  },
+  "groups": {
+    "food": {
+      "neurons": 80,
+      "matched": 80,
+      "sideCounts": {
+        "somaSide": {
+          "unknown": 80
+        },
+        "rootSide": {
+          "L": 23,
+          "R": 57
+        }
+      }
+    },
+    "threat": {
+      "neurons": 80,
+      "matched": 80,
+      "sideCounts": {
+        "somaSide": {
+          "L": 42,
+          "R": 37,
+          "unknown": 1
+        },
+        "rootSide": {
+          "L": 1,
+          "unknown": 79
+        }
+      }
+    },
+    "light": {
+      "neurons": 80,
+      "matched": 80,
+      "sideCounts": {
+        "somaSide": {
+          "L": 79,
+          "unknown": 1
+        },
+        "rootSide": {
+          "L": 1,
+          "unknown": 79
+        }
+      }
+    },
+    "left": {
+      "neurons": 90,
+      "matched": 90,
+      "sideCounts": {
+        "somaSide": {
+          "L": 90
+        },
+        "rootSide": {
+          "unknown": 90
+        }
+      }
+    },
+    "right": {
+      "neurons": 90,
+      "matched": 90,
+      "sideCounts": {
+        "somaSide": {
+          "R": 90
+        },
+        "rootSide": {
+          "unknown": 90
+        }
+      }
+    }
+  },
+  "motorOverlap": {
+    "food": 0,
+    "threat": 64,
+    "light": 0,
+    "left": 90,
+    "right": 90
+  },
+  "notes": [
+    "Selected food neurons carry rootSide sides; their raw somaSide is empty.",
+    "Selected threat sides come from somaSide; light has no bilateral split.",
+    "No official annotation distinguishes front from back.",
+    "Motor readout groups must not receive directional stimulation."
+  ],
+  "reportHash": "0x585a1fab2652f12d61a0eef703b615e1d413b788462fdc845157a0ea52c83aed"
+}
