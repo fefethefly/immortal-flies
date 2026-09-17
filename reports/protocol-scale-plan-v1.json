@@ -1,0 +1,36 @@
+{
+  "schema": "iff.protocol-scale-plan/1",
+  "policy": "protocol-relay-scale/1",
+  "preregistered": true,
+  "status": "PLAN ONLY - results must not exist before this file is committed",
+  "graph": {
+    "id": "malecns-circuit",
+    "sourceCommit": "df7b372cba4079bbd488f0fcbe5eb182feece3aa",
+    "metadataSha256": "0x7623082c058a626759164e83e666b628396669d115eeaeb1c8afef654a1adca9",
+    "connectivitySha256": "0x4278c3cae84471b8a808391d5de5eddf8e54a2b75e01f8596743ec07e2f1e843",
+    "note": "Historical 1400-node/42031-edge graph, loaded and hash-checked from the committed snapshot, not the uncommitted 12000-node working tree."
+  },
+  "environments": { "count": 100, "seedStart": 1000, "envId": "protocol-relay", "foodCount": 3, "threatCount": 2 },
+  "flies": 10,
+  "seedBase": 7000,
+  "rounds": 36,
+  "arms": {
+    "off": { "mode": "off", "deliveryCopies": 1 },
+    "relay": { "mode": "relay", "deliveryCopies": 1 },
+    "duplicate": { "mode": "relay", "deliveryCopies": 2 },
+    "scrambled": { "mode": "scrambled", "deliveryCopies": 1 }
+  },
+  "primary": {
+    "metric": "paired per-environment collected difference, relay minus off",
+    "gainThresholdDelta": 0.2,
+    "passRule": "approximate 95% interval lower bound exceeds +0.2 with more wins than losses",
+    "failRule": "threshold not met is recorded as a negative result; no metric, seed or parameter changes after execution"
+  },
+  "safety": {
+    "hazardRule": "relay must not increase mean hazard exposure versus off by more than 0.5",
+    "misinformationSanity": "scrambled minus off paired mean delta must not exceed 0"
+  },
+  "secondary": ["duplicate vs relay: raw deliveries/bytes increase with identical behavior", "scrambled vs off", "changedInputs, hazard exposure, message and payload accounting"],
+  "verification": "every arm on every environment is executed twice; results must match hash-for-hash",
+  "limits": "SIM only; engineered scalar receiver; shared world depletion couples arms' environments but arms run separately; 100 seeds are independent environments, not independent brains; receiver dedup is task-local, no network layer; results do not establish T3 promotion or learning."
+}
