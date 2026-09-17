@@ -105,6 +105,36 @@ depends on stimulated group size, so traces are compared per direction only;
 motor-group activity is read-only ethology, no directional current enters
 left/right groups; no re-sensing, learning, behavior or foraging claim.
 
+## Closed-loop stage (iff.direction-closed-loop/1)
+
+`scripts/run-direction-closed-loop.mjs` + `reports/direction-closed-loop-v1.json`.
+Three arms share the world, start state, observation layer and the UNMODIFIED
+production kernel; only stimulus routing differs: directional (side-route/1),
+swapped (left/right exchanged control), legacy (full-group scalar). Sensing is
+recomputed every round from the moved body; movement comes only from the
+kernel's own motor decode; no directional current enters motor groups. Trace
+entries carry a round-0 baseline, so metrics stay defined out of sensor range.
+
+20 seeds x 36 rounds on the 1400-node subgraph, replays 20/20:
+
+- Behavioral divergence: directional final states differ from legacy 20/20 —
+  side routing changes the neural-to-behavior trajectory in closed loop.
+- No foraging benefit demonstrated: collected = 0 in all arms; directional vs
+  swapped diverges in only 6/20 seeds (targets are mostly beyond the 1000
+  local radius in a 10000-wide world within 36 rounds).
+- Cost signal: directional threat exposure 27 vs legacy 6 across seeds;
+  larger total injected current has behavioral consequences.
+- Mechanism check (standalone, not a committed report): a synthetic graph with
+  same-side sensory-to-motor wiring collects 1/1 under directional routing
+  while legacy collects 0 — encoding, plan, view-graph routing, kernel motor
+  decode, movement and pickup all compose end to end.
+
+Reading: with side-route/1 held fixed, the remaining bottleneck is the circuit
+wiring between the routed sensory sides and the left/right motor readout
+groups in the malecns-circuit subgraph, not the direction interface. A
+malecns-full study is the next lever, separately versioned. Sides locate
+neuron position, not response tuning; no biological or significance claim.
+
 ## Next gate
 
 Closed-loop study only, separately versioned: re-sense each round while moving,
