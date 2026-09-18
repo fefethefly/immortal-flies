@@ -5,9 +5,9 @@
 ## 证据与边界
 
 - **B — 页面规则**：https://brainweb.club/rules 。规则声明不等于实现通过验证；本次不引用推文、其他页面或未定位的仓库。
-- **S — 消息声明**：`/Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/flyswarm/schemas.mjs`。
-- **Q — 聚合实现**：`/Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/flyswarm/quorum.mjs`。
-- **I — 模块出口**：`/Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/flyswarm/index.mjs`。
+- **S — 消息声明**：`src/brain/flyswarm/schemas.mjs`。
+- **Q — 聚合实现**：`src/brain/flyswarm/quorum.mjs`。
+- **I — 模块出口**：`src/brain/flyswarm/index.mjs`。
 - 本地证据限于静态阅读：导出模块不代表模块已接线、已部署或测试通过；没有审阅运行内核、合约、托管执行器。本次不判断这些组件的运行状态。
 
 ## 对照：已知事实 → 真正差距 → 建议

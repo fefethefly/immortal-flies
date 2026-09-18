@@ -4,7 +4,7 @@ Status: candidate sensory encoding implemented; no neural mapping or behavior cl
 
 ## Contract
 
-Module: `/Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/task-direction.mjs`.
+Module: `src/brain/task-direction.mjs`.
 `encodeDirection(observations, body)` consumes the immediate output observations of
 `observeLocal`, plus integer body x/y (0–10000) and heading (0–359).
 It does not read the world, graph, reward, runtime state or motor output.

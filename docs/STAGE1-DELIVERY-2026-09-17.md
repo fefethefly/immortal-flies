@@ -14,7 +14,7 @@
 
 - `npm test`：190/190。
 - `npm run build`：通过。
-- `node scripts/verify-life-genesis.mjs /Users/caonanya/Documents/ChatGPT/immoratalflies/dist`：9 个文件大小/指纹通过。
+- `node scripts/verify-life-genesis.mjs dist`：9 个文件大小/指纹通过。
 - `node scripts/test-habitat-browser.mjs`：自行构建、启动本地服务和无头 Chrome；模拟 RPC，不访问公共链或发送交易。真实页面投食能量 429 → 649，刷新仍为 649，显示恢复提示，无 runtime exception。测试启用减少动态效果以冻结模拟。
 
 ## 尚未验收 / 发布边界

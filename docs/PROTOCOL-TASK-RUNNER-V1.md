@@ -3,8 +3,8 @@
 状态：非神经 SIM 协议任务，未接入产品、上链、学习或经验晋升。复用现有接纳中继与非神经导航，不改协议语义。
 
 实现：
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/protocol-task.mjs（核心）
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/protocol-task.mjs（命令行）
+- src/brain/protocol-task.mjs（核心）
+- scripts/protocol-task.mjs（命令行）
 
 ## 任务结构
 

@@ -2,9 +2,11 @@
 
 **免费孵化，拥有一只有可验证历史的数字果蝇。**
 
+许可证 [MIT](LICENSE)。第三方连接组与字体见 [NOTICE](NOTICE)。贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)。漏洞请按 [SECURITY.md](SECURITY.md) 私下报告，不要把私钥或 API 密钥发到 issue。
+
 当前优先交付 BNB 免费孵化（仅网络 gas）、Soul 身份、链上互动与可恢复档案。公共协议分离 LifeId、SpeciesManifest、ModelManifest 与 Session，为未来跨链跨物种交流/迁徙预留接口；首版 BNB 为唯一权威身份链，跨链桥未开放。交易仍是纸面小世界。产品裁定见 [PRODUCT-LATEST §20](docs/PRODUCT-LATEST.md#20-已确认开放数字生命架构与本轮交付)，实现规格见 [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md)。
 
-**工程暂停交接（2026-09-16）：** 新 Soul/生命日志合约初版已编译，测试尚未全部通过，未部署公共链。前端与正式协议规格尚未完成。接手从 [Grok 交接说明](docs/GROK-HANDOFF-2026-09-16.md) 开始。
+BSC 主网身份核 LIVE：`ImmortalSoul` `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`（`phenotype-loci/3`）。旧 `/2` 集合 `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` 已 RETIRED。禁止把 `ImmortalFly.sol` 部署到 chainId 56，也禁止再部署一份 Soul 当迭代。
 
 ## 启动
 
@@ -49,7 +51,7 @@ npm run server   # http://127.0.0.1:8787 ；契约见 docs/API-V1.md
 
 ## 范围与事实
 
-**$IFS 代币已在 BSC 主网发射**（记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)）；**金库地址未公布**。**Soul NFT 主网尚未开放**。`ImmortalFly.sol` 是 16 节点测试网原型，**禁止部署到 BSC 主网**。主网身份草案是 `contracts/life/ImmortalSoul.sol`（未部署，清单 `UNDEPLOYED`），见 [docs/LIFE-PROTOCOL.md](docs/LIFE-PROTOCOL.md) 与 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) §19–§20。本地祭坛才能练旧 `mint`；生产 `/altar` 跳蓝图。迷宫成绩、本地档案、MaleCNS 连接组都不能当作链上资产或官方成绩。销毁与自动打给个人地址均未实现，也不应实现为协议分流。
+**$IFS 代币已在 BSC 主网发射**（记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)）。**Soul NFT 主网已开放** LIVE 集合 `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`，清单 `public/contract/life/ImmortalSoul.mainnet.json`。`ImmortalFly.sol` 是 16 节点测试网原型，**禁止部署到 BSC 主网**。见 [docs/LIFE-PROTOCOL.md](docs/LIFE-PROTOCOL.md) 与 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) §19–§20。本地祭坛才能练旧 `mint`；生产 `/altar` 跳蓝图。迷宫成绩、本地档案、MaleCNS 连接组都不能当作链上资产或官方成绩。销毁与自动打给个人地址均未实现，也不应实现为协议分流。
 
 模型名称为 `iff-neural-16-v1`：16 个节点、3 组可训练参数与确定性随机状态。它受到果蝇行为启发，并非完整果蝇脑连接组，更不代表意识上传。页面中复杂的发光线路是美术表现；神经图谱展示的是轻量模型的实际电位与脉冲。
 
@@ -168,3 +170,7 @@ npm test
 ```
 
 来源、许可证、预处理与映射规则见 [docs/CONNECTOME-MALE-CNS.md](docs/CONNECTOME-MALE-CNS.md)。产品与开放架构见 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md)。
+
+## 许可证
+
+源代码为 [MIT](LICENSE)。Janelia FlyEM MaleCNS 衍生图为 **CC BY**（不能改写成 MIT）；捆绑字体为 **SIL OFL**。详见 [NOTICE](NOTICE)。

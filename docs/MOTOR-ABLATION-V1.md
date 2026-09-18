@@ -44,17 +44,17 @@ heading 0° 的原失败仍在；45° 表现不同说明几何/离散运动敏�
 
 ## 工件与验证
 
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/motor-ablation-core.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-motor-ablation.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/motor-ablation.test.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/motor-ablation-plan-v1.json
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/motor-ablation-v1.json
+- scripts/motor-ablation-core.mjs
+- scripts/study-motor-ablation.mjs
+- tests/motor-ablation.test.mjs
+- reports/motor-ablation-plan-v1.json
+- reports/motor-ablation-v1.json
 
 新测试及旧 motor-input 测试 5/5 通过；新报告完整 verify 退出码 0。测试逐拍重新执行原 step，核对实际选中源、spikes、neuralHash、身体和运动读出公式；不预设一定采集或误差收缩。保存报告约 39 MB，依赖对应仓库源码与历史 git 图对象，不是独立复算包。未跑全仓库测试或部署。
 
 ```sh
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-motor-ablation.mjs verify
-node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/motor-ablation.test.mjs
+node scripts/study-motor-ablation.mjs verify
+node --test tests/motor-ablation.test.mjs
 ```
 
 ## 下一步

@@ -5,7 +5,7 @@ Not a frontend, network service, full T3 protocol, learning or gain claim.
 
 ## Entry point
 
-`/Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/task-protocol-relay.mjs`
+`src/brain/task-protocol-relay.mjs`
 exports `runProtocolRelay(graph, world, options)` and `PROTOCOL_RELAY`.
 Use the existing graph loader and `createWorld` from `task.mjs`. The world must
 carry its valid worldHash; caller supplies graph artifacts and retains them.
@@ -46,7 +46,7 @@ do not make a self-contained replay package.
 ## Validation
 
 ```sh
-node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/task-protocol-relay.test.mjs
+node --test tests/task-protocol-relay.test.mjs
 ```
 
 Two-life / 32-round tests use a tiny synthetic graph, not MaleCNS capability

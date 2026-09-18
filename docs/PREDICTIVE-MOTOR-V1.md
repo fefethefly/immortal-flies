@@ -36,15 +36,15 @@
 
 ## 工件与复算
 
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/predictive-motor-input.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-predictive-motor.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-motor.test.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/predictive-motor-plan-v1.json
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/predictive-motor-v1.json
+- src/brain/predictive-motor-input.mjs
+- scripts/study-predictive-motor.mjs
+- tests/predictive-motor.test.mjs
+- reports/predictive-motor-plan-v1.json
+- reports/predictive-motor-v1.json
 
 ```sh
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-predictive-motor.mjs verify
-node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-motor.test.mjs
+node scripts/study-predictive-motor.mjs verify
+node --test tests/predictive-motor.test.mjs
 ```
 
 依赖对应仓库源码及历史 git 图对象，不是独立复算包。仅测试一个已知开发场景；不能声称泛化或预测控制普遍无效。

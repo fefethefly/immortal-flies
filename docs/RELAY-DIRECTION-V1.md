@@ -5,7 +5,7 @@
 ## 断线恢复
 
 原定位实验已完成，见原始文档：
-/Users/caonanya/Documents/ChatGPT/immoratalflies/docs/RELAY-DIAGNOSIS-V1.md
+docs/RELAY-DIAGNOSIS-V1.md
 
 恢复时旧报告严格重放与 2 项测试通过。额外的最小探针将相反方向消息交给原 receiveRelayInbox，再从同一初态执行一次原 step；实际 voltage/refractory/spikes 数组完全相同（seed 301，两侧均 30 个脉冲），不是只比较哈希。原始坐标不同，但 applied.food 都为 346。
 
@@ -36,14 +36,14 @@
 ## 验证与并行工作区变化
 
 新增文件：
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/relay-direction.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/relay-direction-core.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-relay-direction.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/relay-direction.test.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/relay-direction-plan-v1.json
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/relay-direction-v1.json
+- src/brain/relay-direction.mjs
+- scripts/relay-direction-core.mjs
+- scripts/study-relay-direction.mjs
+- tests/relay-direction.test.mjs
+- reports/relay-direction-plan-v1.json
+- reports/relay-direction-v1.json
 
-运行后，另一路工作修改了 /Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/graph.mjs，加入 endian.mjs 导入及 loadGraph 字节序检查。当前 prepareGraph 未变，但源码指纹变化使新旧报告严格 verify 正确拒绝通过。未回滚该修改、未覆盖报告、未放宽测试。
+运行后，另一路工作修改了 src/brain/graph.mjs，加入 endian.mjs 导入及 loadGraph 字节序检查。当前 prepareGraph 未变，但源码指纹变化使新旧报告严格 verify 正确拒绝通过。未回滚该修改、未覆盖报告、未放宽测试。
 
 在临时隔离副本中，仅将 graph.mjs 恢复为 cf92469 提交版本（报告记录指纹 0x9dc97b781d629b3dcbedcc3b11f3f676a7e525047c645b14e663e69311d37fca）：
 - 新旧诊断及 inbox/local relay 相关测试 **10/10 通过**；

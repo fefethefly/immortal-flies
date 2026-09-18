@@ -1,0 +1,32 @@
+Immortal Flies
+==============
+
+The original source code in this repository is licensed under the MIT License
+(see LICENSE). The following third-party materials keep their own terms and
+are **not** re-licensed as MIT.
+
+Janelia FlyEM MaleCNS v1.0
+--------------------------
+Connectome annotations, neurotransmitter predictions, and connection weights
+come from the Janelia FlyEM MaleCNS v1.0 release (CC BY).
+
+  https://male-cns.janelia.org/download/
+
+This repository does not redistribute the original Feather files. It keeps
+processing records and derived runtime graphs under `public/data/malecns-*`.
+Those derived graphs remain subject to the upstream CC BY attribution
+requirement. See `docs/CONNECTOME-MALE-CNS.md` and each dataset's
+`provenance.json`.
+
+Fonts (SIL Open Font License 1.1)
+---------------------------------
+Bundled under `public/fonts/` with their OFL license files:
+
+  - Barlow Condensed
+  - IBM Plex Mono
+  - Cormorant Garamond
+
+OpenZeppelin Contracts 5.4.0 (MIT)
+----------------------------------
+Solidity contracts import `@openzeppelin/contracts`. That library keeps its
+own MIT copyright notices; they are not replaced by this project's LICENSE.

@@ -85,9 +85,9 @@ fail closed. A changed binding uses a separate directory. Run only one writer
 at a time. An interrupted block reruns; already completed blocks are reused.
 
 ```sh
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-direction-l2o.mjs --max-blocks 2
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-direction-l2o.mjs --max-blocks 0
-node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/direction-l2o.test.mjs
+node scripts/study-direction-l2o.mjs --max-blocks 2
+node scripts/study-direction-l2o.mjs --max-blocks 0
+node --test tests/direction-l2o.test.mjs
 ```
 
 `--max-blocks` caps NEW blocks per invocation, not total completed blocks.
@@ -98,4 +98,4 @@ Current binding:
 `0x451c8e49bb5eeac52351c0957e2aad50ef5fbd5190a1fc494ebb43a92e4c1fd1`
 
 Checkpoint directory:
-`/Users/caonanya/Documents/ChatGPT/immoratalflies/reports/direction-l2o-checkpoints/451c8e49bb5eeac52351c0957e2aad50ef5fbd5190a1fc494ebb43a92e4c1fd1/`
+`reports/direction-l2o-checkpoints/451c8e49bb5eeac52351c0957e2aad50ef5fbd5190a1fc494ebb43a92e4c1fd1/`

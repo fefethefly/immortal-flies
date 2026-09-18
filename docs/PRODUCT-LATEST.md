@@ -19,7 +19,7 @@ BSC 主网身份核已换成 `phenotype-loci/3` 集合：`ImmortalSoul` `0x9341F
 
 此前交接（2026-09-16，Grok 续写）：
 
-免费孵化、创世承诺和跨链跨物种架构结论已确认（§20）。BSC 主网身份核已部署（2026-09-16）：`ImmortalSoul` `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F`，`LifeJournal` `0xf2457F49E6c7Ab8b0BBbd796991a139A6fE69c78`，`SoulKin` `0xA6810953e52f5EEa39C323d8Ea7dC42c210A13A0`。curator 为热钥匙 `0x4767dAC30648fE0d8A6076F79414D42947486Ae3`。禁止再部署一份 ImmortalSoul。规格见 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md)。
+免费孵化、创世承诺和跨链跨物种架构结论已确认（§20）。BSC 主网身份核已部署（2026-09-16）：`ImmortalSoul` `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F`，`LifeJournal` `0xf2457F49E6c7Ab8b0BBbd796991a139A6fE69c78`，`SoulKin` `0xA6810953e52f5EEa39C323d8Ea7dC42c210A13A0`。curator 为 `0x4767dAC30648fE0d8A6076F79414D42947486Ae3`。禁止再部署一份 ImmortalSoul。规格见 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md)。
 
 前端 `/habitat.html` 与 `/field.html` 已读主网清单。测试网 `0x3487A2802AF82F12Bb7a3dd40B262394f4819A5a` 另存为 `ImmortalSoul.testnet.json`。创世包解码器是 `phenotype-loci/2`，状态仍是 `LOCAL_PACKAGE_UNPUBLISHED`。三份主网合约已在 Sourcify 上 `exact_match`（Soul / Journal / Kin）。主网第一只 Gen0 已出生：`#1`「Elon Musk」，lifeId `0x3008c660…1de754`，块 `122191967`，主人 `0x6aBe…81F`。LifeJournal 对该 life 仍是空头。`ImmortalFly.sol` 未上 56。
 

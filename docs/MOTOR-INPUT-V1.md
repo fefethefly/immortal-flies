@@ -13,7 +13,7 @@
 - 当前符号检查无误，原右侧失败没有修复。seed 301 第 32 拍使用 941，真实运动组左1/右4，转 +9°；临时非神经读出左1/右0才转 −9°。这验证了积分器，不证明感觉控制器能做到。
 
 同预算消融及完整重放见：
-/Users/caonanya/Documents/ChatGPT/immoratalflies/docs/MOTOR-ABLATION-V1.md
+docs/MOTOR-ABLATION-V1.md
 
 ---
 

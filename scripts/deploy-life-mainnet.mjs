@@ -213,7 +213,7 @@ function recordOf({
     deployedAt: new Date().toISOString(),
     bindTxHash: bindKin.hash,
     journalBindTxHash: bindJournal.hash,
-    note: "BSC mainnet identity kernel /3. Curator is the hot deploy key. SoulKinCross is bound (free, 24h parent cooldown). Renderer is replaceable after 48h challenge. ERC-2981 default 0 cap 5%. Do not deploy ImmortalFly.sol to chain 56. Do not redeploy this collection to iterate.",
+    note: "BSC mainnet identity kernel /3. Curator is the deploy account. SoulKinCross is bound (free, 24h parent cooldown). Renderer is replaceable after 48h challenge. ERC-2981 default 0 cap 5%. Do not deploy ImmortalFly.sol to chain 56. Do not redeploy this collection to iterate.",
   };
 }
 

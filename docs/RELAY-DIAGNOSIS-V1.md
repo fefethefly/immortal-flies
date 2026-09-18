@@ -74,11 +74,11 @@ neural arm or credit handwritten control gains to neural intelligence.
 
 ## Reproduction and limits
 
-Report: /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/relay-diagnosis-v1.json
+Report: reports/relay-diagnosis-v1.json
 
 ```sh
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-relay-diagnosis.mjs verify
-node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/relay-diagnosis.test.mjs
+node scripts/study-relay-diagnosis.mjs verify
+node --test tests/relay-diagnosis.test.mjs
 ```
 
 64 arm runs, each executed twice and compared in full; a separate verify run

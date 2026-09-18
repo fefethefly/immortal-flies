@@ -7,18 +7,18 @@ runner and receiver. Does not load or modify MaleCNS data, old reports or runtim
 ## Verify the delivered package
 
 ```sh
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/protocol-replay.mjs verify
+node scripts/protocol-replay.mjs verify
 ```
 
 Default artifact:
-`/Users/caonanya/Documents/ChatGPT/immoratalflies/reports/protocol-replay-smoke-v1.json`
+`reports/protocol-replay-smoke-v1.json`
 
 To regenerate without overwriting evidence, choose an unused path in an
 existing directory:
 
 ```sh
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/protocol-replay.mjs build /tmp/protocol-smoke-new.json
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/protocol-replay.mjs verify /tmp/protocol-smoke-new.json
+node scripts/protocol-replay.mjs build /tmp/protocol-smoke-new.json
+node scripts/protocol-replay.mjs verify /tmp/protocol-smoke-new.json
 ```
 
 Build refuses an existing destination. Verify is read-only. Both require a
@@ -53,7 +53,7 @@ experience promotion or external replication is included.
 ## Validation and frontend use
 
 ```sh
-node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/protocol-replay.test.mjs
+node --test tests/protocol-replay.test.mjs
 ```
 
 Verification does not stop at the outer hash: it reconstructs the graph/world,

@@ -38,15 +38,15 @@
 
 新旧预测测试合计 **5/5 通过**，包括候选评分、状态不变性、预测分支不变性、全报告重放、拒绝退化候选。CLI verify 退出码 0。测试通过仅说明实现与证据一致，导航验收未通过。未运行全仓库测试或部署。
 
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/predictive-turn-cost.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-turn-cost.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-turn-cost.test.mjs
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/turn-cost-plan-v1.json
-- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/turn-cost-v1.json
+- src/brain/predictive-turn-cost.mjs
+- scripts/study-turn-cost.mjs
+- tests/predictive-turn-cost.test.mjs
+- reports/turn-cost-plan-v1.json
+- reports/turn-cost-v1.json
 
 ```sh
-node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-turn-cost.mjs verify
-node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-turn-cost.test.mjs
+node scripts/study-turn-cost.mjs verify
+node --test tests/predictive-turn-cost.test.mjs
 ```
 
 ## 决策

@@ -1,14 +1,45 @@
+# Dependencies / build
 node_modules/
 dist/
 artifacts/
+coverage/
+.nyc_output/
+
+# Secrets — never commit real keys
 .env
-.env.local
-*.log
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.keystore
+id_rsa
+id_rsa.pub
+
+# Local / editor
 .DS_Store
-test-results/
+.idea/
+*.swp
+*.log
+.vercel
+.envrc
+
+# Finder duplicates
+*_副本.*
+* copy.*
+* Copy.*
+
+# Generated connectome (full graph is local-only)
 scripts/data/cache/
+scripts/data/.deps/
 public/data/malecns-full/graph.bin
 public/data/malecns-full/metadata.json
+
+# Runtime data
 server/data/
-.vercel
-scripts/data/.deps/
+test-results/
+.tmp-*/
+.tmp-*
+
+# Headless Chrome / local smoke profiles (must never be committed)
+**/chrome-profile/
