@@ -97,3 +97,4 @@ PRODUCT-LATEST, mining, and most lab notes are Chinese only. The root [README](.
 4. Paper trading, credit, and vaults marked SIM are not real funds.
 5. MaleCNS-derived graphs stay CC BY. See [NOTICE](../NOTICE).
 6. New product rules go into PRODUCT-LATEST or a satellite spec — not a new dated handoff at the folder root.
+7. GitHub-facing docs, commits, and PRs are English ([AGENTS.md](../AGENTS.md)). Do not mass-translate existing Chinese notes unless asked.

@@ -1,0 +1,14 @@
+---
+description: GitHub docs and commit text are English for international collaboration
+alwaysApply: true
+---
+
+# GitHub language
+
+Canonical copy: repository root [AGENTS.md](../../AGENTS.md).
+
+Anything that lands on GitHub as collaboration text is **English**: commit subject and body, PR title and body, issues, and GitHub-facing docs (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `docs/README.md`, new contributor docs).
+
+Do not mass-translate existing Chinese product or lab notes unless asked. Chat with the owner may stay in their language; git artifacts stay English.
+
+Commit messages: 1–2 English sentences on why, not a file list.

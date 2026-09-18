@@ -18,7 +18,7 @@
 [![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-5.4-4E5EE4?logo=openzeppelin&logoColor=white)](https://www.openzeppelin.com/)
 [![CI](https://img.shields.io/badge/CI-npm%20test%20%2B%20build-2ea44f)](./.github/workflows/segment-replay.yml)
 
-License [MIT](LICENSE). Third-party connectome and fonts: [NOTICE](NOTICE). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately via [SECURITY.md](SECURITY.md) — never paste private keys or API secrets into issues.
+License [MIT](LICENSE). Third-party connectome and fonts: [NOTICE](NOTICE). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md). Agents: [AGENTS.md](AGENTS.md) (English on GitHub: commits, PRs, contributor docs). Report vulnerabilities privately via [SECURITY.md](SECURITY.md) — never paste private keys or API secrets into issues.
 
 **Site** · https://immortalflies.com · **Docs catalog** · [docs/README.md](docs/README.md) · **Repo** · https://github.com/fefethefly/immortal-flies
 

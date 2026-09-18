@@ -1,30 +1,32 @@
-# 贡献
+# Contributing
 
-需要 Node.js 22+。不要提交 `.env`、私钥或本机生成的全量连接组。
+Need Node.js 22+. Do not commit `.env`, private keys, or a locally generated full connectome.
+
+**Language:** this project is public. Write **English** for commits, pull requests, issues, and GitHub-facing docs. See [AGENTS.md](AGENTS.md). Existing Chinese product/lab notes are not a translation queue unless someone asks.
 
 ```sh
 npm install
-cp .env.example .env   # 密钥留空即可跑通本地
+cp .env.example .env   # leave secrets empty for a local run
 npm test
 npm run build
 ```
 
-合约测试需要 Foundry `anvil`：
+Contract tests need Foundry `anvil`:
 
 ```sh
 npm run life:compile
 npm run life:test
 ```
 
-全量 MaleCNS 图不入库，需本地生成，见 `docs/CONNECTOME-MALE-CNS.md`。
+The full MaleCNS graph is not in git. Generate it locally; see `docs/CONNECTOME-MALE-CNS.md`.
 
-## 请遵守的边界
+## Boundaries
 
-- 许可证是 MIT；衍生的 MaleCNS 图与捆绑字体仍走 NOTICE 里的原许可证。
-- 不要把 `ImmortalFly.sol` 部署到 BSC 主网。
-- 不要在主网再部署一份 `ImmortalSoul` 来加功能；玩法进卫星合约。
-- 纸面交易、信用、金库在代码里标 SIM 的，不要写成真实资金。
-- 提交前确认 `git status` 没有 `.env`、`*.pem`、Finder 的 `*_副本` 文件。
-- 不要 `git push --mirror` 或推送 `refs/cline/**`。那些是本机 Cline 检查点，可能含浏览器配置，不是源码。
+- License is MIT. Derived MaleCNS graphs and bundled fonts stay on the licenses in NOTICE.
+- Do not deploy `ImmortalFly.sol` to BSC mainnet.
+- Do not redeploy `ImmortalSoul` on mainnet to add features; play goes in satellite contracts.
+- Paper trading, credit, and vaults marked SIM are not real funds.
+- Before you commit, check `git status` for `.env`, `*.pem`, and Finder `*_副本` copies.
+- Do not `git push --mirror` or push `refs/cline/**`. Those are local Cline checkpoints and may contain browser profile data, not source.
 
-补丁请开 PR。漏洞请走 [SECURITY.md](SECURITY.md)，不要开公开 issue。
+Open a pull request for patches. Report vulnerabilities via [SECURITY.md](SECURITY.md), not a public issue.
