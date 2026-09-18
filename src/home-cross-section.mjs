@@ -1,5 +1,6 @@
 import { phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
 import { flyHeading, flyPhase, flySprite } from "./life/fly-sprite.mjs";
+import { flyPigment } from "./life/fly-chibi.mjs";
 import { createNeuronFieldGL } from "./home-neuron-gl.mjs";
 import { random32, summarize } from "./swarm.mjs";
 
@@ -10,6 +11,9 @@ const WASH = {
   SELL: [176, 110, 88],
   HOLD: [126, 122, 110],
 };
+export const SIGNAL_HOP = 0.12;
+export const SIGNAL_TRAVEL = 0.28;
+export const SIGNAL_HOLD = 0.62;
 const LOBES = [
   { x: -0.62, y: 0.2, z: 0.12, sx: 0.15, sy: 0.26, sz: 0.13, n: 0.27 },
   { x: 0.62, y: 0.2, z: 0.12, sx: 0.15, sy: 0.26, sz: 0.13, n: 0.27 },
@@ -507,6 +511,116 @@ export function saccadeShift(fly, time, mode = "society", reduced = false) {
   };
 }
 
+export function pigmentRgb(art) {
+  const c = flyPigment(art);
+  return [c.r, c.g, c.b];
+}
+
+function mixRgb(a, b, t) {
+  const k = Math.max(0, Math.min(1, t));
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * k),
+    Math.round(a[1] + (b[1] - a[1]) * k),
+    Math.round(a[2] + (b[2] - a[2]) * k),
+  ];
+}
+
+export function colonyLinks(living, perchOf, adj, field, near = 0.16) {
+  const links = new Map((living || []).map((fly) => [fly.id, []]));
+  const join = (a, b) => {
+    if (a === b) return;
+    const left = links.get(a);
+    const right = links.get(b);
+    if (!left || !right) return;
+    if (!left.includes(b)) left.push(b);
+    if (!right.includes(a)) right.push(a);
+  };
+  for (let i = 0; i < living.length; i += 1) {
+    const a = living[i];
+    const ia = perchOf.get(a.id);
+    const na = field?.neurons?.[ia];
+    for (let j = i + 1; j < living.length; j += 1) {
+      const b = living[j];
+      const ib = perchOf.get(b.id);
+      const nb = field?.neurons?.[ib];
+      const wired = ia != null && ib != null && adj?.[ia]?.includes(ib);
+      const close =
+        na &&
+        nb &&
+        Math.hypot(na.x - nb.x, na.y - nb.y, na.z - nb.z) < near;
+      if (wired || close) join(a.id, b.id);
+    }
+  }
+  for (const nbrs of links.values()) nbrs.sort((x, y) => x - y);
+  return links;
+}
+
+export function signalWave(originId, links, livingIds) {
+  const ids = [...new Set(livingIds || [])].sort((a, b) => a - b);
+  if (!ids.includes(originId)) return [];
+  const hops = [];
+  const seen = new Set([originId]);
+  let frontier = [originId];
+  let hop = 1;
+  while (seen.size < ids.length && hop <= 24) {
+    const next = [];
+    for (const from of frontier) {
+      for (const to of links.get(from) || []) {
+        if (seen.has(to) || !ids.includes(to)) continue;
+        seen.add(to);
+        hops.push({ from, to, hop });
+        next.push(to);
+      }
+    }
+    if (!next.length) {
+      const rest = ids.filter((id) => !seen.has(id));
+      if (!rest.length) break;
+      for (const orphan of rest) {
+        let nearest = originId;
+        let dist = Math.abs(orphan - originId);
+        for (const id of seen) {
+          const d = Math.abs(orphan - id);
+          if (d < dist || (d === dist && id < nearest)) {
+            dist = d;
+            nearest = id;
+          }
+        }
+        hops.push({ from: nearest, to: orphan, hop });
+        seen.add(orphan);
+        next.push(orphan);
+      }
+    }
+    frontier = next.sort((a, b) => a - b);
+    hop += 1;
+  }
+  return hops;
+}
+
+export function packetProgress(wave, hop, time) {
+  const start = (wave?.born || 0) + (hop.hop - 1) * SIGNAL_HOP;
+  return (time - start) / SIGNAL_TRAVEL;
+}
+
+export function signalFrom(wave, flyId) {
+  if (flyId === wave.originId) return flyId;
+  return wave.hops.find((row) => row.to === flyId)?.from ?? flyId;
+}
+
+export function signalGain(wave, flyId, time) {
+  if (!wave) return 0;
+  if (flyId === wave.originId) {
+    const age = time - wave.born;
+    if (age < 0) return 0;
+    return Math.max(0, 1 - age / 1.15);
+  }
+  const hop = wave.hops.find((row) => row.to === flyId);
+  if (!hop) return 0;
+  const at = wave.born + (hop.hop - 1) * SIGNAL_HOP + SIGNAL_TRAVEL;
+  const age = time - at;
+  if (age < 0) return 0;
+  return Math.max(0, 1 - age / SIGNAL_HOLD);
+}
+
 export function causalState(swarm, fly) {
   const last = swarm?.trades?.[0];
   const subject =
@@ -652,6 +766,8 @@ function project(point, camera, width, height) {
 export function createCrossSectionRenderer(canvas, read) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return { hits: [], schedule() {}, destroy() {} };
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
   const media = matchMedia("(prefers-reduced-motion: reduce)");
   const hits = [];
   const trails = new Map();
@@ -718,26 +834,6 @@ export function createCrossSectionRenderer(canvas, read) {
     return dustSprite;
   }
 
-  // Soft wash-coloured landing glow per side: beds each fly into the field.
-  const washTiles = new Map();
-  function washTile(side) {
-    let tile = washTiles.get(side);
-    if (tile) return tile;
-    const rgb = WASH[side] || WASH.HOLD;
-    tile = document.createElement("canvas");
-    tile.width = 64;
-    tile.height = 64;
-    const g = tile.getContext("2d");
-    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grad.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.5)`);
-    grad.addColorStop(0.4, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.16)`);
-    grad.addColorStop(1, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
-    g.fillStyle = grad;
-    g.fillRect(0, 0, 64, 64);
-    washTiles.set(side, tile);
-    return tile;
-  }
-
   // Ambient dust: depth-sorted motes with parallax drift and twinkle.
   const dust = [];
   function seedDust() {
@@ -794,6 +890,27 @@ export function createCrossSectionRenderer(canvas, read) {
   let order = [];
   let inletGrad = null;
   let inletGradKey = "";
+  const flyDraw = [];
+  const flyLabels = [];
+  const yawOf = new Map();
+
+  function wrapDelta(next, prev) {
+    let d = next - prev;
+    while (d > Math.PI) d -= TAU;
+    while (d < -Math.PI) d += TAU;
+    return d;
+  }
+
+  function smoothYaw(id, next) {
+    const prev = yawOf.get(id);
+    if (prev == null || Math.abs(wrapDelta(next, prev)) > 2.5) {
+      yawOf.set(id, next);
+      return next;
+    }
+    const yaw = prev + wrapDelta(next, prev) * 0.22;
+    yawOf.set(id, yaw);
+    return yaw;
+  }
 
   // WebGL point-sprite field for dense fields (>2k neurons). The offscreen
   // GL canvas is stamped into the 2D frame with one drawImage.
@@ -1206,6 +1323,8 @@ export function createCrossSectionRenderer(canvas, read) {
     }
 
     hits.length = 0;
+    flyDraw.length = 0;
+    flyLabels.length = 0;
     const food = project({ x: 0.22, y: 0.04, z: 0.08 }, camera, width, height);
     if (mode === "society") {
       ctx.globalAlpha = 0.18;
@@ -1326,6 +1445,11 @@ export function createCrossSectionRenderer(canvas, read) {
     if (pulses.length > 8) pulses.splice(0, pulses.length - 8);
     if (sparks.length > 16) sparks.splice(0, sparks.length - 16);
 
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = bgVeil;
+    ctx.fillRect(0, 0, width, height);
+
     for (const fly of living) {
       const perch = perchOf.get(fly.id);
       const neuron = field.neurons[perch];
@@ -1365,47 +1489,85 @@ export function createCrossSectionRenderer(canvas, read) {
         ctx.stroke();
       }
       ctx.globalCompositeOperation = "source-over";
-      const k = (0.92 + ((p.depth + 1) / 2) * 0.28) * (picked ? 1.45 : 1);
-      const tile = flySprite(art, {
-        flying: true,
+      const k = (0.92 + ((p.depth + 1) / 2) * 0.28) * (picked ? 1.22 : 1);
+      const sz = (width < 720 ? 64 : 80) * k * (art.scale || 1);
+      const prev = trail.length >= 2 ? trail[trail.length - 2] : null;
+      const tdx = prev ? p.x - prev.x : 0;
+      const tdy = prev ? p.y - prev.y : 0;
+      const raw =
+        Math.hypot(tdx, tdy) > 0.85
+          ? Math.atan2(tdy, tdx)
+          : flyHeading(fly, shift);
+      flyDraw.push({
+        picked,
+        wash,
+        id: fly.id,
+        side: fly.lastSide,
+        x: p.x,
+        y: p.y,
+        sz,
+        depth: p.depth,
+        alpha: mode === "neural" && !picked ? 0.92 : 1,
+        heading: smoothYaw(fly.id, raw) + Math.PI / 2,
+        art,
         phase: reduced ? 0 : flyPhase(time, fly.id),
       });
-      const sz = (picked ? 66 : 48) * k * (art.scale || 1);
-      // Landing glow: the fly sits inside a soft wash halo instead of
-      // reading as a sticker pasted onto the field.
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = picked ? 0.34 : 0.16;
-      const hr = sz * 1.15;
-      ctx.drawImage(
-        washTile(fly.lastSide || "HOLD"),
-        p.x - hr,
-        p.y - hr,
-        hr * 2,
-        hr * 2,
-      );
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 1;
-      ctx.save();
-      ctx.globalAlpha = mode === "neural" && !picked ? 0.72 : 1;
-      ctx.translate(p.x, p.y);
-      ctx.rotate(flyHeading(fly, shift));
-      ctx.drawImage(tile, -sz / 2, -sz / 2, sz, sz);
-      ctx.restore();
-      if (picked || mode !== "neural") {
-        ctx.globalAlpha = picked ? 0.92 : 0.62;
-        ctx.fillStyle = "#e6dcc4";
-        ctx.font = `${picked ? 11 : 9}px IBM Plex Mono, monospace`;
-        ctx.textAlign = "left";
-        ctx.fillText(
-          `#${String(fly.id).padStart(3, "0")}`,
-          p.x + sz * 0.38,
-          p.y - 2,
-        );
-        ctx.fillStyle = `rgb(${wash[0]},${wash[1]},${wash[2]})`;
-        ctx.fillText(fly.lastSide, p.x + sz * 0.38, p.y + 10);
-      }
-      hits.push({ x: p.x, y: p.y, r: sz * 0.6, id: fly.id });
     }
+
+    flyDraw.sort((a, b) => a.depth - b.depth);
+    for (const row of flyDraw) {
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = row.picked ? 0.22 : 0.1;
+      ctx.fillStyle = `rgb(${row.wash[0]},${row.wash[1]},${row.wash[2]})`;
+      ctx.beginPath();
+      ctx.ellipse(row.x, row.y + 2, row.sz * 0.1, row.sz * 0.14, 0, 0, TAU);
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+      if (row.picked) {
+        ctx.globalAlpha = 0.88;
+        ctx.strokeStyle = "rgba(240,234,217,0.7)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(row.x, row.y, 13, 0, TAU);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = row.alpha;
+      ctx.save();
+      ctx.translate(row.x, row.y);
+      ctx.rotate(row.heading);
+      ctx.shadowColor = "rgba(232, 214, 170, 0.32)";
+      ctx.shadowBlur = row.picked ? 6 : 3.5;
+      ctx.drawImage(
+        flySprite(row.art, {
+          flying: true,
+          phase: row.phase,
+          hologram: true,
+        }),
+        -row.sz / 2,
+        -row.sz / 2,
+        row.sz,
+        row.sz,
+      );
+      ctx.restore();
+      if (row.picked || mode !== "neural") {
+        flyLabels.push(row);
+      }
+      hits.push({ x: row.x, y: row.y, r: row.sz * 0.42, id: row.id });
+    }
+    for (const label of flyLabels) {
+      ctx.globalAlpha = label.picked ? 0.92 : 0.62;
+      ctx.fillStyle = "#e6dcc4";
+      ctx.font = `${label.picked ? 11 : 9}px IBM Plex Mono, monospace`;
+      ctx.textAlign = "left";
+      ctx.fillText(
+        `#${String(label.id).padStart(3, "0")}`,
+        label.x + label.sz * 0.38,
+        label.y - 2,
+      );
+      ctx.fillStyle = `rgb(${label.wash[0]},${label.wash[1]},${label.wash[2]})`;
+      ctx.fillText(label.side, label.x + label.sz * 0.38, label.y + 10);
+    }
+    ctx.globalAlpha = 1;
 
     ctx.globalCompositeOperation = "lighter";
     for (const burst of pulses) {
@@ -1477,8 +1639,6 @@ export function createCrossSectionRenderer(canvas, read) {
     drawRibbon(swarm?.prices?.slice(-60) || [], cam.ribbon);
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = 1;
-    ctx.fillStyle = bgVeil;
-    ctx.fillRect(0, 0, width, height);
     if (animate) raf = requestAnimationFrame(draw);
   }
 

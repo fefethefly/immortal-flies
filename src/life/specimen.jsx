@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { projectFlyCloud, stampCloud } from "./fly-cloud.mjs";
+import { drawFlyArt, fitSpan, flyPhase, sizeFactor } from "./fly-sprite.mjs";
 import { hungerOf } from "./habitat-sim.mjs";
 import { labelOf, normalizeGiven, setGivenName, trueNameOf } from "./names.mjs";
 
 const TAU = Math.PI * 2;
 
-function drawHolo(canvas, { soul, body, yaw, pitch, spinning, reduced }) {
+function drawHolo(canvas, { soul, body, yaw, spinning, reduced }) {
   const ctx = canvas.getContext("2d");
   const box = canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -15,47 +15,53 @@ function drawHolo(canvas, { soul, body, yaw, pitch, spinning, reduced }) {
   const w = box.width;
   const h = box.height;
   ctx.clearRect(0, 0, w, h);
-  const well = ctx.createRadialGradient(w * 0.5, h * 0.55, 8, w * 0.5, h * 0.5, w * 0.55);
+  const well = ctx.createRadialGradient(
+    w * 0.5,
+    h * 0.55,
+    8,
+    w * 0.5,
+    h * 0.5,
+    w * 0.55,
+  );
   well.addColorStop(0, "rgba(48, 92, 96, 0.38)");
   well.addColorStop(0.55, "rgba(14, 22, 20, 0.42)");
   well.addColorStop(1, "rgba(6, 7, 5, 0)");
   ctx.fillStyle = well;
   ctx.fillRect(0, 0, w, h);
   if (!soul) return;
-  const cy = Math.cos(yaw);
-  const sy = Math.sin(yaw);
-  const cp = Math.cos(pitch);
-  const sp = Math.sin(pitch);
   const hunger = body ? hungerOf(body.energy) : "sated";
-  const dim = hunger === "collapsed" ? 0.38 : hunger === "faint" ? 0.62 : 1;
+  const collapsed = hunger === "collapsed";
+  const tired = hunger === "faint" || collapsed;
   const flying = Boolean(
     body &&
-      (body.mode === "fly" || body.mode === "hover" || body.mode === "takeoff") &&
-      hunger !== "faint" &&
-      hunger !== "collapsed",
+      (body.mode === "fly" ||
+        body.mode === "hover" ||
+        body.mode === "takeoff") &&
+      !tired,
   );
-  const flap = flying && !reduced ? 0.45 + 0.55 * Math.sin(body.flap || 0) : 0.16;
-  const sweep = flying && !reduced ? 0.12 * Math.sin((body.flap || 0) + 0.6) : 0;
-  const k = Math.min(w, h) * 0.00355;
-  stampCloud(
+  ctx.save();
+  ctx.translate(w * 0.5, h * 0.5);
+  ctx.rotate(Math.sin(yaw) * 0.08);
+  ctx.translate(-w * 0.5, -h * 0.5);
+  drawFlyArt(
     ctx,
-    projectFlyCloud(soul.phenotype.art, {
-      flap,
-      sweep,
-      project: (x, y, z) => {
-        const x1 = x * cy + z * sy;
-        const z1 = -x * sy + z * cy;
-        const y2 = y * cp - z1 * sp;
-        const z2 = y * sp + z1 * cp;
-        return {
-          x: w * 0.5 + x1 * k,
-          y: h * 0.5 - y2 * k,
-          z: z2,
-        };
-      },
-    }),
-    { dim, px: Math.max(0.9, Math.min(w, h) / 220) },
+    soul.phenotype.art,
+    w * 0.5,
+    h * 0.5,
+    fitSpan(w, h, { pad: 0.92 }) * sizeFactor(soul.phenotype.art),
+    {
+      flying,
+      phase:
+        flying && !reduced
+          ? flyPhase((body?.flap || 0) * 0.16, soul.tokenId)
+          : 0,
+      tired,
+      collapsed,
+      view: "portrait",
+      ignoreScale: true,
+    },
   );
+  ctx.restore();
   ctx.strokeStyle = "rgba(140, 224, 226, 0.32)";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -65,14 +71,24 @@ function drawHolo(canvas, { soul, body, yaw, pitch, spinning, reduced }) {
   ctx.beginPath();
   ctx.ellipse(w * 0.5, h * 0.78, w * 0.22, 5, 0, 0, TAU);
   ctx.stroke();
-  const scan = ((Date.now() / 28) % h);
+  const scan = (Date.now() / 28) % h;
   if (!reduced) {
-    ctx.fillStyle = spinning ? "rgba(160, 230, 232, 0.1)" : "rgba(160, 230, 232, 0.05)";
+    ctx.fillStyle = spinning
+      ? "rgba(160, 230, 232, 0.1)"
+      : "rgba(160, 230, 232, 0.05)";
     ctx.fillRect(0, scan, w, 2);
   }
 }
 
-export function SpecimenHologram({ soul, bodyReader, locale, tx, wallet, onNamed, onRename }) {
+export function SpecimenHologram({
+  soul,
+  bodyReader,
+  locale,
+  tx,
+  wallet,
+  onNamed,
+  onRename,
+}) {
   const canvasRef = useRef(null);
   const energyRef = useRef(null);
   const thrustRef = useRef(null);
@@ -102,7 +118,7 @@ export function SpecimenHologram({ soul, bodyReader, locale, tx, wallet, onNamed
       if (!running) return;
       frame = requestAnimationFrame(draw);
       if (camera.current.spinning && !reduced && !drag.current) {
-        camera.current.yaw += 0.012;
+        camera.current.yaw += 0.008;
       }
       const body = bodyReader?.current?.();
       drawHolo(canvas, {
@@ -114,8 +130,10 @@ export function SpecimenHologram({ soul, bodyReader, locale, tx, wallet, onNamed
         reduced,
       });
       const hunger = body ? hungerOf(body.energy) : "sated";
-      if (energyRef.current) energyRef.current.textContent = String(Math.round(body?.energy || 0));
-      if (thrustRef.current) thrustRef.current.textContent = (body?.thrust || 0).toFixed(2);
+      if (energyRef.current)
+        energyRef.current.textContent = String(Math.round(body?.energy || 0));
+      if (thrustRef.current)
+        thrustRef.current.textContent = (body?.thrust || 0).toFixed(2);
       if (turnRef.current) {
         turnRef.current.textContent = `${(((body?.heading || 0) * 180) / Math.PI).toFixed(0)}°`;
       }
@@ -127,7 +145,10 @@ export function SpecimenHologram({ soul, bodyReader, locale, tx, wallet, onNamed
       }
       if (hungerRef.current) {
         hungerRef.current.dataset.hunger = hunger;
-        hungerRef.current.lastChild && (hungerRef.current.lastChild.textContent = tx(`habitat.hunger.${hunger}`));
+        hungerRef.current.lastChild &&
+          (hungerRef.current.lastChild.textContent = tx(
+            `habitat.hunger.${hunger}`,
+          ));
       }
     }
     draw();
@@ -147,17 +168,23 @@ export function SpecimenHologram({ soul, bodyReader, locale, tx, wallet, onNamed
   }
   function onPointerMove(event) {
     if (!drag.current) return;
-    camera.current.yaw = drag.current.yaw + (event.clientX - drag.current.x) * 0.01;
+    camera.current.yaw =
+      drag.current.yaw + (event.clientX - drag.current.x) * 0.01;
     camera.current.pitch = Math.max(
       -0.7,
-      Math.min(0.8, drag.current.pitch + (event.clientY - drag.current.y) * 0.008),
+      Math.min(
+        0.8,
+        drag.current.pitch + (event.clientY - drag.current.y) * 0.008,
+      ),
     );
   }
   function onPointerUp() {
     drag.current = null;
   }
 
-  const mine = Boolean(wallet && soul && soul.owner.toLowerCase() === wallet.toLowerCase());
+  const mine = Boolean(
+    wallet && soul && soul.owner.toLowerCase() === wallet.toLowerCase(),
+  );
 
   async function saveName() {
     if (!soul) return;
@@ -235,7 +262,12 @@ export function SpecimenHologram({ soul, bodyReader, locale, tx, wallet, onNamed
             </label>
           ) : null}
           {mine ? (
-            <button className="ghost" type="button" disabled={naming} onClick={saveName}>
+            <button
+              className="ghost"
+              type="button"
+              disabled={naming}
+              onClick={saveName}
+            >
               {tx("life.rename")}
             </button>
           ) : null}

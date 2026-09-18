@@ -282,7 +282,7 @@ def assign_groups(seeds, index):
     return groups
 
 
-def build_circuit(info, seeds, weights_path):
+def build_circuit(info, seeds, weights_path, cap=1400):
     seed_ids = set().union(*seeds.values())
     hop, pre, post, weight = load_weights(weights_path, either=seed_ids, minimum=8)
     partners = set(seed_ids)
@@ -297,7 +297,7 @@ def build_circuit(info, seeds, weights_path):
     ranked = sorted(partners - seed_ids, key=lambda body: (-degree.get(body, 0), body))
     selected = set(seed_ids)
     for body in ranked:
-        if len(selected) >= 1400:
+        if len(selected) >= cap:
             break
         selected.add(body)
     selected &= set(info)
@@ -309,7 +309,7 @@ def build_circuit(info, seeds, weights_path):
         "seedCount": len(seed_ids),
         "selectedCount": len(selected),
         "hop": 1,
-        "cap": 1400,
+        "cap": cap,
     }
 
 
@@ -340,6 +340,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--circuit", action="store_true")
     parser.add_argument("--full", action="store_true")
+    parser.add_argument(
+        "--circuit-cap",
+        type=int,
+        default=1400,
+        help="cap the circuit sample size (hero field density)",
+    )
     args = parser.parse_args()
     if not args.circuit and not args.full:
         args.circuit = True
@@ -384,7 +390,9 @@ def main():
         "files": source_files,
     }
     if args.circuit:
-        nodes, groups, adjacency, extra = build_circuit(info, seeds, weight_path)
+        nodes, groups, adjacency, extra = build_circuit(
+            info, seeds, weight_path, cap=args.circuit_cap
+        )
         write_dataset("malecns-circuit", nodes, groups, adjacency, {**base_prov, "subset": "circuit", "processing": extra})
     if args.full:
         nodes, groups, adjacency, extra = build_full(info, seeds, weight_path)

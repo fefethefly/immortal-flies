@@ -1,14 +1,14 @@
 {
   "status": "LIVE",
   "chainId": 56,
-  "address": "0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875",
-  "soul": "0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F",
+  "address": "0x42E10Dc1e1D90e5F10580a8967E80F38B3e03e5D",
+  "soul": "0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD",
   "hive": "0xfAdb2FE136c89866Cd1CB0DD31298e08cc61a467",
   "feeBps": 200,
-  "operator": "0xc2FcdA8D7abbff26FbF0CD27D4Dc45b59c8419F2",
-  "fromBlock": 122367153,
-  "txHash": "0xa270422cbb66caab1b06afd96324fb73496b293d1de51a8071628e98e97deeb1",
-  "explorer": "https://bscscan.com/address/0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875",
-  "deployedAt": "2026-09-17T06:40:54.452Z",
-  "note": "Independent satellite. Not a Soul module. Do not setModule. Not OpenSea. 2% hive fee is not a buyback."
+  "operator": "0x4767dAC30648fE0d8A6076F79414D42947486Ae3",
+  "fromBlock": 122510085,
+  "txHash": "0xae1b7a23b7f2e898251603cd4b5f532f818253804cb36c799d18689b8eb3a705",
+  "explorer": "https://bscscan.com/address/0x42E10Dc1e1D90e5F10580a8967E80F38B3e03e5D",
+  "deployedAt": "2026-09-18T00:33:20.971Z",
+  "note": "Independent satellite for the /3 Soul. Not a Soul module. Do not setModule. Not OpenSea. 2% hive fee is not a buyback."
 }

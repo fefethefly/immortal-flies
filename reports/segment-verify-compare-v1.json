@@ -1,0 +1,81 @@
+{
+  "schema": "iff.verify-compare/1",
+  "audit": "SIM",
+  "yield": false,
+  "graph": {
+    "id": "malecns-circuit",
+    "neurons": 12000,
+    "edges": 477021,
+    "datasetHash": "0xe269ed3d16c7f08a3e035e37edb44c8f30b96480646f865d960eb2e02388f64b"
+  },
+  "shape": {
+    "steps": 1000,
+    "checkpointEvery": 100,
+    "leafEvery": 10,
+    "probeCount": 3,
+    "leafCount": 100
+  },
+  "inputs": 1,
+  "producer": {
+    "ms": 843,
+    "heapDelta": 16970968,
+    "segmentId": "0x3a911c4050427e0ff508212db6a1b06db68fa0b0155ecd3bc2e662a8ebed0287",
+    "startRoot": "0xf1915cbd4a77b3bac2d6abbe00347ccb782738a28e1444bcf41292753387afa9",
+    "finalRoot": "0x0d624e1d8d0e572096a9ffaf7b331c9b03671444803772eecdc33d2232f3af21"
+  },
+  "storage": {
+    "restorePackBytes": 194257,
+    "trajectoryWithTreeBytes": 932561,
+    "samplingOpeningsBytes": 260361
+  },
+  "fullReplay": {
+    "ms": 908,
+    "ok": true,
+    "steps": 1000,
+    "catchesUnprobedLeaves": true
+  },
+  "sampling": {
+    "ms": 170,
+    "ok": true,
+    "positions": [
+      250,
+      600,
+      760
+    ],
+    "replayedSteps": 510,
+    "openingsOk": 3
+  },
+  "coverage": {
+    "leaves": 100,
+    "finalLeafAlwaysChecked": 1,
+    "otherLeavesHitBySample": 3,
+    "otherLeavesMissed": 96,
+    "stepFractionSampled": 0.51,
+    "note": "Sampling always binds the final leaf. Unprobed intermediate leaves can diverge without failing k openings if the published tree is built around those openings."
+  },
+  "recovery": {
+    "restoreOk": true,
+    "continueStartRoot": "0x0d624e1d8d0e572096a9ffaf7b331c9b03671444803772eecdc33d2232f3af21",
+    "continueMatchesPriorFinal": true
+  },
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v23.11.0"
+  },
+  "onChain": {
+    "fullReplay": "impossible: MiningHub does not call step()",
+    "sampling": "commitPrivate + lockSeed + recordOpening + settlePrivate",
+    "testnet": {
+      "hub": "0x1dAd6d5D9C407553814888917Ff45F0d1Fee55A1",
+      "previousHub": "0xF0e07ff3dF12319808f977A0D81b4eF86BB71825",
+      "previousHubError": "BondLow on the stale satellite after the last settled segment",
+      "segmentId": "0x3d1181ba6d3a362d2ddc4ba9baa84dd71d89ceffc148b614d1b53f4aecf90290",
+      "archive": "https://runner-production-ea3b.up.railway.app/archive/0x3d1181ba6d3a362d2ddc4ba9baa84dd71d89ceffc148b614d1b53f4aecf90290",
+      "schema": "iff.life-restore/1",
+      "status": "awaiting-window",
+      "challengeUntil": 1789683889,
+      "yield": false
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "status": "BSC_TESTNET",
+  "chainId": 97,
+  "address": "0xdb80def1828236A5af09965F46c6BEE63ccc1f4e",
+  "soul": "0x3487A2802AF82F12Bb7a3dd40B262394f4819A5a",
+  "journal": "0xed5a8486c4eD9bc7F7Cc06d20fae0c9F59A74643",
+  "ifs": "0xff23A7635140cF3c127f31A3c56A59C19F058899",
+  "hive": "0xc2FcdA8D7abbff26FbF0CD27D4Dc45b59c8419F2",
+  "operator": "0xc2FcdA8D7abbff26FbF0CD27D4Dc45b59c8419F2",
+  "fromBlock": 131659353,
+  "txHash": "0x56849977a06592b3b492fe6bd5f08f941a6d73ef09cadfa1e08760012ec29e77",
+  "explorer": "https://testnet.bscscan.com/address/0xdb80def1828236A5af09965F46c6BEE63ccc1f4e",
+  "deployedAt": "2026-09-18T01:02:58.278Z",
+  "previous": {
+    "status": "STALE",
+    "address": "0x1dAd6d5D9C407553814888917Ff45F0d1Fee55A1",
+    "txHash": "0x9190ba36c58b814f140e02368948a6fb05a78f62d3ef30ac008848637b2629e2",
+    "fromBlock": 131629146,
+    "deployedAt": "2026-09-17T21:16:23.751Z",
+    "note": "Superseded testnet satellite. Do not send funds. Soul / Journal unchanged."
+  },
+  "note": "Independent satellite. Not a Soul module. Do not setModule. Private-track service fee is not mining yield. Testnet mock IFS, not live IFS. Bytecode includes validUntil, daily caps, revokeAcceptance. Frontend /host.html?net=test."
+}

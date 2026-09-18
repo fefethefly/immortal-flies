@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-120 -120 240 240" fill="none">
+  <rect x="-120" y="-120" width="240" height="240" fill="#0a0907"/>
+  <circle r="76" stroke="#f3ba00" stroke-width="1.6"/>
+  <circle r="64" stroke="#f3ba00" stroke-width=".7" opacity=".35"/>
+  <path d="M0-88V-76M0 76V88M-88 0H-76M76 0H88" stroke="#f3ba00" stroke-width="1.6" stroke-linecap="square"/>
+  <rect x="-58" y="-58" width="116" height="116" stroke="#f3ba00" stroke-width="1.2" opacity=".78"/>
+  <path d="M-58-58H-46M-58-58V-46M58-58H46M58-58V-46M-58 58H-46M-58 58V46M58 58H46M58 58V46" stroke="#f3ba00" stroke-width="1.6" stroke-linecap="square"/>
+  <defs>
+    <linearGradient id="lb" x1="-36" y1="-28" x2="32" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff8e1"/>
+      <stop offset=".4" stop-color="#f3ba00"/>
+      <stop offset="1" stop-color="#d49b00"/>
+    </linearGradient>
+    <radialGradient id="le" cx="58%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#f07169"/>
+      <stop offset=".55" stop-color="#c23a32"/>
+      <stop offset="1" stop-color="#7a1c18"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(4 8) scale(.92)">
+    <ellipse cx="-18" cy="-28" rx="42" ry="18" transform="rotate(-32 -18 -28)" fill="#ffe08a" opacity=".38"/>
+    <ellipse cx="-4" cy="-36" rx="38" ry="16" transform="rotate(-12 -4 -36)" fill="#fff8e1" opacity=".28"/>
+    <path d="M-22 12L-36 42M-6 16L-10 46M16 12L30 40M-28 6L-48 32M4 10L8 42M24 4L44 32" stroke="#d49b00" stroke-width="3.2" stroke-linecap="round"/>
+    <ellipse cx="-16" cy="8" rx="34" ry="20" fill="url(#lb)"/>
+    <path d="M-42 2h42M-40 10h38M-32 18h28" stroke="#d49b00" stroke-width="3.4" stroke-linecap="round"/>
+    <ellipse cx="18" cy="0" rx="18" ry="16" fill="url(#lb)"/>
+    <ellipse cx="42" cy="-6" rx="16" ry="14.5" fill="url(#lb)"/>
+    <ellipse cx="50" cy="-11" rx="9.5" ry="10.5" fill="url(#le)"/>
+    <ellipse cx="36" cy="-12" rx="5.4" ry="6.2" fill="#c23a32"/>
+    <circle cx="53" cy="-15" r="2.4" fill="#fff8e1"/>
+    <path d="M32-20Q24-40 12-46M46-20Q52-42 64-46" stroke="#d49b00" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="12" cy="-46" r="2.3" fill="#f3ba00"/>
+    <circle cx="64" cy="-46" r="2.3" fill="#f3ba00"/>
+  </g>
+</svg>

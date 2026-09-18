@@ -2,7 +2,7 @@
  * 交易场的 MaleCNS 数据桥（浏览器侧）。
  *
  * 交易场不再跑 24 节点占位反射：这里加载已入库的真实 MaleCNS 感官-运动子图
- * （public/data/malecns-circuit，1,400 节点，同一套 body ID），建内核、绑创世、
+ * （public/data/malecns-circuit，12,000 节点，同一套 body ID），建内核、绑创世、
  * 逐 tick 走蝇群协议（话语/记忆/聚合），并把内核状态映射成交易场 UI 的形状。
  *
  * 边界声明：
@@ -135,13 +135,16 @@ export async function restorePitSession(
     session: new BrainSession(graph, structuredClone(member.state)),
     book: structuredClone(member.book),
     overlay: structuredClone(member.overlay),
-    genome: structuredClone(member.genome || genomeOf({
-      soulId: member.state?.soulId,
-      seed: member.genome?.seed || member.state?.rng,
-      id: member.id,
-      gen: member.gen,
-      parent: member.parent,
-    })),
+    genome: structuredClone(
+      member.genome ||
+        genomeOf({
+          soulId: member.state?.soulId,
+          seed: member.genome?.seed || member.state?.rng,
+          id: member.id,
+          gen: member.gen,
+          parent: member.parent,
+        }),
+    ),
     ethology: null,
     intent: null,
   }));

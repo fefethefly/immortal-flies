@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { ArrowUpRight, X, MoveUpRight } from "lucide-react";
-import { FlyMark, VitruvianFly } from "./vitruvian.jsx";
+import { GOLD } from "./brand.mjs";
+import { BrandWordmark, FlyMark, VitruvianFly } from "./vitruvian.jsx";
 
-export { FlyMark, VitruvianFly };
+export { BrandWordmark, FlyMark, VitruvianFly };
 export function SectionLabel({ number, children, right }) {
   return (
     <div className="section-label">
@@ -95,7 +96,7 @@ export function SignalCanvas({ brain, variant = "hero" }) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, 5 + strength * 4, 0, Math.PI * 2);
         ctx.fillStyle = active
-          ? "#c9a25e"
+          ? GOLD
           : `rgba(196, 184, 154,${0.15 + strength * 0.45})`;
         ctx.fill();
         ctx.beginPath();
@@ -221,7 +222,7 @@ export function SoulCard({ index, name, tone, descriptor, onOpen, brain }) {
           label={`SOUL #${index}`}
         />
         <span className="card-axis">DROSOPHILA / {index}</span>
-        <span className="card-hash">IFF–{index}–G0</span>
+        <span className="card-hash">FLY–{index}–G0</span>
       </div>
       <div className="card-info">
         <div className="card-number">

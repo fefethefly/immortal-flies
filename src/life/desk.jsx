@@ -16,6 +16,8 @@ import {
   readHatchRequested,
   readHeadBlock,
   readKinBreedPrice,
+  readParentCooldown,
+  formatCooldown,
   readPendingHatch,
   readPendingBreed,
 } from "./chain.mjs";
@@ -26,6 +28,7 @@ import {
   useBirthCard,
 } from "./birth-card.jsx";
 import { KinBoard } from "./kin.jsx";
+import { grindCrossover } from "./descent.mjs";
 import {
   labelOf,
   matchSoul,
@@ -153,6 +156,7 @@ export function LifeDesk({
   const [findMiss, setFindMiss] = useState(false);
   const [mate, setMate] = useState("");
   const [breedPriceWei, setBreedPriceWei] = useState(0n);
+  const [breedCool, setBreedCool] = useState({ cooldown: 0, remaining: 0 });
   const [breedBuyNote, setBreedBuyNote] = useState("");
   const [birth, setBirth] = useBirthCard(souls);
   const [needRetry, setNeedRetry] = useState(false);
@@ -210,6 +214,30 @@ export function LifeDesk({
       gone = true;
     };
   }, [deployment]);
+
+  useEffect(() => {
+    if (!deployment?.kin || !selected?.tokenId || !mate) {
+      setBreedCool({ cooldown: 0, remaining: 0 });
+      return undefined;
+    }
+    let gone = false;
+    openLifeReader(deployment)
+      .then(async (reader) => {
+        if (!reader?.kin || gone) return;
+        const next = await readParentCooldown(
+          reader.kin,
+          selected.tokenId,
+          Number(mate),
+        );
+        if (!gone) setBreedCool(next);
+      })
+      .catch(() => {
+        if (!gone) setBreedCool({ cooldown: 0, remaining: 0 });
+      });
+    return () => {
+      gone = true;
+    };
+  }, [deployment, selected?.tokenId, mate, breedPending]);
 
   useEffect(() => {
     if (!deployment || !selected?.tokenId) {
@@ -578,6 +606,12 @@ export function LifeDesk({
       check();
       setBreedPriceWei(price);
       setBreedBuyNote("");
+      const cool = await readParentCooldown(kin, selected.tokenId, Number(mate));
+      check();
+      setBreedCool(cool);
+      if (cool.remaining > 0) {
+        throw new Error(tx("kin.cooldownWait", { t: formatCooldown(cool.remaining) }));
+      }
       const receipt = await (
         await kin.requestBreed(selected.tokenId, Number(mate), { value: price })
       ).wait();
@@ -601,7 +635,27 @@ export function LifeDesk({
         throw new Error(tx("hatch.expired", { id: live.requestId }));
       if (hatchPhase(live, now) !== "ready")
         throw new Error(tx("kin.breedWait"));
-      const receipt = await (await kin.breed(live.requestId)).wait();
+      let breedArg = [];
+      if (typeof kin.CROSSOVER_RULE === "function") {
+        // 交叉规则模块：链下研磨全中候选，合约一次解码验证。
+        const collection = await soul.getAddress();
+        const [genomeA, genomeB, block] = await Promise.all([
+          soul.getGenome(live.parentA),
+          soul.getGenome(live.parentB),
+          kin.runner?.provider?.getBlock(live.entropyBlock),
+        ]);
+        check();
+        if (!block?.hash) throw new Error(tx("kin.breedWait"));
+        const grind = grindCrossover({
+          seedA: Number(genomeA.seed),
+          seedB: Number(genomeB.seed),
+          collection,
+          requestId: live.requestId,
+          entropy: block.hash,
+        });
+        breedArg = [live.requestId, grind.n];
+      }
+      const receipt = await (await kin.breed(...breedArg)).wait();
       check();
       const event = readBorn(receipt, soul);
       const [genesisRoot, descent] = await Promise.all([
@@ -828,6 +882,9 @@ export function LifeDesk({
           {breedPriceWei === 0n
             ? tx("kin.feeFree")
             : tx("kin.feePay", { n: formatBreedPrice(breedPriceWei) })}
+          {breedCool.remaining > 0
+            ? ` ${tx("kin.cooldownWait", { t: formatCooldown(breedCool.remaining) })}`
+            : ""}
         </p>
       ) : null}
 
@@ -881,7 +938,12 @@ export function LifeDesk({
               <div className="life-actions">
                 <button
                   className="ghost"
-                  disabled={busy || !mate || Boolean(breedPending)}
+                  disabled={
+                    busy ||
+                    !mate ||
+                    Boolean(breedPending) ||
+                    breedCool.remaining > 0
+                  }
                   onClick={requestBreed}
                 >
                   {tx("kin.request")}
@@ -919,6 +981,12 @@ export function LifeDesk({
                 className="life-cross"
               >
                 {tx(ask ? "market.fromDeskListed" : "market.fromDesk")}
+              </SiteLink>
+              <SiteLink
+                href={withNet(`/host.html?soul=${selected.tokenId}`)}
+                className="life-cross"
+              >
+                {tx("host.fromDesk")}
               </SiteLink>
             </>
           ) : null}

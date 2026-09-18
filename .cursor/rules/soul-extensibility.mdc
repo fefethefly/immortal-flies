@@ -1,0 +1,21 @@
+---
+description: 主网 Soul 不可废；上链功能必须先按身份核 + 模块设计
+globs: contracts/life/**,docs/LIFE-PROTOCOL.md,docs/PRODUCT-LATEST.md,src/life/**
+alwaysApply: true
+---
+
+# 主网身份核：特别注意可扩展性
+
+产品在快速迭代，很多玩法没想清楚；同时要准备 BSC 主网给用户真正孵化。
+
+主网一旦部署 `ImmortalSoul`，禁止用「再部署一份」当迭代。测试网可以标 STALE；主网重部等于废掉用户的 NFT / lifeId / 基因组。
+
+LIVE 集合是 `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`（`phenotype-loci/3`）。`0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` 是 RETIRED 的 `/2` 团队测试，不是同一只集合。
+
+设计任何以后要上链的功能时，先读 `docs/LIFE-PROTOCOL.md` 文首「特别注意」和 §3，再写合约：
+
+- 身份事实（lifeId、seed、父母、世代、不可烧、Gen0 规则、起名）才进 Soul。
+- 玩法（繁衍规则、Journal、市场、成就、还没发明的东西）进卫星合约，主键是 lifeId 或 tokenId，经 `modules[id]` 挂上。
+- 不要给 Soul 加 UUPS / 代理。不要把没想清楚的字段堆进 ImmortalSoul。
+- 出生钩子必须 try/catch，不能卡住孵化。
+- 不要部署 `ImmortalFly.sol` 到 chainId 56。

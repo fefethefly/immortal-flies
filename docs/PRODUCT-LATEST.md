@@ -4,9 +4,18 @@
 
 本文不构成收益、回购、销毁或金融产品承诺。链上事实只以已核验地址和回执为准。
 
+## 2026-09-18 群体智慧升级增补
+
+按[再评估](SWARM-PROTOCOL-REEVALUATION-2026-09-18.md)推进开放群体智慧方向，交易世界保留为应用插件。首轮仅新增 opt-in 工程关联学习器 `context-association/1`：情境关联、延迟资格迹、衰减、反转、冻结与状态恢复；不静默替换旧 overlay/runtime，不修改 Soul 或历史图制品。**尚未接入生产运行器或完成神经行为、共享记忆、跨物种学习增益验收。** 此前 §21 的协议整体“设计”状态不能解读为这些新能力已上线；新增模块也不能解读为 T4 通过。交付范围、测试与 swarm.family 调研见 [首轮升级记录](SWARM-UPGRADE-2026-09-18.md)。
+
+
+## 当前工程交接状态（2026-09-18）
+
+BSC 主网身份核已换成 `phenotype-loci/3` 集合：`ImmortalSoul` `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`，`SoulRenderer` `0x06E2B1e2F03E2573874540BbE439eEccb33b234C`，`LifeJournal` `0xB0fE4BbfE3afE64347e8Cb5aD77A087C36cBE419`，`SoulKinCross` `0x838A30868Bb82D4dABe70d586e87aeC948CC5825`（免费、24h 亲本冷却），`SoulMarket` `0x42E10Dc1e1D90e5F10580a8967E80F38B3e03e5D`。旧 `/2` 集合 `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` 与旧市场 `0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875` 标 RETIRED；`#1`「Elon Musk」仍在旧地址，不是这只集合。清单 `ImmortalSoul.deployment.json`。`ImmortalFly.sol` 未上 56。这一只 LIVE 集合禁止再靠重部迭代。
+
 ## 当前工程交接状态（2026-09-17）
 
-2026-09-17 产品负责人确认群体智慧协议方向，已收入 §21。状态仍是**设计稿，未实现**：不冻结五动词全家 schema，不上 Railway 多生命集群，不把晋升写进 Soul。细则与实验设计仍以 [SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md](SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md) 为准；全量运行分层见 [RUNTIME-TIERS-DESIGN-2026-09-17.md](RUNTIME-TIERS-DESIGN-2026-09-17.md)。同日测试网已绑定 SoulKinFee；官方 NFT 市场按 [SOUL-MARKET.md](SOUL-MARKET.md) 落地合约与 `/market.html`。主网繁衍仍是免费 SoulKin。主网 SoulMarket `0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875` 已部署，未 `setModule`。
+2026-09-17 产品负责人确认群体智慧协议方向，已收入 §21。状态仍是**设计稿，未实现**：不冻结五动词全家 schema，不上 Railway 多生命集群，不把晋升写进 Soul。细则与实验设计仍以 [SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md](SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md) 为准；全量运行分层见 [RUNTIME-TIERS-DESIGN-2026-09-17.md](RUNTIME-TIERS-DESIGN-2026-09-17.md)。同日测试网已绑定 SoulKinFee；官方 NFT 市场按 [SOUL-MARKET.md](SOUL-MARKET.md) 落地合约与 `/market.html`。段证明挖矿按 [MINING-SEGMENT-PROOF-DESIGN-2026-09-17.md](MINING-SEGMENT-PROOF-DESIGN-2026-09-17.md) 与 [MINING-HUB-V1.md](MINING-HUB-V1.md)：M0 SIM 与 MiningHub 私有轨已按 2026-09-18 评审改结算（无开叶不付款、同工作不重复付、争议可结束、退款回出资人）。测试网卫星 `0x1dAd6d5D9C407553814888917Ff45F0d1Fee55A1`；旧 `0xF0e07ff3dF12319808f977A0D81b4eF86BB71825` 为 STALE。主网 `MiningHub.deployment.json` = `UNDEPLOYED`。对外不说挖矿已上线。主网繁衍是免费 SoulKinCross。主网 SoulMarket `0x42E10Dc1e1D90e5F10580a8967E80F38B3e03e5D` 对着新 Soul，未 `setModule`。旧市场 `0x5f67…` 已 RETIRED。
 
 此前交接（2026-09-16，Grok 续写）：
 
@@ -25,9 +34,9 @@
 | 项 | 事实 |
 | --- | --- |
 | `$IFS` 税币 | BSC 主网 `0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`，买卖各 1%。分账：蜂巢 80% `0xfAdb2FE136c89866Cd1CB0DD31298e08cc61a467` · 运营 20% `0x055bB2aF42B832A55F3D708c92824C491dE05427`。清单：`public/token/official.json`，`status=live`。税进钱包 ≠ 金库在交易，≠ 回购。 |
-| Soul / NFT 主网 | `ImmortalSoul` `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F`（IFSOUL，`phenotype-loci/2`，Gen0 1024，一地址一生一孵）。清单 `LIVE`，chainId 56。回执 `0x6b06b216…daca62`。 |
-| 官方 NFT 市场 | 主网 SoulMarket `0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875`，对着上列 Soul，2% 进蜂巢。未 `setModule`。回执 `0xa270422c…7deeb1`。不是 OpenSea。 |
-| 本地基因组 / 表型 | `iff.genome/1`、`phenotype-loci/2`（64 chips，加权出现率）、`phenotype-art/1`。观测台、名册、祭坛读数、首页说明与 `tokenURI` 共用解码器。出现率公开，不是定价。 |
+| Soul / NFT 主网 | `ImmortalSoul` `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`（IFSOUL，`phenotype-loci/3`，Gen0 1024，maxSupply 1048576 可上调）。清单 `LIVE`，chainId 56。回执 `0xceaf940a…680b14`。旧 `/2` `0x500D…293F` 为 RETIRED。 |
+| 官方 NFT 市场 | 主网 SoulMarket `0x42E10Dc1e1D90e5F10580a8967E80F38B3e03e5D`，对着上列 Soul，2% 进蜂巢。未 `setModule`。回执 `0xae1b7a23…b3a705`。不是 OpenSea。旧市场 `0x5f67…` 为 RETIRED。 |
+| 本地基因组 / 表型 | `iff.genome/1`、`phenotype-loci/3`（96 chips，加权出现率）、`phenotype-art/1`。观测台、名册与 `tokenURI` 共用解码器。LIVE 主网集合是 `/3`。出现率公开，不是定价。 |
 | 纸面交易世界 | `/swarm.html` 七视图、Colony / Intent / Risk / Execution、纸面金库与 IFS 面板。数据标 SIM。 |
 | 纸面经济沙盘 | `/economy` 情景计算器。`FEE_SPLIT` 里仍有「回购 / 销毁」旧标签，**不是链上动作**。 |
 | 16 节点原型合约 | `contracts/ImmortalFly.sol` 可编译、可测、有测试网脚本。`public/contract/ImmortalFly.deployment.json` = `UNDEPLOYED`。 |
@@ -37,6 +46,7 @@
 | 项 | 事实 |
 | --- | --- |
 | 真实 mint 前端 | 栖息地已接主网清单。生产网站尚未推送；创世 URI 指向 immortalflies.com，域名上线前该链接会 404。旧祭坛 `/altar` 仍重定向到蓝图。 |
+| 段证明 / 托管加油 | 本地 SIM + Anvil 门已按评审改过。主网 `UNDEPLOYED`。测试网旧卫星不是真 IFS。不是挖矿收益。 |
 | 销毁 | 没有任何已核验、会使 IFS `totalSupply` 下降的路径。 |
 | 回购执行 | 只有已实现盈余 D 的纸面预算；路由 `later`，`spent` 不会真去买。繁衍费买 IFS 是另一条卫星路径（§22），未上线。 |
 | 用户金库 / 锁仓 / Credit | 纸面或未接线。§11 的资金漏洞未修完前，禁止开放真实抵押、借贷、金库收益、自动回购。 |
@@ -55,7 +65,7 @@
 
 ### 0.4 给审阅者的阅读顺序
 
-先读 §0.3 第 6–7 条（身份核不可废；群体智慧是可验证接口）和 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md) 文首「特别注意」。然后：§1–§8 定位与金融规则 → §16 表型 → §17 竞品核验 → §18 销毁与金库 → §19 主网 Soul 工作评估 → §21 群体智慧协议（设计，未实现）→ §22 繁衍费买 IFS → §23 官方市场（主网卫星已部）→ §12 分期。旧入口 FindYourAgent 仍以 §9 / §14 为准，不要和 §17 竞品混为一谈。实验与 schema 细则读 [SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md](SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md)，不要只读本节摘要就冻协议。繁衍收费以 [SOULKIN-FEE.md](SOULKIN-FEE.md) 为准；市场以 [SOUL-MARKET.md](SOUL-MARKET.md) 为准。
+先读 §0.3 第 6–7 条（身份核不可废；群体智慧是可验证接口）和 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md) 文首「特别注意」。然后：§1–§8 定位与金融规则 → §16 表型 → §17 竞品核验 → §18 销毁与金库 → §19 主网 Soul 工作评估 → §21 群体智慧协议（设计，未实现）→ §22 繁衍费买 IFS → §23 官方市场（主网卫星已部）→ §24 段证明私有轨（设计，未部署）→ §12 分期。旧入口 FindYourAgent 仍以 §9 / §14 为准，不要和 §17 竞品混为一谈。实验与 schema 细则读 [SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md](SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md)，不要只读本节摘要就冻协议。繁衍收费以 [SOULKIN-FEE.md](SOULKIN-FEE.md) 为准；市场以 [SOUL-MARKET.md](SOUL-MARKET.md) 为准。
 
 ## 1. 最终定位
 
@@ -455,7 +465,7 @@ IFS 与 BNB 的职责也要分开：
 
 日期：2026-09-16。竞品公开页面把体色、眼型、体型、条纹写成「263 个链上脑权重的读出」，并让已有个体在解码器上线后一次性表达。对方合约字段与 263 的科学含义未独立核验；本节吸收的是机制，不是那个数字，也不是第二套自造脑。
 
-本地已落地：`iff.genome/1` + `phenotype-loci/2`。观测台点云、名册、祭坛读数、首页说明和 `tokenURI` 共用同一解码器。已有本地灵魂按出生 seed 表达。公开出现率见 `public/life-phenotype/current.json`。
+本地已落地：`iff.genome/1` + `phenotype-loci/3`。观测台点云、名册、祭坛读数、首页说明和 `tokenURI` 共用同一解码器。已有本地灵魂按出生 seed 表达。公开出现率见 `public/life-phenotype/current.json`。已 LIVE 主网集合仍钉 `/2`。
 
 ### 16.1 吸收什么
 
@@ -484,7 +494,7 @@ MaleCNS 是共享的物种身体。个体差别来自 Genome 与之后的经历�
 
 ```text
 iff.genome/1
-  → phenotype-loci/2     纯函数，加权读出 hue / sat / light / eye / size / stripes / mark / chips[]
+  → phenotype-loci/3     纯函数，加权读出 hue / sat / light / eye / size / stripes / mark / wing / sex / eyePair / chips[]
   → phenotype-art/1      同一输出驱动点云、祭坛卡、名册、链上 SVG
 ```
 
@@ -500,6 +510,7 @@ iff.genome/1
 | weights 216–239 | seed 展开的编码器偏向 | 眼型 |
 | weights 240–259 | generation + inheritBias | 体型 |
 | weights 260–262 | mutateRoot / 亲本位 | 条纹 |
+| （无对应切片） | unused chips 56–63 | 左右复眼是否同色（链下读出，不进 tokenURI） |
 
 解码器升级 = 新版本 + 全体再表达。旧 Genome 与旧记录可重放。禁止用新解码器回写 seed。
 
@@ -531,21 +542,27 @@ SIM / guest 可自选 seed，便于对照实验。bonded / 主网发行：seed �
 
 | 层 | 谁保证 | 市场怎么用 |
 | --- | --- | --- |
-| 集合硬顶 | `MAX_GEN0 = 1024`；含后代 `MAX_SUPPLY = 65536`。成功出生才占位 | 总量滤镜。没写进合约的封顶不能说。 |
+| 集合硬顶 | `MAX_GEN0 = 1024`（钉死）；含后代 `maxSupply` 初值 `1_048_576`，只能上调。成功出生才占位 | 总量滤镜。没写进合约的封顶不能说。 |
 | 每地址 1 只 | `hatched[address]`，终身，卖掉不重置 | 挡住一个钱包连点。不挡多个钱包。不要求持有 IFS。 |
-| 表型出现率 | `phenotype-loci/2` 加权表，清单 `public/life-phenotype/current.json` | `tokenURI.attributes` 做 Body / Eyes / Mark 等筛选。页面显示「1024 只里预期约 N 只」。 |
+| 表型出现率 | `phenotype-loci/3` 加权表，清单 `public/life-phenotype/current.json` | `tokenURI.attributes` 做 Body / Eyes / Wings / Sex 等筛选。页面显示「1024 只里预期约 N 只」。 |
 | 生命经历 | LifeJournal 刺激与检查点 | 以后的成交叙事。同脸可以克隆，日记不能。 |
 
 规则：
 
 - 每个位点把该段 chips 折成 `x * 31 + chip`，再对 10000 bps 加权表掷骰。骨白锁定明度为偏亮，锁定写在脸上，不是暗箱加成。
-- `tokenURI` **只**含 Body、Saturation、Light、Eyes、Size、Stripes、Mark、Generation。禁止 Rarity / Rank / Legendary / 价格字段。
+- `tokenURI` **只**含 Body、Saturation、Light、Eyes、Size、Stripes、Mark、Wings、Wing shape、Veins、Sex、Generation。禁止 Rarity / Rank / Legendary / 价格字段。
 - 统计稀缺（组合概率、预期只数）是视图，可在我们的页面算。**集合内名次**必须等铸出后再根据实盘计算，会随新孵化变动，因此不能写进元数据。
 - 上架主键是 `chainId + collection + tokenId + lifeId`。长相不是唯一键；同 seed 克隆允许。
 - ERC-721 转移会清空 `authorizedRunner` 并 `++controlEpoch`。买到的是身份与日记，不是对方正在跑的脑会话。
 - 市场合约以后另外部署。Soul 不写版税、不写自动做市、不按稀有度改 IFS。
 
 `phenotype-loci/1` 用大段均值，12 色里有一半几乎出不来，已废弃。旧测试网若仍钉 `/1`，必须用 `/2` 重新部署后再孵。
+
+### 16.8 表型目标：生物学多样性，不是皮肤抽卡
+
+长相要覆盖可观察的生物学多样性轴（色素、体型、复眼、腹部分节、翅斑/翅形/翅脉、性别），而不是按稀有度分层的皮肤。仓库解码器是 `phenotype-loci/3`：11 个市场位点进 `tokenURI`（含 Wings / Wing shape / Veins / Sex），OpenSea 可筛选。左右复眼镶嵌仍是 chips 56–63 的链下读出，约 2%，不进筛选项。已 LIVE 的主网 `/2` 集合筛不到翅与性别；要让外部盘筛到，必须新身份核，不能改旧 Soul。
+
+性别每代从 seed 重掷（约 50/50），图上画性梳与腹部分节，`Sex` 进 OpenSea 筛选项。翅位点进入 Kin 交叉；性别不进。下一份身份核把 `SoulRenderer` 做成构造期 immutable 合约（不是模块），以免 SVG/属性把 Soul 撑破 24KB。
 
 ## 17. 竞品核验：@fruitfliesBsc / immortalfruitflies.app
 
@@ -616,11 +633,11 @@ IFS 已发射。税分账地址已写入 `official.json`。协议层只有 D 的
 
 **特别注意：** 主网上线后不能靠重部 Soul 迭代。产品没想清楚不等于可以以后换一套 NFT。架构必须是身份核 + 可替换模块，见 LIFE-PROTOCOL 文首与 §3。
 
-链上身份核只存不会搬迁的事实：`seed`、`bornAt`、`bornBlock`、`genesisRoot`、`genomeHash`、decoder 钉死 `phenotype-loci/2`、`authorizedRunner`、`controlEpoch`、`hatched`、链上起名、父母/世代（写下不可改）。`requestHatch(name)` / `hatch` 免费 + gas，每地址终身 1 只 Gen0，不要求持有 IFS。`getGenome` + `tokenURI`（SVG/属性与 JS 解码器逐位一致，属性可筛选、不含稀有级或价格）。`SoulCannotBeBurned`。无 `tick`/`train`、无管理员改模样、**无代理 / 无 UUPS**。
+链上身份核只存不会搬迁的事实：`seed`、`bornAt`、`bornBlock`、`lookVersion`、`genesisRoot`、`genomeHash`（不含 decoder）、`authorizedRunner`、`controlEpoch`、`hatched`、链上起名、父母/世代（写下不可改）。`requestHatch(name)` / `hatch` 免费 + gas，每地址终身 1 只 Gen0，不要求持有 IFS。收费只在 Kin。`getGenome` + `tokenURI`（SVG/属性与 JS 解码器逐位一致，属性可筛选、不含稀有级或价格）。`SoulCannotBeBurned`。无 `tick`/`train`、无管理员改 seed、**无代理 / 无 UUPS**。渲染器可换但 48h 时可被 `loci` 前缀挑战否决。
 
-`curator` 不是 owner：只能挂/换 `modules` 或交出自己。繁衍规则在 `SoulKin`，刺激在 `LifeJournal`，以后的玩法另内部署卫星，用 lifeId / tokenId 索引。`mintDescendant` 仅 `MODULE_KIN` 可调，不占 Gen0 名额。主网第一期可以对用户只开孵化，但核上必须已经留好模块槽，禁止「第一期写死、第二期重部」。
+`curator` 不是 owner：部署期可即时挂模块；有灵魂之后非零模块 48h 时锁，置零立即。繁衍规则在 `SoulKin`，刺激在 `LifeJournal`，孵化门在 `MODULE_HATCH_GATE`，以后的玩法另内部署卫星，用 lifeId / tokenId 索引。`mintDescendant` 仅 `MODULE_KIN` 可调，不占 Gen0 名额。
 
-本期集合 Gen0 最多 1024，含后代硬顶 65536，成功出生才计入供应，请求占用名额且有过期回收。同一部署钉死一个 decoderHash；换解码器必须新集合，不得用新解码器改写已出生个体的脸。
+本期集合 Gen0 最多 1024，`maxSupply` 初值 1_048_576 且只能上调。ERC-2981 默认 0%、顶 5%。ticker `IFSOUL`。同一基因组换读法不必新集合；换 lifeId 公式或能被烧掉才必须新集合。RETIRED 的 `/2` 测试集合 `0x500D…293F` 不是这份规格。
 
 ### 19.3 工程顺序
 
@@ -861,3 +878,24 @@ Anvil 已覆盖：免费出生、付费托管、适配器失败不回滚、重�
 ### 23.2 上线顺序
 
 Anvil 挂/买/撤 → 测试网对着现有 Soul → `/market.html?net=test` → 主网另部卫星（已完成）。导航写「市场」。不要写成「已上 OpenSea」。生产站需推送 `SoulMarket.deployment.json`。
+
+## 24. 段证明私有轨（2026-09-17 规格）
+
+状态：**本地实现已按 2026-09-18 评审改结算、连续性、日限额与错段撤销。** `/host.html` 是生命托管页。测试网卫星 `0xdb80def1828236A5af09965F46c6BEE63ccc1f4e` 对着 MockIFSTax，不是真钱。旧 `0x1dAd6d5D9C407553814888917Ff45F0d1Fee55A1` 与 `0xF0e07ff3dF12319808f977A0D81b4eF86BB71825` 为 STALE。主网清单仍是 `UNDEPLOYED`。机制是轨迹承诺与抽样复核，不是「证明靠抽检不靠信任」。付款是验收记账、挑战窗结束后可提。运营口径见 [MINING-OPS.md](MINING-OPS.md)。
+
+### 24.1 已确认
+
+1. **面向用户的第一版是私有轨托管，不是公共轨挖矿。** 主人给自己的 Soul 加 IFS，官方 / 白名单 Runner 跑段，日记可复算。不按 tick、节点数或持币量发 IFS。
+2. **这是服务费（§8.2 的 R），不是收益、APY、回购或销毁。** 页面禁用挖矿收益文案。T3/T4 通过前禁止「更聪明 / 群体智能已实现」。
+3. **卫星不进 `modules[]`，无 UUPS。** 私有轨承诺走已部署 LifeJournal 的 `archiveHash`。失败不卡孵化转移。
+4. **合约不执行神经计算。** 哈希不匹配不罚本金；罚没只在双方确认同一判定、一方超时，或双方不一致时超时双输。
+5. **围观打赏 `giftFuel` 主人不可直接提现，随生命走；未用主人油和在途退款回原出资人退款账户。** 罐空则休眠，不删 NFT。
+6. **跨平台逐位一致未在 Linux CI 出绿并合进发布分支之前，不开真钱。** 向量：`reports/segment-replay-full-v1.json`，`n=1000`，`L=10`。Linux 工作流 `.github/workflows/segment-replay.yml` 已在 `ci/malecns-full-replay` 出绿（含 12k circuit 图钉死）。
+7. **v1 验收是「官方 Runner、无人挑战即付」。** 无独立链上 Verifier。未公布仲裁人，争议对不上只走超时双输。
+8. **主网日限额默认 100 IFS / 用户 / 日、1000 IFS 协议日总量。** Runner 工价 ≠ 协议收入。真 IFS `0x65b66BB4…7777`，蜂巢 `0xfAdb2FE1…1467`。测试网 Mock 币不能当真钱。
+9. **证据第二镜像 + 默认 37 天保留。** 主网 Runner 必须独立进程与数据目录，禁止复用测试网 Railway。
+
+### 24.2 上线顺序
+
+Anvil 罐 / 税差 / 领段 / Journal 对拍 / 无开叶不付款 / 同工作不重复付 / 转移退款原路 / 争议超时双输 / 日限额 / 订单过期 / 错段撤销（`npm run life:test:hub`）。公开恢复包可在另一目录独立重放并续跑（`iff.life-restore/1`，`npm run life:restore`）。完整重放对抽样对照见 `reports/segment-verify-compare-v1.json`（`npm run segment:compare`）。测试网卫星 `0xdb80def1828236A5af09965F46c6BEE63ccc1f4e`，旧 `0x1dAd…55A1` 与 `0xF0e07ff3…71825` 为 STALE。Runner 接新卫星后才能把公开 `/archive` 写成恢复包。主网卫星未做。对外不说挖矿已开，也不说能挖到真 IFS。生命托管页 `/host.html`；托管网 `/#mesh` 不是 MiningHub。
+

@@ -77,6 +77,116 @@
   color: var(--quiet);
   font-size: 13px;
 }
+.blue-jump {
+  display: inline-flex;
+  margin-top: 18px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.blue-phase-note,
+.blue-swarm-lead,
+.blue-swarm-note,
+.blue-mother {
+  max-width: 42em;
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+.blue-swarm {
+  scroll-margin-top: 96px;
+}
+.blue-swarm .kicker {
+  margin-bottom: 10px;
+}
+.rite-main h3 {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 500;
+  margin: 28px 0 14px;
+}
+.blue-ifaces,
+.blue-objects,
+.blue-verbs,
+.blue-split,
+.blue-tiers {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.blue-ifaces {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.blue-ifaces li:last-child {
+  grid-column: 1 / -1;
+}
+.blue-ifaces strong,
+.blue-objects strong,
+.blue-split strong {
+  font-size: 22px;
+}
+.blue-objects {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.blue-objects li,
+.blue-split li,
+.blue-tiers li,
+.blue-track li,
+.blue-honest li,
+.blue-verbs li {
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.blue-verbs li {
+  display: grid;
+  grid-template-columns: 20px 88px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.blue-verbs svg {
+  color: var(--gold);
+  margin-top: 2px;
+}
+.blue-verbs code {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--gold);
+}
+.blue-split {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.blue-split li[data-state="drawn"] strong {
+  color: var(--quiet);
+}
+.blue-tiers {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.blue-track {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  columns: 2;
+  column-gap: 28px;
+}
+.blue-track li {
+  break-inside: avoid;
+  font-size: 13px;
+  color: var(--muted);
+}
+.blue-honest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.blue-honest li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+}
 
 .rite-engine,
 .rite-cabinet {
@@ -84,7 +194,7 @@
   position: relative;
   border: 1px solid var(--line);
   background:
-    radial-gradient(ellipse 70% 50% at 50% 18%, rgba(201, 162, 94, 0.1), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 50% 18%, rgba(240, 185, 11), 0.1), transparent 58%),
     linear-gradient(180deg, rgba(255, 248, 230, 0.04), transparent 40%),
     #12100d;
   box-shadow:
@@ -146,7 +256,7 @@
 }
 .rite-orb.live {
   background: var(--gold);
-  box-shadow: 0 0 0 0 rgba(201, 162, 94, 0.45);
+  box-shadow: 0 0 0 0 rgba(240, 185, 11), 0.45);
   animation: rite-pulse 2.4s var(--ease) infinite;
 }
 .rite-orb.paper {
@@ -185,7 +295,7 @@
   font-family: var(--display);
   font-size: 42px;
   line-height: 1;
-  color: rgba(201, 162, 94, 0.12);
+  color: rgba(240, 185, 11), 0.12);
 }
 .blue-layer em {
   display: block;
@@ -229,11 +339,13 @@
   letter-spacing: 0.14em;
   color: var(--quiet);
 }
-.blue-phases li[data-state="now"] em {
+.blue-phases li[data-state="now"] em,
+.blue-phases li[data-state="live"] em {
   color: var(--gold);
 }
-.blue-phases li[data-state="now"] {
-  background: linear-gradient(90deg, rgba(201, 162, 94, 0.08), transparent 58%);
+.blue-phases li[data-state="now"],
+.blue-phases li[data-state="live"] {
+  background: linear-gradient(90deg, rgba(240, 185, 11, 0.08), transparent 58%);
 }
 
 .blue-drawn {
@@ -244,14 +356,17 @@
 .blue-drawn li {
   min-height: 100%;
 }
+.blue-drawn li:last-child {
+  grid-column: 1 / -1;
+}
 
 @keyframes rite-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(201, 162, 94, 0.4);
+    box-shadow: 0 0 0 0 rgba(240, 185, 11), 0.4);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(201, 162, 94, 0);
+    box-shadow: 0 0 0 10px rgba(240, 185, 11), 0);
   }
 }
 @keyframes rite-rise {
@@ -265,12 +380,27 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .blue-ifaces,
+  .blue-tiers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 @media (max-width: 900px) {
   .rite-hero,
   .blue-drawn,
   .blue-phase-wrap,
-  .blue-phases li {
+  .blue-phases li,
+  .blue-ifaces,
+  .blue-objects,
+  .blue-split,
+  .blue-tiers,
+  .blue-verbs li,
+  .blue-honest li {
     grid-template-columns: 1fr;
+  }
+  .blue-track {
+    columns: 1;
   }
   .blue-layer:nth-child(1),
   .blue-layer:nth-child(2),
@@ -308,7 +438,7 @@
 }
 .blue-pheno-seeds button.is-on {
   color: #f0ead9;
-  border-color: #c9a25e;
+  border-color: var(--gold);
 }
 .blue-pheno .pheno {
   padding: 16px 18px;

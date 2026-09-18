@@ -29,7 +29,7 @@ export function SwarmTape() {
           .slice(0, 5)
           .map((row) => (
             <span key={row.id} className={row.id === champ?.id ? "lead" : ""}>
-              <FlyMark small />
+              <FlyMark small inherit />
               #{row.id}
             </span>
           ))}

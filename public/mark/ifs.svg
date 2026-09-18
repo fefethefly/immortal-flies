@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img">
+  <title>IFS</title>
+  <rect width="1024" height="1024" fill="#f3ba00"/>
+  <defs>
+    <linearGradient id="ib" x1="280" y1="280" x2="760" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3a2e12"/>
+      <stop offset=".45" stop-color="#1a1408"/>
+      <stop offset="1" stop-color="#0a0907"/>
+    </linearGradient>
+    <radialGradient id="ie" cx="58%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#f07169"/>
+      <stop offset=".55" stop-color="#c23a32"/>
+      <stop offset="1" stop-color="#7a1c18"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(512 540)" fill="none">
+    <ellipse cx="-70" cy="-110" rx="168" ry="72" transform="rotate(-32 -70 -110)" fill="#fff8e1" opacity=".28"/>
+    <ellipse cx="-16" cy="-142" rx="152" ry="64" transform="rotate(-12 -16 -142)" fill="#fff8e1" opacity=".2"/>
+    <path d="M-88 48L-144 168M-24 64L-40 184M64 48L120 160M-112 24L-192 128M16 40L32 168M96 16L176 128" stroke="#1a1408" stroke-width="14" stroke-linecap="round"/>
+    <ellipse cx="-64" cy="32" rx="136" ry="80" fill="url(#ib)"/>
+    <path d="M-168 8h168M-160 40h152M-128 72h112" stroke="#d49b00" stroke-width="14" stroke-linecap="round"/>
+    <ellipse cx="72" cy="0" rx="72" ry="64" fill="url(#ib)"/>
+    <ellipse cx="168" cy="-24" rx="64" ry="58" fill="url(#ib)"/>
+    <ellipse cx="200" cy="-44" rx="38" ry="42" fill="url(#ie)"/>
+    <ellipse cx="144" cy="-48" rx="22" ry="25" fill="#c23a32"/>
+    <circle cx="212" cy="-60" r="10" fill="#fff8e1"/>
+    <path d="M128-80Q96-160 48-184M184-80Q208-168 256-184" stroke="#1a1408" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="48" cy="-184" r="9" fill="#1a1408"/>
+    <circle cx="256" cy="-184" r="9" fill="#1a1408"/>
+  </g>
+</svg>

@@ -14,6 +14,7 @@ import {
   readPendingHatch,
 } from "./chain.mjs";
 import { useHatchWatch } from "./hatch-watch.mjs";
+import { MarketThumb } from "./market-thumb.jsx";
 import {
   normalizeGiven,
   peekPendingGiven,
@@ -262,6 +263,8 @@ export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
       )}
       {born ? (
         <>
+          {/* 刚孵化的果蝇先露脸：颜色就是这只 NFT 的基因组读出的体色与眼色。 */}
+          <MarketThumb soul={born} className="hatch-fly" />
           {compact ? (
             <p className="hatch-meta">
               {tx("hatch.born", { id: born.tokenId })}

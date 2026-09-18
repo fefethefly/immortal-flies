@@ -57,8 +57,19 @@ export function formatBnb(atoms) {
 export function formatToken(atoms) {
   return (Number(atoms) / TOKEN_UNIT).toFixed(1);
 }
+function trimFrac(text) {
+  return text.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+}
+/** BNB per token as a plain decimal. Never scientific notation. */
 export function formatPrice(price) {
-  return (Number(price) / BNB_UNIT).toExponential(3);
+  const value = Number(price) / BNB_UNIT;
+  if (!Number.isFinite(value)) return "—";
+  if (value === 0) return "0";
+  const sign = value < 0 ? "-" : "";
+  const abs = Math.abs(value);
+  if (abs >= 0.01) return sign + trimFrac(abs.toFixed(4));
+  const lead = Math.max(0, Math.ceil(-Math.log10(abs)) - 1);
+  return sign + trimFrac(abs.toFixed(Math.min(12, lead + 4)));
 }
 export function equityOf(fly, price) {
   return fly.bnb + Math.trunc((fly.token * price) / TOKEN_UNIT);

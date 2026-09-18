@@ -1,4 +1,5 @@
 import { hash } from "../../../src/brain/codec.mjs";
+import { resolveLocale, t } from "../../../src/i18n.mjs";
 import {
   EXPLAINER,
   TOOL_WHITELIST,
@@ -8,7 +9,11 @@ import {
   answerQuestion,
   policyCard,
 } from "../../../src/brain/flyswarm/explain.mjs";
-import { proposePlans, validatePlans, worldView } from "../../../src/brain/flyswarm/world.mjs";
+import {
+  proposePlans,
+  validatePlans,
+  worldView,
+} from "../../../src/brain/flyswarm/world.mjs";
 import { pitView } from "../../../src/brain/flyswarm/pit.mjs";
 import { AppError, badRequest, unauthorized } from "../shared/errors.mjs";
 
@@ -61,7 +66,11 @@ function runTool(session, name, args = {}) {
       return {
         society: view.society,
         pressure: view.pressure,
-        events: retrieveEvents(world, { kind: args.kind || null, flyId: args.flyId ?? null, tick: args.tick ?? null }).slice(0, 8),
+        events: retrieveEvents(world, {
+          kind: args.kind || null,
+          flyId: args.flyId ?? null,
+          tick: args.tick ?? null,
+        }).slice(0, 8),
       };
     case "draft-report":
       return {
@@ -85,7 +94,9 @@ export function createLlmService({ sessions, store, provider, logger }) {
     try {
       await store.appendLlmAudit(record);
     } catch (err) {
-      logger.warn("llm audit write failed", { error: err?.message || String(err) });
+      logger.warn("llm audit write failed", {
+        error: err?.message || String(err),
+      });
     }
   }
 
@@ -101,7 +112,7 @@ export function createLlmService({ sessions, store, provider, logger }) {
     if (!sessionId) throw badRequest("MISSING_SESSION", "sessionId required");
     if (flyId == null) throw badRequest("MISSING_FLY", "flyId required");
     const row = await requireSession(sessionId, req);
-    const locale = body?.locale || "zh";
+    const locale = resolveLocale(body?.locale);
     const local = explainFly(row.session, flyId);
     const contextRefs = local.steps.flatMap((s) => s.refs || []);
     const policy = policyCard();
@@ -132,7 +143,11 @@ export function createLlmService({ sessions, store, provider, logger }) {
             },
             {
               role: "user",
-              content: JSON.stringify({ locale, explanation: local, pit: pitView(row.session).flies.find((f) => f.id === flyId) }),
+              content: JSON.stringify({
+                locale,
+                explanation: local,
+                pit: pitView(row.session).flies.find((f) => f.id === flyId),
+              }),
             },
           ],
           tools: openaiTools(),
@@ -159,7 +174,9 @@ export function createLlmService({ sessions, store, provider, logger }) {
         }
         degraded = false;
       } catch (err) {
-        logger.warn("llm explain degraded", { error: err?.message || String(err) });
+        logger.warn("llm explain degraded", {
+          error: err?.message || String(err),
+        });
         degraded = true;
       }
     }
@@ -205,16 +222,23 @@ export function createLlmService({ sessions, store, provider, logger }) {
     const sessionId = body?.sessionId;
     if (!sessionId) throw badRequest("MISSING_SESSION", "sessionId required");
     const row = await requireSession(sessionId, req);
-    const locale = body?.locale || "zh";
+    const locale = resolveLocale(body?.locale);
     const questionId = body?.questionId || null;
     const text = typeof body?.text === "string" ? body.text.slice(0, 500) : "";
 
     if (questionId) {
       if (!QUESTIONS.some((q) => q.id === questionId)) {
-        throw badRequest("UNKNOWN_QUESTION", `Unknown questionId: ${questionId}`);
+        throw badRequest(
+          "UNKNOWN_QUESTION",
+          `Unknown questionId: ${questionId}`,
+        );
       }
       const answer = answerQuestion(row.session, questionId);
-      const promptHash = await auditHash({ kind: "ask", questionId, tick: row.session.kernel.colony.tick });
+      const promptHash = await auditHash({
+        kind: "ask",
+        questionId,
+        tick: row.session.kernel.colony.tick,
+      });
       const policyHash = await auditHash(policyCard());
       const resultHash = await auditHash(answer);
       await audit({
@@ -245,10 +269,15 @@ export function createLlmService({ sessions, store, provider, logger }) {
       };
     }
 
-    if (!text) throw badRequest("MISSING_QUESTION", "questionId or text required");
+    if (!text)
+      throw badRequest("MISSING_QUESTION", "questionId or text required");
 
     const hits = retrieveEvents(row.session.world, {});
-    const promptHash = await auditHash({ kind: "ask-free", text, tick: row.session.kernel.colony.tick });
+    const promptHash = await auditHash({
+      kind: "ask-free",
+      text,
+      tick: row.session.kernel.colony.tick,
+    });
     const policyHash = await auditHash(policyCard());
     let narrative = null;
     let degraded = true;
@@ -287,10 +316,10 @@ export function createLlmService({ sessions, store, provider, logger }) {
         degraded = false;
       } catch (err) {
         logger.warn("llm ask degraded", { error: err?.message || String(err) });
-        narrative = "解释层降级：仅返回检索到的事件引用，未生成自然语言。";
+        narrative = t(locale, "ask.degraded.fetch");
       }
     } else {
-      narrative = "解释层降级：未配置 LLM，返回检索证据。";
+      narrative = t(locale, "ask.degraded.unconfigured");
     }
 
     const answer = {
@@ -347,14 +376,23 @@ export function createLlmService({ sessions, store, provider, logger }) {
     }));
     const mutated = JSON.stringify(booksBefore) !== JSON.stringify(booksAfter);
     if (mutated) {
-      throw new AppError("PLAN_MUTATION", 500, "validatePlans must not mutate books");
+      throw new AppError(
+        "PLAN_MUTATION",
+        500,
+        "validatePlans must not mutate books",
+      );
     }
 
     let narrative = null;
     let degraded = true;
     let modelId = EXPLAINER.modelId;
     let providerId = EXPLAINER.provider;
-    const promptHash = await auditHash({ kind: "plan", sessionId, tick: row.session.kernel.colony.tick, plans: proposed });
+    const promptHash = await auditHash({
+      kind: "plan",
+      sessionId,
+      tick: row.session.kernel.colony.tick,
+      plans: proposed,
+    });
     const policyHash = await auditHash(policyCard());
 
     if (provider.configured) {
@@ -368,7 +406,10 @@ export function createLlmService({ sessions, store, provider, logger }) {
             },
             {
               role: "user",
-              content: JSON.stringify({ plans: validated, society: worldView(row.session).society }),
+              content: JSON.stringify({
+                plans: validated,
+                society: worldView(row.session).society,
+              }),
             },
           ],
         });
@@ -377,7 +418,9 @@ export function createLlmService({ sessions, store, provider, logger }) {
         providerId = result.provider;
         degraded = false;
       } catch (err) {
-        logger.warn("llm plan degraded", { error: err?.message || String(err) });
+        logger.warn("llm plan degraded", {
+          error: err?.message || String(err),
+        });
       }
     }
 

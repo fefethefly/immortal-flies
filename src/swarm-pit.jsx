@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { GOLD } from "./brand.mjs";
 import { FlyMark } from "./vitruvian.jsx";
 import {
   bookOf,
@@ -84,7 +85,7 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
           const px = (seed * 1.73) % width;
           const py = (seed * 2.41 + i * 11) % height;
           ctx.fillStyle =
-            i % 7 === 0 ? "rgba(201,162,94,.28)" : "rgba(147,161,129,.12)";
+            i % 7 === 0 ? "rgba(240,185,11,.28)" : "rgba(147,161,129,.12)";
           ctx.fillRect(px, py, i % 3 === 0 ? 1.5 : 1, i % 3 === 0 ? 1.5 : 1);
         }
       }
@@ -119,7 +120,7 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
         const max = Math.max(...prices);
         const span = Math.max(1, max - min);
         ctx.beginPath();
-        ctx.strokeStyle = "#c9a25e";
+        ctx.strokeStyle = GOLD;
         ctx.lineWidth = 1.3;
         prices.forEach((price, i) => {
           const x = width * 0.08 + (i / (prices.length - 1)) * width * 0.84;
@@ -355,7 +356,7 @@ export function Roster({ board, selectedId, onSelect }) {
               onClick={() => onSelect(row.id)}
               style={{ "--pheno": look.art.body }}
             >
-              <FlyMark small />
+              <FlyMark small inherit />
               <span>
                 <b>
                   {i + 1} · #{row.id}

@@ -1,0 +1,57 @@
+:root {
+  --gold-deep: #d49b00;
+  --gold-pale: #ffe08a;
+}
+
+.brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+.brand-wordmark b {
+  font-family: "Barlow Condensed", var(--sans);
+  font-size: 26px;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  line-height: 0.9;
+  color: #f3ba00;
+  text-transform: uppercase;
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .brand-wordmark b {
+    background: linear-gradient(180deg, #fff8e1 0%, #f3ba00 42%, #d49b00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+.brand-wordmark small {
+  display: block;
+  font-family: var(--sans);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  line-height: 1;
+  color: var(--gold-deep, #d49b00);
+  margin: 0;
+}
+
+.site-brand .fly-mark,
+.site-brand img.fly-mark.small,
+.brand img.fly-mark {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+}
+
+.site-lockup {
+  display: block;
+  height: 52px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+  object-position: left center;
+}

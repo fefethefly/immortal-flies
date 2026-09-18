@@ -109,6 +109,7 @@ const COLONY_BATCH = 12;
 export async function loadColony(
   soul,
   { genesisRoot, chainId, fieldCount } = {},
+  onProgress,
 ) {
   const extras = { genesisRoot, chainId, fieldCount };
   const total = Number(await soul.totalSupply());
@@ -127,6 +128,7 @@ export async function loadColony(
       ids.map((id) => readSoulCard(soul, id, extras).catch(() => null)),
     );
     cards.push(...rows.filter(Boolean));
+    onProgress?.(Math.min(start + COLONY_BATCH - 1, total), total);
   }
   return withParents(cards);
 }
@@ -176,11 +178,16 @@ export async function loadSoulFamily(soul, tokenId, extras = {}) {
   return withParents([card, ...parents]);
 }
 
-export async function hydrateColony(soul, extras = {}, taggedId = 0) {
+export async function hydrateColony(
+  soul,
+  extras = {},
+  taggedId = 0,
+  onProgress,
+) {
   let roster = [];
   let colonyFailed = false;
   try {
-    roster = await loadColony(soul, extras);
+    roster = await loadColony(soul, extras, onProgress);
   } catch {
     colonyFailed = true;
   }

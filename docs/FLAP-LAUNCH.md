@@ -14,8 +14,10 @@
 | 总供应（实测） | `1e27`（18 位小数）                                                  |
 | 买/卖税        | 各 100 bps                                                           |
 | 分账           | 金库 8000 bps / 运营 2000 bps                                        |
+| 蜂巢金库 80%   | `0xfAdb2FE136c89866Cd1CB0DD31298e08cc61a467`                         |
+| 运营 20%       | `0x055bB2aF42B832A55F3D708c92824C491dE05427`                         |
 
-主站清单 `public/token/official.json` 已置 `live`。**金库地址（`vault` 字段）仍未公布**，主站明说 “The hive vault address is not posted”。发射交易哈希与金库地址回执待补录；拿到回执前不另行宣布金库或回购。
+主站清单 `public/token/official.json` 已置 `live`。税分账已写入：蜂巢 80% `0xfAdb2FE136c89866Cd1CB0DD31298e08cc61a467`，运营 20% `0x055bB2aF42B832A55F3D708c92824C491dE05427`。税进钱包 ≠ 金库在交易，≠ 回购。发射交易哈希仍待补录。
 
 ## 先定 ticker：用 $IFS，不用 $IFF
 
@@ -41,7 +43,7 @@ Flap 的金库发射口 `VaultPortal` 要的是税币。这和 V7「场内手续
 1. 一个多签或冷钱包，作为 **FLAP_HIVE_ADDRESS**（收 80%）。
 2. 一个运营钱包 **FLAP_OPS_ADDRESS**（收 20%），不能和金库相同。
 3. 发射用的热钱包，里面有足够 BNB 付 `quoteAmt` 和 gas。建议先备 **0.05–0.2 BNB**，按当天 Flap 曲线再改。
-4. 一张方图（印记 `public/assets/fly-seal.png` 可用），网站、推特、简介。
+4. 一张方图：`public/mark/ifs.png`（网站、favicon、OG、推特、简介同一张金果蝇吉祥物）。
 5. **不要把私钥发给我，不要写进仓库。**
 
 ## 页面发射步骤（当时的执行参考，已完成）
@@ -79,6 +81,9 @@ FLAP_HIVE_ADDRESS=0x... FLAP_OPS_ADDRESS=0x... npm run flap:prepare
 
 ## 发射之后立刻做
 
-- ✅ 主站 `official.json` 已改成 `live`（address、flapUrl 已填；`vault` 待金库地址回执后补）。
+- ✅ 主站 `official.json` 已改成 `live`（address、flapUrl、vault、ops 已填）。
 - 官宣只贴本页公布的地址。
 - 不要承诺金库已经在自动盈利或回购已经开始。税进地址 ≠ 有机体已经在交易。
+- 税进钱包 ≠ 回购 ≠ 销毁。销毁只在已实现盈余回购之后、且 `totalSupply` 下降回执出现时才成立。见 `docs/PRODUCT-LATEST.md` §8.2 / §18。繁衍费买 IFS 是另一只卫星 Kin，规格见 [SOULKIN-FEE.md](SOULKIN-FEE.md)，未部署前不要把 Flap 曲线交易写成协议回购。
+- 不要把蜂巢金库或运营分成自动打给 CZ 或其他个人地址。运营 20% 只允许链下人工支配。
+- Soul NFT 尚未部署。用户目前只能买 `$IFS`，不能在主网 mint 灵魂。主网禁止部署 `ImmortalFly.sol`。

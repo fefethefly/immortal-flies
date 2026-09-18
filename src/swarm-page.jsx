@@ -390,127 +390,129 @@ export function PitPage() {
 
         {tab === "pit" && (
           <>
-            <div className="pit-hero">
-              <div>
-                <p className="pit-kicker">L2 / TRADING WORLD</p>
-                <ol className="pit-flow" aria-label={tx("pit.flowCaption")}>
-                  <li>SENSE</li>
-                  <li>ACT</li>
-                  <li>PORT</li>
-                </ol>
+            <div className="pit-front">
+              <div className="pit-hero">
+                <div>
+                  <p className="pit-kicker">L2 / TRADING WORLD</p>
+                  <ol className="pit-flow" aria-label={tx("pit.flowCaption")}>
+                    <li>SENSE</li>
+                    <li>ACT</li>
+                    <li>PORT</li>
+                  </ol>
+                </div>
+                <p>{tx("pit.flowCaption")}</p>
               </div>
-              <p>{tx("pit.flowCaption")}</p>
-            </div>
-            <section className="pit">
-              <div className="stage">
-                <span className="stage-frame tl" />
-                <span className="stage-frame br" />
-                <div className="stage-notes">
-                  <span>MALECNS / 1400 NODES / TRADER</span>
-                  <span>
-                    TICK #{view.tick} · {formatBnb(stats.bnb)} BNB
-                  </span>
-                </div>
-                <PitCanvas
-                  swarm={view}
-                  selectedId={fly?.id}
-                  wash={wash}
-                  onSelect={selectFly}
-                />
-                <div className="stage-read">
-                  <small>{tx("pit.selected")}</small>
-                  <strong>#{fly?.id ?? "—"}</strong>
-                  <em className={reflex?.side.toLowerCase()}>
-                    {reflex?.side || "—"}
-                  </em>
-                  <PriceMark price={view.market.price} />
-                </div>
-                <p className="stage-caption">{tx("pit.caption")}</p>
-              </div>
-
-              <aside className="lectern">
-                <div className="path">
-                  {FINANCIAL_PORTS.map((port, i) => (
-                    <React.Fragment key={port.id}>
-                      {i > 0 && <i className="path-flow" />}
-                      <span className={port.status}>{port.label}</span>
-                    </React.Fragment>
-                  ))}
-                </div>
-                <h1>{tx("pit.title")}</h1>
-                {fly && reflex ? (
-                  <Cause
-                    stim={
-                      lastStim
-                        ? `${labels[lastStim.kind]} ×${(lastStim.intensity / 100).toFixed(2)}`
-                        : null
-                    }
-                    reflex={reflex}
-                    trade={lastFill}
-                  />
-                ) : (
-                  <p className="empty">{tx("pit.emptyFly")}</p>
-                )}
-                {fly && (
-                  <>
-                    <div className="fly-head">
-                      <div>
-                        <small>
-                          GEN {fly.gen} ·{" "}
-                          {fly.parent == null
-                            ? tx("pit.noParent")
-                            : tx("pit.parent", { id: fly.parent })}
-                        </small>
-                        <strong>#{fly.id}</strong>
-                      </div>
-                      <code>{fly.fingerprint}</code>
-                    </div>
-                    <PhenotypeReadout
-                      fly={fly}
-                      locale={locale}
-                      compact
-                      caption={tx("pheno.claim")}
-                      note={tx("pheno.note")}
-                    />
-                    <BookSplit fly={fly} price={view.market.price} />
-                    <Balance fly={fly} />
-                  </>
-                )}
-                <OrganStops
-                  kinds={STIMULI}
-                  labels={labels}
-                  hints={hints}
-                  icons={ICONS}
-                  intensity={intensity}
-                  cooldown={cooldown}
-                  active={wash}
-                  onPulse={pulse}
-                  onIntensity={setIntensity}
-                />
-                <div className="lectern-actions">
-                  <button
-                    className="primary"
-                    onClick={() => setRunning((v) => !v)}
-                  >
-                    {running ? <Pause size={14} /> : <Play size={14} />}
-                    {running ? tx("pit.pause") : tx("pit.resume")}
-                  </button>
-                  <button
-                    className="ghost"
-                    onClick={cullNow}
-                    disabled={stats.alive < 2}
-                  >
-                    {tx("pit.settleNow")}
-                  </button>
-                </div>
-                {error && (
-                  <div className="pit-error" role="alert">
-                    {error}
+              <section className="pit">
+                <div className="stage">
+                  <span className="stage-frame tl" />
+                  <span className="stage-frame br" />
+                  <div className="stage-notes">
+                    <span>MALECNS / 12000 NODES / TRADER</span>
+                    <span>
+                      TICK #{view.tick} · {formatBnb(stats.bnb)} BNB
+                    </span>
                   </div>
-                )}
-                <p className="lectern-note">{notice}</p>
-              </aside>
-            </section>
+                  <PitCanvas
+                    swarm={view}
+                    selectedId={fly?.id}
+                    wash={wash}
+                    onSelect={selectFly}
+                  />
+                  <div className="stage-read">
+                    <small>{tx("pit.selected")}</small>
+                    <strong>#{fly?.id ?? "—"}</strong>
+                    <em className={reflex?.side.toLowerCase()}>
+                      {reflex?.side || "—"}
+                    </em>
+                    <PriceMark price={view.market.price} />
+                  </div>
+                  <p className="stage-caption">{tx("pit.caption")}</p>
+                </div>
+
+                <aside className="lectern">
+                  <div className="path">
+                    {FINANCIAL_PORTS.map((port, i) => (
+                      <React.Fragment key={port.id}>
+                        {i > 0 && <i className="path-flow" />}
+                        <span className={port.status}>{port.label}</span>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                  <h1>{tx("pit.title")}</h1>
+                  {fly && reflex ? (
+                    <Cause
+                      stim={
+                        lastStim
+                          ? `${labels[lastStim.kind]} ×${(lastStim.intensity / 100).toFixed(2)}`
+                          : null
+                      }
+                      reflex={reflex}
+                      trade={lastFill}
+                    />
+                  ) : (
+                    <p className="empty">{tx("pit.emptyFly")}</p>
+                  )}
+                  {fly && (
+                    <>
+                      <div className="fly-head">
+                        <div>
+                          <small>
+                            GEN {fly.gen} ·{" "}
+                            {fly.parent == null
+                              ? tx("pit.noParent")
+                              : tx("pit.parent", { id: fly.parent })}
+                          </small>
+                          <strong>#{fly.id}</strong>
+                        </div>
+                        <code>{fly.fingerprint}</code>
+                      </div>
+                      <PhenotypeReadout
+                        fly={fly}
+                        locale={locale}
+                        compact
+                        caption={tx("pheno.claim")}
+                        note={tx("pheno.note")}
+                      />
+                      <BookSplit fly={fly} price={view.market.price} />
+                      <Balance fly={fly} />
+                    </>
+                  )}
+                  <OrganStops
+                    kinds={STIMULI}
+                    labels={labels}
+                    hints={hints}
+                    icons={ICONS}
+                    intensity={intensity}
+                    cooldown={cooldown}
+                    active={wash}
+                    onPulse={pulse}
+                    onIntensity={setIntensity}
+                  />
+                  <div className="lectern-actions">
+                    <button
+                      className="primary"
+                      onClick={() => setRunning((v) => !v)}
+                    >
+                      {running ? <Pause size={14} /> : <Play size={14} />}
+                      {running ? tx("pit.pause") : tx("pit.resume")}
+                    </button>
+                    <button
+                      className="ghost"
+                      onClick={cullNow}
+                      disabled={stats.alive < 2}
+                    >
+                      {tx("pit.settleNow")}
+                    </button>
+                  </div>
+                  {error && (
+                    <div className="pit-error" role="alert">
+                      {error}
+                    </div>
+                  )}
+                  <p className="lectern-note">{notice}</p>
+                </aside>
+              </section>
+            </div>
 
             <section className="after">
               <div>
@@ -694,6 +696,7 @@ export function PitPage() {
             <RichText
               text={tx("pit.footer")}
               tags={{
+                field: <a href="/field.html">{tx("nav.field")}</a>,
                 altar: <a href="/blueprint.html">{tx("nav.altar")}</a>,
                 canon: <a href="/brain.html">{tx("nav.canon")}</a>,
               }}

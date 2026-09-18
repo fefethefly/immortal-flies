@@ -13,7 +13,7 @@ const PORT = 4177;
 const WIDTH = 1920;
 const HEIGHT = 1080;
 const FPS = 24;
-const DURATION = 20;
+const DURATION = 30;
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css",
@@ -27,7 +27,7 @@ const MIME = {
 };
 
 const preview = process.argv.includes("--preview");
-const PREVIEW_TIMES = [0.9, 2.4, 5.4, 9.4, 14.6, 18.6];
+const PREVIEW_TIMES = [1.6, 6.4, 12.6, 18.4, 23.4, 28.0];
 
 function serve() {
   return new Promise((resolve) => {
@@ -93,6 +93,7 @@ async function connectChrome() {
       "--no-first-run",
       "--no-default-browser-check",
       "--disable-background-networking",
+      "--remote-debugging-address=127.0.0.1",
       `--remote-debugging-port=9223`,
       `--user-data-dir=${userData}`,
       `--window-size=${WIDTH},${HEIGHT}`,
@@ -100,7 +101,11 @@ async function connectChrome() {
     ],
     { stdio: ["ignore", "pipe", "pipe"] },
   );
-  for (let i = 0; i < 40; i++) {
+  let chromeErr = "";
+  chrome.stderr.on("data", (chunk) => {
+    chromeErr += chunk.toString();
+  });
+  for (let i = 0; i < 80; i++) {
     try {
       const res = await fetch("http://127.0.0.1:9223/json/version");
       if (res.ok) {
@@ -111,7 +116,7 @@ async function connectChrome() {
     await wait(150);
   }
   chrome.kill();
-  throw new Error("Chrome debug port did not open");
+  throw new Error(`Chrome debug port did not open. ${chromeErr.slice(-800)}`);
 }
 
 function openSocket(url) {
@@ -210,7 +215,7 @@ async function main() {
       "-i",
       `anoisesrc=color=brown:amplitude=0.035:sample_rate=44100:duration=${DURATION}`,
       "-filter_complex",
-      "[0:a]volume=0.045[a1];[1:a]highpass=f=180,lowpass=f=2400,volume=0.09[a2];[a1][a2]amix=inputs=2:duration=first,afade=t=in:st=0:d=1.4,afade=t=out:st=18.4:d=1.6[a]",
+      "[0:a]volume=0.045[a1];[1:a]highpass=f=180,lowpass=f=2400,volume=0.09[a2];[a1][a2]amix=inputs=2:duration=first,afade=t=in:st=0:d=1.5,afade=t=out:st=28.2:d=1.7[a]",
       "-map",
       "[a]",
       audio,

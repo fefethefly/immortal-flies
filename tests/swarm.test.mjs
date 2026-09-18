@@ -4,10 +4,12 @@ import {
   ACTION_TRADE,
   BNB_UNIT,
   START_BNB,
+  START_PRICE,
   bookOf,
   createSwarm,
   decodeTrade,
   equityOf,
+  formatPrice,
   reflexOf,
   runSwarm,
   settleBooks,
@@ -90,6 +92,16 @@ test("stimulus cooldown rejects a second pulse", () => {
   const once = stimulate(swarm, "light", 0.45);
   assert.equal(once.stimulus.light, 45);
   assert.throws(() => stimulate(once, "dark", 0.5), /冷却/);
+});
+
+test("formatPrice writes a plain decimal, not scientific notation", () => {
+  assert.equal(formatPrice(START_PRICE), "0.00001117");
+  assert.equal(formatPrice(0), "0");
+  assert.equal(formatPrice(BNB_UNIT), "1");
+  assert.equal(formatPrice(1_117), "0.000001117");
+  assert.equal(formatPrice(Number.NaN), "—");
+  assert.equal(/[eE]/.test(formatPrice(START_PRICE)), false);
+  assert.equal(/[eE]/.test(formatPrice(1)), false);
 });
 
 test("approach and retreat decode into the first financial act", () => {

@@ -10,7 +10,7 @@ export const ECONOMY_DEFAULTS = Object.freeze({
   tokenPrice: 0.002,
 });
 export const FEE_SPLIT = Object.freeze([
-  { key: "team", label: "开发与运营", rate: 0.45, color: "#c9a25e" },
+  { key: "team", label: "开发与运营", rate: 0.45, color: "#f0b90b" },
   { key: "burn", label: "回购 / 销毁", rate: 0.2, color: "#b57660" },
   { key: "genesisPool", label: "Genesis 贡献池", rate: 0.15, color: "#9c855f" },
   { key: "season", label: "全体玩家赛季池", rate: 0.1, color: "#a9c4bb" },
@@ -62,7 +62,7 @@ export function teamVested(month) {
 
 /** PRODUCT-LATEST §8.2. Hypothesis only — not a quote or a payout. */
 export const PROTOCOL_SPLIT = Object.freeze([
-  { key: "ifsBudget", rate: 0.35, color: "#c9a25e" },
+  { key: "ifsBudget", rate: 0.35, color: "#f0b90b" },
   { key: "reserve", rate: 0.25, color: "#9c855f" },
   { key: "capital", rate: 0.2, color: "#a89e8c" },
   { key: "lockReward", rate: 0.1, color: "#93a181" },

@@ -43,6 +43,9 @@ import {
   unauthorized,
 } from "../shared/errors.mjs";
 import { hashToken, tokensMatch } from "../shared/tokens.mjs";
+import { createSchemas, validateRecord } from "../../../src/brain/flyswarm/schemas.mjs";
+
+const genomeSchemas = createSchemas();
 
 const ARCHIVE_SCHEMA = "iff.colony-archive/1";
 
@@ -82,7 +85,7 @@ export function createSessionService({ config, store, logger }) {
   const clock = () =>
     typeof config.now === "function" ? config.now() : Date.now();
   const idleMs = () => config.session?.idleMs ?? 2 * 60 * 60 * 1000;
-  const maxAgeMs = () => config.session?.maxAgeMs ?? 24 * 60 * 60 * 1000;
+  const maxAgeMs = () => config.session?.maxAgeMs ?? 0;
   const maxLive = () => config.session?.maxLive ?? 64;
 
   async function boot(preloadedGraph = null) {
@@ -368,6 +371,16 @@ export function createSessionService({ config, store, logger }) {
       kernel.colony.members = [];
       for (const member of payload.members) {
         const session = await BrainSession.restore(member.archive, graph);
+        // Older server archives omitted this field but kept it in pitSnapshot.
+        // Never manufacture birth identity from the evolved RNG.
+        const savedGenome = member.genome || payload.pitSnapshot?.members?.find(
+          (item) => item.id === member.id,
+        )?.genome;
+        if (!savedGenome) throw badRequest("ARCHIVE_GENOME_MISSING", "Birth genome unavailable; preserve this archive for explicit migration");
+        validateRecord(genomeSchemas, savedGenome);
+        if (savedGenome.soulId !== session.state.soulId) {
+          throw badRequest("ARCHIVE_GENOME_ID", "Genome and session identity differ");
+        }
         kernel.colony.members.push({
           id: member.id,
           gen: member.gen,
@@ -376,6 +389,7 @@ export function createSessionService({ config, store, logger }) {
           session,
           book: structuredClone(member.book),
           overlay: structuredClone(member.overlay || createOverlay()),
+          genome: structuredClone(savedGenome),
           ethology: null,
           intent: null,
         });
@@ -438,6 +452,7 @@ export function createSessionService({ config, store, logger }) {
         soulId: member.session.state.soulId,
         book: structuredClone(member.book),
         overlay: structuredClone(member.overlay),
+        genome: structuredClone(member.genome),
         archive,
       });
     }

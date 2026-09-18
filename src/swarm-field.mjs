@@ -114,7 +114,7 @@ export function createSwarmFieldRenderer(canvas, read) {
     const cx = width * 0.5;
     const cy = height * 0.5;
     const wash = ctx.createRadialGradient(cx, cy, 20, cx, cy, Math.max(width, height) * 0.62);
-    wash.addColorStop(0, "rgba(201,162,94,0.06)");
+    wash.addColorStop(0, "rgba(240,185,11,0.06)");
     wash.addColorStop(1, "rgba(8,7,6,0)");
     ctx.fillStyle = wash;
     ctx.fillRect(0, 0, width, height);
@@ -122,7 +122,7 @@ export function createSwarmFieldRenderer(canvas, read) {
     if (!reduced) {
       for (let i = 0; i < 36; i += 1) {
         const seed = (i * 97 + Math.floor(angle * 280)) % 997;
-        ctx.fillStyle = i % 6 === 0 ? "rgba(201,162,94,.26)" : "rgba(147,161,129,.1)";
+        ctx.fillStyle = i % 6 === 0 ? "rgba(240,185,11,.26)" : "rgba(147,161,129,.1)";
         ctx.fillRect((seed * 1.73) % width, (seed * 2.41 + i * 13) % height, 1.2, 1.2);
       }
     }
@@ -145,7 +145,7 @@ export function createSwarmFieldRenderer(canvas, read) {
     for (const [id, locus] of Object.entries(FIELD_LOCI)) {
       const x = locus.x * width;
       const y = locus.y * height;
-      ctx.strokeStyle = id === "inter.core" ? "rgba(201,162,94,0.28)" : "rgba(156,171,141,0.2)";
+      ctx.strokeStyle = id === "inter.core" ? "rgba(240,185,11,0.28)" : "rgba(156,171,141,0.2)";
       ctx.beginPath();
       ctx.ellipse(x, y, locus.r * width, locus.r * height * 1.05, 0, 0, TAU);
       ctx.stroke();
@@ -200,7 +200,7 @@ export function createSwarmFieldRenderer(canvas, read) {
       }
       const heading = spin + Math.PI / 2;
       drawFly(ctx, x, y, lit ? 1.08 : you ? 1 : 0.78, heading, lit, you);
-      ctx.fillStyle = you ? "#c9ab6e" : "#7a7266";
+      ctx.fillStyle = you ? "#fcd535" : "#7a7266";
       ctx.textAlign = "left";
       ctx.fillText(you ? "YOU" : body.shardId.replace("shard-", "#"), x + 12, y - 9);
     }

@@ -39,6 +39,16 @@
     },
     {
       "inputs": [],
+      "name": "Cooldown",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CooldownCap",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "InvalidPair",
       "type": "error"
     },
@@ -121,6 +131,19 @@
         }
       ],
       "name": "BreedBuyHeld",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "cooldown",
+          "type": "uint64"
+        }
+      ],
+      "name": "BreedCooldownSet",
       "type": "event"
     },
     {
@@ -397,6 +420,19 @@
     },
     {
       "inputs": [],
+      "name": "breedCooldown",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "breedPrice",
       "outputs": [
         {
@@ -462,6 +498,25 @@
           "internalType": "address",
           "name": "",
           "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "lastBredAt",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
         }
       ],
       "stateMutability": "view",
@@ -629,6 +684,19 @@
         }
       ],
       "name": "setAdapter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "next",
+          "type": "uint64"
+        }
+      ],
+      "name": "setBreedCooldown",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

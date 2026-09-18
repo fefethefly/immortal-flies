@@ -60,6 +60,7 @@ import {
   waitAction,
 } from "./chain.mjs";
 import {
+  BrandWordmark,
   FlyMark,
   VitruvianFly,
   SectionLabel,
@@ -676,9 +677,7 @@ export default function App() {
           aria-label={tx("altar.aria")}
         >
           <FlyMark />
-          <span>
-            IMMORTAL<small>FRUIT FLIES</small>
-          </span>
+          <BrandWordmark />
         </a>
         <nav className={navOpen ? "open" : ""} aria-label={tx("nav.label")}>
           <a href="/" onClick={() => setNavOpen(false)}>
@@ -871,13 +870,13 @@ export default function App() {
             {Array.from({ length: 4 }, (_, i) => (
               <React.Fragment key={i}>
                 <span>APPROACH BECOMES BUY</span>
-                <FlyMark small />
+                <FlyMark small inherit />
                 <span>RETREAT BECOMES SELL</span>
                 <span className="ticker-diamond">+</span>
                 <span>CULL THE WEAK</span>
-                <FlyMark small />
+                <FlyMark small inherit />
                 <span>THE LINEAGE TRADES ON</span>
-                <FlyMark small />
+                <FlyMark small inherit />
               </React.Fragment>
             ))}
           </div>
@@ -1030,7 +1029,7 @@ export default function App() {
                               key={`${x}-${y}`}
                             >
                               {current[0] === x && current[1] === y ? (
-                                <FlyMark small />
+                                <FlyMark small inherit />
                               ) : x === 13 && y === 7 ? (
                                 <Droplets size={14} />
                               ) : visited ? (
@@ -1348,7 +1347,7 @@ export default function App() {
         <section className="manifesto-section">
           <div className="container">
             <div className="manifesto-eyebrow">
-              <FlyMark small /> THE CONTINUITY PROTOCOL
+              <FlyMark small inherit /> THE CONTINUITY PROTOCOL
             </div>
             <h2>
               人扮演了造物者。
@@ -1554,9 +1553,7 @@ export default function App() {
       <footer className="site-footer container">
         <a className="brand" href="#home">
           <FlyMark />
-          <span>
-            IMMORTAL<small>FRUIT FLIES</small>
-          </span>
+          <BrandWordmark />
         </a>
         <p>
           一个先交易、再扩展金融行为的数字生命实验。

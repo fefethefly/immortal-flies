@@ -18,17 +18,25 @@ export function PhenotypeReadout({
     ["sat", ph.sat],
     ["light", ph.light],
     ["eye", ph.eye],
+    ["eyePair", ph.eyePair],
+    ["sex", ph.sex],
+    ["wingMark", ph.wingMark],
+    ["wingShape", ph.wingShape],
+    ["wingVein", ph.wingVein],
     ["size", ph.size],
     ["stripes", ph.stripes],
     ["mark", ph.mark],
-  ];
+  ].filter(([, row]) => row);
   const scarce = ph.scarcity;
   const expected = scarce ? formatExpected(scarce.expectedPer1024) : null;
   return (
     <div
       className={`pheno ${compact ? "is-compact" : ""}`}
       data-testid="phenotype-readout"
-      style={{ "--pheno-body": ph.art.body, "--pheno-eye": ph.art.eye }}
+      style={{
+        "--pheno-body": ph.art.body,
+        "--pheno-eye": ph.art.eyeLeft || ph.art.eye,
+      }}
     >
       <header className="pheno-head">
         <span>GENOME / READOUT</span>
@@ -40,8 +48,8 @@ export function PhenotypeReadout({
         role="img"
         aria-label={
           lang === "zh"
-            ? "64 个基因组格子，不是神经元"
-            : "64 genome chips, not neurons"
+            ? "96 个基因组格子，不是神经元"
+            : "96 genome chips, not neurons"
         }
       >
         {ph.chips.map((chip) => (
@@ -61,7 +69,14 @@ export function PhenotypeReadout({
               <dt>{key}</dt>
               <dd>
                 {key === "hue" ? <b style={{ background: ph.art.body }} /> : null}
-                {key === "eye" ? <b style={{ background: ph.art.eye }} /> : null}
+                {key === "eye" ? (
+                  <>
+                    <b style={{ background: ph.art.eyeLeft || ph.art.eye }} />
+                    {ph.eyePair?.id === "split" ? (
+                      <b style={{ background: ph.art.eyeRight }} />
+                    ) : null}
+                  </>
+                ) : null}
                 <span>{row[lang] || row.en}</span>
                 <small>
                   {locked

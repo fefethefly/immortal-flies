@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { FlyMark } from "./vitruvian.jsx";
+import { BrandLockup } from "./vitruvian.jsx";
 import { LocaleContext } from "./locale-context.jsx";
 import { LocaleSwitch } from "./locale-switch.jsx";
 import { SiteCa } from "./seal-bar.jsx";
@@ -20,7 +20,9 @@ export const NAV_GROUPS = [
       ["/", "nav.home", "home", "01"],
       ["/habitat.html", "nav.habitat", "habitat", "02"],
       ["/field.html", "nav.field", "field", "03"],
-      ["/market.html", "nav.market", "market", "04"],
+      ["/host.html", "nav.host", "host", "04"],
+      ["/market.html", "nav.market", "market", "05"],
+      ["/colony.html", "nav.colony", "colony", "06"],
     ],
   },
   {
@@ -51,8 +53,12 @@ const ROUTE_ALIASES = {
   "/field.html": "/field.html",
   "/habitat": "/habitat.html",
   "/habitat.html": "/habitat.html",
+  "/host": "/host.html",
+  "/host.html": "/host.html",
   "/market": "/market.html",
   "/market.html": "/market.html",
+  "/colony": "/colony.html",
+  "/colony.html": "/colony.html",
   "/live": "/live.html",
   "/live.html": "/live.html",
   "/protocol": "/protocol.html",
@@ -137,12 +143,10 @@ export function SiteBrand({ href = "/", small }) {
     <a
       className="site-brand"
       href={href}
+      aria-label="IMMORTAL Fruit Flies"
       onClick={(event) => goFromClick(go, href, event)}
     >
-      <FlyMark small={small} />
-      <span>
-        IMMORTAL<small>FRUIT FLIES</small>
-      </span>
+      <BrandLockup small={small} />
     </a>
   );
 }

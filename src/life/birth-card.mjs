@@ -1,3 +1,4 @@
+import { catalogIndex, traitSwatches } from "./fly-traits.mjs";
 import { labelOf, trueNameOf } from "./names.mjs";
 
 export const CARD_W = 1400;
@@ -218,6 +219,11 @@ export function describeBirth(
     badge: catalogBadge(soul, locale),
     plateName: name,
     tokenMark: `#${soul.tokenId}`,
+    plateIndex: catalogIndex(soul),
+    traitRows: traitSwatches(soul, locale),
+    vitalLine: `${
+      locale === "zh" ? `第${soul.generation || 0}代` : `Gen ${soul.generation || 0}`
+    } · ${tx("ledger.card.alive")}`,
     accession: tx(bred ? "birth.accession.bred" : "birth.accession.hatched", {
       n: soul.generation || 0,
     }),

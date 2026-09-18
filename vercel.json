@@ -6,7 +6,9 @@
     { "source": "/blueprint", "destination": "/blueprint.html" },
     { "source": "/economy", "destination": "/economy.html" },
     { "source": "/habitat", "destination": "/habitat.html" },
+    { "source": "/host", "destination": "/host.html" },
     { "source": "/market", "destination": "/market.html" },
+    { "source": "/colony", "destination": "/colony.html" },
     { "source": "/field", "destination": "/field.html" },
     { "source": "/swarm", "destination": "/swarm.html" },
     { "source": "/brain", "destination": "/brain.html" },
@@ -35,6 +37,22 @@
     },
     {
       "source": "/contract/life/SoulMarket.testnet.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/contract/life/MiningHub.deployment.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/contract/life/MiningHub.testnet.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/contract/life/PrivateRunner.deployment.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/contract/life/PrivateRunner.testnet.json",
       "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     },
     {

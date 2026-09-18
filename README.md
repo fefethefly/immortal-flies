@@ -1,8 +1,10 @@
 # IMMORTAL / Fruit Flies
 
-**The Swarm Trades. — 果蝇上链，先学会买卖。**
+**免费孵化，拥有一只有可验证历史的数字果蝇。**
 
-一个为 BNB Chain 设计的数字生命原型。活着的第一件事是交易：趋近与退避被读成买入与卖出。身份、训练与转生留在祭坛；出借、金库与预测是后续金融行为，不另起策略机器人。
+当前优先交付 BNB 免费孵化（仅网络 gas）、Soul 身份、链上互动与可恢复档案。公共协议分离 LifeId、SpeciesManifest、ModelManifest 与 Session，为未来跨链跨物种交流/迁徙预留接口；首版 BNB 为唯一权威身份链，跨链桥未开放。交易仍是纸面小世界。产品裁定见 [PRODUCT-LATEST §20](docs/PRODUCT-LATEST.md#20-已确认开放数字生命架构与本轮交付)，实现规格见 [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md)。
+
+**工程暂停交接（2026-09-16）：** 新 Soul/生命日志合约初版已编译，测试尚未全部通过，未部署公共链。前端与正式协议规格尚未完成。接手从 [Grok 交接说明](docs/GROK-HANDOFF-2026-09-16.md) 开始。
 
 ## 启动
 
@@ -47,7 +49,7 @@ npm run server   # http://127.0.0.1:8787 ；契约见 docs/API-V1.md
 
 ## 范围与事实
 
-**$IFS 代币已在 BSC 主网发射**（记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)）；但 **NFT 合约主网尚未开放**、测试网合约也未部署（`public/contract/ImmortalFly.deployment.json` 仍是 `UNDEPLOYED`），祭坛只是本地仪式。部署后连接钱包会切到 BSC 测试网（97），铸造与训练会发交易。迷宫成绩、本地档案、MaleCNS 连接组都不能当作链上资产或官方成绩。
+**$IFS 代币已在 BSC 主网发射**（记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)）；**金库地址未公布**。**Soul NFT 主网尚未开放**。`ImmortalFly.sol` 是 16 节点测试网原型，**禁止部署到 BSC 主网**。主网身份草案是 `contracts/life/ImmortalSoul.sol`（未部署，清单 `UNDEPLOYED`），见 [docs/LIFE-PROTOCOL.md](docs/LIFE-PROTOCOL.md) 与 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) §19–§20。本地祭坛才能练旧 `mint`；生产 `/altar` 跳蓝图。迷宫成绩、本地档案、MaleCNS 连接组都不能当作链上资产或官方成绩。销毁与自动打给个人地址均未实现，也不应实现为协议分流。
 
 模型名称为 `iff-neural-16-v1`：16 个节点、3 组可训练参数与确定性随机状态。它受到果蝇行为启发，并非完整果蝇脑连接组，更不代表意识上传。页面中复杂的发光线路是美术表现；神经图谱展示的是轻量模型的实际电位与脉冲。
 
@@ -55,9 +57,9 @@ SHA-256 校验用于验证档案完整性，不能证明档案的来源、持有
 
 ## 链上原型
 
-[contracts/ImmortalFly.sol](contracts/ImmortalFly.sol) 是可编译 ERC-721：固定上限 1024；完整保存轻量模型状态；内置基础 SVG 和元数据；无 burn、管理员、代理升级或任意状态覆写入口。状态由交易推进。
+[contracts/ImmortalFly.sol](contracts/ImmortalFly.sol) 是可编译 ERC-721 **测试网原型**：固定上限 1024；完整保存 16 节点状态；内置基础 SVG；无 burn、管理员、代理。它不是主网灵魂。主网方案见 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) §19。
 
-本地祭坛（`altar.html`，生产环境已并入蓝图）已写好测试网读写代码：`src/chain.mjs` 负责切链、发现代币、`getFly` / `mint` / `train` / `sleep` / `wake` / `rebirth`。地址写在 `public/contract/ImmortalFly.deployment.json`（当前 `UNDEPLOYED`）。艺术卡面仍用本地图片；链上 SVG 是独立兜底。主网、发行规则和独立安全检查尚未完成，不能承诺“已经在 BNB 永存”。
+本地祭坛（`altar.html`，生产环境已并入蓝图）已写好 **chainId 97** 读写：`src/chain.mjs` 的 `getFly` / `mint` / `train` / `sleep` / `wake` / `rebirth`。地址写在 `public/contract/ImmortalFly.deployment.json`（当前 `UNDEPLOYED`）。艺术卡面仍用本地图片。不能承诺“已经在 BNB 永存”。
 
 两套前端：[docs/FRONTENDS.md](docs/FRONTENDS.md)。测试网步骤：[docs/TESTNET.md](docs/TESTNET.md)。Flap Vault UI 是另一包，现在不做。
 

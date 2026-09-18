@@ -7,8 +7,10 @@ import {
   constants,
   readdir,
   rm,
+  rename,
 } from "node:fs/promises";
 import { join } from "node:path";
+import { randomUUID } from "node:crypto";
 
 /** 磁盘档案：data/sessions/<id>/ 与 branches / llm 审计。 */
 export function createStore(dataDir) {
@@ -37,7 +39,13 @@ export function createStore(dataDir) {
   }
 
   async function writeJson(path, value) {
-    await writeFile(path, `${JSON.stringify(value)}\n`, "utf8");
+    const temp = `${path}.${randomUUID()}.tmp`;
+    try {
+      await writeFile(temp, `${JSON.stringify(value)}\n`, { encoding: "utf8", flag: "wx" });
+      await rename(temp, path);
+    } finally {
+      await rm(temp, { force: true });
+    }
   }
 
   async function readJson(path) {

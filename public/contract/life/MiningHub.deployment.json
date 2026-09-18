@@ -1,0 +1,11 @@
+{
+  "status": "UNDEPLOYED",
+  "chainId": null,
+  "address": null,
+  "soul": null,
+  "journal": null,
+  "ifs": null,
+  "hive": null,
+  "fromBlock": 0,
+  "note": "Independent satellite. Not a Soul module. Do not setModule. Anvil gates passed; no mainnet deploy yet. Private-track service fee is not mining yield. Frontend /host.html. See docs/MINING-OPS.md."
+}

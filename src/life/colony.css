@@ -1,0 +1,965 @@
+/* Colony ledger —— 群体图鉴页。沿用 candlelight/gold 体系，不引入新色相。 */
+
+/* 台账页以右侧名录为主体：左栏收窄成紧凑侧栏，内容随视口固定。 */
+.life-shell.is-colony {
+  grid-template-columns: minmax(224px, 264px) minmax(0, 1fr);
+}
+
+.life-shell.is-colony .life-rail {
+  position: sticky;
+  top: 72px;
+  align-self: start;
+  max-height: calc(100dvh - 72px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 22px 18px 30px;
+}
+
+.life-shell.is-colony .life-rail h1 {
+  margin: 6px 0 10px;
+  font-size: 24px;
+}
+
+.life-shell.is-colony .life-rail > p {
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.life-cross-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 4px 0 12px;
+}
+
+.life-cross-row .life-cross {
+  margin: 0;
+}
+
+.life-stage.is-colony {
+  min-width: 0;
+}
+
+.colony-tabs {
+  position: sticky;
+  top: 72px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 10px 24px;
+  background: rgba(11, 10, 8, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #2f2a1f;
+}
+
+.colony-tabs a {
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  color: #a89e8c;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.colony-tabs a:hover {
+  color: #f0ead9;
+  border-color: #2f2a1f;
+}
+
+.colony-section {
+  padding: 8px 0 26px;
+  scroll-margin-top: 122px;
+}
+
+.colony-section + .colony-section {
+  border-top: 1px solid rgba(47, 42, 31, 0.7);
+}
+
+.colony-lead {
+  margin: 12px 24px 0;
+  max-width: 62ch;
+  color: #a89e8c;
+  font-size: 13px;
+}
+
+/* life-thought 默认是栖息地画布的绝对定位浮层；台账页作为普通段落参与排版。 */
+.colony-section .life-thought {
+  position: static;
+  margin: 12px 24px 0;
+  max-width: 62ch;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.life-census {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 8px 0 2px;
+  border-top: 1px solid rgba(47, 42, 31, 0.85);
+}
+
+.life-census h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font:
+    500 15px/1.2 "Cormorant Garamond",
+    serif;
+  color: #f0ead9;
+}
+
+.life-census h3 small {
+  color: #8a8172;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+
+.life-census > div {
+  display: grid;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid #2f2a1f;
+  background: rgba(12, 11, 9, 0.72);
+}
+
+.life-census > div strong {
+  font:
+    500 16px/1 "Cormorant Garamond",
+    serif;
+  color: #f0ead9;
+}
+
+.life-census > div small {
+  color: #8a8172;
+  font:
+    8px/1.3 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.colony-mine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a89e8c;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+
+.colony-mine input {
+  accent-color: #f0b90b;
+}
+
+.colony-card-name {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.colony-card-name:hover em {
+  color: #f0b90b;
+}
+
+.colony-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 24px 40px;
+}
+
+.colony-pages small {
+  color: #8a8172;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+}
+
+.colony-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  vertical-align: -1px;
+}
+
+.colony-dot.is-seen {
+  background: linear-gradient(90deg, #b98a0a, #f0b90b);
+}
+
+.colony-dot.is-expected {
+  border: 1px solid #6e6553;
+}
+
+.colony-loci {
+  display: grid;
+  gap: 18px;
+  padding: 16px 24px 0;
+}
+
+.colony-locus h4 {
+  margin: 0 0 8px;
+  color: #c8bfb0;
+  font:
+    500 13px/1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.colony-locus h4 small {
+  margin-left: 8px;
+  color: #8a8172;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.colony-locus ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.colony-locus li {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.colony-locus-name {
+  color: #a89e8c;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colony-bars {
+  display: grid;
+  grid-template-rows: 5px 5px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.colony-bars i {
+  display: block;
+  height: 5px;
+  transition: width 480ms ease;
+}
+
+.colony-bars i.is-seen {
+  background: linear-gradient(90deg, #b98a0a, #f0b90b);
+}
+
+.colony-bars i.is-expected {
+  border: 1px solid #6e6553;
+}
+
+.colony-locus-nums {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  min-width: 4.5rem;
+}
+
+.colony-locus-nums b {
+  color: #f0ead9;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+
+.colony-locus-nums small {
+  color: #8a8172;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+}
+
+.colony-locus li.is-from-parent .colony-locus-name em {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 1px solid rgba(240, 185, 11, 0.55);
+  color: #f0b90b;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+.colony-predict-legend {
+  justify-content: flex-start;
+}
+
+.colony-atlas-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 22px;
+  padding: 22px 24px 0;
+}
+
+.colony-atlas-lists h3 {
+  margin: 0 0 4px;
+  font:
+    500 18px/1.2 "Cormorant Garamond",
+    serif;
+  color: #f0ead9;
+}
+
+.colony-atlas-lists ol {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.colony-atlas-lists li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.colony-atlas-lists button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #c8bfb0;
+  font:
+    12px "IBM Plex Mono",
+    monospace;
+  cursor: pointer;
+  text-align: left;
+}
+
+.colony-atlas-lists button:hover {
+  color: #f0b90b;
+}
+
+.colony-atlas-lists small {
+  color: #8a8172;
+  font:
+    10px "IBM Plex Mono",
+    monospace;
+  white-space: nowrap;
+}
+
+.colony-predict {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 26px;
+  padding: 18px 24px 0;
+}
+
+.colony-predict-form {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.colony-predict-form label {
+  display: grid;
+  gap: 6px;
+  color: #8a8172;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+
+.colony-predict-form select {
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+  color: #f0ead9;
+  padding: 8px;
+  font:
+    12px "IBM Plex Mono",
+    monospace;
+}
+
+.colony-decided h3 {
+  margin: 10px 0 6px;
+  font:
+    500 15px/1.2 "Cormorant Garamond",
+    serif;
+  color: #f0ead9;
+}
+
+.colony-decided ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.colony-decided li {
+  color: #c8bfb0;
+  font-size: 12px;
+}
+
+.colony-predict-out {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-width: 0;
+}
+
+.colony-predict-out .colony-loci {
+  padding: 0;
+}
+
+.colony-samples-wrap h3 {
+  margin: 0 0 8px;
+  font:
+    500 18px/1.2 "Cormorant Garamond",
+    serif;
+  color: #f0ead9;
+}
+
+.colony-samples {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.colony-samples li {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #2f2a1f;
+  background: rgba(12, 11, 9, 0.72);
+}
+
+.colony-samples small {
+  color: #a89e8c;
+  font:
+    10px/1.4 "IBM Plex Mono",
+    monospace;
+}
+
+.colony-boards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+  padding: 18px 24px 0;
+}
+
+.colony-boards h3 {
+  margin: 0 0 4px;
+  font:
+    500 18px/1.2 "Cormorant Garamond",
+    serif;
+  color: #f0ead9;
+}
+
+.colony-boards ol {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.colony-boards li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.colony-boards button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #c8bfb0;
+  font:
+    12px "IBM Plex Mono",
+    monospace;
+  cursor: pointer;
+  text-align: left;
+}
+
+.colony-boards button:hover {
+  color: #f0b90b;
+}
+
+.colony-boards small {
+  color: #8a8172;
+  font:
+    10px "IBM Plex Mono",
+    monospace;
+  white-space: nowrap;
+}
+
+.colony-detail {
+  max-width: 480px;
+  width: min(92vw, 480px);
+  max-height: 86vh;
+  overflow: auto;
+}
+
+.colony-detail:focus {
+  outline: none;
+}
+
+.colony-detail-art {
+  display: grid;
+  place-items: center;
+  margin: 2px 0 4px;
+  padding: 8px 10px 12px;
+  border-radius: 16px;
+  border: 1px solid #b4945438;
+  background:
+    radial-gradient(
+      ellipse at 50% 58%,
+      color-mix(in srgb, var(--pheno-body) 18%, transparent),
+      transparent 68%
+    ),
+    #0c0b09;
+}
+
+.life-market-buy-card.colony-detail .colony-detail-art .life-market-thumb {
+  display: block;
+  width: min(100%, 260px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  max-width: 100%;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  border: 0;
+  background: transparent;
+}
+
+.colony-detail-art .catalog-portrait {
+  filter: drop-shadow(0 0 8px #e3b96028);
+}
+
+.colony-detail .fly-traits li {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.colony-detail .fly-traits span {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+}
+.colony-detail .fly-traits small {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+@media (max-width: 1000px) {
+  .colony-predict {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .life-shell.is-colony {
+    grid-template-columns: 1fr;
+  }
+
+  .life-shell.is-colony .life-rail {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding: 22px 20px 36px;
+  }
+
+  .colony-locus li {
+    grid-template-columns: minmax(6rem, 8rem) 1fr auto;
+    gap: 8px;
+  }
+}
+
+.life-market-card.is-preview {
+  border-style: dashed;
+}
+
+.colony-unborn {
+  justify-self: start;
+  padding: 2px 7px;
+  border: 1px dashed rgba(240, 185, 11, 0.55);
+  color: #f0b90b;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Collectible cabinet: the illustration and its two traits form one reading unit. */
+.life-shell.is-colony {
+  display: block;
+  max-width: 1680px;
+  margin: auto;
+  background:
+    radial-gradient(ellipse at 50% 0, #29201455, transparent 460px), #0b0b09;
+}
+.colony-cover {
+  display: grid;
+  grid-template-columns: 1fr 2.6fr 1fr;
+  align-items: center;
+  gap: 24px;
+  padding: 34px 36px 30px;
+  border-bottom: 1px solid #a5844438;
+  text-align: center;
+}
+.colony-cover h1 {
+  margin: 8px 0 12px;
+  font:
+    600 clamp(32px, 4.1vw, 66px) / 1.15 "Noto Serif SC",
+    "Songti SC",
+    Georgia,
+    serif;
+  letter-spacing: 0.1em;
+  color: #ffe0a0;
+  text-shadow: 0 2px 20px #d7a64d45;
+}
+.colony-cover p {
+  margin: 0;
+  color: #dbccb0;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+}
+.colony-cover-kicker {
+  color: #bba271;
+  font: 10px/1.5 monospace;
+  letter-spacing: 0.3em;
+}
+.colony-cover .colony-cover-note {
+  text-align: left;
+  color: #d6adc5;
+  font-family: "Kaiti SC", "STKaiti", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.8;
+  letter-spacing: 0.06em;
+  transform: rotate(-5deg);
+}
+.colony-cover-note span {
+  font-size: 13px;
+}
+.colony-cover-seal {
+  justify-self: end;
+  display: grid;
+  gap: 2px;
+  width: 128px;
+  padding: 12px 8px;
+  border: 1px solid #cfb274;
+  border-radius: 45% 45% 38% 38%;
+  color: #ead4a2;
+  text-decoration: none;
+  box-shadow: inset 0 0 16px #c4a35e12;
+  font-size: 11px;
+}
+.colony-cover-seal b {
+  font:
+    32px/1 Georgia,
+    serif;
+}
+.life-shell.is-colony .life-rail {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  padding: 0 28px;
+  border: 0;
+  background: transparent;
+}
+.colony-ledger-info > summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  cursor: pointer;
+  color: #bfae8c;
+  font-size: 12px;
+}
+.colony-ledger-info > summary span {
+  color: #938873;
+}
+.colony-ledger-info[open] {
+  padding-bottom: 24px;
+}
+.colony-ledger-info > p {
+  max-width: 85ch;
+  font-size: 13px;
+}
+.colony-ledger-info .life-census {
+  grid-template-columns: repeat(6, 1fr);
+}
+.colony-ledger-info .life-kin {
+  max-width: 340px;
+}
+.colony-tabs {
+  top: 70px;
+  justify-content: center;
+  padding: 8px 16px;
+  border-top: 1px solid #a5844430;
+}
+.colony-tabs a {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.is-colony .life-market-head {
+  padding: 22px 28px 8px;
+}
+.is-colony .life-market-head h2 {
+  font-size: 26px;
+  color: #ebd6ae;
+}
+.is-colony .life-market-head .eyebrow {
+  color: #98825b;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+}
+.is-colony .life-market-filters {
+  padding: 8px 28px;
+  gap: 10px;
+}
+.is-colony .life-market-filters label {
+  font-size: 10px;
+}
+.is-colony .life-market-filters select,
+.is-colony .life-market-filters input {
+  border-radius: 5px;
+  border-color: #aa8b493b;
+  background: #13120e;
+}
+.colony-lead {
+  max-width: 100ch;
+  margin: 8px 28px 0;
+  font-size: 12px;
+  color: #9f9685;
+}
+.is-colony .life-market-grid {
+  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+  gap: 14px;
+  padding: 22px 28px 32px;
+  align-items: start;
+}
+.is-colony .life-market-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 49% minmax(0, 1fr);
+  grid-template-rows: 22px auto auto 26px auto;
+  gap: 5px 10px;
+  min-height: 208px;
+  padding: 17px 14px 10px 8px;
+  overflow: hidden;
+  border: 1px solid #b49454a6;
+  border-radius: 13px;
+  background:
+    radial-gradient(
+      ellipse at 26% 55%,
+      color-mix(in srgb, var(--pheno-body) 13%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(130deg, #19150e88, #080908 68%);
+  box-shadow: inset 0 1px 0 #f5d99810;
+  transition:
+    border-color 0.25s,
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+.is-colony .life-market-card:hover {
+  transform: translateY(-3px);
+  border-color: #e1bd79;
+  box-shadow:
+    0 8px 26px #0005,
+    inset 0 0 24px #b7933410;
+}
+.is-colony .life-market-card.is-clickable {
+  cursor: pointer;
+}
+.is-colony .life-market-card.is-open {
+  border-color: #e1bd79;
+  box-shadow:
+    0 8px 26px #0005,
+    inset 0 0 24px #b7933410;
+}
+.is-colony .life-market-card .fly-index {
+  grid-column: 2;
+  color: #cfb67f;
+  font: 12px/1.5 monospace;
+  letter-spacing: 0.06em;
+}
+.is-colony .life-market-card .life-market-thumb {
+  grid-column: 1;
+  grid-row: 1 / 5;
+  width: 100%;
+  height: 172px;
+  align-self: center;
+  border: 0;
+  background: transparent;
+  object-fit: contain;
+  object-position: center;
+}
+.is-colony .life-market-card > strong {
+  grid-column: 2;
+  align-self: center;
+  color: color-mix(in srgb, var(--pheno-body) 38%, #fff0d8);
+  font:
+    600 20px/1.25 "Noto Serif SC",
+    "Songti SC",
+    Georgia,
+    serif;
+  text-transform: capitalize;
+  overflow-wrap: anywhere;
+}
+.is-colony .life-market-card .fly-traits {
+  grid-column: 2;
+  align-self: center;
+  gap: 9px;
+}
+.is-colony .life-market-card .fly-traits small {
+  display: none;
+}
+.is-colony .life-market-card .fly-traits span {
+  font-size: 12px;
+}
+.is-colony .fly-traits-dot {
+  width: 12px;
+  height: 12px;
+  box-shadow:
+    inset 0 2px 3px #ffffff99,
+    inset 0 -2px 3px #0005;
+}
+.is-colony .life-market-card .fly-vital,
+.is-colony .life-market-card .colony-unborn {
+  grid-column: 2;
+  border: 0;
+  padding: 4px 0 0;
+  font: 11px/1.4 monospace;
+  color: #bba87d;
+  letter-spacing: 0;
+}
+.is-colony .fly-vital b {
+  color: #91bd84;
+}
+.colony-card-data {
+  grid-column: 1 / -1;
+  border-top: 1px solid #b4945428;
+  padding: 7px 6px 0;
+}
+.colony-card-data summary {
+  cursor: pointer;
+  color: #a18e69;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+.colony-card-data[open] summary {
+  margin-bottom: 12px;
+}
+.colony-card-data dl {
+  margin-top: 12px;
+}
+.colony-card-data .life-kin-row {
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.is-colony :is(button, a, summary, input, select):focus-visible {
+  outline: 2px solid #e4c17c;
+  outline-offset: 4px;
+}
+@media (min-width: 1500px) {
+  .is-colony .life-market-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .colony-cover {
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 28px 20px;
+    text-align: left;
+  }
+  .colony-cover .colony-cover-note {
+    display: none;
+  }
+  .colony-cover h1 {
+    font-size: 32px;
+  }
+  .colony-cover p {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .colony-cover-seal {
+    width: 82px;
+  }
+  .colony-cover-seal b {
+    font-size: 26px;
+  }
+  .colony-cover-kicker {
+    font-size: 8px;
+  }
+  .colony-tabs {
+    position: static;
+    gap: 0;
+  }
+  .colony-tabs a {
+    padding: 8px;
+    font-size: 9px;
+  }
+  .is-colony .life-market-grid {
+    padding: 18px 16px;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  }
+  .life-shell.is-colony .life-rail {
+    padding: 0 20px;
+  }
+  .colony-ledger-info .life-census {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .is-colony .life-market-head {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-colony .life-market-card {
+    transition: none;
+  }
+  .is-colony .life-market-card:hover {
+    transform: none;
+  }
+}
+.is-colony .life-market-card .colony-card-name {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+.is-colony .catalog-portrait {
+  filter: drop-shadow(0 0 5px #e3b96020);
+  object-fit: contain;
+  object-position: center;
+}

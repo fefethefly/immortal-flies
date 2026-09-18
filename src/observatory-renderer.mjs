@@ -1,9 +1,10 @@
+import { GOLD } from "./brand.mjs";
 import { createFlyCloud, colonyPosition } from "./observatory-art.mjs";
 import { phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
 
 const TAU = Math.PI * 2;
 const CLOUD = createFlyCloud();
-const COLORS = { neural: "#a9c4bb", society: "#c9a25e", market: "#93a181" };
+const COLORS = { neural: "#a9c4bb", society: GOLD, market: "#93a181" };
 const countBits = (value) => {
   let n = value >>> 0,
     count = 0;
@@ -116,7 +117,7 @@ export function createObservatoryRenderer(canvas, read) {
     const color = COLORS[mode],
       fly = swarm.flies.find((f) => f.id === selectedId) || swarm.flies[0];
     const pheno = fly ? phenotypeOf(fly) : null;
-    const bodyColor = pheno?.art.body || "#c9a25e";
+    const bodyColor = pheno?.art.body || GOLD;
     const eyeColor = pheno?.art.eye || "#b57660";
     const bodyScale = pheno?.art.scale || 1;
     const stripeCount = pheno?.art.stripes ?? 2;
@@ -357,7 +358,7 @@ export function createObservatoryRenderer(canvas, read) {
             : p.material === "vein"
               ? "#e6e0cf"
               : p.material === "gold"
-                ? "#c9a25e"
+                ? GOLD
                 : bodyColor;
       if (p.material === "wing") alpha *= 0.65;
       if (p.material === "abdomen" && stripeCount > 0) {

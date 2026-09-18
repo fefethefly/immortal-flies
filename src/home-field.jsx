@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  createSwarm,
   formatPrice,
   loadStoredSwarm,
   reflexOf,
   saveStoredSwarm,
+  stimulate,
   tickSwarm,
 } from "./swarm.mjs";
 import { recallFly, rememberFly } from "./site-chrome.jsx";
@@ -641,8 +643,16 @@ export function HomeField({ swarm, selectedId, onSelect }) {
   );
 }
 
+function loadHomeColony() {
+  const saved = loadStoredSwarm();
+  if (saved.tick > 0 || saved.flies.length >= 12) return saved;
+  const next = createSwarm({ size: 16, seed: saved.seed || 0x1f1f1f1f });
+  saveStoredSwarm(next);
+  return next;
+}
+
 export function useHomeSwarm() {
-  const [swarm, setSwarm] = useState(loadStoredSwarm);
+  const [swarm, setSwarm] = useState(loadHomeColony);
   const [paused, setPaused] = useState(false);
   const [selectedId, setSelectedId] = useState(() => recallFly() ?? 0);
   const touched = useRef(false);
@@ -693,10 +703,22 @@ export function useHomeSwarm() {
     setSelectedId(id);
     rememberFly(id);
   }
+  function poke(kind = "light") {
+    setSwarm((current) => {
+      try {
+        const next = stimulate(current, kind, 0.7);
+        saveStoredSwarm(next);
+        return next;
+      } catch {
+        return current;
+      }
+    });
+  }
   return {
     swarm,
     selectedId,
     select,
+    poke,
     paused,
     togglePause: () => setPaused((value) => !value),
   };

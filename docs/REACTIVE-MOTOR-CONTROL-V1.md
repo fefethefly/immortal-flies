@@ -1,0 +1,25 @@
+# 手写反应式运动对照 / 1
+
+状态：非神经开发对照，未接入产品。不是原神经控制器的修复。
+
+实现：
+/Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/reactive-motor-control.mjs
+
+读取自己的观察、合法一拍延迟消息和 heading；复用原控制器的观察选择及角差计算，但不使用其感觉源，也不调用神经 step。输出直接人工运动计数：角差 >9° 时 right=1/left=0，角差 <−9° 时 left=1/right=0；死区内 left=right=6。没有目标则静止。按几何积分规则转 ±9°，转弯时速度 3、前进时速度上限 35。不存在神经脉冲、学习或生物学归因。
+
+角差定义为目标角−当前 heading；+y 为屏幕向下，所以右侧目标初始 +90° 对应 +9°，不能反转符号。
+
+## 最小验证
+
+原 seed 301/right 的几何：receiver=(5000,5000), heading=0，target=(5000,6200)，observer=(5000,6800)。seed 仅作场景标签，手写控制器没有 RNG。预算 160 拍，采集半径 400。
+
+- 真实延迟消息：第 **34 拍**进入采集半径，距离 **377.966**。
+- 移除消息：160 拍无移动、无采集。
+- 两次运行完整轨迹一致；测试验证角差正负、死区、静止及非神经标记。
+
+测试：
+```sh
+node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/reactive-motor-control.test.mjs
+```
+
+仅这一已知失败几何的手写对照通过，不是四方位或未知环境的普遍保证。原神经 right/behind 失败仍然保留。该对照可检查观察/消息和几何运动层是否可用，不能替代神经闭环验证。

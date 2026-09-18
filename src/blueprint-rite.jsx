@@ -1,8 +1,9 @@
 import React, { memo, useEffect, useRef } from "react";
+import { GOLD } from "./brand.mjs";
 import { useOnStage, usePrefersReduced } from "./rite.jsx";
 
 const LAYERS = [
-  { id: "L0", color: "#c9a25e", y: 0.16 },
+  { id: "L0", color: GOLD, y: 0.16 },
   { id: "L1", color: "#93a181", y: 0.36 },
   { id: "L2", color: "#d8c9a4", y: 0.56 },
   { id: "L3", color: "#b57660", y: 0.76 },
@@ -25,9 +26,9 @@ function slab(ctx, cx, y, w, h, skew, color, lit) {
   ctx.lineTo(left + w - skew, y + h);
   ctx.lineTo(left - skew, y + h);
   ctx.closePath();
-  ctx.fillStyle = lit ? "rgba(201, 162, 94, 0.16)" : "rgba(18, 16, 13, 0.86)";
+  ctx.fillStyle = lit ? "rgba(240, 185, 11, 0.16)" : "rgba(18, 16, 13, 0.86)";
   ctx.fill();
-  ctx.strokeStyle = lit ? color : "rgba(201, 162, 94, 0.28)";
+  ctx.strokeStyle = lit ? color : "rgba(240, 185, 11, 0.28)";
   ctx.lineWidth = lit ? 1.6 : 1;
   ctx.stroke();
   ctx.beginPath();
@@ -36,9 +37,9 @@ function slab(ctx, cx, y, w, h, skew, color, lit) {
   ctx.lineTo(left + w + skew - 10, y - 10);
   ctx.lineTo(left + skew - 10, y - 10);
   ctx.closePath();
-  ctx.fillStyle = lit ? "rgba(201, 162, 94, 0.22)" : "rgba(28, 24, 18, 0.9)";
+  ctx.fillStyle = lit ? "rgba(240, 185, 11, 0.22)" : "rgba(28, 24, 18, 0.9)";
   ctx.fill();
-  ctx.strokeStyle = "rgba(201, 162, 94, 0.2)";
+  ctx.strokeStyle = "rgba(240, 185, 11, 0.2)";
   ctx.stroke();
 }
 
@@ -98,7 +99,7 @@ export const LayerCabinet = memo(function LayerCabinet({
       }
       geometry.forEach((g, i) => {
         if (i < geometry.length - 1) {
-          ctx.strokeStyle = "rgba(201, 162, 94, 0.22)";
+          ctx.strokeStyle = "rgba(240, 185, 11, 0.22)";
           ctx.beginPath();
           ctx.moveTo(g.cx, g.y + g.h);
           ctx.lineTo(geometry[i + 1].cx, geometry[i + 1].y);
@@ -211,7 +212,7 @@ export const PhaseSpine = memo(function PhaseSpine({ count, nowCount }) {
 
     const paint = (pulse) => {
       ctx.clearRect(0, 0, width, height);
-      ctx.strokeStyle = "rgba(201, 162, 94, 0.28)";
+      ctx.strokeStyle = "rgba(240, 185, 11, 0.28)";
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(18, 10);
@@ -223,12 +224,12 @@ export const PhaseSpine = memo(function PhaseSpine({ count, nowCount }) {
         const next = i === nowCount;
         ctx.beginPath();
         ctx.arc(18, y, live ? 5 : 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = live ? "#c9a25e" : next ? "#93a181" : "#3a3428";
+        ctx.fillStyle = live ? GOLD : next ? "#93a181" : "#3a3428";
         ctx.fill();
         if (live && pulse) {
           ctx.beginPath();
           ctx.arc(18, y, 8 + Math.sin(pulse + i) * 2, 0, Math.PI * 2);
-          ctx.strokeStyle = "rgba(201, 162, 94, 0.35)";
+          ctx.strokeStyle = "rgba(240, 185, 11, 0.35)";
           ctx.stroke();
         }
       }

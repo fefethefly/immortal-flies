@@ -13,6 +13,7 @@ import {
   Radio,
   Eye,
 } from "lucide-react";
+import { GOLD } from "./brand.mjs";
 import { FlyMark } from "./vitruvian.jsx";
 import { SiteLink, SitePage } from "./site-chrome.jsx";
 import { SIGNAL_GROUPS } from "./brain/signals.mjs";
@@ -148,8 +149,8 @@ function NeuralScene({ nodes, edges, state, bodyView, groups }) {
           y = height * 0.16 + (state.body.y / 10000) * height * 0.68;
         const foodX = width * 0.7,
           foodY = height * 0.35;
-        ctx.fillStyle = "#c9a25e";
-        ctx.shadowColor = "#c9a25e";
+        ctx.fillStyle = GOLD;
+        ctx.shadowColor = GOLD;
         ctx.shadowBlur = 12;
         ctx.beginPath();
         ctx.arc(foodX, foodY, 5 + state.signal.food / 120, 0, Math.PI * 2);
@@ -163,7 +164,7 @@ function NeuralScene({ nodes, edges, state, bodyView, groups }) {
         ctx.rotate(((state.body.heading + 90) * Math.PI) / 180);
         ctx.strokeStyle = "#f0ead9";
         ctx.fillStyle = "#17140f";
-        ctx.shadowColor = "#c9a25e";
+        ctx.shadowColor = GOLD;
         ctx.shadowBlur = 10;
         for (const direction of [-1, 1]) {
           ctx.beginPath();
@@ -217,7 +218,7 @@ function NeuralScene({ nodes, edges, state, bodyView, groups }) {
       for (const [from, to] of edges) {
         if (!points[from] || !points[to]) continue;
         const lit = active.has(from);
-        ctx.strokeStyle = lit ? "rgba(201,162,94,.5)" : "rgba(216,201,164,.1)";
+        ctx.strokeStyle = lit ? "rgba(240,185,11,.5)" : "rgba(216,201,164,.1)";
         ctx.lineWidth = lit ? 1 : 0.45;
         ctx.beginPath();
         ctx.moveTo(points[from][0], points[from][1]);
@@ -227,10 +228,10 @@ function NeuralScene({ nodes, edges, state, bodyView, groups }) {
       points.forEach(([x, y, k], i) => {
         const lit = active.has(i);
         ctx.fillStyle = lit
-          ? "#c9a25e"
+          ? GOLD
           : role.get(i) || (nodes[i].sign < 0 ? "#9c855f" : "#93a181");
         ctx.shadowBlur = lit ? 10 : 0;
-        ctx.shadowColor = "#c9a25e";
+        ctx.shadowColor = GOLD;
         ctx.beginPath();
         ctx.arc(x, y, lit ? 3.2 : k * 0.9, 0, Math.PI * 2);
         ctx.fill();
@@ -278,7 +279,7 @@ function SignalRack({ state, trace }) {
     if (!trace.length) return;
     const max = Math.max(1, ...trace.map((frame) => frame.spikeCount || 0));
     ctx.beginPath();
-    ctx.strokeStyle = "#c9a25e";
+    ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1.4;
     trace.forEach((frame, i) => {
       const x = (i / Math.max(trace.length - 1, 1)) * cssW,

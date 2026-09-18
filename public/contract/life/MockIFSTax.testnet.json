@@ -1,0 +1,13 @@
+{
+  "status": "BSC_TESTNET",
+  "chainId": 97,
+  "address": "0xff23A7635140cF3c127f31A3c56A59C19F058899",
+  "symbol": "TIFS",
+  "taxBps": 100,
+  "operator": "0xc2FcdA8D7abbff26FbF0CD27D4Dc45b59c8419F2",
+  "fromBlock": 131618232,
+  "txHash": "0xf7674c73ef66412dc50d5205afd96de292f8c5dcb8fd1161d8ced020b9e3978f",
+  "explorer": "https://testnet.bscscan.com/address/0xff23A7635140cF3c127f31A3c56A59C19F058899",
+  "deployedAt": "2026-09-17T19:55:12.819Z",
+  "note": "Testnet mock with 1% tax. Not live IFS. Not a yield token."
+}

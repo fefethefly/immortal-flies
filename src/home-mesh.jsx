@@ -124,7 +124,12 @@ export function HomeMeshAtlas({ tx }) {
   }
 
   return (
-    <section className="home-mesh" aria-label={tx("public.mesh.label")} data-reveal="wait">
+    <section
+      id="mesh"
+      className="home-mesh"
+      aria-label={tx("public.mesh.label")}
+      data-reveal="wait"
+    >
       <div className="mesh-head">
         <div>
           <p className="mesh-kicker">{tx("public.mesh.kicker")}</p>

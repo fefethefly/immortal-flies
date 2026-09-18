@@ -1,13 +1,16 @@
 {
-  "schema": "iff.phenotype-loci/2",
-  "decoder": "phenotype-loci/2",
+  "schema": "iff.phenotype-loci/3",
+  "decoder": "phenotype-loci/3",
   "supply": 1024,
   "rollModulus": 10000,
   "rules": [
     "Each locus folds its chips with x * 31 + chip, then rolls against a 10000-bps table.",
     "Bone body locks Light to light. That lock is visible, not a hidden bonus.",
     "tokenURI carries filterable attributes only. No rarity rank, grade, or price.",
-    "Collection rank is computed after mint from the live set and changes until sold out."
+    "Collection rank is computed after mint from the live set and changes until sold out.",
+    "Chips 56–63 read eye-pair mosaicism off chain. Split eyes are not a tokenURI trait.",
+    "Chips 64–95 read wing mark / shape / veins and sex. Those four are tokenURI filters.",
+    "Sex is rolled each generation. Wing loci enter Kin crossover; sex does not."
   ],
   "traits": {
     "hue": [
@@ -238,6 +241,106 @@
         "pct": 10,
         "expectedPer1024": 102.4
       }
+    ],
+    "wingMark": [
+      {
+        "id": "clear",
+        "bps": 7000,
+        "pct": 70,
+        "expectedPer1024": 716.8
+      },
+      {
+        "id": "apical",
+        "bps": 1800,
+        "pct": 18,
+        "expectedPer1024": 184.32
+      },
+      {
+        "id": "banded",
+        "bps": 800,
+        "pct": 8,
+        "expectedPer1024": 81.92
+      },
+      {
+        "id": "pictured",
+        "bps": 400,
+        "pct": 4,
+        "expectedPer1024": 40.96
+      }
+    ],
+    "wingShape": [
+      {
+        "id": "typical",
+        "bps": 7800,
+        "pct": 78,
+        "expectedPer1024": 798.72
+      },
+      {
+        "id": "miniature",
+        "bps": 1200,
+        "pct": 12,
+        "expectedPer1024": 122.88
+      },
+      {
+        "id": "curly",
+        "bps": 700,
+        "pct": 7,
+        "expectedPer1024": 71.68
+      },
+      {
+        "id": "vestigial",
+        "bps": 300,
+        "pct": 3,
+        "expectedPer1024": 30.72
+      }
+    ],
+    "wingVein": [
+      {
+        "id": "complete",
+        "bps": 8600,
+        "pct": 86,
+        "expectedPer1024": 880.64
+      },
+      {
+        "id": "incomplete",
+        "bps": 1000,
+        "pct": 10,
+        "expectedPer1024": 102.4
+      },
+      {
+        "id": "extra",
+        "bps": 400,
+        "pct": 4,
+        "expectedPer1024": 40.96
+      }
+    ],
+    "sex": [
+      {
+        "id": "female",
+        "bps": 5000,
+        "pct": 50,
+        "expectedPer1024": 512
+      },
+      {
+        "id": "male",
+        "bps": 5000,
+        "pct": 50,
+        "expectedPer1024": 512
+      }
+    ],
+    "eyePair": [
+      {
+        "id": "matched",
+        "bps": 9800,
+        "pct": 98,
+        "expectedPer1024": 1003.52
+      },
+      {
+        "id": "split",
+        "bps": 200,
+        "pct": 2,
+        "expectedPer1024": 20.48
+      }
     ]
   },
   "market": {
@@ -249,6 +352,10 @@
       "Size",
       "Stripes",
       "Mark",
+      "Wings",
+      "Wing shape",
+      "Veins",
+      "Sex",
       "Generation"
     ],
     "tokenUriMustNotContain": [
@@ -261,6 +368,9 @@
       "Mythic",
       "price",
       "floor"
+    ],
+    "displayOnly": [
+      "eyePair"
     ],
     "listingKey": "chainId + collection + tokenId + lifeId",
     "clones": "Same looks may exist. Looks are not a unique key.",

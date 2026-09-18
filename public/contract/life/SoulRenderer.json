@@ -1,0 +1,249 @@
+{
+  "contractName": "SoulRenderer",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "name": "StringsInsufficientHexLength",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "seed",
+          "type": "uint32"
+        }
+      ],
+      "name": "chipWords",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "w0",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "w1",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "w2",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "seed",
+          "type": "uint32"
+        }
+      ],
+      "name": "decode",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "hue",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "saturation",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "light",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "eye",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "size",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "stripes",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "mark",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "wingMark",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "wingShape",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "wingVein",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "sex",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "body",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct SoulRenderer.Phenotype",
+          "name": "p",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decoderId",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "seed",
+          "type": "uint32"
+        }
+      ],
+      "name": "loci",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "out",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint32",
+          "name": "seed",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "life",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "genesis",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "birth",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "generation",
+          "type": "uint32"
+        },
+        {
+          "internalType": "string",
+          "name": "given",
+          "type": "string"
+        }
+      ],
+      "name": "render",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "collection",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ]
+}

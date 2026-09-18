@@ -1,6 +1,18 @@
-# BSC 测试网闭环
+# BSC 测试网闭环（16 节点原型）
 
-当前目标：先把 `ImmortalFly` 部署到 **BNB Smart Chain Testnet（chainId 97）**，再让本地祭坛用钱包签名读写同一只果蝇。当前状态：`public/contract/ImmortalFly.deployment.json` 为 `UNDEPLOYED`。注意：生产环境 `/altar` 已重定向到蓝图页；本地 `npm run dev` 仍可打开 `altar.html` 走下面的流程。MaleCNS 连接组、迷宫成绩、Flap Vault UI 都不走这条合约。
+**范围：** 本文只描述旧原型 `ImmortalFly.sol`（`iff-neural-16-v1`）在 **BSC Testnet chainId 97** 上的读写。它不是主网灵魂，也不是 `$IFS`。
+
+**主网禁止：** 不要把这份合约部署到 BSC 主网（56）。主网身份是 `contracts/life/ImmortalSoul.sol`。测试网灵魂用：
+
+```sh
+npm run life:check:testnet
+# IFF_DEPLOY_KEY=0x… npm run life:deploy:testnet
+# IFF_DEPLOY_KEY=0x… npm run life:hatch:testnet
+```
+
+部署清单：`public/contract/life/ImmortalSoul.testnet.json`。生产栖息地默认读主网 `ImmortalSoul.deployment.json`；本地要练测试网繁衍加 `?net=test`。`status` 以 `STALE` 开头的旧 `/1` 集合不会被前端当成活合约。当前解码器是 `phenotype-loci/2`。2026-09-16 测试网身份核：`ImmortalSoul` `0x3487A2802AF82F12Bb7a3dd40B262394f4819A5a`。2026-09-17 已把 `MODULE_KIN` 换成 `SoulKinFee` `0xfBC663EF50fF104277D05c520994E25a2391414f`（价可改，适配器未接）。旧免费 Kin `0xCA916D8632805FDC204eadF381f5243296f8A4d6` 留作 STALE。旧 `0x220e…7322` 已废弃。旧祭坛仍走 `ImmortalFly.sol`。
+
+当前目标：若仍要练旧祭坛，可把原型部署到测试网，再用本地祭坛签名。当前状态：`public/contract/ImmortalFly.deployment.json` 为 `UNDEPLOYED`。生产环境 `/altar` 已重定向到蓝图页；本地 `npm run dev` 仍可打开 `altar.html`。MaleCNS 连接组、迷宫成绩、Flap Vault UI、主网 Soul mint 都不走这条合约。
 
 ## 两套前端
 
@@ -40,8 +52,10 @@ npm run contracts:deploy:testnet
 
 浏览器要能访问测试网 RPC。公共节点偶尔限流时，可自备 `BSC_TESTNET_RPC`。
 
-## 尚未包含
+## 尚未包含（也不该由本原型补）
 
-- 主网、付费 mint、繁衍、成就上链
+- 主网 Soul mint（新合约，见 PRODUCT-LATEST §19）
+- 付费 mint、繁衍、成就上链
 - Flap 自定义 Vault UI
 - 把 MaleCNS 16 万神经元写进合约
+- 销毁、回购执行、金库地址公布（与本原型无关）

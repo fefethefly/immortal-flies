@@ -1,7 +1,21 @@
 /**
  * New Soul / Journal wallet adapter. Old src/chain.mjs stays on the 16-node testnet prototype.
  */
-import { BrowserProvider, Contract, JsonRpcProvider, formatEther, getAddress } from "ethers";
+import {
+  BrowserProvider,
+  Contract,
+  JsonRpcProvider,
+  formatEther,
+  getAddress,
+} from "ethers";
+import {
+  IFS_ABI,
+  decodeTank,
+  hubListingPath,
+  parseHubDeployment,
+  parseRunnerListing,
+  runnerListingPath,
+} from "./host.mjs";
 
 export const BSC_MAINNET = Object.freeze({
   chainId: 56,
@@ -37,6 +51,7 @@ export function parseLifeDeployment(data) {
   if (
     !data?.address ||
     data.status === "UNDEPLOYED" ||
+    data.status === "RETIRED" ||
     String(data.status).startsWith("STALE")
   )
     return null;
@@ -73,6 +88,7 @@ export function parseMarketDeployment(data) {
   if (
     !data?.address ||
     data.status === "UNDEPLOYED" ||
+    data.status === "RETIRED" ||
     String(data.status).startsWith("STALE")
   ) {
     return null;
@@ -98,6 +114,114 @@ export async function loadMarketDeployment(
   return parseMarketDeployment(await response.json());
 }
 
+export async function loadHubDeployment(
+  search = typeof window === "undefined" ? "" : window.location.search,
+) {
+  const response = await fetch(hubListingPath(search), { cache: "no-store" });
+  if (!response.ok) return null;
+  const parsed = parseHubDeployment(await response.json());
+  if (!parsed) return null;
+  return {
+    ...parsed,
+    address: getAddress(parsed.address),
+    soul: parsed.soul ? getAddress(parsed.soul) : null,
+    journal: parsed.journal ? getAddress(parsed.journal) : null,
+    ifs: parsed.ifs ? getAddress(parsed.ifs) : null,
+    hive: parsed.hive ? getAddress(parsed.hive) : null,
+  };
+}
+
+export async function loadRunnerListing(
+  search = typeof window === "undefined" ? "" : window.location.search,
+) {
+  const response = await fetch(runnerListingPath(search), { cache: "no-store" });
+  if (!response.ok) return null;
+  return parseRunnerListing(await response.json());
+}
+
+export async function openLifeHub(address, runner) {
+  const artifact = await loadLifeArtifact("MiningHub");
+  return new Contract(address, artifact.abi, runner);
+}
+
+export function openIfsToken(address, runner) {
+  return new Contract(address, IFS_ABI, runner);
+}
+
+export function explainHostError(err, tx) {
+  const raw = err?.shortMessage || err?.reason || err?.message || String(err);
+  if (/NotOwner/i.test(raw)) return tx("host.needOwner");
+  if (/NotAllowlisted|NotActive/i.test(raw)) return tx("host.needRunner");
+  if (/FeeCap|WrongSteps|CapExceeded|OrderExpired|DayCap/i.test(raw)) {
+    return tx("host.badOrder");
+  }
+  if (/Insufficient|TankEmpty|ZeroIn/i.test(raw)) return tx("host.needFuel");
+  if (/PausedHub/i.test(raw)) return tx("host.paused");
+  return explainLifeError(err, tx);
+}
+
+export async function hubHasSpendLimits(hub) {
+  if (!hub || typeof hub.maxUserDaily !== "function") return false;
+  try {
+    await hub.maxUserDaily();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function readHostSnapshot(hub, tokenId, wallet) {
+  const id = Number(tokenId);
+  if (!hub || !id) return null;
+  const tankRaw = await hub.tanks(id);
+  const workRaw = await hub.workOf(id);
+  const [
+    lastFinalRoot,
+    lastSettledId,
+    maxUserDaily,
+    maxProtocolDaily,
+    spendDay,
+    paused,
+    arbiter,
+  ] = await Promise.all([
+    hub.lastFinalRoot(id),
+    hub.lastSettledId(id),
+    hub.maxUserDaily(),
+    hub.maxProtocolDaily(),
+    hub.spendDay(),
+    hub.paused(),
+    hub.arbiter(),
+  ]);
+  let refunds = 0n;
+  let userDaySpend = 0n;
+  let userSpendDay = 0;
+  if (wallet) {
+    [refunds, userDaySpend, userSpendDay] = await Promise.all([
+      hub.refunds(wallet),
+      hub.userDaySpend(wallet),
+      hub.userSpendDay(wallet),
+    ]);
+  }
+  return {
+    tank: decodeTank(tankRaw),
+    work: {
+      accepted: Number(workRaw.accepted ?? workRaw[0] ?? 0),
+      disputed: Number(workRaw.disputed ?? workRaw[1] ?? 0),
+      slashed: Number(workRaw.slashed ?? workRaw[2] ?? 0),
+    },
+    lastFinalRoot,
+    lastSettledId,
+    maxUserDaily: String(maxUserDaily),
+    maxProtocolDaily: String(maxProtocolDaily),
+    spendDay: Number(spendDay),
+    paused: Boolean(paused),
+    arbiter,
+    refunds: String(refunds),
+    userDaySpend: String(userDaySpend),
+    userSpendDay: Number(userSpendDay),
+  };
+}
+
 export async function openLifeMarket(address, runner) {
   const artifact = await loadLifeArtifact("SoulMarket");
   return new Contract(address, artifact.abi, runner);
@@ -119,20 +243,39 @@ export async function loadLifeArtifact(name = "ImmortalSoul") {
   return response.json();
 }
 
-const KIN_FEE_PROBE = [
-  "function breedPrice() view returns (uint256)",
-];
+const KIN_FEE_PROBE = ["function breedPrice() view returns (uint256)"];
 
+const KIN_CROSS_PROBE = ["function CROSSOVER_RULE() view returns (string)"];
+
+/** 先探测收费与否、是否交叉规则，再挂上对应模块的完整 ABI。 */
 export async function openLifeKin(address, runner) {
-  const probe = new Contract(address, KIN_FEE_PROBE, runner);
+  const probe = new Contract(
+    address,
+    [...KIN_FEE_PROBE, ...KIN_CROSS_PROBE],
+    runner,
+  );
+  let isFee = true;
   try {
     await probe.breedPrice();
-    const artifact = await loadLifeArtifact("SoulKinFee");
-    return new Contract(address, artifact.abi, runner);
   } catch {
-    const artifact = await loadLifeArtifact("SoulKin");
-    return new Contract(address, artifact.abi, runner);
+    isFee = false;
   }
+  let isCross = false;
+  try {
+    await probe.CROSSOVER_RULE();
+    isCross = true;
+  } catch {
+    /* legacy kin */
+  }
+  const name = isCross
+    ? isFee
+      ? "SoulKinCrossFee"
+      : "SoulKinCross"
+    : isFee
+      ? "SoulKinFee"
+      : "SoulKin";
+  const artifact = await loadLifeArtifact(name);
+  return new Contract(address, artifact.abi, runner);
 }
 
 export async function readKinBreedPrice(kin) {
@@ -141,6 +284,38 @@ export async function readKinBreedPrice(kin) {
     return BigInt(await kin.breedPrice());
   } catch {
     return 0n;
+  }
+}
+
+export function formatCooldown(seconds) {
+  const n = Math.max(0, Number(seconds) || 0);
+  if (n <= 0) return "0";
+  const h = Math.floor(n / 3600);
+  const m = Math.ceil((n % 3600) / 60);
+  if (h <= 0) return `${Math.max(1, m)}m`;
+  if (m <= 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
+export async function readParentCooldown(kin, parentA, parentB) {
+  try {
+    if (typeof kin?.breedCooldown !== "function") {
+      return { cooldown: 0, remaining: 0 };
+    }
+    const [cool, tA, tB, block] = await Promise.all([
+      kin.breedCooldown(),
+      kin.lastBredAt(parentA),
+      kin.lastBredAt(parentB),
+      kin.runner?.provider?.getBlock("latest"),
+    ]);
+    const now = Number(block?.timestamp ?? 0);
+    const ready = Math.max(Number(tA) + Number(cool), Number(tB) + Number(cool));
+    return {
+      cooldown: Number(cool),
+      remaining: Math.max(0, ready - now),
+    };
+  } catch {
+    return { cooldown: 0, remaining: 0 };
   }
 }
 
@@ -434,11 +609,7 @@ export async function loadMarketActivity(market, fromBlock = 0, limit = 16) {
   const kinds = ["Sold", "Listed", "Relisted", "Canceled", "Swept"];
   const rows = [];
   for (const kind of kinds) {
-    const logs = await queryAllLogs(
-      market,
-      market.filters[kind](),
-      fromBlock,
-    );
+    const logs = await queryAllLogs(market, market.filters[kind](), fromBlock);
     for (const log of logs) {
       rows.push({
         kind: kind.toLowerCase(),
@@ -446,7 +617,8 @@ export async function loadMarketActivity(market, fromBlock = 0, limit = 16) {
         seller: log.args?.seller,
         buyer: log.args?.buyer,
         lifeId: log.args?.lifeId,
-        price: log.args?.price != null ? BigInt(log.args.price).toString() : "0",
+        price:
+          log.args?.price != null ? BigInt(log.args.price).toString() : "0",
         fee: log.args?.fee != null ? BigInt(log.args.fee).toString() : "0",
         block: Number(log.blockNumber || 0),
       });
@@ -479,6 +651,8 @@ export function explainLifeError(err, tx) {
   if (/InvalidCheckpoint/i.test(raw)) return tx("life.badCheckpoint");
   if (/InvalidInput/i.test(raw)) return tx("life.badInput");
   if (/WrongFee|PriceCap/i.test(raw)) return tx("kin.wrongFee");
+  if (/Cooldown/i.test(raw)) return tx("kin.cooldown");
+  if (/HatchDenied/i.test(raw)) return tx("hatch.denied");
   if (/PendingBreed|InvalidPair|Unauthorized/i.test(raw))
     return tx("kin.breedNeed");
   if (/BreedNotReady|BreedUnavailable/i.test(raw)) return tx("kin.breedWait");
@@ -574,7 +748,10 @@ export function readBreedRequested(receipt, kin) {
           parentA: Number(parsed.args.parentA),
           parentB: Number(parsed.args.parentB),
           entropyBlock: Number(parsed.args.entropyBlock),
-          paid: parsed.args.paid != null ? BigInt(parsed.args.paid).toString() : "0",
+          paid:
+            parsed.args.paid != null
+              ? BigInt(parsed.args.paid).toString()
+              : "0",
         };
       }
     } catch {

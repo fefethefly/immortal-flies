@@ -9,7 +9,10 @@
   --text: #f0ead9;
   --muted: #a89e8c;
   --line: #2f2a1f;
-  --gold: #c9a25e;
+  --gold: #f0b90b;
+  --gold-bright: #fcd535;
+  --gold-ink: #0b0e11;
+  --gold-rgb: 240, 185, 11;
   --nerve: #93a181;
   --rust: #a5715c;
   --display:
@@ -33,7 +36,7 @@ body {
   background:
     radial-gradient(
       ellipse 62% 46% at 20% -6%,
-      rgba(201, 162, 94, 0.1),
+      rgba(240, 185, 11, 0.1),
       transparent 60%
     ),
     radial-gradient(
@@ -98,7 +101,7 @@ button:active:not(:disabled) {
   background:
     radial-gradient(
       ellipse 62% 46% at 20% -6%,
-      rgba(201, 162, 94, 0.11),
+      rgba(240, 185, 11, 0.11),
       transparent 60%
     ),
     radial-gradient(
@@ -156,14 +159,23 @@ button:active:not(:disabled) {
   stroke: var(--gold);
 }
 
+.pit-front {
+  --pit-chrome: 115px;
+  display: flex;
+  flex-direction: column;
+  width: min(1440px, calc(100% - 8%));
+  height: calc(100dvh - var(--pit-chrome));
+  min-height: 560px;
+  margin: 0 auto;
+}
 .pit-hero {
   display: flex;
   justify-content: space-between;
   align-items: end;
   gap: 24px;
-  width: min(1440px, calc(100% - 8%));
-  margin: 0 auto;
-  padding: 22px 0 18px;
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 14px 0 12px;
   border-bottom: 1px solid var(--line);
 }
 .pit-kicker {
@@ -229,12 +241,16 @@ button:active:not(:disabled) {
 .pit {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.72fr);
-  min-height: calc(100dvh - 148px);
+  flex: 1 1 auto;
+  min-height: 0;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
 }
 .stage {
   position: relative;
+  height: 100%;
+  min-height: 0;
   border-right: 1px solid var(--line);
-  min-height: 640px;
 }
 .stage-frame {
   position: absolute;
@@ -259,7 +275,7 @@ button:active:not(:disabled) {
 .pit-canvas {
   width: 100%;
   height: 100%;
-  min-height: 640px;
+  min-height: 0;
   display: block;
   cursor: pointer;
 }
@@ -333,6 +349,9 @@ button:active:not(:disabled) {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   background:
     linear-gradient(180deg, rgba(255, 248, 230, 0.04), transparent 28%),
     linear-gradient(180deg, #16130f 0%, var(--ink) 14%);
@@ -421,9 +440,19 @@ button:active:not(:disabled) {
 .lectern .pheno {
   padding-top: 4px;
   border-top: 1px solid #2f2a1f;
+  gap: 8px;
+}
+.lectern .pheno-chips {
+  width: min(196px, 100%);
+  gap: 2px;
+}
+.lectern .pheno-claim,
+.lectern .pheno-note {
+  font-size: 11px;
+  line-height: 1.5;
 }
 .roster button {
-  --pheno: #c9a25e;
+  --pheno: #f0b90b;
 }
 .roster .fly-mark {
   color: var(--pheno);
@@ -785,6 +814,10 @@ button:active:not(:disabled) {
 }
 
 @media (max-width: 1100px) {
+  .pit-front {
+    height: auto;
+    min-height: 0;
+  }
   .pit {
     grid-template-columns: 1fr;
   }
@@ -796,6 +829,9 @@ button:active:not(:disabled) {
   .pit-canvas {
     min-height: 520px;
   }
+  .lectern {
+    overflow: visible;
+  }
   .after,
   .roster {
     grid-template-columns: 1fr;
@@ -805,6 +841,11 @@ button:active:not(:disabled) {
     gap: 12px;
   }
 }
+@media (max-height: 860px) {
+  .stage-read strong {
+    font-size: 44px;
+  }
+}
 @media (max-width: 720px) {
   .pit-live span small {
     display: none;
@@ -812,8 +853,10 @@ button:active:not(:disabled) {
   .stage-read strong {
     font-size: 40px;
   }
-  .pit-hero {
+  .pit-front {
     width: calc(100% - 10%);
+  }
+  .pit-hero {
     flex-direction: column;
     align-items: start;
   }
@@ -980,6 +1023,57 @@ button:active:not(:disabled) {
 .market-meta b {
   color: var(--text);
   font-weight: 400;
+}
+.hatch {
+  width: min(1440px, calc(100% - 8%));
+  margin: 36px auto 0;
+  padding: 28px 0 0;
+  border-top: 1px solid var(--line);
+}
+.hatch h2 {
+  margin: 8px 0 12px;
+  font: 500 22px/1 var(--display);
+}
+.hatch h2 small {
+  margin-left: 12px;
+  font: 9px var(--mono);
+  color: #8a8172;
+  letter-spacing: 1px;
+}
+.hatch-note,
+.hatch-meta {
+  max-width: 56ch;
+  margin: 0 0 14px;
+  color: #7a7165;
+}
+.hatch-name {
+  display: grid;
+  gap: 6px;
+  max-width: 28rem;
+  margin: 0 0 14px;
+  color: #7a7165;
+  font: 11px var(--mono);
+}
+.hatch-name input {
+  border: 1px solid var(--line);
+  background: #100e0b;
+  color: #f0ead9;
+  padding: 8px;
+  font: 12px var(--mono);
+}
+.hatch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.hatch-go {
+  display: inline-flex;
+  align-items: center;
+  margin: 8px 12px 8px 0;
+  color: var(--gold-bright, #fcd535);
+  font: 12px / 1.4 var(--mono);
+  letter-spacing: 0.04em;
 }
 @media (max-width: 900px) {
   .world-deck {

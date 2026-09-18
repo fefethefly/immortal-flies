@@ -1,0 +1,11 @@
+{
+  "status": "UNDEPLOYED",
+  "audit": "MAINNET",
+  "yield": false,
+  "chainId": 56,
+  "url": null,
+  "health": null,
+  "hub": null,
+  "address": null,
+  "note": "Dedicated mainnet runner. Do not reuse the testnet Railway process or IFF_DATA_DIR. Requires IFF_MAINNET_RUNNER=1, live IFS 0x65b66BB4…7777, hive 0xfAdb2FE1…1467. Service fee is not protocol income."
+}

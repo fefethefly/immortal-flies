@@ -8,7 +8,10 @@
   --muted: #a89e8c;
   --quiet: #8a8172;
   --line: #2f2a1f;
-  --gold: #c9a25e;
+  --gold: #f0b90b;
+  --gold-bright: #fcd535;
+  --gold-ink: #0b0e11;
+  --gold-rgb: 240, 185, 11;
   --display:
     "Cormorant Garamond", "Iowan Old Style", Palatino, "Songti SC", serif;
   --mono: "IBM Plex Mono", monospace;
@@ -94,9 +97,9 @@ button:hover:not(:disabled) {
   font-family: "Cormorant Garamond", "Iowan Old Style", Palatino, serif;
 }
 .brain-brand .fly-mark {
-  width: 36px;
-  height: 36px;
-  color: #f0ead9;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
 }
 .brain-brand small {
   display: block;
@@ -182,7 +185,7 @@ h1 {
   margin: 18px 0 12px;
 }
 h1 span {
-  color: #c9a25e;
+  color: var(--gold);
 }
 .brain-title p {
   font-size: 12px;
@@ -201,7 +204,7 @@ h1 span {
 .layer-chips li {
   font-size: 9px;
   letter-spacing: 1.4px;
-  color: #c9a25e;
+  color: var(--gold);
   border: 1px solid #443c2c;
   padding: 5px 9px;
 }
@@ -209,7 +212,7 @@ h1 span {
   margin-top: 10px !important;
 }
 .brain-align a {
-  color: #c9a25e;
+  color: var(--gold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -930,8 +933,10 @@ h1 span {
     font-size: 6px;
     letter-spacing: 3px;
   }
-  .brain-brand svg {
-    width: 23px;
+  .brain-brand svg,
+  .brain-brand .fly-mark {
+    width: 36px;
+    height: 36px;
   }
   .brain-app main {
     padding: 30px 5% 0;

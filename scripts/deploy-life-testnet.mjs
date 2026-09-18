@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ContractFactory, JsonRpcProvider, Wallet, getAddress } from "ethers";
 import { compileLife } from "./compile-life.mjs";
+import { deployRenderer, deploySoul } from "./life-soul-factory.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -81,7 +82,7 @@ const block = await provider.getBlockNumber();
 console.log(`RPC ${url}`);
 console.log(`chain ${CHAIN_ID} · block ${block}`);
 console.log(
-  `genesis ${genesis.genesisRoot.slice(0, 12)}… · soul ${artifacts.ImmortalSoul.deployedBytes}B`,
+  `genesis ${genesis.genesisRoot.slice(0, 12)}… · soul ${artifacts.ImmortalSoul.deployedBytes}B · renderer ${artifacts.SoulRenderer.deployedBytes}B`,
 );
 
 if (checkOnly) {
@@ -95,20 +96,20 @@ console.log(`deployer ${wallet.address}`);
 console.log(`balance  ${balance} wei`);
 if (balance === 0n) throw new Error("部署账户 tBNB 为 0。请先领取测试币。");
 
-const soulFactory = new ContractFactory(
-  artifacts.ImmortalSoul.abi,
-  artifacts.ImmortalSoul.bytecode,
+const renderer = await deployRenderer(artifacts, wallet);
+const rendererTx = renderer.deploymentTransaction();
+const rendererAddress = await renderer.getAddress();
+console.log(`renderer tx ${rendererTx.hash}`);
+
+const soul = await deploySoul(
+  artifacts,
   wallet,
-);
-const soul = await soulFactory.deploy(
-  genesis.genesisRoot,
-  genesis.speciesHash,
-  genesis.modelHash,
+  genesis,
   `https://immortalflies.com${genesis.manifestPath}`,
+  rendererAddress,
 );
 const soulTx = soul.deploymentTransaction();
 console.log(`soul tx ${soulTx.hash}`);
-await soul.waitForDeployment();
 const soulAddress = await soul.getAddress();
 const soulReceipt = await soulTx.wait();
 
@@ -152,15 +153,17 @@ const record = {
   status: "BSC_TESTNET",
   chainId: CHAIN_ID,
   address: soulAddress,
+  renderer: rendererAddress,
   journal: journalAddress,
   kin: kinAddress,
   deployer: wallet.address,
   txHash: soulTx.hash,
+  rendererTxHash: rendererTx.hash,
   journalTxHash: journalTx.hash,
   kinTxHash: kinTx.hash,
   fromBlock: soulReceipt.blockNumber,
   collection: "ImmortalSoul",
-  decoder: "phenotype-loci/2",
+  decoder: "phenotype-loci/3",
   maxPerAddress: 1,
   maxGen0: 1024,
   modules: true,

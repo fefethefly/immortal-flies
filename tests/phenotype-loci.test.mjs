@@ -4,6 +4,7 @@ import { buildGenome } from "../src/brain/flyswarm/genome.mjs";
 import { expressPhenotype } from "../src/brain/flyswarm/phenotype.mjs";
 import {
   EYES,
+  EYE_PAIRS,
   FORBIDDEN_METADATA,
   GEN0_SUPPLY,
   HUES,
@@ -13,18 +14,23 @@ import {
   PHENOTYPE_DECODER,
   ROLL_MOD,
   SATS,
+  SEXES,
   SIZES,
   STRIPES,
+  WING_MARKS,
+  WING_SHAPES,
+  WING_VEINS,
   bpsOf,
   buildPhenotypeManifest,
   comboCatalog,
   formatExpected,
   marketAttributes,
+  pickExcluding,
   scarcityOf,
 } from "../src/brain/flyswarm/phenotype-loci.mjs";
 
 test("every locus table sums to 10000 bps and bone is the rarest body", () => {
-  for (const table of [HUES, SATS, LIGHTS, EYES, SIZES, STRIPES, MARKS]) {
+  for (const table of [HUES, SATS, LIGHTS, EYES, SIZES, STRIPES, MARKS, EYE_PAIRS, WING_MARKS, WING_SHAPES, WING_VEINS, SEXES]) {
     assert.equal(table.reduce((n, row) => n + row.bps, 0), ROLL_MOD);
   }
   assert.equal(HUES.at(-1).id, "bone");
@@ -82,5 +88,58 @@ test("combo catalog is a probability measure and market metadata stays filter-on
   const manifest = buildPhenotypeManifest();
   assert.equal(manifest.decoder, PHENOTYPE_DECODER);
   assert.equal(manifest.supply, 1024);
+  assert.deepEqual(manifest.market.displayOnly, ["eyePair"]);
+  assert.ok(manifest.traits.sex);
+  assert.ok(manifest.traits.wingMark);
+  assert.ok(manifest.market.tokenUriContains.includes("Sex"));
+  assert.ok(manifest.market.tokenUriContains.includes("Wings"));
   assert.match(formatExpected(0.04), /<0\.1|0\.04/);
+});
+
+test("split eyes are a leftover-chip mosaic and never collide with the primary eye", () => {
+  let split = 0;
+  let matched = 0;
+  for (let seed = 1; seed <= 8000; seed += 1) {
+    const ph = expressPhenotype(buildGenome({ soulId: "pair", seed }));
+    if (ph.eyePair.id === "split") {
+      split += 1;
+      assert.notEqual(ph.eye.id, ph.eyeOther.id);
+      assert.equal(ph.art.eyeLeft, ph.eye.hex);
+      assert.equal(ph.art.eyeRight, ph.eyeOther.hex);
+      assert.notEqual(ph.art.eyeLeft, ph.art.eyeRight);
+    } else {
+      matched += 1;
+      assert.equal(ph.eye.id, ph.eyeOther.id);
+      assert.equal(ph.art.eyeLeft, ph.art.eyeRight);
+    }
+  }
+  const got = (split / (split + matched)) * 100;
+  assert.ok(Math.abs(got - 2) < 1.2, `split rate ${got}`);
+  const other = pickExcluding(0, EYES, "wild");
+  assert.notEqual(other.id, "wild");
+});
+
+test("sex and wing loci appear in market metadata and stay near published weights", () => {
+  const N = 12000;
+  const sexes = { female: 0, male: 0 };
+  const shapes = Object.fromEntries(WING_SHAPES.map((row) => [row.id, 0]));
+  const seenMark = new Set();
+  const seenVein = new Set();
+  for (let seed = 1; seed <= N; seed += 1) {
+    const ph = expressPhenotype(buildGenome({ soulId: "dimorph", seed }));
+    sexes[ph.sex.id] += 1;
+    shapes[ph.wingShape.id] += 1;
+    seenMark.add(ph.wingMark.id);
+    seenVein.add(ph.wingVein.id);
+    assert.ok(["female", "male"].includes(ph.art.sex));
+  }
+  assert.ok(Math.abs((sexes.female / N) * 100 - 50) < 2.5, `female ${sexes.female}`);
+  for (const row of WING_SHAPES) {
+    const got = (shapes[row.id] / N) * 100;
+    assert.ok(Math.abs(got - row.bps / 100) < 1.8, `${row.id} ${got}`);
+  }
+  assert.deepEqual([...seenMark].sort(), [...WING_MARKS.map((row) => row.id)].sort());
+  assert.deepEqual([...seenVein].sort(), [...WING_VEINS.map((row) => row.id)].sort());
+  const attrs = marketAttributes(expressPhenotype(buildGenome({ soulId: "card", seed: 43 })));
+  assert.equal(attrs.find((row) => row.trait_type === "Sex").value.length > 0, true);
 });

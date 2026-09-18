@@ -51,7 +51,7 @@ contract ImmortalFly is ERC721 {
     event Born(uint256 indexed tokenId, uint32 dna);
     event StateAdvanced(uint256 indexed tokenId, uint64 ticks, uint32 incarnation, uint16 energy, bool dormant);
 
-    constructor() ERC721("IMMORTAL / Genesis Prototype", "IFF") {}
+    constructor() ERC721("IMMORTAL / Genesis Prototype", "IFP") {}
 
     modifier controller(uint256 tokenId) {
         _checkAuthorized(_requireOwned(tokenId), msg.sender, tokenId);
@@ -199,7 +199,7 @@ contract ImmortalFly is ERC721 {
             ' / ENERGY ', uint256(fly.brain.energy).toString(),
             '</text><text x="46" y="696">NEURAL TICKS ', uint256(fly.brain.ticks).toString(),
             '</text><text x="46" y="728">DNA ', uint256(fly.dna).toString(),
-            '</text><text x="46" y="758" font-size="11">IFF-NEURAL-16-V1 / ON-CHAIN PROTOTYPE</text></g></svg>'
+            '</text><text x="46" y="758" font-size="11">IF16 PROTOTYPE / NOT IFS</text></g></svg>'
         );
     }
 }

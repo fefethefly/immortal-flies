@@ -64,7 +64,7 @@ export function ProtocolVisual({ locale, paused, onPause, onStimulus }) {
       <div className={`protocol-scene ${state}`} data-stimuli={stimuli}>
         {state === "fallback" ? (
           <img
-            src="/mark/ifs.png?v=thorax"
+            src="/mark/particle.png"
             width="1024"
             height="1024"
             alt={
@@ -193,8 +193,8 @@ export function ProtocolArchitecture({ locale }) {
       </div>
       <p className="protocol-boundary">
         {zh
-          ? "架构不等于全部上线：交易与经济页面仍为 SIM；跨链、跨物种迁徙是预留能力，尚未开放。"
-          : "Architecture is not a shipping claim: trading and economy remain SIM; cross-chain and cross-species migration are reserved capabilities, not open features."}
+          ? "架构不等于全部上线：交易与经济页面仍为 SIM；群体智慧协议是设计稿，未实现。跨链、跨物种迁徙是预留能力，尚未开放。"
+          : "Architecture is not a shipping claim: trading and economy remain SIM; the swarm intelligence protocol is a design, not implemented. Cross-chain and cross-species migration are reserved capabilities, not open features."}
       </p>
     </section>
   );
@@ -204,6 +204,7 @@ export function ProtocolResearch({ locale }) {
   const zh = locale === "zh";
   return (
     <section
+      id="research"
       className="protocol-section protocol-research"
       aria-labelledby="research-title"
     >
@@ -226,24 +227,25 @@ export function ProtocolResearch({ locale }) {
         </h2>
         <p>
           {zh
-            ? "通用智慧是方向，可验证协作是下一步。用固定任务、预算与种子，对照单体与群体，检验经验是否值得保留、共享与继承。"
-            : "General intelligence is the direction. Verifiable cooperation is the next step: compare individuals and groups under fixed tasks, budgets and seeds before retaining, sharing or inheriting experience."}
+            ? "协议标准化的不是智慧本身，而是任务、语言、学习、聚合、身份五个可验证接口。增益必须能被复算。T3、T4 通过前，不说群体智能已实现。"
+            : "The protocol does not standardize intelligence. It standardizes five verifiable interfaces: task, message, learn, pool, identity. Every gain must be recomputable. Until T3 and T4 pass, we do not say swarm intelligence is here."}
         </p>
       </div>
       <ol className="protocol-research-steps">
         {(zh
           ? [
-              ["任务", "定义成功，而不只展示活动。"],
-              ["复核", "经验附带依据，让他人独立重放。"],
-              ["晋升", "增益经对照验证，才进入共享经验。"],
+              ["任务", "先定义成功，再谈活动。"],
+              ["语言", "观察与确认补依据。收到不等于服从。"],
+              ["学习", "可回滚的状态变更。旧版本永不覆盖。"],
+              ["聚合", "经验经对照与复现，才晋升。"],
+              ["身份", "生命与运行器分开。晋升不进 Soul。"],
             ]
           : [
-              ["Task", "Define success, not just activity."],
-              ["Replication", "Attach evidence others can replay."],
-              [
-                "Promotion",
-                "Share experience only after controlled evaluation.",
-              ],
+              ["Task", "Define success before counting activity."],
+              ["Message", "Observe and confirm carry evidence. Received is not obeyed."],
+              ["Learn", "Reversible state change. Old versions stay."],
+              ["Pool", "Promote experience only after controlled replication."],
+              ["Identity", "Life and runner stay apart. Promotion never enters Soul."],
             ]
         ).map(([title, desc], i) => (
           <li key={title}>
@@ -253,10 +255,10 @@ export function ProtocolResearch({ locale }) {
           </li>
         ))}
       </ol>
-      <SiteLink className="protocol-research-link" href="/blueprint.html">
+      <SiteLink className="protocol-research-link" href="/blueprint.html#swarm">
         {zh
-          ? "阅读协议蓝图与交付边界"
-          : "Read the blueprint and delivery boundaries"}
+          ? "阅读群体智慧协议与交付边界"
+          : "Read the swarm protocol and delivery boundaries"}
         <ArrowUpRight size={18} />
       </SiteLink>
     </section>

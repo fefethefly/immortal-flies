@@ -1,4 +1,5 @@
 @import "./fonts.css";
+@import "./brand-lockup.css";
 
 /* Shared foundation, including direct entry to lazy-loaded Life pages. */
 *,
@@ -23,6 +24,8 @@
   --gold-bright: #fcd535;
   --gold-ink: #0b0e11;
   --gold-rgb: 240, 185, 11;
+  --gold-deep: #d49b00;
+  --gold-pale: #ffe08a;
 }
 
 body {
@@ -95,23 +98,8 @@ html {
 .site-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  letter-spacing: 0.18em;
-  font-size: 12px;
+  gap: 12px;
   color: inherit;
-}
-.site-brand small {
-  display: block;
-  color: var(--quiet, #8a8172);
-  letter-spacing: 0.22em;
-  font-size: 8px;
-  margin-top: 4px;
-}
-.site-brand .fly-mark,
-.site-brand img.fly-mark.small {
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
 }
 .site-bar-tools {
   display: flex;
@@ -313,10 +301,6 @@ html {
   text-decoration: none;
   flex-shrink: 0;
 }
-.site-bar .site-brand small {
-  font-size: 10px;
-  letter-spacing: 0.14em;
-}
 .site-bar .site-ca {
   flex-shrink: 1;
 }
@@ -398,16 +382,19 @@ html {
   .site-bar .site-nav a {
     width: fit-content;
   }
-  .site-bar .site-brand .fly-mark {
-    width: 42px;
-    height: 42px;
+  .site-bar .site-brand .fly-mark,
+  .site-bar .site-lockup {
+    width: auto;
+    height: 44px;
+    max-width: 176px;
   }
   .site-bar .site-ca {
     min-height: 44px;
   }
 }
 @media (max-width: 560px) {
-  .site-bar-lead .site-brand > span {
-    display: none;
+  .site-bar .site-lockup {
+    height: 34px;
+    max-width: 148px;
   }
 }

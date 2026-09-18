@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { GOLD } from "./brand.mjs";
 import { useTx } from "./locale-context.jsx";
 import { SiteLink } from "./site-chrome.jsx";
 import {
@@ -172,6 +173,10 @@ function HomePitDeck({ swarm, fly, onSelect }) {
         {tx("public.enterPit")}
         <ArrowUpRight size={14} />
       </SiteLink>
+      <SiteLink className="deck-go" href="/field.html">
+        {tx("public.enterHatch")}
+        <ArrowUpRight size={14} />
+      </SiteLink>
     </article>
   );
 }
@@ -257,7 +262,7 @@ function HomeScope({ fly, tick }) {
     if (series.length < 2) return;
     const max = Math.max(1, ...series);
     ctx.beginPath();
-    ctx.strokeStyle = "#c9a25e";
+    ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1.3;
     series.forEach((value, i) => {
       const x = (i / (series.length - 1)) * width;

@@ -24,8 +24,14 @@ const PAGES = {
   "/habitat.html": lazy(() =>
     import("./life/habitat-page.jsx").then((m) => ({ default: m.HabitatPage })),
   ),
+  "/host.html": lazy(() =>
+    import("./life/host-page.jsx").then((m) => ({ default: m.HostPage })),
+  ),
   "/market.html": lazy(() =>
     import("./life/market-page.jsx").then((m) => ({ default: m.MarketPage })),
+  ),
+  "/colony.html": lazy(() =>
+    import("./life/colony-page.jsx").then((m) => ({ default: m.ColonyPage })),
   ),
   "/live.html": lazy(() =>
     import("./fly-live/page.jsx").then((m) => ({ default: m.FlyLivePage })),

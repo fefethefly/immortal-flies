@@ -35,6 +35,7 @@ import {
   writeMarketView,
 } from "./market.mjs";
 import { MarketThumb } from "./market-thumb.jsx";
+import { FlyTraitRows, FlyVital } from "./fly-card.jsx";
 import { labelOf } from "./names.mjs";
 import { withNet } from "./net.mjs";
 import { mergeSoul, querySoulId, readSoulCard, shortAddr } from "./souls.mjs";
@@ -498,6 +499,9 @@ export function MarketPage() {
           <SiteLink href={withNet("/habitat.html")} className="life-cross">
             {tx("market.toHabitat")}
           </SiteLink>
+          <SiteLink href={withNet("/host.html")} className="life-cross">
+            {tx("market.toHost")}
+          </SiteLink>
           <div className="life-kin">
             <button
               type="button"
@@ -773,6 +777,8 @@ export function MarketPage() {
                         (soul ? labelOf(soul, locale) : `#${row.tokenId}`)}{" "}
                       <em>#{row.tokenId}</em>
                     </strong>
+                    <FlyTraitRows soul={soul} locale={locale} />
+                    <FlyVital soul={soul} locale={locale} tx={tx} />
                     <p>
                       {soul?.phenotype?.summary?.[locale] ||
                         soul?.phenotype?.summary?.en ||
@@ -941,6 +947,8 @@ export function MarketPage() {
           >
             <h2 id="market-buy-title">{tx("market.buyTitle")}</h2>
             <MarketThumb soul={buying.soul} />
+            <FlyTraitRows soul={buying.soul} locale={locale} />
+            <FlyVital soul={buying.soul} locale={locale} tx={tx} />
             <p>{tx("market.buyConfirm", { id: buying.tokenId })}</p>
             <p className="life-meta">
               {buying.soul?.givenName ||

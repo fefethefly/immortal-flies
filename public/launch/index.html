@@ -4,20 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0907" />
-    <title>IMMORTAL FLY — Site Launch</title>
-    <meta
-      name="description"
-      content="Official site launch film for Immortal Fly. $IFS is live on BSC. The pit is paper."
-    />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>IMMORTAL FLY — Protocol film</title>
+    <link rel="icon" type="image/svg+xml" href="/mark/ifs.svg" />
     <style>
-      @font-face {
-        font-family: "Cormorant Garamond";
-        font-style: normal;
-        font-weight: 500;
-        font-display: block;
-        src: url("../fonts/cormorant-500.woff2") format("woff2");
-      }
       @font-face {
         font-family: "Cormorant Garamond";
         font-style: normal;
@@ -46,635 +35,281 @@
         font-display: block;
         src: url("../fonts/ibm-plex-mono-500.ttf") format("truetype");
       }
-
       :root {
         --bg: #0a0907;
         --text: #f0ead9;
         --muted: #a39a8b;
         --quiet: #7a7266;
-        --line: #2f2a1f;
-        --gold: #c9a25e;
-        --neural: #9cab8d;
+        --gold: #f0b90b;
+        --ink: #0b0e11;
+        --sell: #b07a6a;
         --display: "Cormorant Garamond", Palatino, serif;
         --cond: "Barlow Condensed", "Helvetica Neue", sans-serif;
         --mono: "IBM Plex Mono", ui-monospace, monospace;
       }
-
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 100%; height: 100%; background: #050403; color: var(--text); overflow: hidden;
       }
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        background: #050403;
-        color: var(--text);
-        overflow: hidden;
-      }
-      body {
-        display: grid;
-        place-items: center;
-      }
-
-      .stage-wrap {
-        width: 1920px;
-        height: 1080px;
-        transform-origin: center center;
-      }
-
+      body { display: grid; place-items: center; }
+      .stage-wrap { width: 1920px; height: 1080px; transform-origin: center; }
       .stage {
-        position: relative;
-        width: 1920px;
-        height: 1080px;
-        overflow: hidden;
-        background:
-          radial-gradient(
-            ellipse 58% 52% at 18% 28%,
-            rgba(201, 162, 94, 0.15),
-            transparent 62%
-          ),
-          radial-gradient(
-            ellipse 48% 42% at 88% 80%,
-            rgba(156, 171, 141, 0.09),
-            transparent 58%
-          ),
-          radial-gradient(
-            ellipse 90% 80% at 50% 50%,
-            transparent 36%,
-            rgba(0, 0, 0, 0.5) 100%
-          ),
-          #0a0907;
+        position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #0a0907;
       }
-
-      .vignette,
-      .grain,
-      .finder {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-      }
-      .vignette {
-        z-index: 20;
-        box-shadow: inset 0 0 220px 48px rgba(0, 0, 0, 0.55);
-      }
+      #fly { position: absolute; inset: 0; z-index: 2; }
+      #spark { display: block; width: 100%; height: 92px; margin: 10px 0 14px; }
+      .vignette, .grain, .finder { position: absolute; inset: 0; pointer-events: none; }
+      .vignette { z-index: 20; box-shadow: inset 0 0 220px 50px rgba(0,0,0,.58); }
       .grain {
-        z-index: 21;
-        opacity: 0.055;
+        z-index: 21; opacity: .045;
         background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         background-size: 180px 180px;
       }
-      .finder {
-        z-index: 22;
-      }
-      .finder i {
-        position: absolute;
-        width: 34px;
-        height: 34px;
-        border-color: rgba(201, 162, 94, 0.42);
-        border-style: solid;
-      }
-      .finder .tl {
-        top: 38px;
-        left: 48px;
-        border-width: 1px 0 0 1px;
-      }
-      .finder .tr {
-        top: 38px;
-        right: 48px;
-        border-width: 1px 1px 0 0;
-      }
-      .finder .bl {
-        bottom: 38px;
-        left: 48px;
-        border-width: 0 0 1px 1px;
-      }
-      .finder .br {
-        bottom: 38px;
-        right: 48px;
-        border-width: 0 1px 1px 0;
-      }
+      .finder { z-index: 22; }
+      .finder i { position: absolute; width: 30px; height: 30px; border-color: rgba(240,185,11,.4); border-style: solid; }
+      .finder .tl { top: 36px; left: 44px; border-width: 1px 0 0 1px; }
+      .finder .tr { top: 36px; right: 44px; border-width: 1px 1px 0 0; }
+      .finder .bl { bottom: 56px; left: 44px; border-width: 0 0 1px 1px; }
+      .finder .br { bottom: 56px; right: 44px; border-width: 0 1px 1px 0; }
 
       .hud {
-        position: absolute;
-        z-index: 18;
-        font-family: var(--mono);
-        font-size: 15px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--quiet);
-        white-space: nowrap;
+        position: absolute; z-index: 18; font-family: var(--mono); font-size: 14px;
+        letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); white-space: nowrap;
       }
-      .hud-l {
-        top: 52px;
-        left: 96px;
-      }
-      .hud-r {
-        top: 52px;
-        right: 96px;
-      }
-      .hud b {
-        color: var(--gold);
-        font-weight: 500;
+      .hud-l { top: 48px; left: 88px; }
+      .hud-c { top: 48px; left: 50%; transform: translateX(-50%); }
+      .hud-r { top: 48px; right: 88px; }
+      .hud b { color: var(--gold); font-weight: 500; }
+      .led {
+        display: inline-block; width: 7px; height: 7px; margin-right: 8px;
+        border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold);
       }
 
-      .scene {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        will-change: opacity, transform;
+      .tape {
+        position: absolute; left: 0; right: 0; bottom: 0; z-index: 17; height: 44px;
+        overflow: hidden; background: rgba(8,7,5,.88); border-top: 1px solid rgba(240,185,11,.28);
+        font-family: var(--mono); font-size: 15px; letter-spacing: .08em; color: var(--gold);
+        line-height: 44px; white-space: nowrap;
       }
+      .tape > div { display: inline-block; padding-left: 40px; }
 
+      .scene { position: absolute; inset: 0; z-index: 6; opacity: 0; }
       .ghost {
-        position: absolute;
-        left: -40px;
-        top: 210px;
-        font-family: var(--display);
-        font-weight: 600;
-        font-size: 320px;
-        letter-spacing: -0.04em;
-        line-height: 0.8;
-        color: rgba(240, 234, 217, 0.035);
-        pointer-events: none;
-        white-space: nowrap;
+        position: absolute; left: -20px; top: 160px; font-family: var(--display); font-weight: 600;
+        font-size: 280px; letter-spacing: -.05em; line-height: .8; color: rgba(240,234,217,.028); pointer-events: none;
       }
 
-      .seal-wrap {
-        position: absolute;
-        left: 50%;
-        top: 46%;
-        width: 420px;
-        height: 420px;
-        transform: translate(-50%, -50%);
+      .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+      .eyeline {
+        font-family: var(--cond); font-size: 28px; letter-spacing: .42em; text-transform: uppercase; color: var(--gold);
       }
-      .ring {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        border: 1px solid rgba(201, 162, 94, 0.28);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
+      h1 {
+        font-family: var(--display); font-weight: 600; font-size: 128px; letter-spacing: -.04em; line-height: .9;
       }
-      .ring-a {
-        width: 420px;
-        height: 420px;
-      }
-      .ring-b {
-        width: 348px;
-        height: 348px;
-        border-color: rgba(240, 234, 217, 0.12);
-      }
-      .crosshair span {
-        position: absolute;
-        background: rgba(201, 162, 94, 0.55);
-      }
-      .crosshair .n,
-      .crosshair .s {
-        left: 50%;
-        width: 1px;
-        height: 22px;
-        transform: translateX(-50%);
-      }
-      .crosshair .n {
-        top: -2px;
-      }
-      .crosshair .s {
-        bottom: -2px;
-      }
-      .crosshair .e,
-      .crosshair .w {
-        top: 50%;
-        height: 1px;
-        width: 22px;
-        transform: translateY(-50%);
-      }
-      .crosshair .e {
-        right: -2px;
-      }
-      .crosshair .w {
-        left: -2px;
-      }
-      .seal {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 268px;
-        height: 268px;
-        transform: translate(-50%, -50%);
-        filter: drop-shadow(0 0 28px rgba(201, 162, 94, 0.22));
-      }
-      .note {
-        position: absolute;
-        left: 50%;
-        top: 78%;
-        transform: translateX(-50%);
-        text-align: center;
-      }
-      .note .line {
-        font-family: var(--display);
-        font-size: 40px;
-        letter-spacing: 0.08em;
-        color: var(--text);
-      }
-      .note .en {
-        margin-top: 14px;
-        font-family: var(--mono);
-        font-size: 16px;
-        letter-spacing: 0.28em;
-        text-transform: uppercase;
-        color: var(--gold);
+      .sub {
+        margin-top: 22px; font-family: var(--mono); font-size: 18px; letter-spacing: .18em; text-transform: uppercase; color: var(--quiet);
       }
 
       .copy {
-        position: absolute;
-        left: 160px;
-        top: 250px;
-        width: 1320px;
+        position: absolute; left: 110px; top: 250px; width: 820px;
       }
       .kicker {
-        font-family: var(--cond);
-        font-size: 22px;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: var(--gold);
-        margin-bottom: 28px;
+        font-family: var(--cond); font-size: 22px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: 18px;
       }
-      h1 {
-        font-family: var(--display);
-        font-weight: 600;
-        font-size: 108px;
-        line-height: 0.98;
-        letter-spacing: -0.03em;
+      .line {
+        font-family: var(--display); font-weight: 600; font-size: 72px; letter-spacing: -.03em; line-height: 1.02;
       }
-      h1 .gold {
-        color: var(--gold);
+      .line.xl { font-size: 92px; }
+      .gold { color: var(--gold); }
+
+      .stack { position: absolute; left: 120px; right: 120px; top: 50%; transform: translateY(-50%); }
+      .slam {
+        font-family: var(--display); font-weight: 600; font-size: 86px; letter-spacing: -.03em; line-height: 1.08;
+        margin: 8px 0;
       }
-      .lead {
-        margin-top: 36px;
-        max-width: 980px;
-        font-family: var(--display);
-        font-size: 32px;
-        line-height: 1.45;
-        color: var(--muted);
-      }
-      .rule {
-        margin-top: 40px;
-        width: 220px;
-        height: 1px;
-        background: var(--gold);
-        transform-origin: left center;
+      .slam small {
+        display: block; margin-top: 8px; font-family: var(--mono); font-size: 18px; letter-spacing: .16em;
+        text-transform: uppercase; color: var(--quiet);
       }
 
-      .lang {
-        position: absolute;
-        left: 140px;
-        right: 140px;
-        top: 50%;
-        transform: translateY(-50%);
+      .board {
+        position: absolute; left: 100px; right: 100px; top: 200px; display: grid;
+        grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: stretch;
       }
-      .lang-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        margin-bottom: 64px;
+      .verdict h2 {
+        font-family: var(--display); font-weight: 600; font-size: 58px; letter-spacing: -.03em; line-height: 1.08;
       }
-      .lang-head .kicker {
-        margin: 0;
+      .desk {
+        padding: 28px 32px 24px; background: rgba(16,14,10,.9);
+        border: 1px solid rgba(240,185,11,.22); border-top: 2px solid var(--gold);
       }
-      .lang-head p {
-        font-family: var(--display);
-        font-size: 28px;
-        color: var(--muted);
+      .desk .row {
+        display: flex; justify-content: space-between; gap: 16px;
+        font-family: var(--mono); font-size: 16px; letter-spacing: .06em; line-height: 2;
+        border-bottom: 1px solid rgba(47,42,31,.8); color: var(--muted);
       }
-      .prims {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 28px;
+      .desk .row b { color: var(--gold); font-weight: 500; }
+      .desk .row.sell b { color: var(--sell); }
+      .badge {
+        display: inline-block; margin-bottom: 14px; padding: 5px 10px; background: var(--gold); color: var(--ink);
+        font-family: var(--mono); font-size: 13px; letter-spacing: .16em; font-weight: 500;
       }
-      .prim {
-        padding-top: 22px;
-        border-top: 1px solid rgba(201, 162, 94, 0.55);
-        transform-origin: left top;
+      .px {
+        font-family: var(--cond); font-size: 54px; letter-spacing: .04em; color: var(--text);
       }
-      .prim strong {
-        display: block;
-        font-family: var(--cond);
-        font-weight: 500;
-        font-size: 72px;
-        letter-spacing: 0.04em;
-        line-height: 1;
-        color: var(--text);
-      }
-      .prim em {
-        display: block;
-        margin: 16px 0 18px;
-        font-family: var(--display);
-        font-style: normal;
-        font-size: 30px;
-        color: var(--gold);
-      }
-      .prim span {
-        display: block;
-        font-family: var(--mono);
-        font-size: 16px;
-        line-height: 1.55;
-        letter-spacing: 0.04em;
-        color: var(--quiet);
-      }
+      .px em { font-style: normal; color: var(--gold); font-size: 22px; letter-spacing: .14em; margin-left: 10px; }
 
-      .split {
-        position: absolute;
-        left: 140px;
-        right: 140px;
-        top: 50%;
-        transform: translateY(-50%);
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 36px;
-      }
-      .plate {
-        min-height: 540px;
-        padding: 48px 52px;
-        background: rgba(18, 17, 14, 0.62);
-        border: 1px solid rgba(201, 162, 94, 0.16);
-        box-shadow: inset 0 1px 0 rgba(240, 234, 217, 0.06);
-        border-top: 1px solid rgba(201, 162, 94, 0.55);
-      }
-      .plate .kicker {
-        margin-bottom: 22px;
-      }
-      .plate h2 {
-        font-family: var(--display);
-        font-weight: 600;
-        font-size: 64px;
-        letter-spacing: -0.02em;
-        line-height: 1.05;
-      }
-      .plate p {
-        margin-top: 22px;
-        font-family: var(--display);
-        font-size: 28px;
-        line-height: 1.45;
-        color: var(--muted);
-      }
-      .meta {
-        margin-top: 36px;
-        font-family: var(--mono);
-        font-size: 16px;
-        line-height: 1.8;
-        letter-spacing: 0.04em;
-        color: var(--quiet);
-      }
-      .meta b {
-        color: var(--gold);
-        font-weight: 500;
-      }
-
-      .end {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-      }
-      .end img {
-        width: 196px;
-        height: 196px;
-        filter: drop-shadow(0 0 24px rgba(201, 162, 94, 0.28));
-      }
-      .end .brand {
-        margin-top: 28px;
-        margin-right: -0.28em;
-        font-family: var(--cond);
-        font-size: 22px;
-        letter-spacing: 0.28em;
-        color: var(--gold);
-      }
-      .end h2 {
-        margin-top: 10px;
-        font-family: var(--display);
-        font-weight: 600;
-        font-size: 92px;
-        letter-spacing: -0.03em;
-      }
-      .end .url {
-        margin-top: 18px;
-        font-family: var(--mono);
-        font-size: 28px;
-        letter-spacing: 0.18em;
-        color: var(--text);
-      }
-      .end .foot {
-        margin-top: 28px;
-        font-family: var(--mono);
-        font-size: 15px;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: var(--quiet);
-      }
+      .end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+      .end .mark { width: 150px; height: 150px; }
+      .end .brand { margin-top: 20px; font-family: var(--cond); font-size: 22px; letter-spacing: .28em; color: var(--gold); }
+      .end h2 { margin-top: 6px; font-family: var(--display); font-weight: 600; font-size: 84px; letter-spacing: -.03em; }
+      .end .url { margin-top: 14px; font-family: var(--mono); font-size: 28px; letter-spacing: .16em; }
+      .end .foot { margin-top: 20px; font-family: var(--mono); font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: var(--quiet); }
 
       .overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 40;
-        display: grid;
-        place-items: center;
-        background: rgba(5, 4, 3, 0.28);
-        cursor: pointer;
+        position: fixed; inset: 0; z-index: 40; display: grid; place-items: center;
+        background: rgba(5,4,3,.28); cursor: pointer;
       }
-      .overlay[hidden],
-      body.capture .overlay,
-      body.capture .progress {
-        display: none;
-      }
-      .play {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        color: var(--text);
-      }
+      .overlay[hidden], body.capture .overlay, body.capture .progress { display: none; }
+      .play { display: flex; flex-direction: column; align-items: center; gap: 14px; }
       .play button {
-        width: 72px;
-        height: 72px;
-        border: 1px solid rgba(201, 162, 94, 0.7);
-        border-radius: 50%;
-        position: relative;
-        background: transparent;
-        cursor: pointer;
-      }
-      .play button i,
-      .play button::after {
-        pointer-events: none;
+        width: 72px; height: 72px; border: 1px solid rgba(240,185,11,.7); border-radius: 50%;
+        background: transparent; position: relative; cursor: pointer;
       }
       .play button::after {
-        content: "";
-        position: absolute;
-        left: 28px;
-        top: 24px;
-        border-style: solid;
-        border-width: 12px 0 12px 18px;
+        content: ""; position: absolute; left: 28px; top: 24px;
+        border-style: solid; border-width: 12px 0 12px 18px;
         border-color: transparent transparent transparent var(--gold);
       }
-      .play small {
-        font-family: var(--mono);
-        letter-spacing: 0.28em;
-        font-size: 13px;
-        color: var(--gold);
-      }
-      .play a {
-        font-family: var(--mono);
-        font-size: 12px;
-        letter-spacing: 0.18em;
-        color: var(--quiet);
-        text-decoration: none;
-      }
-      .progress {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 30;
-        height: 3px;
-        background: rgba(47, 42, 31, 0.8);
-      }
-      .progress > span {
-        display: block;
-        height: 100%;
-        width: 0;
-        background: var(--gold);
-      }
+      .play small, .play a { font-family: var(--mono); letter-spacing: .2em; text-decoration: none; }
+      .play small { font-size: 13px; color: var(--gold); }
+      .play a { font-size: 12px; color: var(--quiet); }
+      .progress { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; height: 3px; background: rgba(47,42,31,.8); }
+      .progress > span { display: block; height: 100%; width: 0; background: var(--gold); }
     </style>
   </head>
   <body>
     <div class="stage-wrap" id="wrap">
-      <div class="stage" id="stage">
-        <div class="ghost" id="ghost">IMMORTAL</div>
-        <div class="hud hud-l" id="hudL">IFS.LAUNCH / 16 SEP 2026</div>
-        <div class="hud hud-r" id="hudR"><b>$IFS</b> · BSC</div>
+      <div class="stage">
+        <canvas id="fly" width="1920" height="1080"></canvas>
+        <div class="ghost" id="ghost">IFS</div>
+        <div class="hud hud-l" id="hudL"><span class="led"></span>IFS · OPEN PROTOCOL</div>
+        <div class="hud hud-c" id="hudC">SIM <b id="tick">1842</b> · PAPER TAPE</div>
+        <div class="hud hud-r" id="hudR"><b>$IFS</b> · BSC · 1% / 1%</div>
 
         <section class="scene" id="s1">
-          <div class="seal-wrap" id="sealWrap">
-            <div class="ring ring-a" id="ringA"></div>
-            <div class="ring ring-b" id="ringB"></div>
-            <div class="ring ring-a crosshair">
-              <span class="n"></span><span class="s"></span><span class="e"></span
-              ><span class="w"></span>
-            </div>
-            <img class="seal" id="seal" src="../assets/fly-seal.png" alt="" />
-          </div>
-          <div class="note" id="s1note">
-            <div class="line">Measured. Written. Able to wake.</div>
-            <div class="en">Site launch</div>
+          <div class="center">
+            <div class="eyeline" id="s1eye">Introducing</div>
+            <h1 id="s1title">Immortal Fly</h1>
+            <div class="sub" id="s1sub">Official $IFS · A flyswarm network</div>
           </div>
         </section>
 
         <section class="scene" id="s2">
           <div class="copy">
-            <div class="kicker" id="s2k">Immortal Flies / Digital Life Observatory</div>
-            <h1 id="s2a">Small lives.</h1>
-            <h1 id="s2b"><span class="gold">Infinite worlds.</span></h1>
-            <p class="lead" id="s2lead">
-              From a neural spark to a society of autonomous agents.<br />Trading is the first verifiable world.
-            </p>
-            <div class="rule" id="s2rule"></div>
+            <div class="kicker" id="s2k">Flyswarm network</div>
+            <div class="line xl" id="s2a">An open</div>
+            <div class="line xl gold" id="s2b">flyswarm protocol.</div>
           </div>
         </section>
 
         <section class="scene" id="s3">
-          <div class="lang">
-            <div class="lang-head">
-              <div class="kicker">Fly Language / Four primitives</div>
-              <p>They do not speak buy or sell. Finance is translated only at the port.</p>
-            </div>
-            <div class="prims">
-              <article class="prim" id="p1">
-                <strong>SENSE</strong>
-                <em>Receive</em>
-                <span>What arrives<br />from whom, when it expires</span>
-              </article>
-              <article class="prim" id="p2">
-                <strong>ACT</strong>
-                <em>Tend</em>
-                <span>Present tendency<br />and intensity</span>
-              </article>
-              <article class="prim" id="p3">
-                <strong>MEMORY</strong>
-                <em>Remember</em>
-                <span>What was lived<br />checkpoints that replay</span>
-              </article>
-              <article class="prim" id="p4">
-                <strong>PROPOSE</strong>
-                <em>Ask</em>
-                <span>What the society<br />may do from the catalog</span>
-              </article>
-            </div>
+          <div class="stack">
+            <div class="slam" id="c1">Cross-species.<small>First life: the fly</small></div>
+            <div class="slam" id="c2">Cross-chain.<small>Settlement starts on BSC</small></div>
+            <div class="slam" id="c3">A social order that can scale.<small>New worlds plug in. The colony stays</small></div>
           </div>
         </section>
 
         <section class="scene" id="s4">
-          <div class="split">
-            <article class="plate" id="pl1">
-              <div class="kicker">First world</div>
-              <h2>The pit is<br />still paper.</h2>
-              <p>Watch the turn before the order. Colony, intent, risk and fills stay in separate layers.</p>
-              <div class="meta">THE PIT · PAPER ONLY<br />USER VAULT NOT OPEN</div>
-            </article>
-            <article class="plate" id="pl2">
-              <div class="kicker">Official token</div>
-              <h2>$IFS is<br />live on BSC.</h2>
-              <p>1% buy and sell tax. Vault address not posted. No yield claim. No buyback claim.</p>
-              <div class="meta">
-                <b>0x65b6…81a7777</b><br />
-                FLAP.SH · IMMORTALFLIES.COM
-              </div>
-            </article>
+          <div class="stack">
+            <div class="slam" id="d1">Raise one life.</div>
+            <div class="slam gold" id="d2">Join the network.</div>
+            <div class="slam" id="d3">Extend the colony.</div>
           </div>
         </section>
 
         <section class="scene" id="s5">
-          <div class="end">
-            <img id="endSeal" src="../assets/fly-seal.png" alt="" />
-            <div class="brand" id="endBrand">OFFICIAL SITE</div>
-            <h2 id="endTitle">Immortal Fly</h2>
-            <div class="url" id="endUrl">immortalflies.com</div>
-            <div class="foot" id="endFoot">$IFS · BSC · Enter the observatory</div>
+          <div class="board">
+            <div id="pl1">
+              <div class="kicker">Custody</div>
+              <div class="verdict">
+                <h2 id="v1">The fly does not hold your keys.</h2>
+                <h2 id="v2" class="gold">The pit is paper.</h2>
+                <h2 id="v3">You decide the trade.</h2>
+              </div>
+            </div>
+            <aside class="desk" id="pl2">
+              <div class="badge">PAPER BOOK · SIM</div>
+              <div class="px">0.00<em>IFS / BNB</em></div>
+              <canvas id="spark" width="640" height="120"></canvas>
+              <div class="row"><span>F-04 FORAGE</span><b>PAPER BUY</b></div>
+              <div class="row sell"><span>F-11 AVOID</span><b>PAPER SELL</b></div>
+              <div class="row"><span>F-07 EXPLORE</span><b>PAPER BUY</b></div>
+              <div class="row"><span>TAX / VAULT</span><b>1% · NOT POSTED</b></div>
+              <div class="row"><span>CONTRACT</span><b>0x65b6…7777</b></div>
+            </aside>
           </div>
         </section>
 
+        <section class="scene" id="s6">
+          <div class="end">
+            <svg class="mark" id="endSeal" viewBox="-90 -90 180 180" fill="none">
+              <circle r="78" stroke="#f0b90b" stroke-width="1.4" />
+              <g stroke="#f0ead9" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M-7-16C-30-38-58-32-76-6C-58-2-30 4-7 2Z" />
+                <path d="M7-16C30-38 58-32 76-6C58-2 30 4 7 2Z" />
+                <path d="M-8 2L-24 12L-32 28M8 2L24 12L32 28M-7 10L-26 22L-30 40M7 10L26 22L30 40M-6 18L-20 34L-18 48M6 18L20 34L18 48" />
+                <ellipse cx="0" cy="-6" rx="9.5" ry="16" />
+                <path d="M-10 8C-13 24-11 38 0 50C11 38 13 24 10 8Z" />
+                <ellipse cx="0" cy="-30" rx="11" ry="9" />
+                <ellipse cx="-10" cy="-36" rx="7.5" ry="8.5" fill="#c23a32" stroke="none" />
+                <ellipse cx="10" cy="-36" rx="7.5" ry="8.5" fill="#c23a32" stroke="none" />
+              </g>
+            </svg>
+            <div class="brand" id="endBrand">LIVE ON BSC</div>
+            <h2 id="endTitle">$IFS</h2>
+            <div class="url" id="endUrl">immortalflies.com</div>
+            <div class="foot" id="endFoot">Raise one life. Join the network.</div>
+          </div>
+        </section>
+
+        <div class="tape" id="tapeWrap"><div id="tape"></div></div>
         <div class="vignette"></div>
         <div class="grain"></div>
-        <div class="finder" aria-hidden="true">
-          <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
-        </div>
+        <div class="finder"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
       </div>
     </div>
 
     <div class="overlay" id="overlay">
       <div class="play">
-        <button type="button" id="playBtn"><i></i></button>
-        <small>PLAY / 20S</small>
+        <button type="button" id="playBtn"></button>
+        <small>PLAY / 30S</small>
         <a href="./immortal-fly-site-launch.mp4" download>Download MP4</a>
       </div>
     </div>
-    <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+    <div class="progress"><span id="bar"></span></div>
 
     <script>
-      const DURATION = 20;
+      const DURATION = 30;
+      const TAU = Math.PI * 2;
+      const GOLD = "#f0b90b";
+      const BONE = "#f0ead9";
+      const EYE = "#c23a32";
       const capture = new URLSearchParams(location.search).has("capture");
       if (capture) document.body.classList.add("capture");
 
       const $ = (id) => document.getElementById(id);
       const clamp = (t, a, b) => Math.max(a, Math.min(b, t));
       const lerp = (a, b, t) => a + (b - a) * t;
+      const fract = (v) => v - Math.floor(v);
       const expoOut = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
       const cubicOut = (t) => 1 - Math.pow(1 - t, 3);
       const cubicIn = (t) => t * t * t;
-      const sineInOut = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
-      const quartOut = (t) => 1 - Math.pow(1 - t, 4);
+      const backOut = (t) => {
+        const c = 1.2;
+        return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2);
+      };
 
       function gate(t, start, dur, ease = cubicOut) {
         if (dur <= 0) return t >= start ? 1 : 0;
@@ -690,87 +325,289 @@
         el.style.opacity = String(v);
         el.style.visibility = v <= 0.001 ? "hidden" : "visible";
       }
-      function setXf(el, xf) {
-        el.style.transform = xf;
+      function slam(el, g, dir = 1) {
+        setOp(el, g);
+        const x = (1 - g) * 70 * dir;
+        const s = lerp(1.16, 1, g);
+        el.style.transform = `translate(${x}px,0) scale(${s})`;
+        el.style.letterSpacing = `${lerp(-0.01, -0.03, g)}em`;
+      }
+
+      function createFlyCloud() {
+        const points = [];
+        function ellipsoid(cx, cy, cz, rx, ry, rz, count, material) {
+          for (let i = 0; i < count; i++) {
+            const y = 1 - (2 * (i + 0.5)) / count;
+            const r = Math.sqrt(1 - y * y);
+            const a = i * 2.399963;
+            points.push({
+              x: cx + rx * Math.cos(a) * r,
+              y: cy + ry * y,
+              z: cz + rz * Math.sin(a) * r,
+              material,
+              seed: fract(i * 0.618034),
+            });
+          }
+        }
+        function line(a, b, count, material = "bone") {
+          for (let i = 0; i < count; i++) {
+            const u = i / count;
+            points.push({
+              x: a[0] + (b[0] - a[0]) * u,
+              y: a[1] + (b[1] - a[1]) * u,
+              z: a[2] + (b[2] - a[2]) * u,
+              material,
+              seed: fract(i * 0.718),
+              side: material === "vein" ? Math.sign(a[0]) : undefined,
+            });
+          }
+        }
+        ellipsoid(0, 46, 0, 27, 59, 22, 260, "abdomen");
+        ellipsoid(0, -20, 7, 30, 34, 25, 180, "bone");
+        ellipsoid(0, -67, 5, 25, 21, 19, 130, "bone");
+        for (const side of [-1, 1]) {
+          ellipsoid(side * 20, -71, 15, 13, 17, 14, 100, "eye");
+          for (let i = 0; i < 240; i++) {
+            const a = i * 2.399963;
+            const radius = Math.sqrt((i + 0.5) / 240);
+            const u = Math.cos(a) * radius * 39;
+            const v = Math.sin(a) * radius * 87;
+            points.push({
+              x: side * (63 + u * 0.84 + v * 0.54),
+              y: 30 - u * 0.54 + v * 0.84,
+              z: 14 + 7 * (1 - radius),
+              material: "wing",
+              side,
+              seed: fract(i * 0.618034),
+            });
+          }
+          for (let i = 0; i < 80; i++) {
+            const a = (i / 80) * TAU;
+            const u = Math.cos(a) * 39;
+            const v = Math.sin(a) * 87;
+            points.push({
+              x: side * (63 + u * 0.84 + v * 0.54),
+              y: 30 - u * 0.54 + v * 0.84,
+              z: 14,
+              material: "vein",
+              side,
+              seed: 0.8,
+            });
+          }
+          for (const end of [[side * 115, 90, 14], [side * 92, 105, 14], [side * 57, 96, 14]])
+            line([side * 18, -34, 15], end, 30, "vein");
+          for (const [start, knee, end] of [[-37, -60, -106], [-12, 4, 32], [8, 63, 119]]) {
+            line([side * 20, start, -4], [side * 50, knee, -14], 16);
+            line([side * 50, knee, -14], [side * 73, end, -19], 18);
+          }
+        }
+        return points;
+      }
+
+      const CLOUD = createFlyCloud();
+      const ctx = $("fly").getContext("2d", { alpha: true });
+      const spark = $("spark");
+      const c2 = spark.getContext("2d", { alpha: true });
+
+      const TAPE = [
+        "IFS/BNB SIM", "PAPER ONLY", "FORAGE → FILL", "AVOID → FILL",
+        "NO YIELD CLAIM", "1% BUY / 1% SELL", "VAULT NOT POSTED",
+        "CROSS-SPECIES", "CROSS-CHAIN", "OPEN PROTOCOL", "0x65b6…7777",
+        "YOU HOLD THE KEYS", "THE PIT IS PAPER",
+      ].join("   ·   ");
+      $("tape").textContent = `${TAPE}   ·   ${TAPE}   ·   ${TAPE}`;
+
+      function drawFly(t, view) {
+        const w = 1920, h = 1080;
+        ctx.clearRect(0, 0, w, h);
+        if (view.alpha <= 0.01) return;
+        ctx.save();
+        ctx.globalAlpha = view.alpha;
+        const { cx, cy, color, unit } = view;
+        const aura = ctx.createRadialGradient(cx, cy - 40, 0, cx, cy, w * 0.4);
+        aura.addColorStop(0, `${color}24`);
+        aura.addColorStop(1, `${color}00`);
+        ctx.fillStyle = aura;
+        ctx.fillRect(0, 0, w, h);
+        ctx.globalCompositeOperation = "lighter";
+        if (view.rings) {
+          for (let i = 0; i < 3; i++) {
+            const rx = w * (0.17 + i * 0.04), ry = h * (0.19 + i * 0.028);
+            const a = t * (i % 2 ? -0.55 : 0.42) + i * 1.3;
+            ctx.strokeStyle = `${color}34`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, TAU);
+            ctx.stroke();
+            ctx.strokeStyle = `${color}99`;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, a, a + 0.55);
+            ctx.stroke();
+          }
+        }
+        if (view.colony) {
+          for (let i = 0; i < 10; i++) {
+            const a = -Math.PI / 2 + ((i + 0.5) / 10) * TAU + t * 0.12;
+            const x = cx + Math.cos(a) * w * 0.26;
+            const y = cy + Math.sin(a) * h * 0.28;
+            ctx.strokeStyle = color;
+            ctx.globalAlpha = view.alpha * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.quadraticCurveTo((cx + x) / 2, cy - 30, x, y);
+            ctx.stroke();
+            const pulse = (t * 0.85 + i * 0.11) % 1;
+            ctx.globalAlpha = view.alpha * (0.3 + (1 - pulse) * 0.5);
+            ctx.beginPath();
+            ctx.arc(x, y, 2.5 + pulse * 12, 0, TAU);
+            ctx.stroke();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, 2.4, 0, TAU);
+            ctx.fill();
+          }
+          ctx.globalAlpha = view.alpha;
+        }
+        const yaw = (view.yaw || 0.2) + Math.sin(t * (view.spin || 0.7)) * 0.28;
+        const tilt = -0.14 + Math.sin(t * 0.9) * 0.06;
+        const scale = unit * 1.55;
+        const bob = Math.sin(t * 3.1) * 7 * unit;
+        const flap = Math.sin(t * TAU * 5.7);
+        const sweep = Math.sin(t * TAU * 5.7 + 0.65) * 0.29;
+        function project(x, y, z) {
+          const xx = x * Math.cos(yaw) + z * Math.sin(yaw);
+          const zz = -x * Math.sin(yaw) + z * Math.cos(yaw);
+          const yy = y * Math.cos(tilt) - zz * Math.sin(tilt);
+          const depth = y * Math.sin(tilt) + zz * Math.cos(tilt);
+          const perspective = 560 / (560 - depth);
+          return { x: cx + xx * scale * perspective, y: cy + yy * scale * perspective + bob, z: depth };
+        }
+        const projected = CLOUD.map((p) => {
+          let { x, y, z } = p;
+          if (p.side) {
+            const u = Math.abs(x) - 18, v = y + 34;
+            const folded = 0.25 + flap * 0.78;
+            const u1 = u * Math.cos(sweep) + v * Math.sin(sweep);
+            const v1 = -u * Math.sin(sweep) + v * Math.cos(sweep);
+            x = p.side * (18 + u1 * Math.cos(folded));
+            y = -34 + v1;
+            z = 14 + u1 * Math.sin(folded);
+          }
+          return { p, ...project(x, y, z) };
+        });
+        projected.sort((a, b) => a.z - b.z);
+        const scanY = ((t * 140) % 260) - 130;
+        for (const { p, x, y, z } of projected) {
+          const scan = Math.max(0, 1 - Math.abs(p.y - scanY) / 20);
+          let alpha = 0.42 + (z + 65) / 280 + scan * 0.55;
+          let fill = BONE;
+          if (p.material === "eye") fill = EYE;
+          else if (p.material === "wing") { fill = color; alpha *= 0.62; }
+          else if (p.material === "abdomen" && Math.sin(p.y * 0.29) > 0.3) alpha *= 0.35;
+          else fill = color;
+          ctx.globalAlpha = view.alpha * Math.min(0.95, alpha);
+          ctx.fillStyle = fill;
+          const size = (p.material === "eye" ? 1.7 : p.material === "wing" ? 0.95 : 1.2) * unit;
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, TAU);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawChart(t, show) {
+        c2.clearRect(0, 0, spark.width, spark.height);
+        if (show < 0.02) return;
+        c2.save();
+        c2.globalAlpha = show * 0.9;
+        const x0 = 8, y0 = 8, w = 624, h = 104;
+        c2.strokeStyle = "rgba(240,185,11,0.25)";
+        c2.strokeRect(x0, y0, w, h);
+        c2.beginPath();
+        for (let i = 0; i < 32; i++) {
+          const u = i / 31;
+          const px = x0 + u * w;
+          const wave = Math.sin(u * 9 + t * 1.6) * 18 + Math.sin(u * 3.1 + t * 0.4) * 10;
+          const py = y0 + h * 0.58 - wave;
+          i ? c2.lineTo(px, py) : c2.moveTo(px, py);
+        }
+        c2.strokeStyle = GOLD;
+        c2.lineWidth = 1.6;
+        c2.stroke();
+        c2.restore();
+      }
+
+      function flyView(t) {
+        const s2 = windowFade(t, 3.55, 9.55, 0.35, 0.15);
+        const s3 = windowFade(t, 9.4, 15.7, 0, 0.25);
+        const s4 = windowFade(t, 15.55, 21.15, 0.25, 0.2);
+        const s5 = windowFade(t, 21.0, 26.2, 0, 0.3);
+        if (s2 > 0.02) return { cx: 1320, cy: 500, unit: 1.95, alpha: s2, color: GOLD, rings: true, colony: true, spin: 0.85, yaw: 0.15 };
+        if (s3 > 0.02) return { cx: 1480, cy: 420, unit: 1.15, alpha: s3 * 0.35, color: GOLD, rings: true, colony: false, spin: 1.1, yaw: 0.4 };
+        if (s4 > 0.02) return { cx: 960, cy: 520, unit: 1.7, alpha: s4 * 0.55, color: GOLD, rings: true, colony: true, spin: 1.05, yaw: 0.1 };
+        if (s5 > 0.02) return { cx: 420, cy: 820, unit: 0.7, alpha: s5 * 0.12, color: GOLD, rings: false, colony: false, spin: 0.4, yaw: 0.3 };
+        return { cx: 960, cy: 520, unit: 1.2, alpha: windowFade(t, 2.2, 4.1, 0.4, 0.3) * 0.1, color: GOLD, rings: false, colony: false, spin: 0.4, yaw: 0.2 };
       }
 
       function apply(t) {
         t = clamp(t, 0, DURATION);
         $("bar").style.width = `${(t / DURATION) * 100}%`;
+        $("tick").textContent = String(1842 + Math.floor(t * 4.6));
+        $("tape").style.transform = `translateX(${-140 - t * 160}px)`;
+        const led = 0.45 + 0.55 * Math.abs(Math.sin(t * 6.2));
+        document.querySelector(".led").style.opacity = String(led);
+        drawFly(t, flyView(t));
+        drawChart(t, windowFade(t, 21.0, 26.15, 0.2, 0.25));
 
-        const hud = windowFade(t, 0.15, 19.7, 0.5, 0.35);
+        const hud = windowFade(t, 0.15, 29.65, 0.3, 0.25);
         setOp($("hudL"), hud);
+        setOp($("hudC"), hud);
         setOp($("hudR"), hud);
-        setOp($("ghost"), windowFade(t, 3.6, 16.8, 0.8, 0.6) * 1);
+        setOp($("tapeWrap"), windowFade(t, 0.25, 29.7, 0.25, 0.2));
+        setOp($("ghost"), windowFade(t, 3.6, 25.6, 0.4, 0.3));
 
-        const g = 0.035 + Math.sin(t * 0.35) * 0.008;
-        $("ghost").style.color = `rgba(240,234,217,${g})`;
-        $("ghost").style.transform = `translateX(${lerp(-24, 18, sineInOut(t / DURATION))}px)`;
-
-        const s1 = windowFade(t, 0, 4.15, 0.35, 0.55);
+        const s1 = windowFade(t, 0, 3.95, 0.2, 0.28);
         setOp($("s1"), s1);
-        const sealIn = gate(t, 0.28, 1.15, expoOut);
-        setXf(
-          $("sealWrap"),
-          `translate(-50%,-50%) scale(${lerp(0.86, 1, sealIn)})`,
-        );
-        $("seal").style.opacity = String(gate(t, 0.22, 0.9, quartOut));
-        $("ringA").style.transform = `translate(-50%,-50%) rotate(${t * 9}deg)`;
-        $("ringB").style.transform = `translate(-50%,-50%) rotate(${-t * 7}deg)`;
-        const noteIn = gate(t, 1.35, 0.7, cubicOut);
-        setOp($("s1note"), s1 * noteIn);
-        setXf($("s1note"), `translate(-50%, ${lerp(18, 0, noteIn)}px)`);
+        slam($("s1eye"), gate(t, 0.22, 0.38, expoOut));
+        slam($("s1title"), gate(t, 0.55, 0.48, backOut));
+        slam($("s1sub"), gate(t, 1.15, 0.35, cubicOut));
 
-        const s2 = windowFade(t, 3.65, 8.02, 0.45, 0);
+        const s2 = windowFade(t, 3.55, 9.55, 0.2, 0);
         setOp($("s2"), s2);
-        const k2 = gate(t, 3.85, 0.45, cubicOut);
-        setOp($("s2k"), k2);
-        setXf($("s2k"), `translateX(${lerp(-36, 0, k2)}px)`);
-        const a2 = gate(t, 4.1, 0.7, expoOut);
-        setOp($("s2a"), a2);
-        setXf($("s2a"), `translateY(${lerp(46, 0, a2)}px)`);
-        const b2 = gate(t, 4.55, 0.75, expoOut);
-        setOp($("s2b"), b2);
-        setXf($("s2b"), `translateY(${lerp(40, 0, b2)}px)`);
-        const l2 = gate(t, 5.15, 0.7, cubicOut);
-        setOp($("s2lead"), l2);
-        setXf($("s2lead"), `translateY(${lerp(24, 0, l2)}px)`);
-        const r2 = gate(t, 5.4, 0.55, quartOut);
-        $("s2rule").style.transform = `scaleX(${r2})`;
-        $("s2rule").style.opacity = String(s2);
+        slam($("s2k"), gate(t, 3.7, 0.28, expoOut), -1);
+        slam($("s2a"), gate(t, 3.95, 0.4, backOut), -1);
+        slam($("s2b"), gate(t, 4.35, 0.42, expoOut), -1);
 
-        const s3 = windowFade(t, 8.0, 13.28, 0, 0.45);
+        const s3 = windowFade(t, 9.4, 15.75, 0, 0.2);
         setOp($("s3"), s3);
-        ["p1", "p2", "p3", "p4"].forEach((id, i) => {
-          const g3 = gate(t, 8.08 + i * 0.16, 0.48, expoOut);
-          setOp($(id), s3 * g3);
-          setXf($(id), `translateY(${lerp(36, 0, g3)}px)`);
-          $(id).style.filter = `blur(${lerp(6, 0, g3)}px)`;
-        });
+        slam($("c1"), gate(t, 9.48, 0.32, backOut), -1);
+        slam($("c2"), gate(t, 11.15, 0.32, expoOut), 1);
+        slam($("c3"), gate(t, 12.2, 0.36, backOut), -1);
 
-        const s4 = windowFade(t, 12.95, 17.15, 0.4, 0.4);
+        const s4 = windowFade(t, 15.55, 21.2, 0.15, 0.15);
         setOp($("s4"), s4);
-        const pl1 = gate(t, 13.1, 0.55, cubicOut);
-        const pl2 = gate(t, 13.35, 0.6, expoOut);
-        setOp($("pl1"), s4 * pl1);
-        setOp($("pl2"), s4 * pl2);
-        setXf($("pl1"), `translateX(${lerp(-48, 0, pl1)}px)`);
-        setXf($("pl2"), `translateX(${lerp(48, 0, pl2)}px)`);
+        slam($("d1"), gate(t, 15.7, 0.3, expoOut), -1);
+        slam($("d2"), gate(t, 17.15, 0.3, backOut), 1);
+        slam($("d3"), gate(t, 18.15, 0.32, expoOut), -1);
 
-        const s5 = windowFade(t, 16.7, 20, 0.5, 0);
+        const s5 = windowFade(t, 21.0, 26.25, 0, 0.25);
         setOp($("s5"), s5);
-        const es = gate(t, 16.85, 0.7, expoOut);
+        slam($("v1"), gate(t, 21.08, 0.32, expoOut), -1);
+        slam($("v2"), gate(t, 22.15, 0.3, backOut), -1);
+        slam($("v3"), gate(t, 23.2, 0.3, expoOut), -1);
+        const desk = gate(t, 21.25, 0.4, expoOut);
+        setOp($("pl2"), s5 * desk);
+        $("pl2").style.transform = `translateX(${lerp(56, 0, desk)}px)`;
+
+        const s6 = windowFade(t, 25.95, 30, 0.35, 0);
+        setOp($("s6"), s6);
+        const es = gate(t, 26.1, 0.45, expoOut);
         $("endSeal").style.opacity = String(es);
-        $("endSeal").style.transform = `scale(${lerp(0.88, 1, es)})`;
-        const eb = gate(t, 17.2, 0.4, cubicOut);
-        setOp($("endBrand"), eb);
-        const et = gate(t, 17.4, 0.65, expoOut);
-        setOp($("endTitle"), et);
-        setXf($("endTitle"), `translateY(${lerp(28, 0, et)}px)`);
-        const eu = gate(t, 17.85, 0.45, cubicOut);
-        setOp($("endUrl"), eu);
-        const ef = gate(t, 18.2, 0.4, cubicOut);
-        setOp($("endFoot"), ef);
+        $("endSeal").style.transform = `scale(${lerp(0.82, 1, es)})`;
+        slam($("endBrand"), gate(t, 26.4, 0.28, cubicOut));
+        slam($("endTitle"), gate(t, 26.65, 0.4, backOut));
+        slam($("endUrl"), gate(t, 27.15, 0.3, expoOut));
+        slam($("endFoot"), gate(t, 27.5, 0.28, cubicOut));
       }
 
       window.__DURATION = DURATION;
@@ -778,49 +615,34 @@
       window.__ready = false;
 
       function fit() {
-        if (capture) {
-          $("wrap").style.transform = "none";
-          return;
-        }
-        const s = Math.min(innerWidth / 1920, innerHeight / 1080);
-        $("wrap").style.transform = `scale(${s})`;
+        $("wrap").style.transform = capture ? "none" : `scale(${Math.min(innerWidth / 1920, innerHeight / 1080)})`;
       }
       addEventListener("resize", fit);
       fit();
 
-      let raf = 0;
-      let playing = false;
+      let raf = 0, playing = false;
       function playFrom(start) {
         playing = true;
         $("overlay").hidden = true;
         const t0 = performance.now() - start * 1000;
-        const tick = (now) => {
+        const loop = (now) => {
           const t = Math.min(DURATION, (now - t0) / 1000);
           apply(t);
-          if (t < DURATION) raf = requestAnimationFrame(tick);
-          else {
-            playing = false;
-            $("overlay").hidden = false;
-          }
+          if (t < DURATION) raf = requestAnimationFrame(loop);
+          else { playing = false; $("overlay").hidden = false; }
         };
         cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(tick);
+        raf = requestAnimationFrame(loop);
       }
-
       $("playBtn").addEventListener("click", () => playFrom(0));
       $("overlay").addEventListener("click", (e) => {
-        if (e.target.closest("a")) return;
-        playFrom(0);
+        if (!e.target.closest("a")) playFrom(0);
       });
       addEventListener("keydown", (e) => {
-        if (e.code === "Space") {
-          e.preventDefault();
-          if (!playing) playFrom(0);
-        }
+        if (e.code === "Space") { e.preventDefault(); if (!playing) playFrom(0); }
       });
-
       document.fonts.ready.then(() => {
-        apply(capture ? 0 : 0.9);
+        apply(capture ? 0 : 1.2);
         window.__ready = true;
         if (!capture) $("overlay").hidden = false;
       });

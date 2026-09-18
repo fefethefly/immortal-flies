@@ -8,9 +8,9 @@ const manifest = JSON.parse(
   fs.readFileSync(`public/life-genesis/${current.genesisRoot.slice(2)}/manifest.json`, "utf8"),
 );
 
-test("mainnet genesis package commits phenotype-loci/2", async () => {
-  assert.equal(current.decoder, "phenotype-loci/2");
-  assert.equal(manifest.decoder, "phenotype-loci/2");
+test("mainnet genesis package commits phenotype-loci/3", async () => {
+  assert.equal(current.decoder, "phenotype-loci/3");
+  assert.equal(manifest.decoder, "phenotype-loci/3");
   assert.equal(current.genesisRoot, await hash(manifest));
   assert.equal(current.speciesHash, await hash(manifest.species));
   assert.equal(current.modelHash, await hash(manifest.model));

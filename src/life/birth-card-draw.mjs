@@ -1,40 +1,11 @@
 import { chipFill } from "../brain/flyswarm/phenotype.mjs";
-import { projectFlyCloud } from "./fly-cloud.mjs";
 import { CARD_H, CARD_W } from "./birth-card.mjs";
+import { drawFlyArt, fitSpan, sizeFactor } from "./fly-sprite.mjs";
 
 const MONO =
   'IBM Plex Mono, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", ui-monospace, monospace';
 const SERIF =
   'Cormorant Garamond, "Songti SC", "STSong", "Noto Serif CJK SC", Times, serif';
-
-/** Head −Y, up +Z, side ±X. Side-oblique, head to the right. */
-function projectPlate(x, y, z) {
-  return {
-    x: -y + x * 0.16,
-    y: -z * 0.7 + x * 0.46,
-    z: x * 0.82 + z * 0.28,
-  };
-}
-
-function stampPlateCloud(ctx, pts, px) {
-  for (const p of pts) {
-    const depth = 0.5 + (p.z + 90) / 220;
-    let a = depth * p.shade;
-    if (p.material === "wing") a *= 0.62;
-    if (p.material === "vein") a *= 0.9;
-    if (p.material === "eye") a = Math.min(0.98, a + 0.3);
-    const r =
-      (p.material === "eye"
-        ? 2.4
-        : p.material === "wing"
-          ? 1.15
-          : p.material === "abdomen" || p.material === "bone"
-            ? 2.05
-            : 1.65) * px;
-    ctx.fillStyle = `rgba(${p.rgb.r},${p.rgb.g},${p.rgb.b},${Math.min(0.95, a)})`;
-    ctx.fillRect(p.x - r / 2, p.y - r / 2, r, r);
-  }
-}
 
 function hexRgb(hex) {
   const n = Number.parseInt(String(hex || "#f0b90b").replace("#", ""), 16);
@@ -42,51 +13,31 @@ function hexRgb(hex) {
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
+/** 出生卡上的主角：与图鉴、我的果蝇同一套正面萌系形象。 */
 function drawFly(ctx, soul, cx, cy, span) {
   if (!soul?.phenotype?.art) {
     ctx.strokeStyle = "rgba(240, 185, 11, 0.18)";
     ctx.setLineDash([4, 5]);
     ctx.beginPath();
-    ctx.arc(cx, cy, 36, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 60, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
     return;
   }
   const body = hexRgb(soul.phenotype.art.body);
-  const glow = ctx.createRadialGradient(cx, cy + 10, 8, cx, cy, span * 0.62);
-  glow.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.2)`);
-  glow.addColorStop(0.42, `rgba(${body.r},${body.g},${body.b},0.05)`);
+  const glow = ctx.createRadialGradient(cx, cy + 20, 12, cx, cy, span * 0.72);
+  glow.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.24)`);
+  glow.addColorStop(0.44, `rgba(${body.r},${body.g},${body.b},0.07)`);
   glow.addColorStop(1, "rgba(10, 9, 7, 0)");
   ctx.fillStyle = glow;
   ctx.beginPath();
-  ctx.arc(cx, cy + 6, span * 0.62, 0, Math.PI * 2);
+  ctx.arc(cx, cy + 10, span * 0.72, 0, Math.PI * 2);
   ctx.fill();
-
-  const pts = projectFlyCloud(soul.phenotype.art, {
-    flap: 0.08,
-    sweep: 0.04,
-    project: projectPlate,
+  drawFlyArt(ctx, soul.phenotype.art, cx, cy, span, {
+    flying: false,
+    view: "portrait",
+    ignoreScale: true,
   });
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  for (const p of pts) {
-    minX = Math.min(minX, p.x);
-    maxX = Math.max(maxX, p.x);
-    minY = Math.min(minY, p.y);
-    maxY = Math.max(maxY, p.y);
-  }
-  const bw = maxX - minX || 1;
-  const bh = maxY - minY || 1;
-  const k = span / Math.max(bw, bh * 1.15);
-  const mx = (minX + maxX) / 2;
-  const my = (minY + maxY) / 2;
-  for (const p of pts) {
-    p.x = cx + (p.x - mx) * k;
-    p.y = cy - (p.y - my) * k;
-  }
-  stampPlateCloud(ctx, pts, Math.max(1.15, Math.min(2.15, k * 0.62)));
 }
 
 function fit(ctx, text, font, max) {
@@ -152,6 +103,39 @@ function drawChips(ctx, phenotype, x, y, w, h) {
   });
 }
 
+/** 两行带色点的性状：色点就是这一只的实际体色与眼色。 */
+function drawTraitRows(ctx, rows, x, y, max) {
+  if (!rows?.length) return y;
+  const step = 48;
+  let top = y;
+  for (const row of rows) {
+    ctx.fillStyle = row.color || "#8a6a2a";
+    ctx.beginPath();
+    ctx.arc(x + 11, top + 11, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(240, 234, 217, 0.22)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#e6dcc4";
+    const font = `500 27px ${MONO}`;
+    ctx.font = font;
+    ctx.fillText(fit(ctx, row.text, font, max - 40), x + 36, top);
+    if (row.detail) {
+      const label = ctx.measureText(fit(ctx, row.text, font, max - 40)).width;
+      ctx.fillStyle = "#7d7565";
+      ctx.font = `22px ${MONO}`;
+      ctx.fillText(
+        fit(ctx, row.detail, ctx.font, max - 60 - label),
+        x + 58 + label,
+        top + 4,
+      );
+    }
+    top += step;
+  }
+  return top;
+}
+
 export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
   const inset = Math.round(Math.min(w, h) * 0.04);
   const pad = inset + 36;
@@ -164,27 +148,27 @@ export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
   const body = hexRgb(card.soul?.phenotype?.art?.body);
   const wash = ctx.createRadialGradient(
     w * 0.5,
-    h * 0.4,
+    h * 0.38,
     20,
     w * 0.5,
-    h * 0.42,
-    w * 0.48,
+    h * 0.4,
+    w * 0.5,
   );
-  wash.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.1)`);
+  wash.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.11)`);
   wash.addColorStop(1, "rgba(10, 9, 7, 0)");
   ctx.fillStyle = wash;
   ctx.fillRect(0, 0, w, h);
 
   const vignette = ctx.createRadialGradient(
     w * 0.5,
-    h * 0.48,
-    w * 0.22,
+    h * 0.46,
+    w * 0.24,
     w * 0.5,
     h * 0.5,
-    w * 0.72,
+    w * 0.74,
   );
   vignette.addColorStop(0, "rgba(10, 9, 7, 0)");
-  vignette.addColorStop(1, "rgba(10, 9, 7, 0.42)");
+  vignette.addColorStop(1, "rgba(10, 9, 7, 0.44)");
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, w, h);
 
@@ -196,7 +180,11 @@ export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
   ctx.font = `500 17px ${MONO}`;
   if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.16em";
   ctx.textAlign = "left";
-  ctx.fillText(fit(ctx, card.series || card.header, ctx.font, inner * 0.56), pad, pad + 6);
+  ctx.fillText(
+    fit(ctx, card.series || card.header, ctx.font, inner * 0.56),
+    pad,
+    pad + 6,
+  );
   ctx.textAlign = "right";
   ctx.fillText(
     fit(
@@ -210,23 +198,60 @@ export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
   );
   if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
 
-  const scale = card.soul?.phenotype?.art?.scale || 1;
-  drawFly(ctx, card.soul, w * 0.5, h * 0.4, Math.min(w, h) * 0.46 * scale);
+  // 图鉴编号：左上角四位数铭牌。
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#c9a44a";
+  ctx.font = `500 30px ${MONO}`;
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.14em";
+  ctx.fillText(card.plateIndex || card.tokenMark || "", pad, pad + 52);
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+
+  // 形象区：页眉/编号之下、名字之上。按外接框反推 span，粗壮体型也不出框。
+  const art = card.soul?.phenotype?.art;
+  const flyTop = pad + 100;
+  const flyBottom = h * 0.575;
+  const flySpan =
+    fitSpan(inner * 0.9, (flyBottom - flyTop) * 0.98) * sizeFactor(art);
+  drawFly(ctx, card.soul, w * 0.5, (flyTop + flyBottom) / 2, flySpan);
 
   const nameFont = `500 ${Math.round(h * 0.058)}px ${SERIF}`;
-  const textTop = h * 0.705;
+  const textTop = h * 0.6;
   ctx.textAlign = "left";
   ctx.fillStyle = "#f0ead9";
   ctx.font = nameFont;
-  ctx.fillText(fit(ctx, card.plateName || card.childTitle, nameFont, inner), pad, textTop);
+  ctx.fillText(
+    fit(ctx, card.plateName || card.childTitle, nameFont, inner),
+    pad,
+    textTop,
+  );
+
+  const afterTraits = drawTraitRows(
+    ctx,
+    card.traitRows,
+    pad,
+    textTop + h * 0.078,
+    inner,
+  );
+
+  let top = afterTraits + 10;
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#c9a44a";
+  ctx.font = `500 24px ${MONO}`;
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.08em";
+  ctx.fillText(
+    fit(ctx, card.vitalLine || card.accession, ctx.font, inner),
+    pad,
+    top,
+  );
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+  top += 46;
 
   const lines = [
-    [card.accession, "#c9a44a", `21px ${MONO}`],
+    [card.accession, "#9c8a56", `21px ${MONO}`],
     [card.formLine || card.traits, "#9c8a56", `20px ${MONO}`],
     [card.finishLine, "#8a8172", `20px ${MONO}`],
     [card.bred ? card.parentLine : "", "#8a8172", `17px ${MONO}`],
   ];
-  let top = textTop + h * 0.072;
   for (const [text, color, font] of lines) {
     if (!text) continue;
     ctx.fillStyle = color;
@@ -239,6 +264,7 @@ export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
   drawChips(ctx, card.soul?.phenotype, pad, barY, inner, 7);
   ctx.fillStyle = "#6f6758";
   ctx.font = `14px ${MONO}`;
+  ctx.textAlign = "left";
   ctx.fillText(
     fit(ctx, card.footer || card.mixLine, ctx.font, inner),
     pad,

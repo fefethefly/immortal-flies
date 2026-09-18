@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from "react";
 import {
   Cpu,
-  DoorOpen,
   Fingerprint,
   Globe,
   Landmark,
   Network,
   Route,
+  Store,
   Wallet,
 } from "lucide-react";
 import { LayerCabinet, PhaseSpine } from "./blueprint-rite.jsx";
+import { BlueprintSwarm } from "./blueprint-swarm.jsx";
 import { tiltHandlers, usePrefersReduced, useReveal } from "./rite.jsx";
 import { useLocale } from "./use-locale.mjs";
 import { SiteLink, SitePage } from "./site-chrome.jsx";
@@ -28,7 +29,7 @@ const LAYERS = [
 ];
 
 const PHASES = [
-  ["P0", "blue.p0", "blue.p0p", "now"],
+  ["P0", "blue.p0", "blue.p0p", "live"],
   ["P1", "blue.p1", "blue.p1p", "now"],
   ["P2", "blue.p2", "blue.p2p", "now"],
   ["P3", "blue.p3", "blue.p3p", "next"],
@@ -40,9 +41,10 @@ const PHASES = [
 
 const DRAWN = [
   ["01", "blue.identityTitle", "blue.identity", Fingerprint],
-  ["02", "blue.vaultTitle", "blue.vault", Landmark],
-  ["03", "blue.capitalTitle", "blue.capital", Wallet],
-  ["04", "blue.portsTitle", "blue.ports", DoorOpen],
+  ["02", "blue.marketTitle", "blue.market", Store],
+  ["03", "blue.vaultTitle", "blue.vault", Landmark],
+  ["04", "blue.capitalTitle", "blue.capital", Wallet],
+  ["05", "blue.swarmBoundTitle", "blue.swarmBound", Network],
 ];
 
 export function BlueprintPage() {
@@ -76,6 +78,9 @@ export function BlueprintPage() {
             <h1>{tx("blue.h1")}</h1>
             <p className="lead">{tx("blue.lead")}</p>
             <p className="blue-dep">{tx("blue.depNote")}</p>
+            <SiteLink className="blue-jump" href="/blueprint.html#swarm">
+              {tx("blue.swarmJump")}
+            </SiteLink>
           </div>
           <LayerCabinet
             key={locale}
@@ -115,11 +120,14 @@ export function BlueprintPage() {
           </div>
         </section>
 
+        <BlueprintSwarm tx={tx} />
+
         <section data-reveal>
           <h2>
             <Route size={18} />
             {tx("blue.phases")}
           </h2>
+          <p className="blue-phase-note">{tx("blue.phasesNote")}</p>
           <div className="blue-phase-wrap">
             <PhaseSpine count={PHASES.length} nowCount={3} />
             <ol className="blue-phases">

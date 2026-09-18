@@ -1,0 +1,62 @@
+# 冻结感觉控制器：消息消融 / 1
+
+日期：2026-09-18。状态：开发诊断完成，非外部预注册、非盲测、非学习或 T3 协作证明。
+
+## 范围与冻结
+
+calibrated-food-steering/1 原样不变：904/941/994，22.5° 死区，强度 1000。使用历史真实图 1400 节点/42031 边；控制器、内核、权重、感觉源选择规则和运动读出均未改动。先写带源码指纹的计划，再执行；运行与 verify 拒绝覆盖及指纹漂移。
+
+场景：receiver=(5000,5000)，目标约 1200、observer 约 1800（对角坐标四舍五入，记录实际距离），固定 observer 仅做真实局部观察、不能采集；receiver 可动。初始 heading 0°/45°，四个身体相对方位，160 拍，seeds 305–312。JSON 明确种子字段审计未找到这些值，但未证明历史所有生成范围都未使用；不作“盲种子”声明。
+
+仅 observer 0 向 receiver 1 发送一拍延迟消息，**没有伪装成 sender 2 的自我消息**。收到消息不读取全局 consumed 状态；采集后可能收到一拍旧消息。无记忆，无威胁。
+
+四臂：
+- scalar：原 receiveRelayInbox + 全 food 感觉组。
+- dual：冻结校准控制器 + 实际单源感觉路由。
+- no-message：同一个 dual 控制器，移除所有消息，而非关闭控制器。
+- scrambled：同一个 dual 控制器，将收到的 x/y 各加 5000 后模 10000；显式错误信息，原始消息保留。
+
+校准臂每拍一个感觉源；无目标时也保留一个零强度源，保持随机抽样次数，不注入电流。标量感觉组大小/强度不同；统一拍数不等于统一有效电流或算力。报告记录 neuronUpdates、edgeVisits、foodAttempts、deliveries。
+
+## 结果（256 配置，每配置双跑；完整 verify 再重建）
+
+| 臂 | 采集 | 平均净距离缩短 |
+| --- | ---: | ---: |
+| scalar | 2/64 | −66.928 |
+| dual | 48/64 | +821.024 |
+| no-message | 0/64 | 0 |
+| scrambled | 0/64 | −785.027 |
+
+**校准臂的 64 次不独立**：0/1000 强度令每次感觉注入的成功与 RNG 无关。同一几何的八种子电位/不应期/脉冲摘要及身体轨迹相同，尽管 RNG 值和完整 state hash 不同。正确解读是 **8 个几何场景中成功 6 个，每个重复八遍**，不是 64 例泛化证明。不计算显著性或置信区间。
+
+| heading | ahead | right | behind | left |
+| --- | --- | --- | --- | --- |
+| 0° | 成功 | 失败 | 失败 | 成功 |
+| 45° | 成功 | 成功 | 成功 | 成功 |
+
+heading 0° 的原失败仍在；45° 表现不同说明几何/离散运动敏感，不是修好了 right。移除/打乱消息均无采集，支持“这些固定任务中正确消息对校准控制器的成绩有作用”。任务设计使无消息初态看不到目标且没有自发搜索，不能推广为任意任务的通信优势。标量也有 2/64 成功，不能宣称标量导航不可能。
+
+## 原 right 失败的复核
+
+原 seed 301/right/motor-dual 完整轨迹与 motor-input-v2 完全一致，未发现角度符号或 right-left 比较错误。第 32 拍：error=-28.168°，source=941，真实运动组 left=1/right=4，实际 +9°。同一源第 33 拍 left=2/right=1，实际 −9°。静息标定不是即时运动指令。
+
+在临时复制的内核中只将读出替为 left=1/right=0，重建同一状态只执行一次 step：神经数组与原步相同，但 heading 144→135（−9°）。这只是**非神经反事实读出干预**，排除该步积分器错误；未接入工作区或计为导航成绩。未证明“极限环”“延迟导致振荡”或需反转符号。
+
+## 工件与验证
+
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/motor-ablation-core.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-motor-ablation.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/motor-ablation.test.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/motor-ablation-plan-v1.json
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/motor-ablation-v1.json
+
+新测试及旧 motor-input 测试 5/5 通过；新报告完整 verify 退出码 0。测试逐拍重新执行原 step，核对实际选中源、spikes、neuralHash、身体和运动读出公式；不预设一定采集或误差收缩。保存报告约 39 MB，依赖对应仓库源码与历史 git 图对象，不是独立复算包。未跑全仓库测试或部署。
+
+```sh
+node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-motor-ablation.mjs verify
+node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/motor-ablation.test.mjs
+```
+
+## 下一步
+
+导航仍未普遍解决。优先研究已有活动状态下感觉刺激的短时响应，而非直接反转控制器符号或修改运动读出。任何新校准/滞回/预测控制候选都必须另立版本，并记录训练和推演成本；不能把人工策略规划归因为神经学习。旧控制器和本轮负面几何结果保留。

@@ -1,0 +1,54 @@
+# 转身代价预测候选 / 1：未通过验收
+
+## 固定实验
+
+候选 predictive-turn-cost/1 复用上一版四个 5 拍预测分支，仅重算终点评分：
+
+`EuclideanDistance / 35 + abs(wrappedBearingError) / 9`
+
+该评分是工程启发式，不是真实剩余时间估计；对角运动及同时转向/移动不满足相加假设。每次仅执行所选分支首拍。可以访问完整神经状态与图，但目标坐标只来自本地观察和 observer 0 的一拍延迟消息。没有自我消息、全局目标输入、直接身体控制或学习。
+
+计划及源文件指纹在运行前冻结；没有根据结果修改参数。seed 301，heading 0/45，四方位，160 个实际步骤；共 24 臂运行，每臂双跑并全量比较。几何和种子均是已知开发条件，不是留出泛化验证。
+
+验收条件：原 heading=0/right 成功；原成功几何不退化；总成功数增加。额外预测开销单独记录，不声称同算力。
+
+## 结果
+
+| heading | 方位 | 原校准控制采集拍 | 新候选采集拍 | 新候选最终距离 |
+| --- | --- | ---: | ---: | ---: |
+| 0 | ahead | 135 | 未采集 | 1200.00 |
+| 0 | right | 未采集 | 106 | 335.20 |
+| 0 | behind | 未采集 | 未采集 | 1168.82 |
+| 0 | left | 151 | 未采集 | 714.76 |
+| 45 | ahead | 107 | 未采集 | 1200.67 |
+| 45 | right | 120 | 未采集 | 848.76 |
+| 45 | behind | 156 | 未采集 | 1195.49 |
+| 45 | left | 124 | 未采集 | 593.06 |
+
+原校准控制成功 **6/8**，新候选 **1/8**，无消息 **0/8**。右侧目标单场景改善不能掩盖六个成功场景全部退化。报告 summary.passed=false，候选拒绝晋升。前向场景仍可陷入静止，因此本评分没有普遍解决短视问题；其他退化原因不作未经验证的归因。
+
+## 交付边界
+
+- 原内核、真实图、边权、阈值、原校准控制器及旧预测版本均未修改。
+- 新候选只被离线研究脚本和测试导入，未接入生产、前端或默认运行器。
+- 未删除负结果、未重写旧报告、未手工翻转连接符号。
+- 不将单场景成功称为神经学习、通用导航或群体智慧。
+
+## 验证及工件
+
+新旧预测测试合计 **5/5 通过**，包括候选评分、状态不变性、预测分支不变性、全报告重放、拒绝退化候选。CLI verify 退出码 0。测试通过仅说明实现与证据一致，导航验收未通过。未运行全仓库测试或部署。
+
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/predictive-turn-cost.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-turn-cost.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-turn-cost.test.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/turn-cost-plan-v1.json
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/turn-cost-v1.json
+
+```sh
+node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-turn-cost.mjs verify
+node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-turn-cost.test.mjs
+```
+
+## 决策
+
+停止这一短视评分变体，不继续在同一组几何上挑权重或增加候选追成功。下一步需先明确任务路线：若研究神经导航，应重新定义独立训练与冻结评测流程；若推进消息协议，可用已明确标注的非神经控制器作工程验证，但不得归因为神经能力。本轮不启动任何上述后续工作。

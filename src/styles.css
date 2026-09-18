@@ -1,4 +1,5 @@
 @import "./fonts.css";
+@import "./brand-lockup.css";
 
 :root {
   color-scheme: dark;
@@ -11,7 +12,12 @@
   --line: #2f2a1f;
   --acid: #f0ead9;
   --cyan: #d8c9a4;
-  --gold: #c9a25e;
+  --gold: #f0b90b;
+  --gold-bright: #fcd535;
+  --gold-ink: #0b0e11;
+  --gold-rgb: 240, 185, 11;
+  --gold-deep: #d49b00;
+  --gold-pale: #ffe08a;
   --violet: #9c855f;
   --nerve: #93a181;
   --rust: #a5715c;
@@ -36,7 +42,7 @@ body {
   background:
     radial-gradient(
       ellipse 62% 46% at 20% -6%,
-      rgba(201, 162, 94, 0.1),
+      rgba(var(--gold-rgb), 0.1),
       transparent 60%
     ),
     radial-gradient(
@@ -167,23 +173,17 @@ h3 {
   height: 41px;
   color: var(--text);
 }
+img.fly-mark {
+  object-fit: contain;
+  display: block;
+}
 .fly-mark.small {
   width: 24px;
   height: 24px;
 }
-.brand > span {
-  font-size: 20px;
-  font-weight: 750;
-  letter-spacing: -0.7px;
-  line-height: 1;
-}
-.brand small {
-  display: block;
-  font-family: var(--mono);
-  font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 4.5px;
-  margin-top: 8px;
+img.fly-mark.small {
+  width: 36px;
+  height: 36px;
 }
 .site-header nav {
   display: flex;
@@ -242,8 +242,8 @@ h3 {
   box-shadow: 0 0 9px #cbbfa860;
 }
 .network-pill.chain i {
-  background: #c9a25e;
-  box-shadow: 0 0 9px #c9a25e80;
+  background: var(--gold);
+  box-shadow: 0 0 9px rgba(var(--gold-rgb), 0.5);
 }
 .network-pill span {
   font-family: var(--sans);
@@ -1145,14 +1145,15 @@ h1 > sup {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   border: 1px solid #423d35;
   background: #211e1a;
 }
-.specimen-avatar svg {
-  width: 27px;
-  height: 27px;
+.specimen-avatar svg,
+.specimen-avatar img.fly-mark {
+  width: 36px;
+  height: 36px;
 }
 .panel-specimen h3 {
   font-size: 17px;
@@ -2284,15 +2285,17 @@ h1 > sup {
   justify-content: space-between;
   gap: 25px;
 }
-.site-footer .brand > span {
-  font-size: 16px;
+.site-footer .brand .brand-wordmark b {
+  font-size: 20px;
 }
-.site-footer .brand small {
-  font-size: 6px;
-  letter-spacing: 3.5px;
+.site-footer .brand .brand-wordmark small {
+  font-size: 7px;
+  letter-spacing: 0.28em;
 }
-.site-footer .brand svg {
-  width: 31px;
+.site-footer .brand svg,
+.site-footer .brand img.fly-mark {
+  width: 48px;
+  height: 48px;
 }
 .site-footer > p {
   font-size: 9px;
@@ -2863,15 +2866,17 @@ h1 > sup {
     height: 80px;
     padding: 0 24px;
   }
-  .brand > span {
-    font-size: 17px;
+  .brand .brand-wordmark b {
+    font-size: 20px;
   }
   .brand small {
     font-size: 6px;
     letter-spacing: 3.9px;
   }
-  .brand svg {
-    width: 35px;
+  .brand svg,
+  .brand img.fly-mark {
+    width: 44px;
+    height: 44px;
   }
   .site-header nav {
     gap: 16px;
@@ -3289,11 +3294,13 @@ h1 > sup {
   .brand {
     gap: 8px;
   }
-  .brand > span {
-    font-size: 16px;
+  .brand .brand-wordmark b {
+    font-size: 18px;
   }
-  .brand svg {
-    width: 32px;
+  .brand svg,
+  .brand img.fly-mark {
+    width: 40px;
+    height: 40px;
   }
   .brand small {
     font-size: 6px;
@@ -3656,11 +3663,13 @@ h1 > sup {
     display: none;
   }
   .specimen-avatar {
-    width: 31px;
-    height: 31px;
+    width: 40px;
+    height: 40px;
   }
-  .specimen-avatar svg {
-    width: 24px;
+  .specimen-avatar svg,
+  .specimen-avatar img.fly-mark {
+    width: 28px;
+    height: 28px;
   }
   .energy-label {
     grid-column: 2;
@@ -4091,8 +4100,8 @@ h1 > sup {
     grid-template-columns: 1fr 1fr;
     gap: 19px;
   }
-  .site-footer .brand > span {
-    font-size: 16px;
+  .site-footer .brand .brand-wordmark b {
+    font-size: 18px;
   }
   .site-footer > p {
     grid-row: 2;
@@ -4367,7 +4376,7 @@ h1 > sup {
   font-family: "Songti SC", "STSong", "Noto Serif SC", var(--display), serif;
 }
 .hero-stage:after {
-  background: radial-gradient(ellipse, #c9a25e18, transparent 68%);
+  background: radial-gradient(ellipse, rgba(var(--gold-rgb), 0.09), transparent 68%);
 }
 .hero-stage.reborn:before {
   border-color: var(--gold);

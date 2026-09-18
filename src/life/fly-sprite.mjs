@@ -1,32 +1,14 @@
-import {
-  ABDOMEN,
-  ANTENNAE,
-  HALTERES,
-  LEGS,
-  VEINS,
-  WING_L,
-  WING_L2,
-  WING_R,
-  WING_R2,
-} from "../mark-paths.mjs";
+import { paintChibi, spriteKey } from "./fly-chibi.mjs";
 
-const TAU = Math.PI * 2;
+/**
+ * fly-sprite.mjs —— 果蝇精灵的统一入口。
+ *
+ * 美术在 fly-chibi.mjs（矢量图鉴像）；这里只负责坐标系、缩放、
+ * 四帧振翅相位与离屏缓存，保证调用方接口不变。
+ */
+
 const cache = new Map();
-
-function hexRgb(hex) {
-  const n = Number.parseInt(String(hex || "#8a6a32").replace("#", ""), 16);
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
-}
-
-function shade(hex, amt) {
-  const c = hexRgb(hex);
-  return `rgb(${Math.min(255, Math.max(0, c.r + amt))},${Math.min(255, Math.max(0, c.g + amt))},${Math.min(255, Math.max(0, c.b + amt))})`;
-}
-
-function rgba(hex, a) {
-  const c = hexRgb(hex);
-  return `rgba(${c.r},${c.g},${c.b},${a})`;
-}
+const CACHE_MAX = 320;
 
 export function flyPhase(time, id = 0) {
   return Math.floor(Math.abs(time) * 18 + id * 2.17) & 3;
@@ -40,144 +22,70 @@ export function flyHeading(fly, shift = { x: 0, y: 0 }) {
   return side === "SELL" ? 0.28 : side === "BUY" ? -0.22 : 0.06;
 }
 
-function paintWings(
-  g,
-  { flying, phase, tired, collapsed, alpha = 1, flip = false },
-) {
-  const down = collapsed
-    ? false
-    : !flying || tired
-      ? true
-      : Boolean(((phase + (flip ? 1 : 0)) & 1) === 1);
-  const left = new Path2D(down ? WING_L2 : WING_L);
-  const right = new Path2D(down ? WING_R2 : WING_R);
-  const membrane =
-    tired || collapsed ? "rgba(214,198,168,0.2)" : "rgba(255,244,214,0.5)";
-  const edge =
-    tired || collapsed ? "rgba(214,198,168,0.42)" : "rgba(255,248,226,0.85)";
-  g.save();
-  g.globalAlpha *= alpha;
-  g.fillStyle = membrane;
-  g.strokeStyle = edge;
-  g.lineWidth = 1.6;
-  g.fill(left);
-  g.fill(right);
-  g.stroke(left);
-  g.stroke(right);
-  g.strokeStyle =
-    tired || collapsed ? "rgba(255,236,186,0.16)" : "rgba(255,244,210,0.55)";
-  g.lineWidth = 1.1;
-  g.stroke(new Path2D(VEINS));
-  g.restore();
+function poseOf(opts = {}) {
+  const flying = opts.flying !== false && !opts.tired && !opts.collapsed;
+  return {
+    flying,
+    phase: (opts.phase ?? 0) & 3,
+    tired: Boolean(opts.tired),
+    collapsed: Boolean(opts.collapsed),
+    hologram: Boolean(opts.hologram),
+    view: opts.view || "portrait",
+  };
 }
 
-function paintFly(g, art, pose) {
-  g.save();
-  g.scale(0.94, 0.94);
-  paintWings(g, pose);
-  // Motion echo: the opposite wing pose at low alpha reads as wingbeat blur.
-  if (pose.flying && !pose.tired && !pose.collapsed) {
-    paintWings(g, { ...pose, flip: true, alpha: 0.28 });
-  }
-  g.restore();
+/**
+ * 萌系果蝇的外接框（本地坐标，span=58 为基准）：
+ * 左右翅尖 ±37.5，触角球到上缘 -39，接触影到下缘 +34。
+ * 卡片、全息、出生卡都按这个框反推 span，避免裁掉触角或翅膀。
+ */
+export const FLY_BOX = Object.freeze({
+  per: 58,
+  halfW: 37.5,
+  top: 39,
+  bottom: 34,
+});
 
-  g.save();
-  g.scale(1.08, 1.08);
-  const body = art.body || "#8a6a32";
-  const dark = shade(body, -42);
-  g.strokeStyle = "#2a1c10";
-  g.lineWidth = pose.tired || pose.collapsed ? 1.5 : 1.85;
-  g.lineCap = "round";
-  g.lineJoin = "round";
-  g.stroke(new Path2D(LEGS));
-  g.lineWidth = 1.5;
-  g.stroke(new Path2D(HALTERES));
-  g.stroke(new Path2D(ANTENNAE));
+export function fitSpan(width, height, { pad = 0.94 } = {}) {
+  const w = Math.max(1, Number(width) || 0);
+  const h = Math.max(1, Number(height) || 0);
+  // 形体关于原点并不上下对称（触角比影长），按较大的一侧对称外接。
+  const reach = Math.max(FLY_BOX.top, FLY_BOX.bottom);
+  const byW = (w * pad) / ((FLY_BOX.halfW * 2) / FLY_BOX.per);
+  const byH = (h * pad) / ((reach * 2) / FLY_BOX.per);
+  return Math.max(16, Math.min(byW, byH));
+}
 
-  g.fillStyle = shade(body, 8);
-  g.beginPath();
-  g.ellipse(0, -6, 9.8, 16.2, 0, 0, TAU);
-  g.fill();
-  g.fillStyle = "rgba(20,14,8,0.16)";
-  g.beginPath();
-  g.ellipse(0, -10, 5.6, 8, 0, 0, TAU);
-  g.fill();
+/** 体型位点的温和体现：粗壮略大、偏小略小，但不会撑破外接框。 */
+export function sizeFactor(art = {}) {
+  const scale = Number(art?.scale) || 1;
+  return Math.max(0.88, Math.min(1.12, 0.86 + scale * 0.14));
+}
 
-  const abdomen = g.createLinearGradient(-9, 8, 9, 50);
-  abdomen.addColorStop(0, shade(body, 30));
-  abdomen.addColorStop(0.55, body);
-  abdomen.addColorStop(1, shade(body, -20));
-  g.fillStyle = abdomen;
-  g.fill(new Path2D(ABDOMEN));
-
-  const stripes = art.stripes || 0;
-  g.strokeStyle = "rgba(22,14,8,0.58)";
-  g.lineWidth = 2.2;
-  for (let i = 0; i < stripes; i += 1) {
-    const y = 16 + i * (26 / Math.max(1, stripes));
-    const half = 7.6 - i * 0.65;
-    g.beginPath();
-    g.moveTo(-half, y);
-    g.lineTo(half, y);
-    g.stroke();
-  }
-  if (art.mark === "bar") {
-    g.fillStyle = dark;
-    g.fillRect(-6.8, 24, 13.6, 3.4);
-  }
-  if (art.mark === "spots") {
-    g.fillStyle = dark;
-    g.beginPath();
-    g.arc(-3.6, 28, 1.8, 0, TAU);
-    g.arc(3.6, 28, 1.8, 0, TAU);
-    g.fill();
-  }
-
-  g.fillStyle = shade(body, 14);
-  g.beginPath();
-  g.ellipse(0, -30, 12.2, 10, 0, 0, TAU);
-  g.fill();
-
-  const eye = art.eye || "#c23a32";
-  g.fillStyle = eye;
-  g.beginPath();
-  g.ellipse(-10.6, -36.4, 8.4, 9.4, 0, 0, TAU);
-  g.ellipse(10.6, -36.4, 8.4, 9.4, 0, 0, TAU);
-  g.fill();
-  if (!pose.tired && !pose.collapsed) {
-    g.fillStyle = "rgba(255,236,220,0.72)";
-    g.beginPath();
-    g.arc(-8.6, -39.6, 1.9, 0, TAU);
-    g.arc(12.4, -39.6, 1.9, 0, TAU);
-    g.fill();
-    g.fillStyle = rgba(eye, 0.28);
-    g.beginPath();
-    g.arc(-11.8, -33.6, 3.3, 0, TAU);
-    g.arc(9.4, -33.6, 3.3, 0, TAU);
-    g.fill();
-  }
-  g.restore();
-  if (pose.collapsed) g.globalAlpha = 0.7;
+export function drawFlyArt(ctx, art = {}, x, y, span, opts = {}) {
+  const sized = opts.ignoreScale ? 1 : art.scale || 1;
+  const k = (span / FLY_BOX.per) * sized;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(k, k);
+  paintChibi(ctx, art, poseOf(opts));
+  ctx.restore();
 }
 
 export function flySprite(art = {}, opts = {}) {
-  const flying = opts.flying !== false && !opts.tired && !opts.collapsed;
-  const phase = (opts.phase ?? 0) & 3;
-  const tired = Boolean(opts.tired);
-  const collapsed = Boolean(opts.collapsed);
-  const key = `${art.body}|${art.eye}|${art.stripes}|${art.mark}|${flying}|${phase}|${tired}|${collapsed}`;
+  const key = spriteKey(art, opts);
   const hit = cache.get(key);
   if (hit) return hit;
   const canvas = document.createElement("canvas");
-  canvas.width = 200;
-  canvas.height = 200;
+  canvas.width = 256;
+  canvas.height = 256;
   const g = canvas.getContext("2d");
   g.imageSmoothingEnabled = true;
   g.imageSmoothingQuality = "high";
-  g.translate(100, 100);
-  g.rotate(Math.PI / 2);
-  g.scale(1.16, 1.16);
-  paintFly(g, art, { flying, phase, tired, collapsed });
+  g.translate(128, 128);
+  g.scale(2.15, 2.15);
+  paintChibi(g, art, poseOf({ ...opts, view: opts.view || "dorsal" }));
+  if (cache.size >= CACHE_MAX) cache.clear();
   cache.set(key, canvas);
   return canvas;
 }

@@ -89,7 +89,7 @@ Stonkfly 用 PAM11 / PPL101 做盈亏，是另一种产品编码。要做就引�
 
 本版已补上的脊梁：`canon.mjs`、`ethology.mjs`、`finance.mjs`、`colony.mjs`；`runtime` 的 `lastAction` 改为读官方分组发放。
 
-产品、飞轮、金库与开放核见 [PRODUCT-LATEST.md](PRODUCT-LATEST.md)。
+产品、飞轮、金库与开放核见 [PRODUCT-LATEST.md](PRODUCT-LATEST.md)。群体智慧协议裁定见同文 §21；实验细则见 [SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md](SWARM-INTELLIGENCE-PROTOCOL-DESIGN-2026-09-17.md)。
 
 ## 7. 下一步（仍不是前端）
 

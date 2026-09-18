@@ -529,6 +529,14 @@ export function HabitatPage() {
           >
             {tx("habitat.toMarket")}
           </SiteLink>
+          <SiteLink
+            href={withNet(
+              selected ? `/host.html?soul=${selected.tokenId}` : "/host.html",
+            )}
+            className="life-cross"
+          >
+            {tx("habitat.toHost")}
+          </SiteLink>
           <SiteLink href="/#mesh" className="life-cross">
             {tx("habitat.toMesh")}
           </SiteLink>

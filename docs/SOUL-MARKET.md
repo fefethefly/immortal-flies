@@ -1,6 +1,6 @@
 # SoulMarket：官方二级市场
 
-日期：2026-09-17。状态：**合约与 `/market.html` 已实现。主网 SoulMarket `0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875`（对着 Soul `0x500D…293F`，hive 官方蜂巢，未 `setModule`）。测试网 `0xC09452de32e965E45B765a32d6DDada2B5968A76`。** 本文是 ImmortalSoul 的官方挂单卫星，不替代 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md)，也不改主网身份核。对照 [PRODUCT-LATEST.md](PRODUCT-LATEST.md) §0.3、§16.7、§23。不是 OpenSea。钱包直转与 Element 一类 BSC 盘仍可用。
+日期：2026-09-18。状态：**合约与 `/market.html` 已实现。主网 SoulMarket `0x42E10Dc1e1D90e5F10580a8967E80F38B3e03e5D`（对着 Soul `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`，hive 官方蜂巢，未 `setModule`）。旧市场 `0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875` 已 RETIRED。测试网 `0xC09452de32e965E45B765a32d6DDada2B5968A76`。** 本文是 ImmortalSoul 的官方挂单卫星，不替代 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md)，也不改主网身份核。对照 [PRODUCT-LATEST.md](PRODUCT-LATEST.md) §0.3、§16.7、§23。不是 OpenSea。钱包直转与 Element 一类 BSC 盘仍可用。
 
 主网 Soul 已可 `transferFrom`。没有本模块，用户也能在任意钱包之间转，或上到别的 NFT 市场。本模块要做的是：**官方页面能按 lifeId 上架、按表型筛选、用 BNB 成交，手续费进已公布蜂巢。** 主网卫星已部署；生产站要带上 `SoulMarket.deployment.json` 后，`/market.html` 才显示已开。不要说「已上 OpenSea」。
 

@@ -174,6 +174,14 @@ export function FieldPage() {
           >
             {tx("field.toMarket")}
           </SiteLink>
+          <SiteLink
+            href={withNet(
+              selected ? `/host.html?soul=${selected.tokenId}` : "/host.html",
+            )}
+            className="life-cross"
+          >
+            {tx("field.toHost")}
+          </SiteLink>
           <SiteLink href="/#mesh" className="life-cross">
             {tx("field.toMesh")}
           </SiteLink>

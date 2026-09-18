@@ -1,6 +1,13 @@
 # IMMORTAL / Genesis contract prototype
 
-**Status: local MVP + testnet deploy path.** This repository includes a compilable ERC-721, Anvil tests, and a BSC testnet (chainId 97) deploy script. A live testnet address appears only after you run `npm run contracts:deploy:testnet`. There is no mainnet deployment, sale, audited security guarantee, or whole fruit-fly brain simulation.
+**Status: local MVP + testnet-only path.** This repository includes a compilable ERC-721, Anvil tests, and a BSC testnet (chainId 97) deploy script. A live testnet address appears only after you run `npm run contracts:deploy:testnet`. There is no mainnet deployment, sale, audited security guarantee, or whole fruit-fly brain simulation.
+
+**Do not deploy `ImmortalFly.sol` to BSC mainnet (chainId 56).** It stores a 16-node toy brain, user-chosen seeds, and the prototype NFT symbol `IFP`. Official tax-coin ticker is **`$IFS`** (`public/token/official.json`). Soul identity on testnet is `contracts/life/ImmortalSoul.sol` (`IFSOUL`). See `docs/LIFE-PROTOCOL.md` and `docs/PRODUCT-LATEST.md` §19–§20.
+
+```sh
+npm run life:compile
+npm run life:test
+```
 
 ## What the contract preserves
 
@@ -87,6 +94,6 @@ The frontend checkpoint validator currently serves the single local demonstratio
 - Simulation age counts computed ticks. Birth block is not evidence of continuous activity.
 - Rebirth is permitted with remaining energy, as in the JS engine. Its count does not increase abilities or a rarity score.
 - Public model data can be copied and simulated elsewhere. Canonical ownership and state provenance are defined by the particular deployed contract and chain.
-- Any mainnet plan needs explicit deployment configuration, realistic BSC gas benchmarking, distribution design and independent security review.
+- Any mainnet plan uses a **new** Soul contract, not this file. That plan is written in `docs/PRODUCT-LATEST.md` §19: committed seed, genome hash, decoder id, no on-chain 16-node ticks. Official coin ticker stays `$IFS`; this prototype NFT is `IFP`, not IFS. This prototype still needs explicit testnet configuration, gas numbers, and review before even chain 97.
 
 `contracts/test/MintBatch.sol` is a test-only receiver used to actually mint all 1024 identities and prove the supply boundary; it is not part of the shipped collection artifact.

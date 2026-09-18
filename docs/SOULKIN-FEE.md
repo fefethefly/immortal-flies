@@ -2,7 +2,12 @@
 
 日期：2026-09-17。状态：**测试网已绑定；主网未换模块。** 本文是下一只可替换繁衍模块的编码与产品规格，不替代 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md)，也不改主网 `ImmortalSoul`。对照 [PRODUCT-LATEST.md](PRODUCT-LATEST.md) §0.3、§17.2、§18、§22。
 
-实现：`contracts/life/SoulKinFee.sol`、`FlapPortalBuyAdapter.sol`。BSC 测试网 `MODULE_KIN` 已是 `SoulKinFee` `0xfBC663EF50fF104277D05c520994E25a2391414f`（适配器未接）。主网现在仍是免费 `SoulKin` `0xA6810953e52f5EEa39C323d8Ea7dC42c210A13A0`。没换主网模块、没接通已核验买币适配器之前，对外只能说测试网在练收费，不能说飞轮已转、不能说已回购、不能说已销毁。
+实现：`contracts/life/SoulKinFee.sol`、`FlapPortalBuyAdapter.sol`。BSC 测试网 `MODULE_KIN` 已是 `SoulKinFee` `0xfBC663EF50fF104277D05c520994E25a2391414f`（适配器未接）。主网 LIVE 是免费 `SoulKinCross` `0x838A30868Bb82D4dABe70d586e87aeC948CC5825`。没换主网收费模块、没接通已核验买币适配器之前，对外只能说测试网在练收费，不能说飞轮已转、不能说已回购、不能说已销毁。
+
+
+## 交叉变体：SoulKinCrossFee
+
+`SoulKinCrossFee` 与 `SoulKinFee` 的费用、买入、托管语义完全一致，唯一差别是子代种子走交叉规则（`ifs.descent-cross/1`）：每个位点等概率取自一位亲本，约 2% 按公布率表重掷（突变）；完成者在链下研磨出全中候选，`breed(id, n)` 由合约一次解码验证。规格见 [LIFE-PROTOCOL.md §4.1](LIFE-PROTOCOL.md)。免费变体是 `SoulKinCross`。部署与绑定：`npm run life:check:kin-cross` → `life:deploy:kin-cross:testnet`。
 
 ## 0. 一句话
 
@@ -45,8 +50,9 @@
 4. **本版仍要求同一地址同时持有双亲。** 跨钱包合繁是下一只 Kin，不混进本规格。
 5. **IFS 只进蜂巢金库** `0xfAdb2FE136c89866Cd1CB0DD31298e08cc61a467`。禁止默认或可设置到运营 `0x055bB2aF42B832A55F3D708c92824C491dE05427`、CZ、curator 热钥匙或任意 EOA。
 6. **出生优先于买币。** 孩子 NFT 落地之后，买币失败只影响 `heldBNB`。
-7. **无代理 / 无 UUPS。** 要改规则就再部署一只 Kin，curator `setModule`。
+7. **无代理 / 无 UUPS。** 要改规则就再部署一只 Kin，curator `setModule`（有灵魂后非零地址须过 48h 时锁）。
 8. **旧 pending 必须清零再切模块。** 换 `MODULE_KIN` 之后，旧 Kin 再 `breed` 会 `ModuleOnly`，托管的 BNB 会卡死。
+9. **亲本默认 24h 冷却**（`KinClock`，顶 7 天）。冷却在 Kin，不在 Soul。没有锁仓加速。
 
 ## 4. 收费
 
@@ -264,7 +270,7 @@ operator 建议仍是现网 curator 热钥匙，或之后的多签。`setCurator
 1. 双亲不同主人 → `Unauthorized`；`parentA == parentB` → `InvalidPair`。
 2. `msg.value != breedPrice` → `WrongFee`；`breedPrice = 0` 且附带 BNB → `WrongFee`。
 3. 熵未到 `breed` → `BreedNotReady`；过期退款到 recipient；拒收则 `refunds` 可领。
-4. `mintDescendant` 因 `MAX_SUPPLY` 失败：请求与托管仍在，256 块后可退。
+4. `mintDescendant` 因 `maxSupply` 失败：请求与托管仍在，256 块后可退。冷却未到 → `Cooldown`。
 5. 适配器 revert：`tokenId` 存在，`heldBNB` 增加，`pendingRequest` 已清。
 6. 适配器成功：IFS 余额出现在 hive，不在 operator，不在 ops。
 7. `flushHeldBnb` 只增加 hive 的 BNB，调用者拿不到。

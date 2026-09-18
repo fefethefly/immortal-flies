@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { projectFlyCloud, stampCloud } from "./fly-cloud.mjs";
+import { drawFlyArt, fitSpan, sizeFactor } from "./fly-sprite.mjs";
 
-export function MarketThumb({ soul }) {
+/** 图鉴缩略图：与出生卡同一套正面萌系形象。 */
+export function MarketThumb({ soul, className = "" }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -18,20 +19,13 @@ export function MarketThumb({ soul }) {
       canvas.height = Math.max(1, Math.floor(box.height * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, box.width, box.height);
-      const k = Math.min(box.width, box.height) * 0.0044;
-      stampCloud(
-        ctx,
-        projectFlyCloud(soul.phenotype.art, {
-          flap: 0.22,
-          sweep: 0.05,
-          project: (x, y, z) => ({
-            x: box.width * 0.5 + (x * 0.86 + z * 0.48) * k,
-            y: box.height * 0.58 + (y * 0.9 - z * 0.26) * k,
-            z,
-          }),
-        }),
-        { px: Math.max(1, k * 0.58) },
-      );
+      const art = soul.phenotype.art;
+      const span = fitSpan(box.width, box.height, { pad: 0.97 }) * sizeFactor(art);
+      drawFlyArt(ctx, art, box.width * 0.5, box.height * 0.5, span, {
+        flying: false,
+        view: "portrait",
+        ignoreScale: true,
+      });
     }
 
     paint();
@@ -40,5 +34,12 @@ export function MarketThumb({ soul }) {
     return () => ro.disconnect();
   }, [soul]);
 
-  return <canvas ref={ref} className="life-market-thumb" role="img" />;
+  return (
+    <canvas
+      ref={ref}
+      className={`life-market-thumb${className ? ` ${className}` : ""}`}
+      role="img"
+      aria-label={soul?.givenName || `#${soul?.tokenId ?? ""}`}
+    />
+  );
 }

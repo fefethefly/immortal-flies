@@ -6,19 +6,23 @@ import { createObservatoryRenderer } from "./observatory-renderer.mjs";
 import { SiteLink } from "./site-chrome.jsx";
 import { phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
 import { PhenotypeReadout } from "./phenotype-view.jsx";
+import { GOLD } from "./brand.mjs";
+import { ProtocolArchitecture } from "./home-protocol.jsx";
 import "./home-observatory.css";
 
 const LIFE_CHIPS = ["L0", "Soul", "Genome", "Society"];
 
 const MODES = ["neural", "society", "market"];
-const COLORS = { neural: "#a9c4bb", society: "#c9a25e", market: "#93a181" };
+const COLORS = { neural: "#a9c4bb", society: GOLD, market: "#93a181" };
 const words = {
   zh: {
-    eyebrow: "永生果蝇 · 数字生命观测站",
-    title: "微小生命。",
-    accent: "无限世界。",
-    lead: "从一束神经信号，到一个自主协作的蝇群社会。观察它们感知、学习与交易，让每一次经历成为下一次进化的起点。",
-    enter: "进入交易世界",
+    eyebrow: "IMMORTAL · 面向通用智慧的开放协议",
+    title: "从一只果蝇，",
+    accent: "到开放智慧。",
+    lead: "从果蝇连接组出发，让独立生命拥有持续身份、交流经历，在不同世界里协作。我们正在构建面向通用智慧的协议，而不是宣称已经实现通用智能。下方为本地模拟，链上身份与模拟活动独立核验。",
+    enter: "探索交易模拟",
+    hatch: "免费孵化果蝇",
+    hatchHint: "仅需两次网络 gas · 每地址一只 Gen0 · 无需持有 IFS",
     canon: "探索生命内核",
     modes: ["神经活动", "蝇群社会", "市场脉冲"],
     auto: "自动巡览",
@@ -38,12 +42,13 @@ const words = {
     economy: "IFS 经济层",
     inspect: "选择外围节点，追踪一只果蝇",
     schematic: "长相由基因组决定 · 不是随机皮肤",
-    annotation: "粒子组成身体外形。体色、眼型、体型、条纹由出生种子固定算出。",
+    annotation: "粒子组成身体外形。体色、眼型、性别、翅膀、体型、条纹由出生种子固定算出。",
     genome: "基因组决定的长相",
     genomeClaim: "长相由基因组决定，不是另外贴上去的皮肤。",
     genomeNote:
-      "64 个方格是基因组格子，由出生种子展开。它们不是神经元，也不是 MaleCNS 的连接权重。",
-    genomeMint: "铸造提交的是基因组。解码器以后上线，已经铸造的灵魂也会长出对应长相。",
+      "96 个方格是基因组格子，由出生种子展开。它们不是神经元，也不是 MaleCNS 的连接权重。",
+    genomeMint:
+      "铸造提交的是基因组。解码器以后上线，已经铸造的灵魂也会长出对应长相。",
     notSkin: "不看叠加层、盈亏或 IFS。休眠只改变辉光。",
     price: "模拟价格 / BNB",
     cash: "纸面现金",
@@ -64,11 +69,13 @@ const words = {
     stage: "聚焦视图",
   },
   en: {
-    eyebrow: "IMMORTAL FLIES / DIGITAL LIFE OBSERVATORY",
-    title: "Small lives.",
-    accent: "Infinite worlds.",
-    lead: "From a neural spark to a society of autonomous agents. Watch them sense, learn and trade. Every experience becomes the beginning of what comes next.",
-    enter: "Enter trading world",
+    eyebrow: "IMMORTAL / TOWARD OPEN INTELLIGENCE",
+    title: "From one fly.",
+    accent: "To open intelligence.",
+    lead: "Starting with a fruit fly connectome, we are building a protocol for persistent lives, shared experience and cooperation across worlds. General intelligence is the ambition, not an achieved result. The observatory below is a local simulation; on-chain identity is verified separately.",
+    enter: "Explore trading sim",
+    hatch: "Hatch your fly — free",
+    hatchHint: "Two network gas fees · One Gen0 per address · No IFS required",
     canon: "Explore the life core",
     modes: ["Neural activity", "Colony behavior", "Market pulse"],
     auto: "Auto tour",
@@ -89,14 +96,16 @@ const words = {
     inspect: "Select a satellite to follow its life",
     schematic: "PHENOTYPE IS A GENOME READOUT / NOT A SKIN",
     annotation:
-      "Particle geometry is form. Colour, eyes, size and stripes are a deterministic readout of the birth seed.",
+      "Particle geometry is form. Colour, eyes, sex, wings, size and stripes are a deterministic readout of the birth seed.",
     genome: "Genome readout",
-    genomeClaim: "Looks are a readout of the genome, not a separately minted skin.",
+    genomeClaim:
+      "Looks are a readout of the genome, not a separately minted skin.",
     genomeNote:
-      "The 64 squares are genome chips expanded from the birth seed. They are not neurons, and not MaleCNS weights.",
+      "The 96 squares are genome chips expanded from the birth seed. They are not neurons, and not MaleCNS weights.",
     genomeMint:
       "Mint commits the genome. A later decoder can express every existing soul.",
-    notSkin: "Overlay, PnL and IFS never paint the body. Sleep only changes the glow.",
+    notSkin:
+      "Overlay, PnL and IFS never paint the body. Sleep only changes the glow.",
     price: "SIM PRICE / BNB",
     cash: "Paper cash",
     fills: "Retained fills",
@@ -309,7 +318,7 @@ export function HomeObservatory({
             {w.eyebrow}
           </p>
           <h1>
-            {w.title} <em>{w.accent}</em>
+            <span>{w.title}</span> <em>{w.accent}</em>
           </h1>
           <ul className="obs-chips" aria-hidden="true">
             {LIFE_CHIPS.map((chip) => (
@@ -320,17 +329,39 @@ export function HomeObservatory({
         <div className="obs-intro-side">
           <p>{w.lead}</p>
           <div className="obs-actions">
-            <SiteLink className="obs-enter" href="/swarm.html">
-              {w.enter}
+            <SiteLink className="obs-enter" href="/blueprint.html">
+              {locale === "zh" ? "探索协议" : "Explore the protocol"}
               <ArrowUpRight size={15} />
             </SiteLink>
-            <SiteLink href="/brain.html">
-              {w.canon}
-              <ArrowUpRight size={14} />
+            <SiteLink className="obs-hatch" href="/field.html">
+              {w.hatch}
+              <ArrowUpRight size={15} />
             </SiteLink>
           </div>
+          <p className="obs-hatch-hint">{w.hatchHint}</p>
         </div>
       </div>
+      <div className="protocol-principles">
+        <span>
+          01 / {locale === "zh" ? "生物连接组" : "BIOLOGICAL CONNECTOME"}
+        </span>
+        <span>02 / {locale === "zh" ? "持续身份" : "PERSISTENT IDENTITY"}</span>
+        <span>
+          03 /{" "}
+          {locale === "zh"
+            ? "可验证协作 · 研究方向"
+            : "VERIFIABLE COOPERATION · RESEARCH"}
+        </span>
+      </div>
+      <ProtocolArchitecture locale={locale} />
+      <header className="protocol-section-head" id="observatory">
+        <span>02 / THE RUNNING EXPERIMENT</span>
+        <small>
+          {locale === "zh"
+            ? "本地 24 节点纸面模型 · 非完整连接组"
+            : "Local 24-node paper model · not the full connectome"}
+        </small>
+      </header>
       <div
         ref={consoleRef}
         className="obs-console"
@@ -540,11 +571,17 @@ export function HomeObservatory({
                   {w.observed} / #{String(fly?.id ?? 0).padStart(4, "0")}
                 </span>
                 <strong>
-                  {pheno ? pheno.hue[locale === "zh" ? "zh" : "en"].toUpperCase() : "IMMORTAL"}
+                  {pheno
+                    ? pheno.hue[locale === "zh" ? "zh" : "en"].toUpperCase()
+                    : "IMMORTAL"}
                   <span> / </span>
                   FLY
                 </strong>
-                <small>{pheno ? pheno.summary[locale === "zh" ? "zh" : "en"] : w.schematic}</small>
+                <small>
+                  {pheno
+                    ? pheno.summary[locale === "zh" ? "zh" : "en"]
+                    : w.schematic}
+                </small>
               </div>
             </div>
             <div className="obs-stage-bottom">
@@ -659,7 +696,9 @@ export function HomeObservatory({
           <p>{w.genomeMint}</p>
           <p>{w.notSkin}</p>
           <SiteLink href="/blueprint.html">
-            {locale === "zh" ? "蓝图里的身份规则" : "Identity rules on the blueprint"}
+            {locale === "zh"
+              ? "蓝图里的身份规则"
+              : "Identity rules on the blueprint"}
             <ArrowUpRight size={12} />
           </SiteLink>
         </div>

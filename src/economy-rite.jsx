@@ -1,8 +1,7 @@
 import React, { memo, useEffect, useRef } from "react";
+import { GOLD } from "./brand.mjs";
 import { PROTOCOL_SPLIT } from "./economy.mjs";
 import { useOnStage, usePrefersReduced } from "./rite.jsx";
-
-const GOLD = "#c9a25e";
 const CLAY = "#b57660";
 const BONE = "#d8c9a4";
 const MUTED = "#8a8172";

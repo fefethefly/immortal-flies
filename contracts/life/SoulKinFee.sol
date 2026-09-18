@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {ImmortalSoul} from "./ImmortalSoul.sol";
 import {IKinBuyAdapter} from "./IKinBuyAdapter.sol";
+import {KinClock} from "./KinClock.sol";
 
 /// @notice Replaceable paid pedigree module. See docs/SOULKIN-FEE.md.
 /// @dev Does not move Soul identities. Buy failure must not roll back mintDescendant.
@@ -20,6 +21,7 @@ contract SoulKinFee is ReentrancyGuard {
     address public immutable hive;
     address public operator;
     uint256 public breedPrice;
+    uint64 public breedCooldown;
     address public adapter;
     uint256 public requestCount;
     uint256 public pendingCount;
@@ -36,6 +38,7 @@ contract SoulKinFee is ReentrancyGuard {
     mapping(uint256 => Request) public requests;
     mapping(address => uint256) public pendingRequest;
     mapping(address => uint256) public refunds;
+    mapping(uint256 => uint64) public lastBredAt;
 
     event BreedRequested(
         uint256 indexed requestId,
@@ -51,6 +54,7 @@ contract SoulKinFee is ReentrancyGuard {
     event RefundHeld(address indexed recipient, uint256 amount);
     event HeldBnbSwept(address indexed to, uint256 amount);
     event BreedPriceSet(uint256 price);
+    event BreedCooldownSet(uint64 cooldown);
     event BuyAdapterSet(address adapter);
     event OperatorChanged(address operator);
 
@@ -71,7 +75,9 @@ contract SoulKinFee is ReentrancyGuard {
         ifs = ifsToken;
         hive = hiveSink;
         operator = msg.sender;
+        breedCooldown = KinClock.DEFAULT_COOLDOWN;
         emit OperatorChanged(msg.sender);
+        emit BreedCooldownSet(breedCooldown);
     }
 
     function setOperator(address next) external {
@@ -87,6 +93,12 @@ contract SoulKinFee is ReentrancyGuard {
         emit BreedPriceSet(next);
     }
 
+    function setBreedCooldown(uint64 next) external {
+        if (msg.sender != operator) revert Unauthorized();
+        breedCooldown = KinClock.setCooldown(next);
+        emit BreedCooldownSet(breedCooldown);
+    }
+
     function setAdapter(address next) external {
         if (msg.sender != operator) revert Unauthorized();
         adapter = next;
@@ -98,6 +110,7 @@ contract SoulKinFee is ReentrancyGuard {
         if (parentA == 0 || parentB == 0 || parentA == parentB) revert InvalidPair();
         if (soul.ownerOf(parentA) != msg.sender || soul.ownerOf(parentB) != msg.sender) revert Unauthorized();
         if (pendingRequest[msg.sender] != 0) revert PendingBreed();
+        KinClock.check(lastBredAt, parentA, parentB, breedCooldown);
         id = ++requestCount;
         requests[id] = Request(msg.sender, parentA, parentB, uint64(block.number + 2), msg.value);
         pendingRequest[msg.sender] = id;
@@ -112,6 +125,7 @@ contract SoulKinFee is ReentrancyGuard {
         bytes32 entropy = blockhash(req.entropyBlock);
         if (entropy == 0) revert BreedUnavailable();
         if (soul.ownerOf(req.parentA) != req.recipient || soul.ownerOf(req.parentB) != req.recipient) revert Unauthorized();
+        KinClock.check(lastBredAt, req.parentA, req.parentB, breedCooldown);
         ImmortalSoul.Genome memory a = soul.getGenome(req.parentA);
         ImmortalSoul.Genome memory b = soul.getGenome(req.parentB);
         uint32 seed = uint32(uint256(keccak256(abi.encode(
@@ -126,6 +140,7 @@ contract SoulKinFee is ReentrancyGuard {
         ))));
         if (seed == 0) seed = 1;
         tokenId = soul.mintDescendant(req.recipient, seed, req.parentA, req.parentB);
+        KinClock.stamp(lastBredAt, req.parentA, req.parentB);
         delete requests[id];
         delete pendingRequest[req.recipient];
         --pendingCount;

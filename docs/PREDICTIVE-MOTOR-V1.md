@@ -1,0 +1,54 @@
+# 5 拍模型预测感觉控制候选 / 1
+
+状态：**导航验收未通过，不晋升，不接入默认运行路径。** 本轮实现的是预测比较候选，最初提出的“保持刺激＋响应间隔”没有实施；两者不能混称。
+
+## 固定规则与边界
+
+在运行前落盘规则和源码指纹。原 seed 301/right 场景、160 个实际步骤，目标距接收者 1200，采集半径 400，真实 observer 发送一拍延迟坐标。比较 baseline、predictive、no-message 三臂。
+
+候选每拍从当前完整神经状态预测 [无刺激,904,941,994] 四条常量输入分支，各 5 拍，按预测终点到已观察坐标的平方距离选择最小项，相等时按上述顺序选择。实际只执行第一拍。没有目标信息则不预测、不刺激。
+
+这是读取完整神经状态和图的**外部模型预测控制**，不是神经学习或同算力神经能力。原内核、连接权重、阈值、运动读出均未改。预测分支不能修改实际状态，实际首拍必须与选中分支首拍一致。
+
+## 结果
+
+| 臂 | 实际步骤 | 额外预测步骤 | 采集 | 最终距离 |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 160 | 0 | 0 | 640.672 |
+| predictive | 160 | 3180 | 0 | 1200 |
+| no-message | 160 | 0 | 0 | 1200 |
+
+预测臂神经元更新量 4,676,000，baseline 为 224,000（约 20.9 倍）；预测臂额外访问 430,890 条边，实际路径没有运动。不因开销更大而宣称能力提升。
+
+首次收到目标时，5 拍末距离平方：
+- 无刺激：1,440,000
+- 904：1,442,209
+- 941：1,461,762
+- 994：1,440,441
+
+所有转身候选的短期距离都比静止大，所以策略反复选无刺激。实际停留原地不是接线错误，而是本目标函数在此初态的短视静止解。报告 passed=false。未改评分、延长预测或延长实际预算追求通过。
+
+## 原失败轨迹回归
+
+独立重建 motor-input-v2 的 seed 301/right 全部 160 拍，逐拍核对感觉源、signal、完整 state hash；从实际左右运动组脉冲数独立计算转角、速度、朝向分箱、边界和坐标，与原 step 一致。未发现该路径上输入应用、速度或位移公式错误。手写控制器直接给运动计数，不是神经输出的逐拍规范。
+
+相关测试 8/8 通过，包括旧控制器、脉冲 A/B 诊断、手写对照及新候选完整重放。**这些是实现和证据一致性测试通过，不是导航成功。** 新报告 verify 通过，未跑全仓库测试或部署。
+
+## 工件与复算
+
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/src/brain/predictive-motor-input.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-predictive-motor.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-motor.test.mjs
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/predictive-motor-plan-v1.json
+- /Users/caonanya/Documents/ChatGPT/immoratalflies/reports/predictive-motor-v1.json
+
+```sh
+node /Users/caonanya/Documents/ChatGPT/immoratalflies/scripts/study-predictive-motor.mjs verify
+node --test /Users/caonanya/Documents/ChatGPT/immoratalflies/tests/predictive-motor.test.mjs
+```
+
+依赖对应仓库源码及历史 git 图对象，不是独立复算包。仅测试一个已知开发场景；不能声称泛化或预测控制普遍无效。
+
+## 后续决策
+
+暂停继续添加短期距离优化变体。若再开发，应先独立定义能接受“先转身、暂时远离目标”的任务代价及训练/评测划分；预算、候选选择与负面结果需记录。新控制器不能靠更换测试期望或修改真实图来获得通过。原神经导航 right/behind 仍未普遍解决。

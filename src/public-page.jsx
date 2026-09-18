@@ -5,6 +5,7 @@ import {
   BookOpen,
   Compass,
   Cpu,
+  HardDrive,
   Landmark,
   Layers,
   Orbit,
@@ -33,6 +34,7 @@ const INDEX = [
     items: [
       ["/field.html", "nav.field", "public.doorField", Orbit],
       ["/habitat.html", "nav.habitat", "public.doorHabitat", Sparkles],
+      ["/host.html", "nav.host", "public.doorHost", HardDrive],
       ["/market.html", "nav.market", "public.doorMarket", Tag],
       ["/#mesh", "nav.mesh", "public.doorMesh", Layers],
       ["/brain.html", "nav.canon", "public.doorCanon", Cpu],

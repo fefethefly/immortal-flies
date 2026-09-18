@@ -1,7 +1,6 @@
 import React, { memo, useEffect, useRef } from "react";
+import { GOLD } from "./brand.mjs";
 import { useOnStage, usePrefersReduced } from "./rite.jsx";
-
-const GOLD = "#c9a25e";
 const NERVE = "#93a181";
 const CLAY = "#b57660";
 const BONE = "#d8c9a4";
@@ -22,15 +21,21 @@ function paintLife(ctx, w, h, tick, dots) {
   for (let i = 0; i < 5; i++) {
     ctx.beginPath();
     ctx.ellipse(cx, cy, 18 + i * 16, 12 + i * 10, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(201,162,94,${0.28 - i * 0.04})`;
+    ctx.strokeStyle = `rgba(240,185,11,${0.28 - i * 0.04})`;
     ctx.stroke();
   }
   for (let i = 0; i < 18; i++) {
     const a = (i / 18) * Math.PI * 2 + tick * 0.02;
     const on = (tick + i * 3) % 18 < 6;
-    ctx.fillStyle = on ? GOLD : "rgba(201,162,94,0.28)";
+    ctx.fillStyle = on ? GOLD : "rgba(240,185,11,0.28)";
     ctx.beginPath();
-    ctx.arc(cx + Math.cos(a) * 46, cy + Math.sin(a) * 28, on ? 2.4 : 1.3, 0, Math.PI * 2);
+    ctx.arc(
+      cx + Math.cos(a) * 46,
+      cy + Math.sin(a) * 28,
+      on ? 2.4 : 1.3,
+      0,
+      Math.PI * 2,
+    );
     ctx.fill();
   }
   for (const d of dots) {
@@ -71,7 +76,7 @@ function paintFinance(ctx, w, h, tick, dots) {
   ctx.clearRect(0, 0, w, h);
   const cx = w * 0.55,
     cy = h * 0.5;
-  ctx.strokeStyle = "rgba(201,162,94,0.3)";
+  ctx.strokeStyle = "rgba(240,185,11,0.3)";
   ctx.beginPath();
   ctx.arc(cx, cy, 36, 0, Math.PI * 2);
   ctx.stroke();
@@ -133,7 +138,7 @@ function paintBoot(ctx, w, h, tick, dots) {
   ctx.fillStyle = BONE;
   ctx.font = "11px 'IBM Plex Mono', monospace";
   ctx.textAlign = "center";
-  ctx.fillText("MALE CNS / 1400", cx, 198);
+  ctx.fillText("MALE CNS / 12000", cx, 198);
   ctx.textAlign = "start";
   for (const d of dots) {
     ctx.globalAlpha = d.life / d.max;
@@ -233,7 +238,8 @@ export const LifeGlyph = memo(function LifeGlyph({ kind, tall }) {
         d.y += d.vy || 0;
         d.life -= 1;
       }
-      for (let i = dots.length - 1; i >= 0; i--) if (dots[i].life <= 0) dots.splice(i, 1);
+      for (let i = dots.length - 1; i >= 0; i--)
+        if (dots[i].life <= 0) dots.splice(i, 1);
       if (dots.length > 50) dots.splice(0, dots.length - 50);
       draw();
     };
@@ -247,7 +253,11 @@ export const LifeGlyph = memo(function LifeGlyph({ kind, tall }) {
   }, [kind, onStage, reduced, tall]);
 
   return (
-    <div className={`life-glyph ${tall ? "is-tall" : ""}`} ref={host} aria-hidden="true">
+    <div
+      className={`life-glyph ${tall ? "is-tall" : ""}`}
+      ref={host}
+      aria-hidden="true"
+    >
       <canvas ref={canvas} />
     </div>
   );

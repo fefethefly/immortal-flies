@@ -32,6 +32,8 @@ export default defineConfig({
         blueprint: "blueprint.html",
         field: "field.html",
         habitat: "habitat.html",
+        host: "host.html",
+        colony: "colony.html",
         market: "market.html",
         live: "live.html",
         protocol: "protocol.html",

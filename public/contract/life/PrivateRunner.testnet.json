@@ -1,0 +1,16 @@
+{
+  "status": "BSC_TESTNET",
+  "audit": "TESTNET",
+  "yield": false,
+  "chainId": 97,
+  "url": "https://runner-production-ea3b.up.railway.app",
+  "health": "https://runner-production-ea3b.up.railway.app/health",
+  "address": "0xc2FcdA8D7abbff26FbF0CD27D4Dc45b59c8419F2",
+  "hub": "0xdb80def1828236A5af09965F46c6BEE63ccc1f4e",
+  "previousHub": "0x1dAd6d5D9C407553814888917Ff45F0d1Fee55A1",
+  "soul": "0x3487A2802AF82F12Bb7a3dd40B262394f4819A5a",
+  "tokens": [1],
+  "dataset": "malecns-full",
+  "steps": 1000,
+  "note": "Private-track journal hosting on Railway. Public /archive is iff.life-restore/1. Not mining yield. Uses MockIFSTax, not live IFS. Previous hub 0x1dAd…55A1 STALE."
+}

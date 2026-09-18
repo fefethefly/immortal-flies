@@ -22,6 +22,11 @@
           "internalType": "string",
           "name": "uri",
           "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "renderer_",
+          "type": "address"
         }
       ],
       "stateMutability": "nonpayable",
@@ -137,6 +142,11 @@
     },
     {
       "inputs": [],
+      "name": "HatchDenied",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "HatchLimit",
       "type": "error"
     },
@@ -167,6 +177,11 @@
     },
     {
       "inputs": [],
+      "name": "Locked",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "ModuleOnly",
       "type": "error"
     },
@@ -187,6 +202,21 @@
     },
     {
       "inputs": [],
+      "name": "RendererMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RoyaltyCap",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SameLoci",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "SoldOut",
       "type": "error"
     },
@@ -196,19 +226,13 @@
       "type": "error"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "value",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "length",
-          "type": "uint256"
-        }
-      ],
-      "name": "StringsInsufficientHexLength",
+      "inputs": [],
+      "name": "SupplyCap",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Timelock",
       "type": "error"
     },
     {
@@ -265,6 +289,25 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "toTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchMetadataUpdate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "uint256",
           "name": "tokenId",
@@ -296,6 +339,19 @@
         }
       ],
       "name": "Born",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "ContractURISet",
       "type": "event"
     },
     {
@@ -334,6 +390,25 @@
         }
       ],
       "name": "CuratorChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "next",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "name": "CuratorProposed",
       "type": "event"
     },
     {
@@ -421,6 +496,57 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "maxSupply",
+          "type": "uint256"
+        }
+      ],
+      "name": "MaxSupplyRaised",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "MetadataUpdate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "next",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "name": "ModuleProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "bytes32",
           "name": "id",
@@ -459,6 +585,101 @@
         }
       ],
       "name": "Named",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "seed",
+          "type": "uint32"
+        }
+      ],
+      "name": "RendererChallenged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "RendererLocked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "next",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "name": "RendererProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "renderer",
+          "type": "address"
+        }
+      ],
+      "name": "RendererSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "bps",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "name": "RoyaltyProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "bps",
+          "type": "uint16"
+        }
+      ],
+      "name": "RoyaltySet",
       "type": "event"
     },
     {
@@ -553,12 +774,25 @@
     },
     {
       "inputs": [],
-      "name": "MAX_SUPPLY",
+      "name": "MAX_ROYALTY_BPS",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "uint16",
           "name": "",
-          "type": "uint256"
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MODULE_HATCH_GATE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
         }
       ],
       "stateMutability": "view",
@@ -601,6 +835,53 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TIMELOCK",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "acceptCurator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "activateModule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "activateRenderer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "activateRoyalty",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -699,6 +980,19 @@
     {
       "inputs": [
         {
+          "internalType": "uint32",
+          "name": "seed",
+          "type": "uint32"
+        }
+      ],
+      "name": "challengeRenderer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "id",
           "type": "uint256"
@@ -710,6 +1004,38 @@
           "internalType": "uint256[]",
           "name": "",
           "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "seed",
+          "type": "uint32"
+        }
+      ],
+      "name": "chipsOf",
+      "outputs": [
+        {
+          "internalType": "bytes32[3]",
+          "name": "words",
+          "type": "bytes32[3]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "contractURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -795,14 +1121,29 @@
               "type": "uint8"
             },
             {
+              "internalType": "uint8",
+              "name": "wingMark",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "wingShape",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "wingVein",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "sex",
+              "type": "uint8"
+            },
+            {
               "internalType": "string",
               "name": "body",
               "type": "string"
-            },
-            {
-              "internalType": "bytes",
-              "name": "chips",
-              "type": "bytes"
             }
           ],
           "internalType": "struct SoulRenderer.Phenotype",
@@ -810,7 +1151,7 @@
           "type": "tuple"
         }
       ],
-      "stateMutability": "pure",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -965,6 +1306,11 @@
               "internalType": "uint64",
               "name": "bornBlock",
               "type": "uint64"
+            },
+            {
+              "internalType": "uint16",
+              "name": "lookVersion",
+              "type": "uint16"
             }
           ],
           "internalType": "struct ImmortalSoul.Genome",
@@ -1070,6 +1416,26 @@
           "internalType": "bytes32",
           "name": "",
           "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lockRenderer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "maxSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -1187,6 +1553,48 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "pendingCurator",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "next",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "pendingModule",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "next",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -1206,6 +1614,24 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "pendingRenderer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "next",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -1219,6 +1645,81 @@
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingRoyalty",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "bps",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint64",
+          "name": "eta",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "next",
+          "type": "address"
+        }
+      ],
+      "name": "proposeRenderer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "next",
+          "type": "uint256"
+        }
+      ],
+      "name": "raiseMaxSupply",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renderer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rendererLocked",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -1259,6 +1760,30 @@
     {
       "inputs": [
         {
+          "internalType": "string",
+          "name": "given",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes",
+          "name": "proof",
+          "type": "bytes"
+        }
+      ],
+      "name": "requestHatch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
@@ -1275,6 +1800,61 @@
           "internalType": "uint64",
           "name": "entropyBlock",
           "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "royaltyBps",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "salePrice",
+          "type": "uint256"
+        }
+      ],
+      "name": "royaltyInfo",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "royaltyReceiver",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -1352,12 +1932,38 @@
     {
       "inputs": [
         {
+          "internalType": "string",
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "setContractURI",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "next",
           "type": "address"
         }
       ],
       "name": "setCurator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "setGenesisURI",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1394,6 +2000,24 @@
         }
       ],
       "name": "setModule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "bps",
+          "type": "uint16"
+        }
+      ],
+      "name": "setRoyalty",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

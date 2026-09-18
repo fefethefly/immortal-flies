@@ -25,7 +25,7 @@ test("lifeId is domain-separated and stable", () => {
   assert.throws(() => lifeId(0, COLLECTION, 1), /Invalid birth identity/);
 });
 
-test("birthHash binds life, genesis, decoder and seed", () => {
+test("birthHash binds life, genesis and seed, not the look decoder", () => {
   const life = lifeId(56, COLLECTION, 7);
   const hash = birthHash({ life, genesisRoot: ROOT, seed: 43 });
   assert.equal(
@@ -34,7 +34,7 @@ test("birthHash binds life, genesis, decoder and seed", () => {
   );
   assert.notEqual(hash, birthHash({ life, genesisRoot: ROOT, seed: 44 }));
   assert.equal(BIRTH_DOMAIN, keccak256(toUtf8Bytes("ifs.fly-birth/1")));
-  assert.equal(DECODER_HASH, keccak256(toUtf8Bytes("phenotype-loci/2")));
+  assert.equal(DECODER_HASH, keccak256(toUtf8Bytes("phenotype-loci/3")));
   assert.throws(
     () => birthHash({ life, genesisRoot: ROOT, seed: 0 }),
     /Invalid birth seed/,

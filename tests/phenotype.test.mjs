@@ -37,7 +37,10 @@ test("same genome expresses the same phenotype; soulId does not change looks", (
   const a = expressPhenotype(buildGenome({ soulId: "alpha", seed: 3700127 }));
   const b = expressPhenotype(buildGenome({ soulId: "beta", seed: 3700127 }));
   assert.equal(a.schema, PHENOTYPE_DECODER);
+  assert.equal(a.decoder, "phenotype-loci/3");
   assert.equal(a.chips.length, CHIP_COUNT);
+  assert.ok(a.mark.id);
+  assert.ok(a.scarcity.expectedPer1024 > 0);
   assert.deepEqual(a.chips, b.chips);
   assert.equal(a.summary.en, b.summary.en);
   assert.equal(a.art.body, b.art.body);

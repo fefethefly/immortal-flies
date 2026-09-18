@@ -12,7 +12,7 @@ import {
   policyCard,
   retrieveEvents,
 } from "./brain/flyswarm/explain.mjs";
-import { explorerToken } from "./token.mjs";
+import { explorerAddress, explorerToken } from "./token.mjs";
 
 const KIND_LABEL = {
   sense: "colony.ev.sense",
@@ -1266,6 +1266,34 @@ export function IfsView({ world, tx, token, credit, remote, onCreditAction }) {
                   </dd>
                 </div>
               )}
+              {token.vault ? (
+                <div className="wide">
+                  <dt>{tx("ifs.hive")}</dt>
+                  <dd>
+                    <a
+                      href={explorerAddress(token.vault, token.chainId)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {token.vault}
+                    </a>
+                  </dd>
+                </div>
+              ) : null}
+              {token.ops ? (
+                <div className="wide">
+                  <dt>{tx("ifs.ops")}</dt>
+                  <dd>
+                    <a
+                      href={explorerAddress(token.ops, token.chainId)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {token.ops}
+                    </a>
+                  </dd>
+                </div>
+              ) : null}
             </dl>
           ) : (
             <p className="empty-inline">{tx("public.tokenError")}</p>

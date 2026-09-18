@@ -46,7 +46,8 @@ export function createConfig(env = process.env) {
     now: typeof env.IFF_NOW === "function" ? env.IFF_NOW : Date.now,
     session: {
       idleMs: intEnv(env, "IFF_SESSION_IDLE_MS", 2 * 60 * 60 * 1000),
-      maxAgeMs: intEnv(env, "IFF_SESSION_MAX_AGE_MS", 24 * 60 * 60 * 1000),
+      // Idle eviction frees RAM; deleting life archives requires an explicit retention policy.
+      maxAgeMs: intEnv(env, "IFF_SESSION_MAX_AGE_MS", 0),
       maxLive: intEnv(env, "IFF_SESSION_MAX_LIVE", 64),
     },
     rate: {

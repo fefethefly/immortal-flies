@@ -1,5 +1,5 @@
 export const SIGNAL_GROUPS = Object.freeze([
-  ['food', '食物感受器', '#c9a25e'],
+  ['food', '食物感受器', '#f0b90b'],
   ['threat', '威胁感受器', '#b57660'],
   ['light', '光感受器', '#a9c4bb'],
   ['left', '左侧运动', '#93a181'],

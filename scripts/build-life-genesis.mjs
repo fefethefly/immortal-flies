@@ -7,7 +7,7 @@ import { loadGraphFromDir } from "../server/src/shared/graph-fs.mjs";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const dataDir = path.join(root, "public/data/malecns-full");
 const currentPath = path.join(root, "public/life-genesis/current.json");
-const DECODER = "phenotype-loci/2";
+const DECODER = "phenotype-loci/3";
 
 async function loadExistingPackage() {
   const current = JSON.parse(await fs.readFile(currentPath, "utf8"));
@@ -102,7 +102,7 @@ const manifest = {
   dataBase: "/data/malecns-full/",
   runtimeBase: "runtime/",
 };
-if (manifest.decoder !== DECODER) throw new Error("Genesis decoder must be phenotype-loci/2");
+if (manifest.decoder !== DECODER) throw new Error("Genesis decoder must be phenotype-loci/3");
 const genesisRoot = await hash(manifest);
 const out = path.join(root, "public/life-genesis", genesisRoot.slice(2));
 await fs.mkdir(out, { recursive: true });
