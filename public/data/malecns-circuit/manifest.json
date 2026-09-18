@@ -5,21 +5,21 @@
   "dataset": "male-cns:v1.0",
   "license": "CC BY",
   "source": "https://male-cns.janelia.org/download/",
-  "neurons": 1400,
-  "edges": 42031,
+  "neurons": 12000,
+  "edges": 477021,
   "metadata": {
     "path": "metadata.json",
-    "bytes": 134660,
-    "sha256": "0x7623082c058a626759164e83e666b628396669d115eeaeb1c8afef654a1adca9"
+    "bytes": 1173120,
+    "sha256": "0x53d5be94c7d2bcadd7daf110d922ea1f8d03a1e0f81117fd034b35c593fd7524"
   },
   "connectivity": {
     "path": "graph.bin",
-    "bytes": 341864,
-    "sha256": "0x4278c3cae84471b8a808391d5de5eddf8e54a2b75e01f8596743ec07e2f1e843"
+    "bytes": 3864184,
+    "sha256": "0xe269ed3d16c7f08a3e035e37edb44c8f30b96480646f865d960eb2e02388f64b"
   },
   "provenance": {
     "path": "provenance.json",
-    "bytes": 1878,
-    "sha256": "0x582b57616f86c6b11d45761287787ccf495df1d49022108e2e548eb9a1ef7cbc"
+    "bytes": 1880,
+    "sha256": "0xf7204748064978851464c0f83890d378686de011a36eebd09091a4f9635d48da"
   }
 }

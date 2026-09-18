@@ -34,8 +34,8 @@
   "processing": {
     "minWeight": 8,
     "seedCount": 356,
-    "selectedCount": 1400,
+    "selectedCount": 12000,
     "hop": 1,
-    "cap": 1400
+    "cap": 12000
   }
 }
