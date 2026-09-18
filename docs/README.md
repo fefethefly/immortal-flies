@@ -23,7 +23,7 @@ Skip everything else until you need a lab replay or a design memo.
 
 | Doc | Status | Role |
 | --- | --- | --- |
-| [PRODUCT-LATEST.md](PRODUCT-LATEST.md) | **Current product book** | Positioning, money rules, Soul assessment, swarm interfaces (mostly design), honest boundaries. |
+| [PRODUCT-LATEST.md](PRODUCT-LATEST.md) | **Current product book** | Open digital life: identity, connectome, society. Trading is the first small world, not the frame. Money rules, Soul assessment, swarm interfaces (mostly design), honest boundaries. |
 | [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md) | **Current encoding spec** | ImmortalSoul / Journal / Kin / genesis. EN: [LIFE-PROTOCOL.en.md](LIFE-PROTOCOL.en.md). |
 | [SOUL-MARKET.md](SOUL-MARKET.md) | Current satellite | Official NFT market. Not OpenSea. |
 | [SOULKIN-FEE.md](SOULKIN-FEE.md) | Current satellite | Paid kin (testnet). Mainnet hatch kin is free SoulKinCross. |
