@@ -7,5 +7,8 @@ server
 contracts
 scripts/data/cache
 test-results
-reports
+# Keep protocol page bundles; ignore the rest of the study dumps.
+reports/**
+!reports/protocol-replay-smoke-v1.json
+!reports/admission-replay-v1.json
 .env.example
