@@ -1,6 +1,8 @@
 # Grok 接手说明：BNB 免费孵化与数字生命闭环
 
-更新时间：2026-09-16（Grok 续写）。**没有公共链部署、转账或对外发布。未自动 commit。**
+> **历史稿（2026-09-16）。** 写于 LIVE `/3` 集合部署之前。文中「没有公共链部署」已经过期。现行状态与阅读顺序见 [README.md](README.md)；产品正文见 [PRODUCT-LATEST.md](PRODUCT-LATEST.md)；身份核见 [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md)。不要用本文对外报价。
+
+更新时间：2026-09-16（Grok 续写）。当时尚未自动 commit。
 
 ## 用户已确认的目标
 

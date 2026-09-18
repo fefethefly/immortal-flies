@@ -1,8 +1,12 @@
 # IMMORTAL FLYSWARM：Agent Society Trading World
 
-日期：2026-09-17（收入群体智慧协议裁定与接口；同日补 SoulKinFee，见 §22；同日补官方 NFT 市场规格，见 §23 与 [SOUL-MARKET.md](SOUL-MARKET.md)；此前 2026-09-16 三次修订：确认 BNB 免费孵化与生命记录闭环，预留跨链跨物种互通）。**本书是唯一当前产品与架构正文。** 未写进本节的页面文案、情景沙盘标签或旧合约注释，不得当成已交货或主网承诺。
+目录与阅读顺序：[docs/README.md](README.md)。**本书是唯一当前产品与架构正文。** 未写进本节的页面文案、情景沙盘标签、实验室笔记或旧合约注释，不得当成已交货或主网承诺。
+
+日期：2026-09-17（收入群体智慧协议裁定与接口；同日补 SoulKinFee，见 §22；同日补官方 NFT 市场规格，见 §23 与 [SOUL-MARKET.md](SOUL-MARKET.md)；此前 2026-09-16 三次修订：确认 BNB 免费孵化与生命记录闭环，预留跨链跨物种互通）。2026-09-18 增补见下文。
 
 本文不构成收益、回购、销毁或金融产品承诺。链上事实只以已核验地址和回执为准。
+
+**先读哪里：** 身份核不可废 → [LIFE-PROTOCOL.md](LIFE-PROTOCOL.md) 文首「特别注意」。已开 / 未开 → 下面 §0。市场 / 繁衍费 / 私有轨分别以 [SOUL-MARKET.md](SOUL-MARKET.md)、[SOULKIN-FEE.md](SOULKIN-FEE.md)、[MINING-HUB-V1.md](MINING-HUB-V1.md) 为准，不要只靠本节摘要。
 
 ## 2026-09-18 群体智慧升级增补
 

@@ -300,6 +300,11 @@ export function DocsPage() {
           <p className="kicker">{tx("nav.docs")}</p>
           <h1>{tx("docs.h1")}</h1>
           <p className="docs-hero-lead">{tx("docs.lead")}</p>
+          <p className="docs-hero-lead">
+            <a href="https://github.com/fefethefly/immortal-flies/blob/main/docs/README.md">
+              {tx("docs.catalog")}
+            </a>
+          </p>
         </header>
 
         <div className="docs-grid">

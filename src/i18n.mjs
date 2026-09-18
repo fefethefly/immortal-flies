@@ -1914,6 +1914,7 @@ export const MESSAGES = Object.freeze({
     "docs.h1": "Public docs",
     "docs.lead":
       "Selected protocol, deployment, and API documents. Prose is written against the repo and rendered at build time; contract addresses are read live from the deployment manifests.",
+    "docs.catalog": "Full reading order and what is current vs historical",
     "docs.tocTitle": "On this page",
     "docs.group.protocol": "Protocol",
     "docs.group.eng": "Network & API",
@@ -3757,6 +3758,7 @@ export const MESSAGES = Object.freeze({
     "docs.h1": "公开文档",
     "docs.lead":
       "精选的协议、部署与接口文档。正文与仓库同步撰写、构建时渲染；合约地址实时读取部署清单。",
+    "docs.catalog": "完整阅读顺序，以及哪些是现行规格、哪些是历史稿",
     "docs.tocTitle": "本页目录",
     "docs.group.protocol": "协议",
     "docs.group.eng": "网络与接口",

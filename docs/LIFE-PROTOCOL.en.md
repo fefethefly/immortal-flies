@@ -1,6 +1,6 @@
 # Life protocol: encoding and interfaces
 
-Date: 2026-09-18. This is the encoding spec for ImmortalSoul / LifeJournal / SoulKin and the genesis package; it does not replace `PRODUCT-LATEST.md`. The BSC mainnet identity core (`phenotype-loci/3`) is deployed: Soul `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`. The old team test collection `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` (`/2`) is marked RETIRED; `#1` still lives at the old address and is not the same collection. Paid Kin: see [SOULKIN-FEE.md](SOULKIN-FEE.md); the official market: see [SOUL-MARKET.md](SOUL-MARKET.md).
+Catalog: [README.md](README.md). Date: 2026-09-18. This is the encoding spec for ImmortalSoul / LifeJournal / SoulKin and the genesis package; it does not replace `PRODUCT-LATEST.md`. The BSC mainnet identity core (`phenotype-loci/3`) is deployed: Soul `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`. The old team test collection `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` (`/2`) is marked RETIRED; `#1` still lives at the old address and is not the same collection. Paid Kin: see [SOULKIN-FEE.md](SOULKIN-FEE.md); the official market: see [SOUL-MARKET.md](SOUL-MARKET.md).
 
 ## Read first: the mainnet identity core is permanent while the product keeps changing
 

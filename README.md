@@ -20,7 +20,7 @@
 
 License [MIT](LICENSE). Third-party connectome and fonts: [NOTICE](NOTICE). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately via [SECURITY.md](SECURITY.md) — never paste private keys or API secrets into issues.
 
-**Site** · https://immortalflies.com · **Repo** · https://github.com/fefethefly/immortal-flies
+**Site** · https://immortalflies.com · **Docs catalog** · [docs/README.md](docs/README.md) · **Repo** · https://github.com/fefethefly/immortal-flies
 
 Current focus: free BNB hatch (gas only), Soul identity, on-chain interaction, and recoverable archives. The public protocol separates LifeId, SpeciesManifest, ModelManifest, and Session so future cross-chain / cross-species work can plug in later. BNB Chain is the only identity authority in v1; bridging is closed. Trading remains a paper small world. Product rules: [PRODUCT-LATEST](docs/PRODUCT-LATEST.md). Spec: [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md).
 
@@ -136,7 +136,7 @@ Static hosting is enough (Vercel: `vercel.json`). The Node backend is optional �
 | `public/contract/life/` | Deployment listings |
 | `tests/`, `scripts/` | Verification |
 
-[Product](docs/PRODUCT-LATEST.md) · [Flap launch](docs/FLAP-LAUNCH.md) · [Biology spine](docs/BIOLOGY-SPINE-V6.md) · [Assets](docs/assets.md)
+Documentation index: **[docs/README.md](docs/README.md)**. Product book: [PRODUCT-LATEST](docs/PRODUCT-LATEST.md). [Flap launch](docs/FLAP-LAUNCH.md) · [Biology spine](docs/BIOLOGY-SPINE-V6.md) · [Assets](docs/assets.md)
 
 ## Connectome runtime
 

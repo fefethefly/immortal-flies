@@ -1,6 +1,6 @@
 # Life protocol：编码与接口
 
-日期：2026-09-18。本文是 ImmortalSoul / LifeJournal / SoulKin / 创世包的编码规格，不替代 `PRODUCT-LATEST.md`。BSC 主网身份核（`phenotype-loci/3`）已部署：Soul `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`。旧团队测试集合 `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F`（`/2`）已标 RETIRED，`#1` 仍在旧地址，不是同一只集合。收费 Kin 见 [SOULKIN-FEE.md](SOULKIN-FEE.md)；官方市场见 [SOUL-MARKET.md](SOUL-MARKET.md)。
+文档目录：[README.md](README.md)。日期：2026-09-18。本文是 ImmortalSoul / LifeJournal / SoulKin / 创世包的编码规格，不替代 `PRODUCT-LATEST.md`。BSC 主网身份核（`phenotype-loci/3`）已部署：Soul `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`。旧团队测试集合 `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F`（`/2`）已标 RETIRED，`#1` 仍在旧地址，不是同一只集合。收费 Kin 见 [SOULKIN-FEE.md](SOULKIN-FEE.md)；官方市场见 [SOUL-MARKET.md](SOUL-MARKET.md)。
 
 ## 特别注意：主网身份核不可废，产品却会继续变
 
