@@ -1,176 +1,154 @@
 # IMMORTAL / Fruit Flies
 
-**免费孵化，拥有一只有可验证历史的数字果蝇。**
+**Free hatch on BNB. Own a digital fruit fly with a verifiable history.**
 
-许可证 [MIT](LICENSE)。第三方连接组与字体见 [NOTICE](NOTICE)。贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)。漏洞请按 [SECURITY.md](SECURITY.md) 私下报告，不要把私钥或 API 密钥发到 issue。
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Mode](https://img.shields.io/badge/Mode-LIVE%20%C2%B7%20Soul%20%2B%20%24IFS%20on%20BSC-success)](https://immortalflies.com)
+[![Chain](https://img.shields.io/badge/Chain-BSC%20Mainnet%20(56)-F0B90B?logo=bnbchain&logoColor=white)](https://bscscan.com/address/0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD)
+[![Token](https://img.shields.io/badge/%24IFS-tax%20coin%20live-2775ca)](./docs/FLAP-LAUNCH.md)
+[![Soul](https://img.shields.io/badge/Soul-ImmortalSoul%20%2F%20phenotype--loci%2F3-9b59b6)](./docs/LIFE-PROTOCOL.md)
+[![Connectome](https://img.shields.io/badge/Connectome-MaleCNS%20v1.0%20(CC%20BY)-e74c3c)](./docs/CONNECTOME-MALE-CNS.md)
+[![Host](https://img.shields.io/badge/Host-Vercel-000000?logo=vercel&logoColor=white)](https://immortalflies.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.30-363636?logo=solidity&logoColor=white)](./contracts/)
+[![Node](https://img.shields.io/badge/Node-%E2%89%A522-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![ethers](https://img.shields.io/badge/ethers-6.15-2535a0)](https://docs.ethers.org/)
+[![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-5.4-4E5EE4?logo=openzeppelin&logoColor=white)](https://www.openzeppelin.com/)
+[![CI](https://img.shields.io/badge/CI-npm%20test%20%2B%20build-2ea44f)](./.github/workflows/segment-replay.yml)
 
-当前优先交付 BNB 免费孵化（仅网络 gas）、Soul 身份、链上互动与可恢复档案。公共协议分离 LifeId、SpeciesManifest、ModelManifest 与 Session，为未来跨链跨物种交流/迁徙预留接口；首版 BNB 为唯一权威身份链，跨链桥未开放。交易仍是纸面小世界。产品裁定见 [PRODUCT-LATEST §20](docs/PRODUCT-LATEST.md#20-已确认开放数字生命架构与本轮交付)，实现规格见 [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md)。
+License [MIT](LICENSE). Third-party connectome and fonts: [NOTICE](NOTICE). Contributing: [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately via [SECURITY.md](SECURITY.md) — never paste private keys or API secrets into issues.
 
-BSC 主网身份核 LIVE：`ImmortalSoul` `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`（`phenotype-loci/3`）。旧 `/2` 集合 `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` 已 RETIRED。禁止把 `ImmortalFly.sol` 部署到 chainId 56，也禁止再部署一份 Soul 当迭代。
+**Site** · https://immortalflies.com · **Repo** · https://github.com/fefethefly/immortal-flies
 
-## 启动
+Current focus: free BNB hatch (gas only), Soul identity, on-chain interaction, and recoverable archives. The public protocol separates LifeId, SpeciesManifest, ModelManifest, and Session so future cross-chain / cross-species work can plug in later. BNB Chain is the only identity authority in v1; bridging is closed. Trading remains a paper small world. Product rules: [PRODUCT-LATEST](docs/PRODUCT-LATEST.md). Spec: [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md).
 
-需要 Node.js 22+。
+LIVE identity kernel: `ImmortalSoul` [`0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`](https://bscscan.com/address/0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD) (`phenotype-loci/3`). Retired `/2` collection `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` is not this set. Do **not** deploy `ImmortalFly.sol` to chainId 56, and do **not** redeploy Soul to iterate.
+
+## Stack
+
+| Layer | What we use |
+| --- | --- |
+| App | React 19, Vite 6, Three.js, Lucide |
+| Chain | ethers 6, Solidity 0.8.30, OpenZeppelin 5.4, BSC mainnet + testnet |
+| Identity | `ImmortalSoul`, `LifeJournal`, `SoulKinCross`, `SoulMarket` |
+| Token | `$IFS` Flap tax coin on BSC |
+| Brain | MaleCNS-derived connectome runtime (`iff-runtime/1`), paper trading pit |
+| Host | Vercel static site + optional Node session/LLM server |
+| Data | Janelia FlyEM MaleCNS v1.0 (CC BY) |
+
+## Quick start
+
+Requires Node.js 22+.
 
 ```sh
 npm install
 npm run dev -- --port 4173
 ```
 
-后端（Session / Replay / P1 LLM，可选）：
+Optional backend (Session / Replay / P1 LLM):
 
 ```sh
-npm run server   # http://127.0.0.1:8787 ；契约见 docs/API-V1.md
+npm run server   # http://127.0.0.1:8787 — see docs/API-V1.md
 ```
 
-`npm run dev` 会把 `/v1`、`/health`、`/ready` 反代到 8787。无 `OPENAI_API_KEY` 时解释层降级为本地确定性实现。
+`npm run dev` proxies `/v1`, `/health`, and `/ready` to 8787. Without `OPENAI_API_KEY`, the explainer falls back to a local deterministic implementation.
 
-打开 http://127.0.0.1:4173/ 看对外主站，http://127.0.0.1:4173/swarm.html 看交易场，http://127.0.0.1:4173/brain.html 看连接组连接组，http://127.0.0.1:4173/economy.html 看信用与盈余，http://127.0.0.1:4173/blueprint.html 看蓝图。顶栏在同一文档里切换，不再整页卸载。生产环境 `/altar` 仍重定向到蓝图（见 `vercel.json`）。生产构建：`npm run build`，本地预览：`npm run preview -- --port 4173`。官方代币清单在 `public/token/official.json`，ticker 为 `$IFS`，已在 BSC 主网发射（`0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`），发射记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)。
+| URL | Page |
+| --- | --- |
+| http://127.0.0.1:4173/ | Public home |
+| http://127.0.0.1:4173/swarm.html | Trading pit |
+| http://127.0.0.1:4173/brain.html | Connectome lab |
+| http://127.0.0.1:4173/habitat.html | Hatch / habitat |
+| http://127.0.0.1:4173/colony.html | Colony catalog |
+| http://127.0.0.1:4173/blueprint.html | Blueprint |
 
-## 这一版可以做什么
+Top nav switches inside one document (no full reload). Production `/altar` redirects to blueprint (`vercel.json`). Build: `npm run build`. Preview: `npm run preview -- --port 4173`.
 
-- 在真实 MaleCNS 1,400 节点感官-运动子图上，观看 5 只果蝇在纸面账本上买卖 IFL/BNB，注入花蜜、威胁、光或暗，等待退役与繁衍。
-- 交易场内切换七个产品视图：交易场 / Colony / Intent / Risk / Execution / Vault / IFS。
-- 现场：六类事件（感觉、行为、记忆、成交、社会、风控）逐 tick 落地；因果条展示「起因 → 转向 → 成交 → 社会」，点击任意一条重放整条链；蜂巢压力计显示聚合买压/卖压。
-- ask 通道：七个固定问题得到带事件引用的确定性回答；API + LLM 可用时支持自由提问，模型缺席仍可运行（P1 退出条件）。
-- LLM 边界抽屉：解释（步骤带证据引用）、检索、候选计划（PASS/REJECT 与原因）、工具白名单（全部只读、不可签名）、策略验证（版本化参数）。
-- Risk / Execution / Vault / IFS 视图披露纸面仓位、流动性、回撤、集中度、信用、回执（滑点/税/裁定）、蜂巢金库与 IFS 纸面面板；用户金库明确标为未接入。
-- 「改变一次经历」创建个人实验分支（快照不随主线变化，不增加投票权）。
-- 可选后端镜像：`npm run server` 时本地场同步到服务端（存档 + LLM 解释/ask/计划），断线自动回落本地。
-- 观察维特鲁威印记：圆、方、准星与白线果蝇。
-- 花蜜、光源与避障训练真实改变三组学习参数和神经状态。
-- 休眠暂停模型；转生补充能量，保留身份、基因与已学习状态。
-- 在迷宫中自主寻果，形成仅保存在本地的挑战记录。
-- 查看 16 节点模型的电位与脉冲图谱。
-- 浏览 Amber / Echo / Phantom 三张有倾斜与光泽反馈的创世卡片概念。
-- 封存、恢复、导入完整 JSON 档案；导出提供下载和全文复制两种路径。
-- 独立运行连续 64 步的保存/恢复一致性验证。
-- 手机与桌面响应式布局、键盘可操作弹窗与视图切换、减少动态效果支持、可选交互音效。
+Official token listing: `public/token/official.json` — ticker `$IFS`, live on BSC at `0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`. Launch notes: [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md).
 
-状态会保存在当前浏览器。模拟仅在页面可见、未休眠且没有正在执行的交互时每秒推进一步；关闭页面不会偷偷推进或惩罚用户。清除网站数据会移除本地进度，请保存档案。内置浏览器对下载的支持可能不同，档案弹窗始终提供可选择的完整 JSON 文本。
+## What this build can do
 
-## 范围与事实
+- Watch flies on a real MaleCNS sensory–motor subgraph trade IFL/BNB on a paper ledger; inject nectar, threat, light, or dark; wait for cull and breed.
+- Seven product views in the pit: Pit / Colony / Intent / Risk / Execution / Vault / IFS.
+- Live tape: six event classes (sense, behavior, memory, fill, social, risk) land each tick; causal bar replays cause → turn → fill → social; hive pressure meter aggregates buy/sell pressure.
+- Ask channel: seven fixed questions with event citations; free-form ask when API + LLM are up; still works without a model.
+- LLM boundary drawer: explain (cited steps), retrieve, candidate plans (PASS/REJECT), read-only tool whitelist, versioned strategy checks.
+- Risk / Execution / Vault / IFS disclose paper positions, liquidity, drawdown, credit, receipts; user vault is marked not wired.
+- Optional server mirror when `npm run server` is running; disconnect falls back to local.
+- Habitat hatch wait, colony catalog, on-chain Soul SVG (`/nft/soul/...`), local archive export/import with SHA-256 integrity checks.
+- Lightweight `iff-neural-16-v1` altar model (train / sleep / rebirth) — testnet prototype only.
 
-**$IFS 代币已在 BSC 主网发射**（记录见 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md)）。**Soul NFT 主网已开放** LIVE 集合 `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`，清单 `public/contract/life/ImmortalSoul.mainnet.json`。`ImmortalFly.sol` 是 16 节点测试网原型，**禁止部署到 BSC 主网**。见 [docs/LIFE-PROTOCOL.md](docs/LIFE-PROTOCOL.md) 与 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) §19–§20。本地祭坛才能练旧 `mint`；生产 `/altar` 跳蓝图。迷宫成绩、本地档案、MaleCNS 连接组都不能当作链上资产或官方成绩。销毁与自动打给个人地址均未实现，也不应实现为协议分流。
+State lives in the browser. The sim advances only while the page is visible, not dormant, and not mid-interaction. Clearing site data wipes local progress — save an archive first.
 
-模型名称为 `iff-neural-16-v1`：16 个节点、3 组可训练参数与确定性随机状态。它受到果蝇行为启发，并非完整果蝇脑连接组，更不代表意识上传。页面中复杂的发光线路是美术表现；神经图谱展示的是轻量模型的实际电位与脉冲。
+## Scope and facts
 
-SHA-256 校验用于验证档案完整性，不能证明档案的来源、持有人身份或成绩真实性。复制状态和复制 NFT 所有权是两回事。
+**`$IFS` is live on BSC** ([FLAP-LAUNCH](docs/FLAP-LAUNCH.md)). **Soul NFT is live** — collection `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`, listing `public/contract/life/ImmortalSoul.mainnet.json`. `ImmortalFly.sol` is a 16-node **testnet** prototype — **do not deploy it to BSC mainnet**. See [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md) and [PRODUCT-LATEST](docs/PRODUCT-LATEST.md) §§19–20.
 
-## 链上原型
+Maze scores, local archives, and MaleCNS graphs are **not** on-chain assets or official results. Burns and auto-payouts to personal addresses are not implemented and must not be framed as protocol splits.
 
-[contracts/ImmortalFly.sol](contracts/ImmortalFly.sol) 是可编译 ERC-721 **测试网原型**：固定上限 1024；完整保存 16 节点状态；内置基础 SVG；无 burn、管理员、代理。它不是主网灵魂。主网方案见 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) §19。
+`iff-neural-16-v1` has 16 nodes, three trainable groups, and deterministic RNG. It is fly-inspired, not a full brain and not consciousness upload. Fancy glowing wires on the page are art; the neural view shows the light model’s voltages and spikes.
 
-本地祭坛（`altar.html`，生产环境已并入蓝图）已写好 **chainId 97** 读写：`src/chain.mjs` 的 `getFly` / `mint` / `train` / `sleep` / `wake` / `rebirth`。地址写在 `public/contract/ImmortalFly.deployment.json`（当前 `UNDEPLOYED`）。艺术卡面仍用本地图片。不能承诺“已经在 BNB 永存”。
+SHA-256 checks archive integrity; it does not prove provenance, ownership, or score authenticity. Copying state is not copying NFT ownership.
 
-两套前端：[docs/FRONTENDS.md](docs/FRONTENDS.md)。测试网步骤：[docs/TESTNET.md](docs/TESTNET.md)。Flap Vault UI 是另一包，现在不做。
+## On-chain pieces
 
-详细接口、权限、限制与复原代码见 [contracts/README.md](contracts/README.md)。特别注意：原型的 NFT approved operator 同时具有改变模型状态的权限；正式版需要单独设计游戏操作授权。
+- **Mainnet Soul** — `contracts/life/ImmortalSoul.sol` and satellites (Journal, Kin, Market). Identity facts stay in Soul; play lives in modules. No UUPS / proxy on Soul.
+- **Testnet prototype** — [contracts/ImmortalFly.sol](contracts/ImmortalFly.sol): ERC-721, cap 1024, full 16-node state, built-in SVG; no burn, admin, or proxy. Not the mainnet soul.
+- Local altar (merged into blueprint in production) talks chainId **97** via `src/chain.mjs`. Listing: `public/contract/ImmortalFly.deployment.json` (`UNDEPLOYED`).
 
-## 验证
+Frontends: [docs/FRONTENDS.md](docs/FRONTENDS.md). Testnet: [docs/TESTNET.md](docs/TESTNET.md). Contract notes: [contracts/README.md](contracts/README.md).
+
+## Verify
 
 ```sh
 npm test
 npm run build
+npm run life:compile
+npm run life:test
 npm run contracts:compile
 npm run contracts:test
-npm run contracts:check:testnet
 ```
 
-合约测试需要安装 Foundry 的 `anvil`。脚本仅启动临时本地链、运行测试并关闭，不连接公共链。
+Contract tests need Foundry `anvil`. The script spins a temporary local chain, runs tests, and exits — it does not touch a public network.
 
-本次验证：
-
-- 7 项蜂群测试通过：同刺激重放、花蜜/威胁改变买卖倾向、淘汰与繁衍、纸面账本不印钞、刺激冷却、行为解码、交易意图不能执行。
-- 6 项模型/档案测试通过：轨迹恢复、损坏档案、元数据校验、休眠转生、训练和能量、合法迷宫路径。
-- 10 项连接组内核测试通过：同输入重放、中断后从检查点继续、拒绝重复/过期/乱序/停用输入、新增适配器不改身份、模型迁移可追溯、损坏档案拒绝、Flap 预览不能执行且凭证只能消费一次、只读市场采样拒绝错误链和重组、官方 MaleCNS 子图保留 body ID 并可重放。
-- 12 项本地链测试通过：包括实际铸造 1024 只并拒绝第 1025 只、权限和转让、JS/Solidity 数值一致、完整状态恢复、链上 SVG。
-- 19 项蝇群协议测试通过：schema 语言法、创世内容寻址、名册双层身份、era 分片日志、confidence-hold 三验收向量（分裂必 HOLD / 逐位重放 / 客脑不可写官方 body ID）、内核话语-记忆-聚合闭环、退役不删灵魂与检查点繁衍。
-- 17 项交易世界测试通过：世界只读内核、同种子逐位重放、六类事件落地与回撤警戒、事件哈希链与因果引用有效、因果链按 tick 重放、回执与成交数量/税/名义额守恒、候选计划校验（现金不足/无方向/未知蝇/信用为空 → REJECT）、纸面信用上限、ask 全目录确定性答案、解释步骤带引用、世界快照往返一致、个人分支不被主线污染、压力计与金库历史、计划生成不改内核、结算繁衍事件与因果、快照携带世界、并发 tick/结算互斥不竞态。
-- 浏览器验证（无头 Chrome，桌面 1440px / 768px / 移动 390px）：七视图无横向溢出、现场落列、因果条重放、ask 回答、解释抽屉五个标签、工具白名单、中英文切换、方向键切换视图、ESC 关闭抽屉、dark 刺激、立即结算（血统更新 + spawn 事件）、刷新后世界状态延续、暂停/恢复、无后端与 API 已接两条路径均无页面错误。
-- 浏览器验证训练、休眠、转生、挑战、恢复、损坏档案拒绝与 64 步证明。下载完成事件在内置浏览器中未能确认，因此提供并检查了可完整读取的 JSON 备用导出路径。
-- BSC 主网实测：`$IFS` 代币存在于 `0x65b66bb4adb0e244e19d290b6aaa0381b81a7777`，symbol `IFS`、总供应 `1e27`、owner 为 Flap Portal（`0xe2cE6ab80874Fa9Fa2aAE65D277Dd6B8e65C9De0`），与 [docs/FLAP-LAUNCH.md](docs/FLAP-LAUNCH.md) 发射记录一致。
-
-本地 gas 样本：mint 181,608，32 步 train 约 629,000，rebirth 39,811。不是 BSC 的实时报价，不能据此承诺费用。生成的明细位于 `artifacts/contract-test-report.json`。
-
-## 生产部署（最小可上线版本）
+## Production
 
 ```sh
-npm run build        # 产物在 dist/（约 10 MB，含字体/连接组数据/代币清单）
-npm run preview      # 本地预览生产构建
+npm run build        # output in dist/
+npm run preview
 ```
 
-- 静态托管即可上线（Vercel 配置见 `vercel.json`：`/altar` 重定向到蓝图；`/economy` 与 `/blueprint` 为页面 rewrite；`/token/official.json` 缓存 60 秒）。
-- **后端是可选的**：不部署 `npm run server` 时，站点完全可用——交易场七视图、ask、解释层全部回落本地实现，API 徽标显示 LOCAL ONLY。部署后端时把 `/v1`、`/health`、`/ready` 反代到 Node 服务。
-- 上线前自检：`npm test`（123 项）+ `npm run build` + preview 环境过一遍四页（首页/交易场/连接组/蓝图）。
-- 版本：`v0.2.0`（P0–P5 纸面世界 + 前端全量 + 可选后端，全部 SIM；不含真实资金、借贷与主网 NFT）。
+Static hosting is enough (Vercel: `vercel.json`). The Node backend is optional — without it, pit views, ask, and explain stay local (badge: LOCAL ONLY).
 
-## 源码导航
+## Source map
 
-| 路径                             | 作用                                                                              |
-| -------------------------------- | --------------------------------------------------------------------------------- |
-| `src/swarm.mjs`                  | 首页纸面场占位：LIF、刺激、记账（不再是交易场决策）                               |
-| `src/swarm-page.jsx`             | 交易场：左坑右案、七视图切换（交易场/六产品视图）                                 |
-| `src/brain/flyswarm/pit.mjs`     | 交易场数据桥：真实子图 → 内核 → 视图与持久化                                      |
-| `src/brain/flyswarm/world.mjs`   | 交易纸面世界（L2）：六类事件、因果条、压力、回执、风控、金库/IFS 快照、候选计划   |
-| `src/brain/flyswarm/explain.mjs` | LLM 边界（P1）：解释、检索、ask、工具白名单、策略参数（本地确定性，缺席仍可运行） |
-| `src/world-views.jsx`            | 六视图组件、现场、因果条、ask 通道、解释抽屉                                      |
-| `src/world.css`                  | 交易世界六视图样式                                                                |
-| `src/swarm-pit.jsx`              | 坑中画布、天平、风琴键、名册                                                      |
-| `src/App.jsx`                    | 祭坛页面、交互与操作互斥                                                          |
-| `src/vitruvian.jsx`              | 维特鲁威印记与 Logo                                                               |
-| `src/components.jsx`             | 印记、卡片、弹窗等组件                                                            |
-| `src/brain/`                     | 开放核：ethology / ports / learn / treasury / kernel                              |
-| `src/brain/flyswarm/`            | 蝇群协议：schemas / genesis / membership / log / quorum / mesh / hosting           |
-| `server/`                        | Session / Replay / P1 LLM HTTP 服务（`docs/API-V1.md`）                           |
-| `src/api-client.mjs`             | 前端 API 封装：可选后端镜像与 LLM 解释/ask/计划（断线回落本地）                   |
-| `src/brain-page.jsx`             | 活体实验室入口                                                                    |
-| `public/data/`                   | MaleCNS 处理后的连接组                                                            |
-| `src/chain.mjs`                  | BSC 测试网连接与合约读写                                                          |
-| `src/engine.mjs`                 | 确定性模型、档案校验、迷宫                                                        |
-| `src/storage.mjs`                | 本地保存与损坏缓存恢复                                                            |
-| `src/styles.css`                 | 设计系统、响应式与动效                                                            |
-| `public/assets/`                 | 生成的果蝇美术                                                                    |
-| `public/fonts/`                  | 本地字体及 OFL 许可证                                                             |
-| `contracts/`                     | Solidity 合约及说明                                                               |
-| `tests/`、`scripts/`             | 模型和合约验证                                                                    |
+| Path | Role |
+| --- | --- |
+| `src/swarm-page.jsx` | Trading pit UI |
+| `src/brain/flyswarm/` | Pit bridge, paper world, explain, schemas |
+| `src/life/` | Habitat, hatch, colony, market, Soul SVG |
+| `src/brain/` | Runtime, adapters, ethology, protocol tasks |
+| `server/` | Session / Replay / LLM HTTP (`docs/API-V1.md`) |
+| `contracts/life/` | Mainnet identity + satellites |
+| `public/data/` | Prepared MaleCNS graphs |
+| `public/contract/life/` | Deployment listings |
+| `tests/`, `scripts/` | Verification |
 
-[最新产品与架构设计](docs/PRODUCT-LATEST.md) · [Flap 发射](docs/FLAP-LAUNCH.md) · [生物学资料](docs/BIOLOGY-SPINE-V6.md) · [美术素材与生成记录](docs/assets.md)
+[Product](docs/PRODUCT-LATEST.md) · [Flap launch](docs/FLAP-LAUNCH.md) · [Biology spine](docs/BIOLOGY-SPINE-V6.md) · [Assets](docs/assets.md)
 
-## 下一阶段
+## Connectome runtime
 
-阶段划分以 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md) 第 12/14 节为准：
-
-1. 蝇群协议 P0（语言与身份）已全部落地：schema 语言法、创世内容寻址、双层名册、era 分片日志、confidence-hold quorum 接入内核（替换朴素多数），交易场 `/swarm.html` 已改读真实 MaleCNS 1,400 节点子图（`src/brain/flyswarm/pit.mjs`），24 节点占位只剩首页纸面场。
-2. P1「LLM 边界」与 P2「交易纸面世界」前端已落地：交易场内七视图（交易场 / Colony / Intent / Risk / Execution / Vault / IFS）、现场（六类事件落地、因果条、蜂巢压力计、ask 通道）与 LLM 边界抽屉（解释/检索/候选计划/工具白名单/策略验证），全部纸面数据并标注 SIM；**HTTP 服务已落地**（`npm run server`，见 [docs/API-V1.md](docs/API-V1.md)），前端已接线（同种子镜像会话 + LLM 解释/ask/计划，断线回落本地确定性实现）。
-3. P3「IFS 会员与模拟 Credit」后端已落地：`iff.credit/1` 信用账本（Free/Locked/Earned/Liquid 四账户、§6.2 公式、衰减/到期/亏损收缩、同一抵押只支撑一次额度）+ IFS 锁仓/解锁/占用模拟，端点 `/v1/sessions/:id/credit*` 与 `/v1/credit/policy`，IFS 视图与 Risk 信用列已接服务端账本（断线回落本地纸面）。全部 SIM；真实 IFS 购买与抵押仍待合约层。
-4. P4「协议自有资金」后端已落地：`iff.protocol/1` 收入层（R/C/N/T/D、35/25/20/10/10 拨定、回购资格与停机规则、哈希链回执，全部 SIM 不动用户资产），Vault 视图新增协议资金面板，端点 `GET /v1/sessions/:id/protocol`。真实执行、外部审计与压力测试仍是上线前置。
-5. P5「用户金库」后端已落地：`iff.vault/1`（按 NAV 铸份额、逐批成本/高水位/已实现损益/费用/Position ID、份额所有权校验、FIFO 退出队列受流动性上限、只有已实现收益可分配），端点 `/v1/vault*`，Vault 视图已接服务端金库（注资/退出/结算表单，断线回落未接入）。真实资金仍需外部审计。
-6. §11「行为/金融解耦」已落地：内核话语升级为 `iff.utterance/2`（只含原生 ethology，无 BUY/SELL/置信度），聚合升级为 `iff.quorum/2`（approach/retreat/still 行为分布，无金融方向）；金融方向只在 TradePort 解释层出现，旧 /1 schema 保留解析与重放。至此 §11 资金缺口全部关闭（份额所有权、分账、浮盈回购、行为解耦、历史恢复）。
-7. 用带 tBNB 的测试网私钥跑 `npm run contracts:deploy:testnet`，再在本地祭坛走完铸造 → 训练 → 休眠/转生。
-8. 质押权益模型（SIM）已落地：质押 IFS 越多权益越多——①质押分红：协议 `stakeRewards` 池按锁定质押量比例分配（单魂单次封顶 10%、超额滚回准备金、停机自动冻结、水位线防重启重复）；②RWA 配额：锁定质押 × 2 兑换股票篓子认购额度（上限可治理，仅资格模拟不构成债权）。IFS 视图信用账本展示每人分红累计与认购额度。真实分红与 RWA 发行仍待合约层。
-9. 根据实测 gas 决定哪些互动逐笔上链、哪些先在本地预演；P6 借贷/RWA/NFT、Flap 嵌入包、主网 NFT、发行规则和独立安全检查仍在后面。
-10. 托管网架子已立（`iff.mesh/1` + `iff.hosting/1`）：首页展示分区/节点/覆盖，接入只改运行器覆盖、不改官方 MaleCNS 普查。IFS 托管占用质押，BNB 只作轨道；自动续费有预算上限。HTTP 与链上 ServiceEscrow 仍未接线。
-
-## 连接组运行内核（第一版）
-
-独立于首页 16 节点原型：大脑运行、输入适配、状态恢复和 Flap 预览已经拆开，并接入 Janelia 公开的 MaleCNS v1.0（CC BY）。
-
-- 打开 http://127.0.0.1:4173/brain.html 。现有视觉首页保留，作为对照入口。
-- 交互子图与全量图共用同一套接口。子图随仓库提供；全量图需本地生成，不提交到 Git。
-- 页面区分三类事实：官方神经元编号与连接、本项目定义的刺激映射、以及美术光效。
-- 输入带有来源、版本和顺序校验；状态可以导出、重放、在中断后从本机档案恢复；更换模型会留下迁移事件。
-- Flap 接口只生成 BSC 测试网模拟意图，不能签名或发送交易；同一动作凭证只能消费一次。
+Separate from the 16-node altar toy: brain run, input adapters, restore, and Flap preview are split, wired to Janelia MaleCNS v1.0 (CC BY).
 
 ```sh
 python3 -m pip install pyarrow pandas
-npm run connectome:prepare            # 交互子图
-npm run connectome:prepare -- --full  # 全量图，约数百 MB 源文件
-npm test
+npm run connectome:prepare            # interactive subgraph (shipped)
+npm run connectome:prepare -- --full  # full graph, large local download
 ```
 
-来源、许可证、预处理与映射规则见 [docs/CONNECTOME-MALE-CNS.md](docs/CONNECTOME-MALE-CNS.md)。产品与开放架构见 [docs/PRODUCT-LATEST.md](docs/PRODUCT-LATEST.md)。
+The interactive subgraph ships with the repo; the full graph is generated locally and not committed. Details: [docs/CONNECTOME-MALE-CNS.md](docs/CONNECTOME-MALE-CNS.md).
 
-## 许可证
+## License
 
-源代码为 [MIT](LICENSE)。Janelia FlyEM MaleCNS 衍生图为 **CC BY**（不能改写成 MIT）；捆绑字体为 **SIL OFL**。详见 [NOTICE](NOTICE)。
+Source code is [MIT](LICENSE). Janelia FlyEM MaleCNS-derived graphs remain **CC BY** (not re-licensed as MIT). Bundled fonts are **SIL OFL**. See [NOTICE](NOTICE).
