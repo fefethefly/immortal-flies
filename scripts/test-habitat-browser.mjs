@@ -68,8 +68,11 @@ try {
   await send('Page.addScriptToEvaluateOnNewDocument', { source: `window.matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){}});` });
   const evaluate = async expression => (await send('Runtime.evaluate', { expression, returnByValue: true })).result.value;
   await send('Page.navigate', { url: `${base}/habitat.html?lang=zh&soul=1` });
-  for (let i = 0; i < 150; i++) { if (await evaluate(`document.body.innerText.includes('养育进度自动保存')`)) break; await new Promise(r => setTimeout(r, 100)); }
-  assert.equal(await evaluate(`document.body.innerText.includes('养育进度自动保存')`), true);
+  for (let i = 0; i < 150; i++) { if (await evaluate(`Boolean(document.querySelector('.life-holo-canvas'))`)) break; await new Promise(r => setTimeout(r, 100)); }
+  assert.equal(await evaluate(`Boolean(document.querySelector('.life-holo-canvas'))`), true);
+  assert.equal(await evaluate(`document.body.innerText.includes('养育进度自动保存')`), false);
+  assert.equal(await evaluate(`document.body.innerText.includes('打开官方一口价盘')`), false);
+  assert.equal(await evaluate(`document.body.innerText.includes('生命记录')`), false);
   const key = habitatStorageKey(deployment);
   for (let i = 0; i < 50; i++) { if (await evaluate(`localStorage.getItem(${JSON.stringify(key)}) !== null`)) break; await new Promise(r => setTimeout(r, 100)); }
   const before = await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(key)})).bodies[0].energy`);
@@ -79,9 +82,9 @@ try {
   assert.equal(await evaluate(`document.body.innerText.includes('已恢复本地养育进度')`), false);
   assert.ok(after > before, `feeding must raise saved energy (${before} -> ${after})`);
   await send('Page.reload'); await new Promise(r => setTimeout(r, 2500));
-  assert.equal(await evaluate(`document.body.innerText.includes('已恢复本地养育进度')`), true);
+  assert.equal(await evaluate(`document.body.innerText.includes('已恢复本地养育进度')`), false);
   const restored = await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(key)})).bodies[0].energy`);
   assert.ok(Math.abs(restored - after) <= 3, `reload must resume near saved energy (${after} -> ${restored})`);
   assert.deepEqual(errors, []);
-  console.log(`PASS real Habitat DOM: fresh boot saves care, feeding raised energy ${before} -> ${after}, reload restored ${restored} with the restored notice; RPC mocked, no transactions.`);
+  console.log(`PASS real Habitat DOM: fresh boot saves care, feeding raised energy ${before} -> ${after}, reload restored ${restored}; RPC mocked, no transactions.`);
 } finally { ws?.close(); chrome.kill(); http.close(); await new Promise(r => setTimeout(r, 300)); await rm(profile, { recursive: true, force: true }); await rm(dist, { recursive: true, force: true }); }

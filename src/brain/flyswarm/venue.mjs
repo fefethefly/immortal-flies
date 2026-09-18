@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { integer, requireValue } from "../codec.mjs";
-import { formatUsd, usdPerToken } from "../../venue-price.mjs";
+import { formatUsd, priceAtomsFromUsd, usdPerToken } from "../../venue-price.mjs";
 
 export { formatUsd, usdPerToken };
 
@@ -238,6 +238,7 @@ export function observationFromFocus(state, { now = Date.now(), staleMs = DEFAUL
       activity: focus.activity,
       assetId: focus.assetId,
       mid: focus.mid,
+      ...(priceAtomsFromUsd(focus.usd) ? { usd: priceAtomsFromUsd(focus.usd) } : {}),
     },
     provenance: {
       kind: "aggregator-quote",

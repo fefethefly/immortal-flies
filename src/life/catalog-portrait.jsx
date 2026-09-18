@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { loadCatalogFly, tintCatalogPixels } from "./catalog-portrait.mjs";
+import { catalogSprite, loadCatalogFly } from "./catalog-portrait.mjs";
 import { MarketThumb } from "./market-thumb.jsx";
 
 /** Raster collectible portrait, tinted from the shared catalog plate. */
@@ -8,13 +8,15 @@ export function CatalogPortrait({ soul, className = "" }) {
   useEffect(() => {
     let gone = false;
     loadCatalogFly()
-      .then((fly) => {
+      .then(() => {
         if (gone || !ref.current) return;
+        const sprite = catalogSprite(soul?.phenotype?.art || {});
+        if (!sprite) return;
         const canvas = ref.current;
         canvas.width = canvas.height = 420;
         const ctx = canvas.getContext("2d");
-        const tinted = tintCatalogPixels(fly, soul?.phenotype?.art || {});
-        ctx.putImageData(new ImageData(tinted.data, 420, 420), 0, 0);
+        ctx.clearRect(0, 0, 420, 420);
+        ctx.drawImage(sprite, 0, 0);
       })
       .catch(() => undefined);
     return () => {

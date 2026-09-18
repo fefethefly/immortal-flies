@@ -471,19 +471,25 @@ export async function queryAllLogs(
   filter,
   fromBlock = 0,
   chunk = LOG_CHUNK,
+  giveUpAfter = 0,
 ) {
   const provider = contract.runner?.provider;
   if (!provider) return [];
   const head = await provider.getBlockNumber();
   const floor = Math.max(0, Number(fromBlock) || 0);
   const out = [];
+  let failed = 0;
+  const stopAfter = Math.max(0, Number(giveUpAfter) || 0);
   for (let from = floor; from <= head; from += chunk) {
     const to = Math.min(head, from + chunk - 1);
     try {
       const logs = await contract.queryFilter(filter, from, to);
       if (logs.length) out.push(...logs);
+      failed = 0;
     } catch {
       /* public BSC RPCs reject wide or busy log scans */
+      failed += 1;
+      if (stopAfter && failed >= stopAfter) break;
     }
   }
   return out;
@@ -614,20 +620,53 @@ export async function readOpenListing(market, tokenId) {
   }
 }
 
+const LISTING_PROBE_CAP = 4096;
+const LOG_GIVE_UP = 2;
+const TOTAL_SUPPLY_DATA = "0x18160ddd";
+
+async function collectSupplyTokenIds(market) {
+  const provider = market?.runner?.provider;
+  if (!provider || typeof market.soul !== "function") return [];
+  try {
+    const soulAddr = await market.soul();
+    if (!soulAddr || typeof provider.call !== "function") return [];
+    const raw = await provider.call({ to: soulAddr, data: TOTAL_SUPPLY_DATA });
+    const total = Number(BigInt(raw || 0));
+    if (!Number.isFinite(total) || total <= 0) return [];
+    const cap = Math.min(total, LISTING_PROBE_CAP);
+    const ids = [];
+    for (let id = 1; id <= cap; id += 1) ids.push(id);
+    return ids;
+  } catch {
+    return [];
+  }
+}
+
 export async function loadOpenListings(market, fromBlock = 0, tokenIds = []) {
   if (!market) return [];
   const ids = new Set(
     (tokenIds || []).map((id) => Number(id)).filter((id) => id > 0),
   );
-  const listed = await queryAllLogs(market, market.filters.Listed(), fromBlock);
-  const relisted = await queryAllLogs(
-    market,
-    market.filters.Relisted(),
-    fromBlock,
-  );
-  for (const log of [...listed, ...relisted]) {
-    const id = Number(log.args?.tokenId ?? 0);
-    if (id) ids.add(id);
+  for (const id of await collectSupplyTokenIds(market)) ids.add(id);
+  if (ids.size === 0) {
+    const listed = await queryAllLogs(
+      market,
+      market.filters.Listed(),
+      fromBlock,
+      LOG_CHUNK,
+      LOG_GIVE_UP,
+    );
+    const relisted = await queryAllLogs(
+      market,
+      market.filters.Relisted(),
+      fromBlock,
+      LOG_CHUNK,
+      LOG_GIVE_UP,
+    );
+    for (const log of [...listed, ...relisted]) {
+      const id = Number(log.args?.tokenId ?? 0);
+      if (id) ids.add(id);
+    }
   }
   const rows = [];
   const list = [...ids];
@@ -645,7 +684,13 @@ export async function loadMarketActivity(market, fromBlock = 0, limit = 16) {
   const kinds = ["Sold", "Listed", "Relisted", "Canceled", "Swept"];
   const rows = [];
   for (const kind of kinds) {
-    const logs = await queryAllLogs(market, market.filters[kind](), fromBlock);
+    const logs = await queryAllLogs(
+      market,
+      market.filters[kind](),
+      fromBlock,
+      LOG_CHUNK,
+      LOG_GIVE_UP,
+    );
     for (const log of logs) {
       rows.push({
         kind: kind.toLowerCase(),

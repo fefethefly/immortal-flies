@@ -121,3 +121,22 @@ test("wallet change while restoration is in flight cannot publish the previous a
   assert.deepEqual(committed, [other]);
   stop();
 });
+
+test("pending poll defaults to a sub-second interval while waiting", async () => {
+  const delays = [];
+  const head = deferred();
+  const stop = startPendingPoll({
+    pending: {},
+    readHead: () => head.promise,
+    onHead: () => {},
+    schedule: (fn, ms) => {
+      delays.push(ms);
+      return 1;
+    },
+    cancel: () => {},
+  });
+  head.resolve(1);
+  await flush();
+  assert.deepEqual(delays, [800]);
+  stop();
+});

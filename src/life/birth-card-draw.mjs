@@ -1,11 +1,13 @@
-import { chipFill } from "../brain/flyswarm/phenotype.mjs";
 import { CARD_H, CARD_W } from "./birth-card.mjs";
-import { drawFlyArt, fitSpan, sizeFactor } from "./fly-sprite.mjs";
+import {
+  catalogSpriteAt,
+  loadCatalogFly,
+} from "./catalog-portrait.mjs";
 
 const MONO =
-  'IBM Plex Mono, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", ui-monospace, monospace';
+  'IBM Plex Mono, "Apple Symbols", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", ui-monospace, monospace';
 const SERIF =
-  'Cormorant Garamond, "Songti SC", "STSong", "Noto Serif CJK SC", Times, serif';
+  '"Noto Serif SC", "Songti SC", "STSong", "Cormorant Garamond", Georgia, serif';
 
 function hexRgb(hex) {
   const n = Number.parseInt(String(hex || "#f0b90b").replace("#", ""), 16);
@@ -13,47 +15,47 @@ function hexRgb(hex) {
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
-/** 出生卡上的主角：与图鉴、我的果蝇同一套正面萌系形象。 */
-function drawFly(ctx, soul, cx, cy, span) {
-  if (!soul?.phenotype?.art) {
-    ctx.strokeStyle = "rgba(240, 185, 11, 0.18)";
-    ctx.setLineDash([4, 5]);
-    ctx.beginPath();
-    ctx.arc(cx, cy, 60, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
+function rgb(c) {
+  return `rgb(${c.r},${c.g},${c.b})`;
+}
+
+function mixRgb(a, b, t) {
+  return {
+    r: Math.round(a.r * (1 - t) + b.r * t),
+    g: Math.round(a.g * (1 - t) + b.g * t),
+    b: Math.round(a.b * (1 - t) + b.b * t),
+  };
+}
+
+function rounded(ctx, x, y, w, h, r) {
+  const rad = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, rad);
     return;
   }
-  const body = hexRgb(soul.phenotype.art.body);
-  const glow = ctx.createRadialGradient(cx, cy + 20, 12, cx, cy, span * 0.72);
-  glow.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.24)`);
-  glow.addColorStop(0.44, `rgba(${body.r},${body.g},${body.b},0.07)`);
-  glow.addColorStop(1, "rgba(10, 9, 7, 0)");
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(cx, cy + 10, span * 0.72, 0, Math.PI * 2);
-  ctx.fill();
-  drawFlyArt(ctx, soul.phenotype.art, cx, cy, span, {
-    flying: false,
-    view: "portrait",
-    ignoreScale: true,
-  });
+  ctx.moveTo(x + rad, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rad);
+  ctx.arcTo(x + w, y + h, x, y + h, rad);
+  ctx.arcTo(x, y + h, x, y, rad);
+  ctx.arcTo(x, y, x + w, y, rad);
+  ctx.closePath();
 }
 
 function fit(ctx, text, font, max) {
   ctx.font = font;
   if (ctx.measureText(text).width <= max) return text;
   let cut = text;
-  while (cut.length > 1 && ctx.measureText(`${cut}…`).width > max) {
+  while (cut.length > 1 && ctx.measureText(`${cut}...`).width > max) {
     cut = cut.slice(0, -1);
   }
-  return `${cut}…`;
+  return `${cut}...`;
 }
 
 function grain(ctx, w, h, seed) {
   let x = (Number(seed) || 1) >>> 0 || 1;
   ctx.fillStyle = "rgba(240, 234, 217, 0.028)";
-  for (let i = 0; i < 2400; i += 1) {
+  for (let i = 0; i < 1800; i += 1) {
     x ^= x << 13;
     x ^= x >>> 17;
     x ^= x << 5;
@@ -66,12 +68,9 @@ function grain(ctx, w, h, seed) {
   }
 }
 
-function frame(ctx, x, y, w, h, tick) {
-  ctx.strokeStyle = "rgba(240, 185, 11, 0.28)";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-  ctx.strokeStyle = "rgba(240, 185, 11, 0.55)";
-  ctx.lineWidth = 1.25;
+function frameTicks(ctx, x, y, w, h, tick) {
+  ctx.strokeStyle = "rgba(214, 179, 106, 0.45)";
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   const corners = [
     [x, y, 1, 1],
@@ -87,188 +86,258 @@ function frame(ctx, x, y, w, h, tick) {
   ctx.stroke();
 }
 
-function drawChips(ctx, phenotype, x, y, w, h) {
-  const chips = phenotype?.chips;
-  if (!chips?.length) {
-    ctx.fillStyle = "#1a160e";
-    ctx.fillRect(x, y, w, h);
-    return;
-  }
-  const n = chips.length;
-  const gap = 1;
-  const cw = (w - gap * (n - 1)) / n;
-  chips.forEach((chip, i) => {
-    ctx.fillStyle = chipFill(chip, phenotype);
-    ctx.fillRect(x + i * (cw + gap), y, Math.max(1, cw), h);
-  });
+function drawDot(ctx, color, cx, cy, r) {
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  const hi = ctx.createRadialGradient(
+    cx - r * 0.32,
+    cy - r * 0.38,
+    1,
+    cx,
+    cy,
+    r,
+  );
+  hi.addColorStop(0, "rgba(255,255,255,0.62)");
+  hi.addColorStop(0.42, "rgba(255,255,255,0)");
+  hi.addColorStop(1, "rgba(0,0,0,0.32)");
+  ctx.fillStyle = hi;
+  ctx.fill();
+  ctx.strokeStyle = "rgba(240, 234, 217, 0.22)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
 }
 
-/** 两行带色点的性状：色点就是这一只的实际体色与眼色。 */
-function drawTraitRows(ctx, rows, x, y, max) {
+function drawTraitPair(ctx, rows, x, y, w) {
   if (!rows?.length) return y;
-  const step = 48;
-  let top = y;
-  for (const row of rows) {
-    ctx.fillStyle = row.color || "#8a6a2a";
-    ctx.beginPath();
-    ctx.arc(x + 11, top + 11, 10, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(240, 234, 217, 0.22)";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#e6dcc4";
-    const font = `500 27px ${MONO}`;
-    ctx.font = font;
-    ctx.fillText(fit(ctx, row.text, font, max - 40), x + 36, top);
-    if (row.detail) {
-      const label = ctx.measureText(fit(ctx, row.text, font, max - 40)).width;
-      ctx.fillStyle = "#7d7565";
-      ctx.font = `22px ${MONO}`;
-      ctx.fillText(
-        fit(ctx, row.detail, ctx.font, max - 60 - label),
-        x + 58 + label,
-        top + 4,
-      );
+  const col = w / Math.max(rows.length, 1);
+  const r = 11;
+  rows.forEach((row, i) => {
+    const left = x + i * col;
+    const split = Boolean(row.color2);
+    const cx = left + r;
+    const cy = y + r + 2;
+    if (split) {
+      drawDot(ctx, row.color || "#8a6a2a", cx, cy, r);
+      drawDot(ctx, row.color2, cx + r * 1.35, cy, r);
+    } else {
+      drawDot(ctx, row.color || "#8a6a2a", cx, cy, r);
     }
-    top += step;
+    const textX = left + (split ? r * 3.2 : r * 2) + 12;
+    const max = col - (textX - left) - 18;
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#cdc3ae";
+    const font = `500 26px ${MONO}`;
+    ctx.font = font;
+    ctx.fillText(fit(ctx, row.text, font, max), textX, y + 4);
+  });
+  return y + 44;
+}
+
+function drawRarity(ctx, text, xRight, y) {
+  if (!text) return;
+  const font = `500 22px ${MONO}`;
+  ctx.font = font;
+  const tw = ctx.measureText(text).width;
+  const pw = tw + 28;
+  const ph = 36;
+  const x = xRight - pw;
+  rounded(ctx, x, y, pw, ph, ph / 2);
+  ctx.strokeStyle = "rgba(240, 185, 11, 0.42)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = "#e8c877";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x + pw / 2, y + ph / 2 + 1);
+  ctx.textBaseline = "top";
+}
+
+/** Colony 同款上色插画：3/4 正面立绘，贴进收藏卡画井。 */
+function drawCatalog(ctx, soul, x, y, w, h) {
+  rounded(ctx, x, y, w, h, 18);
+  ctx.save();
+  ctx.clip();
+  const body = hexRgb(soul?.phenotype?.art?.body);
+  ctx.fillStyle = "#050403";
+  ctx.fillRect(x, y, w, h);
+  const wash = ctx.createRadialGradient(
+    x + w * 0.5,
+    y + h * 0.58,
+    12,
+    x + w * 0.5,
+    y + h * 0.55,
+    Math.max(w, h) * 0.55,
+  );
+  wash.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.18)`);
+  wash.addColorStop(0.55, "rgba(240, 234, 217, 0.05)");
+  wash.addColorStop(1, "rgba(5, 4, 3, 0)");
+  ctx.fillStyle = wash;
+  ctx.fillRect(x, y, w, h);
+  const sprite = catalogSpriteAt(soul?.phenotype?.art || {}, Math.round(h));
+  if (sprite) {
+    const size = Math.min(w, h) * 0.9;
+    const dx = x + (w - size) / 2;
+    const dy = y + (h - size) / 2;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.shadowColor = "rgba(227, 185, 96, 0.22)";
+    ctx.shadowBlur = 22;
+    ctx.drawImage(sprite, dx, dy, size, size);
+    ctx.shadowBlur = 0;
   }
-  return top;
+  ctx.restore();
+  rounded(ctx, x, y, w, h, 18);
+  ctx.strokeStyle = "rgba(180, 148, 84, 0.32)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
 }
 
 export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
-  const inset = Math.round(Math.min(w, h) * 0.04);
-  const pad = inset + 36;
+  const inset = 28;
+  const pad = 52;
   const inner = w - pad * 2;
+  const textH = card.bred && card.mixLine ? 340 : 300;
+  const body = hexRgb(card.soul?.phenotype?.art?.body);
+  const cream = { r: 255, g: 240, b: 216 };
   ctx.save();
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "#0a0907";
-  ctx.fillRect(0, 0, w, h);
 
-  const body = hexRgb(card.soul?.phenotype?.art?.body);
+  rounded(ctx, 0, 0, w, h, 22);
+  ctx.clip();
+  ctx.fillStyle = "#0a0a08";
+  ctx.fillRect(0, 0, w, h);
+  const plate = ctx.createLinearGradient(0, 0, w * 0.2, h);
+  plate.addColorStop(0, "#17130a");
+  plate.addColorStop(0.78, "#0a0a08");
+  ctx.fillStyle = plate;
+  ctx.fillRect(0, 0, w, h);
   const wash = ctx.createRadialGradient(
     w * 0.5,
-    h * 0.38,
+    h * 0.26,
     20,
     w * 0.5,
-    h * 0.4,
-    w * 0.5,
+    h * 0.22,
+    w * 0.62,
   );
-  wash.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.11)`);
-  wash.addColorStop(1, "rgba(10, 9, 7, 0)");
+  wash.addColorStop(0, `rgba(${body.r},${body.g},${body.b},0.16)`);
+  wash.addColorStop(1, "rgba(10, 10, 8, 0)");
   ctx.fillStyle = wash;
   ctx.fillRect(0, 0, w, h);
 
-  const vignette = ctx.createRadialGradient(
-    w * 0.5,
-    h * 0.46,
-    w * 0.24,
-    w * 0.5,
-    h * 0.5,
-    w * 0.74,
-  );
-  vignette.addColorStop(0, "rgba(10, 9, 7, 0)");
-  vignette.addColorStop(1, "rgba(10, 9, 7, 0.44)");
-  ctx.fillStyle = vignette;
-  ctx.fillRect(0, 0, w, h);
-
   grain(ctx, w, h, card.soul?.seed || card.soul?.tokenId || 1);
-  frame(ctx, inset, inset, w - inset * 2, h - inset * 2, 22);
+
+  ctx.strokeStyle = "rgba(154, 122, 63, 0.42)";
+  ctx.lineWidth = 2;
+  rounded(ctx, 1, 1, w - 2, h - 2, 20);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(245, 216, 148, 0.08)";
+  ctx.lineWidth = 1;
+  rounded(ctx, 3, 3, w - 6, h - 6, 18);
+  ctx.stroke();
+  frameTicks(ctx, inset, inset, w - inset * 2, h - inset * 2, 18);
 
   ctx.textBaseline = "top";
-  ctx.fillStyle = "#9c8a56";
-  ctx.font = `500 17px ${MONO}`;
-  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.16em";
+  ctx.fillStyle = "#bba271";
+  ctx.font = `500 16px ${MONO}`;
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.28em";
   ctx.textAlign = "left";
   ctx.fillText(
-    fit(ctx, card.series || card.header, ctx.font, inner * 0.56),
+    fit(ctx, card.series || card.header, ctx.font, inner * 0.7),
     pad,
-    pad + 6,
-  );
-  ctx.textAlign = "right";
-  ctx.fillText(
-    fit(
-      ctx,
-      [card.tokenMark, card.badge].filter(Boolean).join(" · "),
-      ctx.font,
-      inner * 0.42,
-    ),
-    w - pad,
-    pad + 6,
+    pad + 2,
   );
   if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
 
-  // 图鉴编号：左上角四位数铭牌。
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#c9a44a";
-  ctx.font = `500 30px ${MONO}`;
-  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.14em";
-  ctx.fillText(card.plateIndex || card.tokenMark || "", pad, pad + 52);
+  ctx.fillStyle = "#cfb67f";
+  ctx.font = `500 28px ${MONO}`;
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.08em";
+  ctx.fillText(card.plateIndex || card.tokenMark || "", pad, pad + 36);
   if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+  drawRarity(ctx, card.rarityLine, w - pad, pad + 32);
 
-  // 形象区：页眉/编号之下、名字之上。按外接框反推 span，粗壮体型也不出框。
-  const art = card.soul?.phenotype?.art;
-  const flyTop = pad + 100;
-  const flyBottom = h * 0.575;
-  const flySpan =
-    fitSpan(inner * 0.9, (flyBottom - flyTop) * 0.98) * sizeFactor(art);
-  drawFly(ctx, card.soul, w * 0.5, (flyTop + flyBottom) / 2, flySpan);
+  const wellY = pad + 88;
+  const wellH = h - pad - textH - wellY;
+  drawCatalog(ctx, card.soul, pad, wellY, inner, Math.max(320, wellH));
 
-  const nameFont = `500 ${Math.round(h * 0.058)}px ${SERIF}`;
-  const textTop = h * 0.6;
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#f0ead9";
+  const nameY = wellY + Math.max(320, wellH) + 18;
+  const nameFont = `600 ${Math.round(h * 0.048)}px ${SERIF}`;
+  ctx.textAlign = "center";
+  ctx.fillStyle = rgb(mixRgb(body, cream, 0.62));
   ctx.font = nameFont;
   ctx.fillText(
-    fit(ctx, card.plateName || card.childTitle, nameFont, inner),
-    pad,
-    textTop,
+    fit(ctx, card.plateName || card.childTitle, nameFont, inner * 0.92),
+    w * 0.5,
+    nameY,
   );
 
-  const afterTraits = drawTraitRows(
+  const afterTraits = drawTraitPair(
     ctx,
     card.traitRows,
-    pad,
-    textTop + h * 0.078,
-    inner,
+    pad + Math.max(0, (inner - Math.min(inner, 820)) / 2),
+    nameY + Math.round(h * 0.058),
+    Math.min(inner, 820),
   );
 
+  const look = [card.formLine, card.finishLine].filter(Boolean).join(" · ");
   let top = afterTraits + 10;
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#c9a44a";
-  ctx.font = `500 24px ${MONO}`;
-  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0.08em";
-  ctx.fillText(
-    fit(ctx, card.vitalLine || card.accession, ctx.font, inner),
-    pad,
-    top,
-  );
-  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
-  top += 46;
-
-  const lines = [
-    [card.accession, "#9c8a56", `21px ${MONO}`],
-    [card.formLine || card.traits, "#9c8a56", `20px ${MONO}`],
-    [card.finishLine, "#8a8172", `20px ${MONO}`],
-    [card.bred ? card.parentLine : "", "#8a8172", `17px ${MONO}`],
-  ];
-  for (const [text, color, font] of lines) {
-    if (!text) continue;
-    ctx.fillStyle = color;
-    ctx.font = font;
-    ctx.fillText(fit(ctx, text, font, inner), pad, top);
+  ctx.textAlign = "center";
+  if (look) {
+    ctx.fillStyle = "#8a8172";
+    ctx.font = `20px ${MONO}`;
+    ctx.fillText(fit(ctx, look, ctx.font, inner), w * 0.5, top);
     top += 34;
   }
 
-  const barY = h - pad - 42;
-  drawChips(ctx, card.soul?.phenotype, pad, barY, inner, 7);
-  ctx.fillStyle = "#6f6758";
-  ctx.font = `14px ${MONO}`;
+  const gen = (card.vitalLine || "").split("·")[0].trim();
+  const alive = card.locale === "zh" ? "存活" : "alive";
+  const hatch = card.bred ? "" : card.locale === "zh" ? "孵化" : "hatched";
+  const vitalParts = [
+    [gen, "#bba87d"],
+    [" · ", "#bba87d"],
+    [alive, "#91bd84"],
+  ];
+  if (hatch) vitalParts.push([" · ", "#bba87d"], [hatch, "#bba87d"]);
+  ctx.font = `500 22px ${MONO}`;
+  const vitalW = vitalParts.reduce(
+    (sum, [text]) => sum + ctx.measureText(text).width,
+    0,
+  );
+  let vitalX = w * 0.5 - vitalW / 2;
   ctx.textAlign = "left";
+  for (const [text, color] of vitalParts) {
+    ctx.fillStyle = color;
+    ctx.fillText(text, vitalX, top);
+    vitalX += ctx.measureText(text).width;
+  }
+  top += 34;
+
+  if (card.bred) {
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#9c8a56";
+    ctx.font = `500 20px ${MONO}`;
+    ctx.fillText(
+      fit(ctx, card.parentLine || card.accession || "", ctx.font, inner),
+      w * 0.5,
+      top,
+    );
+    top += 30;
+    if (card.mixLine) {
+      ctx.fillStyle = "#8a8172";
+      ctx.font = `18px ${MONO}`;
+      ctx.fillText(fit(ctx, card.mixLine, ctx.font, inner), w * 0.5, top);
+    }
+  }
+
+  const barY = h - pad - 22;
+  ctx.fillStyle = "#6f6758";
+  ctx.font = `16px ${MONO}`;
+  ctx.textAlign = "center";
   ctx.fillText(
-    fit(ctx, card.footer || card.mixLine, ctx.font, inner),
-    pad,
-    barY + 16,
+    fit(ctx, card.footer || "", ctx.font, inner),
+    w * 0.5,
+    barY,
   );
   ctx.restore();
 }
@@ -281,12 +350,17 @@ export async function renderBirthPng(card, canvas) {
   node.width = CARD_W;
   node.height = CARD_H;
   const ctx = node.getContext("2d");
-  if (typeof document !== "undefined" && document.fonts) {
+  if (typeof document !== "undefined") {
     await Promise.all([
-      document.fonts.load(`500 76px ${SERIF}`),
-      document.fonts.load(`13px ${MONO}`),
-      document.fonts.ready,
-    ]).catch(() => {});
+      document.fonts
+        ? Promise.all([
+            document.fonts.load(`600 76px ${SERIF}`),
+            document.fonts.load(`13px ${MONO}`),
+            document.fonts.ready,
+          ]).catch(() => {})
+        : Promise.resolve(),
+      loadCatalogFly().catch(() => {}),
+    ]);
   }
   drawBirthCard(ctx, card, CARD_W, CARD_H);
   return node;

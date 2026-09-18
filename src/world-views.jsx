@@ -13,6 +13,7 @@ import {
   retrieveEvents,
 } from "./brain/flyswarm/explain.mjs";
 import { explorerAddress, explorerToken } from "./token.mjs";
+import { FILL_HOLD_KEYS } from "./brain/fill-admit.mjs";
 
 const KIND_LABEL = {
   sense: "colony.ev.sense",
@@ -603,6 +604,9 @@ export function IntentView({ world, tx }) {
                 <i style={{ width: `${row.confidence}%` }} />
               </div>
               <code>conf {row.confidence}</code>
+              {row.hold && FILL_HOLD_KEYS[row.hold] ? (
+                <code>{tx(FILL_HOLD_KEYS[row.hold])}</code>
+              ) : null}
             </div>
           </article>
         ))}

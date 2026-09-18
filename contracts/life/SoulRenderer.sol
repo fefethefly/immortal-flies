@@ -5,6 +5,8 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ISoulView} from "./ISoulView.sol";
 /// @dev phenotype-loci/3 decoder. Weighted rolls, no rarity grade in metadata.
 ///      Looks may be replaced on Soul after a 48h challenge window; loci() prefix must match.
+///      `image` is an HTTPS SVG so wallets that drop nested data URIs can still fetch art.
+///      The same SVG stays on-chain in `image_data`.
 contract SoulRenderer {
     using Strings for uint256;
     // Exact RGB values of JS hslToHex at the finite 12 x 3 x 3 palette entries.
@@ -166,7 +168,7 @@ contract SoulRenderer {
         string memory blot = p.wingMark == 0 ? "" : '<circle cx="-70" cy="-70" r="8" fill="#30271d" opacity=".5"/><circle cx="70" cy="-70" r="8" fill="#30271d" opacity=".5"/>';
         string memory dimorph = p.sex == 0 ? "" : '<path d="M-26 8 h10M16 8 h10" stroke="#30271d" stroke-width="3"/>';
         string memory svg = string.concat(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440"><rect width="400" height="440" fill="#0a0907"/><g transform="translate(200 210) scale(',
+            '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="440" viewBox="0 0 400 440"><rect width="400" height="440" fill="#0a0907"/><g transform="translate(200 210) scale(',
             scales[p.size],
             ')"><path d="M-22 0L-95 70M-22 25L-100 115M-22 50L-82 152M22 0L95 70M22 25L100 115M22 50L82 152" stroke="#f0b90b" stroke-width="3"/><g transform="',
             wingX,
@@ -212,7 +214,13 @@ contract SoulRenderer {
         );
         string memory json = string.concat(
             '{"name":"', title,
-            '","description":"BNB digital life identity. Genome and ownership on chain; connectome computation and archives off chain. Looks are a weighted genome readout. Occurrence is not a price. No protocol mint fee. Not a biological consciousness claim.","image":"data:image/svg+xml;base64,',
+            '","description":"BNB digital life identity. Genome and ownership on chain; connectome computation and archives off chain. Looks are a weighted genome readout. Occurrence is not a price. No protocol mint fee. Not a biological consciousness claim.","image":"https://immortalflies.com/nft/soul/',
+            id.toString(),
+            "/",
+            uint256(seed).toString(),
+            "/",
+            uint256(generation).toString(),
+            '.svg","image_data":"data:image/svg+xml;base64,',
             Base64.encode(bytes(svg)),
             '","lifeId":"', Strings.toHexString(uint256(life), 32),
             '","genesisRoot":"', Strings.toHexString(uint256(genesis), 32),

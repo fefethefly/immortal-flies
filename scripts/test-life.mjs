@@ -19,6 +19,10 @@ import { deploySoulCollection, deployRenderer } from "./life-soul-factory.mjs";
 import { lifeId, birthHash } from "../src/life/identity.mjs";
 import { expressPhenotype } from "../src/brain/flyswarm/phenotype.mjs";
 import {
+  soulTokenImageUrl,
+  soulTokenSvg,
+} from "../src/life/soul-token-svg.mjs";
+import {
   grindCrossover,
   traitsOfSeed,
   verifyCrossover,
@@ -219,9 +223,11 @@ try {
   assert.equal(meta.givenName, "Ember");
   assert.equal(meta.name, "Ember #1");
   assert.equal(meta.generation, 0);
-  assert.ok(
-    Buffer.from(meta.image.split(",")[1], "base64").toString().includes("<svg"),
-  );
+  assert.equal(meta.image, soulTokenImageUrl(1, Number(genome.seed), 0));
+  assert.ok(meta.image_data.startsWith("data:image/svg+xml;base64,"));
+  const svg = Buffer.from(meta.image_data.split(",")[1], "base64").toString();
+  assert.equal(svg, soulTokenSvg({ id: 1, seed: Number(genome.seed), generation: 0 }));
+  assert.ok(svg.includes('width="400"') && svg.includes('height="440"'));
   const attrs = Object.fromEntries(
     meta.attributes.map((row) => [row.trait_type, row.value]),
   );
@@ -385,6 +391,10 @@ try {
     Buffer.from((await soul.tokenURI(3)).split(",")[1], "base64"),
   );
   assert.equal(childMeta.generation, 1);
+  assert.equal(
+    childMeta.image,
+    soulTokenImageUrl(3, Number((await soul.getGenome(3)).seed), 1),
+  );
   assert.equal(
     Object.fromEntries(
       childMeta.attributes.map((row) => [row.trait_type, row.value]),

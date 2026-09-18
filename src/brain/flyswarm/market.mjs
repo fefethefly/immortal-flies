@@ -7,6 +7,7 @@
  */
 import { integer, requireValue } from "../codec.mjs";
 import { clamp, random32, START_PRICE } from "../../swarm.mjs";
+import { saneUsdAtoms } from "../../venue-price.mjs";
 
 export const MARKET_SCHEMA = "iff.market-feed/1";
 export const MARKET_PROVENANCE_KINDS = Object.freeze([
@@ -100,6 +101,7 @@ export function offerObservation(feed, raw = {}) {
       "只读行情不得携带签名或 calldata",
     );
   }
+  const usd = payload.usd == null ? null : saneUsdAtoms(payload.usd);
   feed.pending = {
     schema: "iff.market-offer/1",
     payload: {
@@ -107,6 +109,7 @@ export function offerObservation(feed, raw = {}) {
       activity,
       ...(assetId ? { assetId } : {}),
       ...(mid != null ? { mid } : {}),
+      ...(usd != null ? { usd } : {}),
     },
     provenance: structuredClone(provenance),
     offeredAt: Date.now(),
@@ -134,6 +137,19 @@ export function stepMarketFeed(feed, { rng, price, tick }) {
           : "offered-sim";
     next.last = { ...next.pending, consumedTick: tick, source };
     next.pending = null;
+  } else if (
+    next.last?.provenance?.kind === "aggregator-quote" &&
+    saneUsdAtoms(next.last?.payload?.usd)
+  ) {
+    changeBps = 0;
+    provenance = structuredClone(next.last.provenance);
+    source = "aggregator-hold";
+    next.last = {
+      ...next.last,
+      payload: { ...next.last.payload, changeBps: 0, activity: 0 },
+      consumedTick: tick,
+      source,
+    };
   } else {
     nextRng = random32(rng);
     const walked = walkPaperPrice(nextRng, price);
@@ -150,9 +166,10 @@ export function stepMarketFeed(feed, { rng, price, tick }) {
 
   const assetId = next.last?.payload?.assetId || provenance.assetId || null;
   const mid = next.last?.payload?.mid ?? null;
+  const usd = next.last?.payload?.usd ?? null;
   next.history = [
     ...next.history,
-    { tick, changeBps, source, price, assetId, mid },
+    { tick, changeBps, source, price, assetId, mid, usd },
   ].slice(-96);
   return {
     feed: next,
@@ -162,6 +179,7 @@ export function stepMarketFeed(feed, { rng, price, tick }) {
     provenance,
     assetId,
     mid,
+    usd,
   };
 }
 
@@ -181,6 +199,7 @@ export function marketView(feed, { kernel, aux, venue } = {}) {
     delta: price - prev,
     pending: Boolean(feed?.pending),
     focusAssetId: last?.payload?.assetId || last?.provenance?.assetId || null,
+    usd: last?.payload?.usd ?? null,
     last: last
       ? {
           source: last.source,

@@ -30,22 +30,28 @@
   pointer-events: auto;
 }
 .cross-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "lead tools"
+    "truth tools";
+  column-gap: 24px;
+  row-gap: 0;
+  align-items: start;
   padding: 92px 4% 0;
 }
 .cross-lead {
+  grid-area: lead;
   min-width: 0;
 }
 .cross-top h1 {
   margin: 0;
-  max-width: 36ch;
+  max-width: 22em;
   font: 600 clamp(24px, 2.9vw, 40px) / 1.22 var(--display);
   font-style: italic;
   letter-spacing: 0.01em;
   text-wrap: pretty;
+  white-space: pre-line;
   /* Champagne gradient like the sign of the pit. */
   background: linear-gradient(165deg, #faf5e0 8%, #f3e4ae 52%, #e6cc78 96%);
   -webkit-background-clip: text;
@@ -53,7 +59,17 @@
   color: transparent;
   -webkit-text-fill-color: transparent;
 }
+.cross-lead p {
+  margin: 10px 0 0;
+  max-width: 52em;
+  font: 400 14px / 1.5 var(--sans);
+  letter-spacing: 0.01em;
+  color: #c6b48a;
+  text-wrap: pretty;
+  white-space: pre-line;
+}
 .cross-truth {
+  grid-area: truth;
   display: flex;
   flex-wrap: wrap;
   gap: 8px 18px;
@@ -63,6 +79,7 @@
   font: 10.5px / 1.5 var(--mono);
   letter-spacing: 0.1em;
   color: #a09070;
+  pointer-events: auto;
 }
 .cross-truth [data-live="true"] {
   color: #c4a56a;
@@ -71,6 +88,7 @@
   color: #7a7165;
 }
 .cross-tools {
+  grid-area: tools;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -109,6 +127,9 @@
 .cross-hatch:hover {
   background: var(--gold, #f0b90b);
   color: var(--gold-ink, #0b0e11);
+}
+.cross-hatch-short {
+  display: none;
 }
 .cross-tools .cross-hatch[aria-expanded="true"] {
   background: #16130f;
@@ -164,6 +185,9 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: 0 0 8px;
+}
+.cross-desk .hatch-wait {
+  max-width: none;
 }
 .cross-desk button {
   min-height: 36px;
@@ -247,11 +271,20 @@
 .cross-tape [data-kind="SYNC"] b {
   color: #e2d0a0;
 }
-.cross-hero:has(.cross-canvas[data-sync="lock"]) .cross-tape [data-kind="SYNC"] b,
-.cross-hero:has(.cross-canvas[data-sync="still"]) .cross-tape [data-kind="SYNC"] b {
+.cross-hero:has(.cross-canvas[data-sync="lock"])
+  .cross-tape
+  [data-kind="SYNC"]
+  b,
+.cross-hero:has(.cross-canvas[data-sync="still"])
+  .cross-tape
+  [data-kind="SYNC"]
+  b {
   color: #f0e6c8;
 }
-.cross-hero:has(.cross-canvas[data-sync="lock"]) .cross-tape [data-kind="SYNC"] span {
+.cross-hero:has(.cross-canvas[data-sync="lock"])
+  .cross-tape
+  [data-kind="SYNC"]
+  span {
   color: #f3ead4;
 }
 .cross-watch small {
@@ -500,49 +533,92 @@
   cursor: default;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 520px) {
   .cross-hero {
     margin-top: -72px;
   }
   .cross-top {
-    padding-top: 88px;
-    flex-direction: column;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "lead lead"
+      "tools tools";
+    column-gap: 14px;
+    row-gap: 10px;
+    align-items: center;
+    padding: 84px 4% 0;
+  }
+  .cross-top h1 {
+    max-width: none;
+    font-size: clamp(22px, 6.1vw, 28px);
+    line-height: 1.2;
+  }
+  .cross-lead p {
+    max-width: none;
+    font-size: 12.5px;
+    line-height: 1.45;
   }
   .cross-tools {
-    align-self: flex-start;
+    justify-self: start;
+    gap: 8px;
+  }
+  .cross-tools button {
+    width: 40px;
+    height: 40px;
+  }
+  .cross-tools .cross-hatch {
+    width: auto;
+    height: 40px;
+    min-width: 40px;
+    padding: 0 12px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .cross-hatch-full {
+    display: none;
+  }
+  .cross-hatch-short {
+    display: inline;
   }
   .cross-tape,
-  .cross-rail {
+  .cross-rail,
+  .cross-scroll,
+  .cross-rule,
+  .cross-truth {
     display: none;
   }
   .cross-mobile-rail {
     position: absolute;
     left: 4%;
     right: 4%;
-    bottom: 114px;
-    bottom: calc(114px + env(safe-area-inset-bottom));
+    bottom: 64px;
+    bottom: calc(64px + env(safe-area-inset-bottom));
     display: grid;
-    gap: 8px;
+    gap: 6px;
     transition: opacity 0.3s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
   }
   .cross-mobile-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label book"
+      "price chg";
+    gap: 2px 12px;
     align-items: baseline;
-    flex-wrap: wrap;
-    gap: 8px 10px;
   }
   .cross-mobile-row span {
+    grid-area: label;
     font: 9px var(--mono);
     letter-spacing: 0.16em;
     color: #a09070;
   }
   .cross-mobile-row strong {
+    grid-area: price;
     font: 20px / 1 var(--mono);
     letter-spacing: -0.03em;
     color: #f0ead9;
   }
   .cross-mobile-row small {
+    grid-area: chg;
     font: 11px var(--mono);
   }
   .cross-mobile-row .buy {
@@ -552,7 +628,13 @@
     color: #c0705a;
   }
   .cross-mobile-row b {
-    margin-left: auto;
+    grid-area: book;
+    margin-left: 0;
+    max-width: 48vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
     font: 400 11px var(--mono);
     color: #e8ddbd;
   }
@@ -580,42 +662,67 @@
   .cross-mobile-split .sell {
     background: #c0705a;
   }
-  .cross-truth {
-    gap: 6px 12px;
-    font-size: 10px;
+  .cross-quotes.is-mobile {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
-  .cross-rule {
-    bottom: 172px;
+  .cross-quotes.is-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  .cross-quotes.is-mobile li {
+    flex: none;
+    white-space: nowrap;
   }
   .cross-desk {
     top: auto;
-    bottom: 118px;
-    bottom: calc(118px + env(safe-area-inset-bottom));
+    bottom: 80px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
     right: 4%;
     left: 4%;
     width: auto;
+    max-height: min(52dvh, 420px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cross-hero[data-hatch="open"] .cross-cause {
+    visibility: hidden;
   }
   .cross-foot {
     grid-template-columns: 1fr;
-    gap: 10px;
-    bottom: 22px;
-    bottom: calc(22px + env(safe-area-inset-bottom));
+    gap: 8px;
+    bottom: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
   }
   .cross-cause {
-    font-size: 12px;
+    display: none;
   }
   .cross-modes button {
     min-height: 40px;
     padding: 0 12px;
   }
-  .cross-scroll {
-    bottom: 192px;
-  }
 }
 
-@media (max-width: 760px) and (max-height: 600px) {
-  .cross-mobile-rail {
+@media (max-height: 520px) {
+  .cross-mobile-rail,
+  .cross-cause {
     display: none;
+  }
+  .cross-top {
+    padding-top: 76px;
+    grid-template-areas: "lead tools";
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .cross-top h1 {
+    font-size: clamp(18px, 4.4vw, 24px);
+  }
+  .cross-lead p {
+    display: none;
+  }
+  .cross-desk {
+    bottom: 64px;
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    max-height: min(58dvh, 360px);
   }
 }
 

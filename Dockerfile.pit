@@ -1,0 +1,16 @@
+FROM node:22-bookworm-slim
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY src ./src
+COPY server ./server
+COPY public/token ./public/token
+COPY public/data/malecns-circuit ./public/data/malecns-circuit
+COPY public/data/malecns-full ./public/data/malecns-full
+ENV IFF_GRAPH_DIR=/app/public/data/malecns-full
+ENV IFF_DATA_DIR=/app/server/data/pit
+ENV IFF_PIT_SIZE=1
+ENV NODE_OPTIONS=--max-old-space-size=1536
+EXPOSE 8787
+CMD ["node", "server/src/pit-runner/index.mjs"]

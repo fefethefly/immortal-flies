@@ -56,6 +56,7 @@ body:has(.life-shell.is-locked) {
 .life-shell.is-habitat .life-rail {
   border-right: 0;
   border-left: 1px solid rgba(47, 42, 31, 0.9);
+  padding-top: 20px;
 }
 .life-rail h1 {
   margin: 8px 0 12px;
@@ -200,13 +201,137 @@ body:has(.life-shell.is-locked) {
   display: grid;
   gap: 10px;
 }
-.life-holo-canvas {
-  width: 100%;
-  height: 220px;
-  border: 1px solid rgba(90, 160, 164, 0.22);
+.life-holo.is-quiet {
+  margin-top: 4px;
+  padding: 12px 12px 14px;
+  border: 1px solid rgba(90, 160, 164, 0.18);
   background:
-    linear-gradient(180deg, rgba(20, 36, 34, 0.35), rgba(8, 7, 5, 0.2)), #0a0c0a;
-  cursor: grab;
+    linear-gradient(180deg, rgba(20, 36, 34, 0.32), rgba(10, 9, 7, 0.4));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+.life-holo.is-quiet .life-holo-art {
+  min-height: 0;
+}
+.life-holo-meta,
+.life-care-label {
+  margin: 0;
+  color: #8a8172;
+  font:
+    11px/1.4 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.04em;
+}
+.life-holo-empty {
+  margin: 0;
+  color: #9a9184;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 36ch;
+}
+.life-rename {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(47, 42, 31, 0.85);
+}
+.life-vitals.is-solo {
+  grid-template-columns: 1fr;
+}
+.life-care {
+  display: grid;
+  gap: 12px;
+  padding: 14px 14px 16px;
+  border: 1px solid rgba(196, 164, 90, 0.18);
+  background:
+    linear-gradient(180deg, rgba(42, 32, 16, 0.28), rgba(12, 11, 9, 0.4));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+.life-care .life-note {
+  margin: 0;
+  font-size: 12px;
+  max-width: none;
+}
+.life-mine-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.life-mine-picks button {
+  padding: 5px 9px;
+  border: 1px solid #2f2a1f;
+  background: #100e0b;
+  color: #8a8172;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.06em;
+}
+.life-mine-picks button.is-on {
+  border-color: rgba(196, 164, 90, 0.55);
+  color: var(--gold);
+}
+.life-send {
+  display: grid;
+  gap: 8px;
+}
+.life-send > button {
+  justify-self: start;
+}
+.life-desk.is-habitat .life-actions .primary {
+  width: 100%;
+}
+.life-shell.is-habitat .life-rail h1 {
+  margin: 0 0 10px;
+  font-size: 26px;
+}
+.life-shell.is-habitat .life-rail > .eyebrow {
+  margin-bottom: 8px;
+}
+.life-shell.is-habitat .life-cross-row {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.life-shell.is-habitat .life-cross-row .life-cross {
+  margin: 0;
+}
+.life-holo-art {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 180px;
+  padding: 8px 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(180, 148, 84, 0.32);
+  background:
+    radial-gradient(
+      ellipse at 50% 58%,
+      color-mix(in srgb, var(--pheno-body, #8a6a2a) 18%, transparent),
+      transparent 68%
+    ),
+    #0c0b09;
+}
+.life-holo-art.is-empty {
+  min-height: 160px;
+  background:
+    linear-gradient(180deg, rgba(20, 36, 34, 0.35), rgba(8, 7, 5, 0.2)),
+    #0a0c0a;
+}
+.life-holo-art .life-market-thumb,
+.life-holo-art .catalog-portrait {
+  display: block;
+  width: min(100%, 280px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border: 0;
+  background: transparent;
+  filter: drop-shadow(0 0 8px #e3b96028);
+}
+.life-holo.is-quiet .life-holo-art .catalog-portrait,
+.life-holo.is-quiet .life-holo-art .life-market-thumb {
+  width: 100%;
+  max-width: none;
 }
 .life-holo-name {
   display: grid;
@@ -318,6 +443,9 @@ body:has(.life-shell.is-locked) {
   display: grid;
   gap: 12px;
 }
+.life-desk.is-habitat {
+  margin-top: 12px;
+}
 .life-chip {
   display: flex;
   flex-wrap: wrap;
@@ -337,6 +465,10 @@ body:has(.life-shell.is-locked) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+.life-desk .hatch-wait {
+  max-width: 42ch;
+  margin: 0;
 }
 .life-journal {
   display: grid;
@@ -458,7 +590,8 @@ body:has(.life-shell.is-locked) {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.life-desk label {
+.life-desk label,
+.life-holo label {
   display: grid;
   gap: 6px;
   font:
@@ -467,7 +600,8 @@ body:has(.life-shell.is-locked) {
   color: #8a8172;
 }
 .life-desk input,
-.life-desk select {
+.life-desk select,
+.life-holo input {
   border: 1px solid #2f2a1f;
   background: #100e0b;
   color: #f0ead9;
@@ -671,6 +805,23 @@ body:has(.life-shell.is-locked) {
     ),
     #0c0b09;
 }
+.is-market .life-market-card .life-market-thumb.catalog-portrait,
+.is-market .life-market-buy-card .life-market-thumb.catalog-portrait {
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  object-position: center;
+  border: 1px solid rgba(180, 148, 84, 0.32);
+  border-radius: 8px;
+  background:
+    radial-gradient(
+      ellipse at 50% 58%,
+      color-mix(in srgb, var(--pheno-body, #8a6a2a) 18%, transparent),
+      transparent 68%
+    ),
+    #0c0b09;
+  filter: drop-shadow(0 0 8px #e3b96028);
+}
 .life-market-card strong {
   font:
     500 20px/1.1 "Cormorant Garamond",
@@ -773,6 +924,10 @@ body:has(.life-shell.is-locked) {
 }
 .life-market-buy-card .life-market-thumb {
   height: 156px;
+}
+.life-market-buy-card .life-market-thumb.catalog-portrait {
+  height: auto;
+  aspect-ratio: 1 / 1;
 }
 .life-market-buy {
   position: fixed;

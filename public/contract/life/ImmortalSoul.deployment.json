@@ -32,5 +32,11 @@
   "deployedAt": "2026-09-18T00:33:13.963Z",
   "bindTxHash": "0x51d0ec49dfe055897aff45cdc8a69d78e9770ab273ff07bbb6a5e5ca65f4e3e9",
   "journalBindTxHash": "0x16b6aa648ecfe04e6b2c8d55c0de4605eab7c87469298a09463234e9825a9174",
-  "note": "BSC mainnet identity kernel /3. Curator is the deploy account. SoulKinCross is bound (free, 24h parent cooldown). Renderer is replaceable after 48h challenge. ERC-2981 default 0 cap 5%. Do not deploy ImmortalFly.sol to chain 56. Do not redeploy this collection to iterate."
+  "note": "BSC mainnet identity kernel /3. Curator is the deploy account. SoulKinCross is bound (free, 24h parent cooldown). Renderer is replaceable after 48h challenge. ERC-2981 default 0 cap 5%. Do not deploy ImmortalFly.sol to chain 56. Do not redeploy this collection to iterate.",
+  "pendingRenderer": "0xc89185b1EaE66dC45D2225613993c30328a3902c",
+  "pendingRendererEta": "2026-09-20T06:22:28.000Z",
+  "pendingRendererTxHash": "0x43cd6f75bf4f962e327e4aded78839f7c3974d7e9bd1dfcb0d023a69c6daf5d8",
+  "pendingRendererDeployTxHash": "0xcd628b62e8336b1e0db3d532500b7cd16ad581af458bfc00241963b98f848020",
+  "rendererProposedAt": "2026-09-18T06:22:29.322Z",
+  "rendererExplorerPending": "https://bscscan.com/address/0xc89185b1EaE66dC45D2225613993c30328a3902c"
 }

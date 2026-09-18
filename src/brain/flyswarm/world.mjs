@@ -741,6 +741,8 @@ export function worldView({ kernel, aux, world, protocol }) {
       light: eth.light || 0,
       side: member.intent?.side || "HOLD",
       confidence: member.intent?.confidence || 0,
+      hold: member.intent?.hold || null,
+      fill: member.intent?.fill || null,
       prevSide: prev?.side || null,
       changed: !prev || prev.side !== (member.intent?.side || "HOLD"),
     };

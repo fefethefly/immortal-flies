@@ -38,7 +38,8 @@ function mockFetch({ server = null, kyber = true } = {}) {
     const href = String(url);
     if (href.includes("/v1/venue/quotes")) {
       if (server instanceof Error) throw server;
-      if (server == null) return { ok: false, status: 404, json: async () => ({}) };
+      if (server == null)
+        return { ok: false, status: 404, json: async () => ({}) };
       return { ok: true, status: 200, json: async () => server };
     }
     if (href.includes("/token/venue-watchlist.json")) {
@@ -113,8 +114,9 @@ test("loadVenueQuotes falls back to Kyber when /v1 is missing", async () => {
   const obs = observationFromQuotes(quotes);
   assert.equal(obs.provenance.kind, "aggregator-quote");
   assert.equal(obs.provenance.fill, "SIM");
-  assert.ok(obs.payload.assetId);
-  assert.equal(quotes.focus.assetId, obs.payload.assetId);
+  assert.equal(obs.payload.assetId, "WBNB");
+  assert.equal(obs.provenance.assetId, "WBNB");
+  assert.ok(obs.payload.usd > 0);
 });
 
 test("loadVenueQuotes uses live server quotes and skips Kyber", async () => {
@@ -149,7 +151,12 @@ test("loadVenueQuotes uses live server quotes and skips Kyber", async () => {
 test("disabled server poller still quotes from Kyber", async () => {
   const quotes = await loadVenueQuotes({
     fetchImpl: mockFetch({
-      server: { schema: "iff.venue/1", enabled: false, assets: [], focus: null },
+      server: {
+        schema: "iff.venue/1",
+        enabled: false,
+        assets: [],
+        focus: null,
+      },
     }),
   });
   assert.equal(quotes.source, "kyber");

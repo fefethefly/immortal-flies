@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import { GOLD } from "./brand.mjs";
 import { FlyMark } from "./vitruvian.jsx";
+import { bookOf, reflexOf } from "./swarm.mjs";
 import {
-  bookOf,
-  formatBnb,
-  formatPrice,
-  formatToken,
-  reflexOf,
-} from "./swarm.mjs";
+  formatBook,
+  flyBook,
+  formatMarketPrice,
+  formatPaperFill,
+  formatPaperValue,
+} from "./paper-units.mjs";
+import { FILL_HOLD_KEYS } from "./brain/fill-admit.mjs";
 import { LocaleContext, useTx } from "./locale-context.jsx";
 import { phenotypeOf } from "./brain/flyswarm/phenotype.mjs";
 
@@ -203,7 +205,7 @@ export function PitCanvas({ swarm, selectedId, wash, onSelect }) {
   );
 }
 
-export function Cause({ stim, reflex, trade }) {
+export function Cause({ stim, reflex, trade, hold, market }) {
   const tx = useTx();
   const why =
     reflex.side === "BUY"
@@ -211,6 +213,7 @@ export function Cause({ stim, reflex, trade }) {
       : reflex.side === "SELL"
         ? tx("pit.whySell")
         : tx("pit.whyHold");
+  const holdText = FILL_HOLD_KEYS[hold] ? tx(FILL_HOLD_KEYS[hold]) : "";
   return (
     <p className="cause" aria-live="polite">
       <span>{stim || tx("pit.market")}</span>
@@ -218,13 +221,7 @@ export function Cause({ stim, reflex, trade }) {
       <span>{why}</span>
       <i />
       <b className={reflex.side.toLowerCase()}>{reflex.side}</b>
-      {trade && (
-        <em>
-          {trade.side === "BUY"
-            ? `${formatBnb(trade.amount)} BNB`
-            : `${formatToken(trade.amount)} IFL`}
-        </em>
-      )}
+      {trade ? <em>{formatPaperFill(trade, market)}</em> : holdText ? <em>{holdText}</em> : null}
     </p>
   );
 }
@@ -252,22 +249,30 @@ export function Balance({ fly }) {
   );
 }
 
-export function BookSplit({ fly, price }) {
+export function BookSplit({ fly, price, mark = "IFS", assetId = null }) {
   const tx = useTx();
-  const bag = bookOf(fly, price);
+  const market = { price, mark, assetId };
+  const bag = fly ? bookOf(fly, price) : { cashShare: 0, inventoryShare: 0 };
+  const shown = formatBook(market, flyBook(fly, market));
   return (
     <div className="book-split" aria-label={tx("pit.book")}>
       <div>
-        <span>CASH</span>
-        <strong>{formatBnb(bag.cash)}</strong>
+        <span>{tx("pit.cash")}</span>
+        <strong>{shown.cash}</strong>
         <i style={{ width: `${bag.cashShare}%` }} />
       </div>
       <div>
-        <span>INVENTORY</span>
-        <strong>{formatBnb(bag.inventory)}</strong>
+        <span>{tx("pit.inventory")}</span>
+        <strong>
+          {shown.qty}
+          <small>{shown.inventory}</small>
+        </strong>
         <i className="inv" style={{ width: `${bag.inventoryShare}%` }} />
       </div>
-      <small>{tx("pit.equity", { bnb: formatBnb(bag.equity) })}</small>
+      <small className={shown.down ? "sell" : "buy"}>
+        {tx("pit.equity", { nav: shown.equity })} · {tx("home.crossPnl")}{" "}
+        {shown.pnl}
+      </small>
     </div>
   );
 }
@@ -341,7 +346,7 @@ export function OrganStops({
   );
 }
 
-export function Roster({ board, selectedId, onSelect }) {
+export function Roster({ board, selectedId, onSelect, market }) {
   const tx = useTx();
   const locale = React.useContext(LocaleContext).locale === "zh" ? "zh" : "en";
   if (!board.length) return <p className="empty">{tx("pit.emptySwarm")}</p>;
@@ -368,7 +373,7 @@ export function Roster({ board, selectedId, onSelect }) {
               </span>
               <em className={row.lastSide.toLowerCase()}>{row.lastSide}</em>
               <strong>
-                {formatBnb(row.equity)}
+                {formatPaperValue(row.equity, market)}
                 <small>
                   {row.roi >= 0 ? "+" : ""}
                   {(row.roi / 10).toFixed(1)}%
@@ -410,7 +415,7 @@ export function Lineage({ lineage, flies }) {
   );
 }
 
-export function TradeRiver({ trades }) {
+export function TradeRiver({ trades, market }) {
   const tx = useTx();
   if (!trades.length) {
     return <p className="empty">{tx("pit.emptyRiver")}</p>;
@@ -425,17 +430,19 @@ export function TradeRiver({ trades }) {
           <small>{timeLabel(row.tick)}</small>
           <b>{row.side}</b>
           <span>#{row.flyId}</span>
-          <em>
-            {row.side === "BUY"
-              ? `${formatBnb(row.amount)} BNB`
-              : `${formatToken(row.amount)} IFL`}
-          </em>
+          <em>{formatPaperFill(row, market)}</em>
         </li>
       ))}
     </ol>
   );
 }
 
-export function PriceMark({ price }) {
-  return <span className="price-mark">{formatPrice(price)}</span>;
+export function PriceMark({ price, mark, assetId }) {
+  const shown = formatMarketPrice({ price, mark, assetId });
+  return (
+    <span className="price-mark">
+      {shown.text}
+      {shown.suffix ? ` ${shown.suffix}` : ""}
+    </span>
+  );
 }

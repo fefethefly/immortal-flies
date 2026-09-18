@@ -22,6 +22,12 @@ import {
   readPendingBreed,
 } from "./chain.mjs";
 import { useHatchWatch } from "./hatch-watch.mjs";
+import { HatchWait } from "./hatch-wait.jsx";
+import {
+  habitatShowsHatch,
+  hatchActionKey,
+  hatchWaitStage,
+} from "./hatch-wait.mjs";
 import {
   BirthCardButton,
   BirthCardDialog,
@@ -129,7 +135,9 @@ export function LifeDesk({
   onStimulus,
   compact,
   hideSpecimen,
+  surface = "full",
 }) {
+  const habitat = surface === "habitat";
   const {
     scope,
     walletEpoch,
@@ -144,7 +152,6 @@ export function LifeDesk({
     blockNow,
     setBlockNow,
     phase,
-    deadline,
   } = useHatchWatch(deployment, onWallet);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -174,6 +181,7 @@ export function LifeDesk({
   );
   const mates = mine.filter((soul) => soul.tokenId !== selected?.tokenId);
   const breedPhase = hatchPhase(breedPending, blockNow);
+  const hatchStage = hatchWaitStage({ busy, pending, phase, needRetry });
   const breedReady = breedPhase === "ready";
   const shown = query.trim()
     ? souls.filter((soul) => matchSoul([soul], query, locale))
@@ -196,7 +204,7 @@ export function LifeDesk({
   }, [walletEpoch]);
 
   useEffect(() => {
-    if (!deployment?.kin) {
+    if (habitat || !deployment?.kin) {
       setBreedPriceWei(0n);
       return undefined;
     }
@@ -213,10 +221,10 @@ export function LifeDesk({
     return () => {
       gone = true;
     };
-  }, [deployment]);
+  }, [deployment, habitat]);
 
   useEffect(() => {
-    if (!deployment?.kin || !selected?.tokenId || !mate) {
+    if (habitat || !deployment?.kin || !selected?.tokenId || !mate) {
       setBreedCool({ cooldown: 0, remaining: 0 });
       return undefined;
     }
@@ -237,7 +245,7 @@ export function LifeDesk({
     return () => {
       gone = true;
     };
-  }, [deployment, selected?.tokenId, mate, breedPending]);
+  }, [deployment, selected?.tokenId, mate, breedPending, habitat]);
 
   useEffect(() => {
     if (!deployment || !selected?.tokenId) {
@@ -263,7 +271,7 @@ export function LifeDesk({
   }, [deployment, selected?.tokenId]);
 
   useEffect(() => {
-    if (!deployment?.journal || !selected) {
+    if (habitat || !deployment?.journal || !selected) {
       setRecord(null);
       setReplay({ status: "idle" });
       setJournalUnread(false);
@@ -351,6 +359,7 @@ export function LifeDesk({
     selected?.life,
     selected?.seed,
     journalTick,
+    habitat,
   ]);
 
   useEffect(() => {
@@ -494,6 +503,7 @@ export function LifeDesk({
       await txr.wait();
       check();
       setAsk(null);
+      setRecipient("");
       setSouls((list) =>
         list.map((item) =>
           item.tokenId === selected.tokenId
@@ -728,6 +738,10 @@ export function LifeDesk({
     setSelected(hit);
   }
 
+  const showHatch =
+    !habitat ||
+    habitatShowsHatch({ used, pending, hatchStage, needRetry });
+
   if (deployment === undefined) {
     return <p className="life-note">{tx("hatch.loading")}</p>;
   }
@@ -736,58 +750,171 @@ export function LifeDesk({
   }
 
   return (
-    <div className={`life-desk ${compact ? "is-compact" : ""}`}>
-      <header className="life-chip">
-        <small>{network.name}</small>
-        <strong>{deployment.chainId === 56 ? "MAINNET" : "TESTNET"}</strong>
-        <span>{shortAddr(deployment.address)}</span>
-      </header>
-      <p className="life-note">{tx("life.deskLead")}</p>
-      {used ? <p className="life-note">{tx("hatch.already")}</p> : null}
-      {wallet ? <p className="life-meta">{shortAddr(wallet)}</p> : null}
-      <label>
-        {tx("hatch.name")}
-        <input
-          value={given}
-          maxLength={24}
-          disabled={used || Boolean(pending)}
-          onChange={(event) => setGiven(event.target.value)}
-          placeholder={tx("hatch.nameHint")}
-        />
-      </label>
-      <div className="life-actions">
-        <button
-          className="primary"
-          disabled={busy || used || Boolean(pending)}
-          onClick={request}
-        >
-          {tx("hatch.request")}
-        </button>
-        {needRetry && phase === "ready" ? (
-          <button className="ghost" disabled={busy} onClick={complete}>
-            {tx("hatch.autoRetry")}
+    <div
+      className={`life-desk ${compact || habitat ? "is-compact" : ""}${habitat ? " is-habitat" : ""}`}
+    >
+      {habitat ? null : (
+        <header className="life-chip">
+          <small>{network.name}</small>
+          <strong>{deployment.chainId === 56 ? "MAINNET" : "TESTNET"}</strong>
+          <span>{shortAddr(deployment.address)}</span>
+        </header>
+      )}
+      {habitat || hatchStage ? null : (
+        <p className="life-note">{tx("life.deskLead")}</p>
+      )}
+      {habitat || !used ? null : (
+        <p className="life-note">{tx("hatch.already")}</p>
+      )}
+      {habitat || !wallet ? null : (
+        <p className="life-meta">{shortAddr(wallet)}</p>
+      )}
+      {habitat && !wallet ? (
+        <div className="life-actions">
+          <button
+            type="button"
+            className="primary"
+            disabled={busy || !deployment}
+            onClick={() =>
+              connectChosenLife(pick, deployment).then((session) => {
+                if (!session) return;
+                setWallet(session.address);
+                onWallet?.(session.address);
+              })
+            }
+          >
+            {tx("habitat.connect")}
           </button>
-        ) : null}
-        {phase === "expired" ? (
-          <button className="ghost" disabled={busy} onClick={expire}>
-            {tx("hatch.expire")}
-          </button>
-        ) : null}
-      </div>
-      {pending ? (
-        <p className="life-note">
-          {phase === "ready"
-            ? tx("hatch.ready", { id: pending.requestId, deadline })
-            : phase === "expired"
-              ? tx("hatch.expired", { id: pending.requestId })
-              : tx("hatch.pending", {
-                  id: pending.requestId,
-                  block: pending.entropyBlock,
-                })}{" "}
-          {blockNow
-            ? tx("life.blockNow", { n: blockNow })
-            : tx("life.waitingBlock")}
-        </p>
+        </div>
+      ) : null}
+      {habitat && !selected ? (
+        <nav className="life-cross-row" aria-label={tx("habitat.careKicker")}>
+          <SiteLink href={withNet("/field.html")} className="life-cross">
+            {tx("habitat.toHatch")}
+          </SiteLink>
+          <SiteLink href={withNet("/market.html")} className="life-cross">
+            {tx("habitat.toMarket")}
+          </SiteLink>
+        </nav>
+      ) : null}
+
+      {habitat && selected ? (
+        <section className="life-care" aria-label={tx("habitat.careKicker")}>
+          {mine.length > 1 ? (
+            <div className="life-mine-picks" role="tablist">
+              {mine.map((soul) => (
+                <button
+                  key={soul.tokenId}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected.tokenId === soul.tokenId}
+                  className={selected.tokenId === soul.tokenId ? "is-on" : ""}
+                  onClick={() => setSelected(soul)}
+                >
+                  #{soul.tokenId}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <p className="life-note">{tx("habitat.careEnergy")}</p>
+          <div className="life-send">
+            <p className="life-care-label">{tx("habitat.transferLead")}</p>
+            <label>
+              {tx("life.recipient")}
+              <input
+                value={recipient}
+                onChange={(event) => setRecipient(event.target.value)}
+                placeholder="0x…"
+              />
+            </label>
+            <button
+              className="ghost"
+              type="button"
+              disabled={busy || !recipient}
+              onClick={transfer}
+            >
+              {tx("life.transfer")}
+            </button>
+            {ask ? (
+              <p className="life-note">{tx("market.deskTransferWarn")}</p>
+            ) : null}
+          </div>
+          <BirthCardButton tx={tx} onClick={() => setBirth(selected)} />
+          <nav className="life-cross-row">
+            <SiteLink
+              href={withNet(`/field.html?soul=${selected.tokenId}`)}
+              className="life-cross"
+            >
+              {tx("habitat.toPerch", { id: selected.tokenId })}
+            </SiteLink>
+            <SiteLink
+              href={withNet(`/market.html?soul=${selected.tokenId}`)}
+              className="life-cross"
+            >
+              {tx(ask ? "market.fromDeskListed" : "habitat.toMarket")}
+            </SiteLink>
+            <SiteLink
+              href={withNet(`/host.html?soul=${selected.tokenId}`)}
+              className="life-cross"
+            >
+              {tx("habitat.toHost")}
+            </SiteLink>
+          </nav>
+        </section>
+      ) : null}
+
+      {showHatch && (!habitat || !used) ? (
+        <label>
+          {tx("hatch.name")}
+          <input
+            value={given}
+            maxLength={24}
+            disabled={used || Boolean(pending) || busy}
+            onChange={(event) => setGiven(event.target.value)}
+            placeholder={tx("hatch.nameHint")}
+          />
+        </label>
+      ) : null}
+      {showHatch ? (
+        <>
+          <HatchWait
+            stage={hatchStage}
+            pending={pending}
+            blockNow={blockNow}
+            compact={compact || habitat}
+            tx={tx}
+          />
+          <div className="life-actions">
+            <button
+              type="button"
+              className="primary"
+              disabled={busy || used || Boolean(pending)}
+              onClick={request}
+            >
+              {tx(hatchActionKey(hatchStage))}
+            </button>
+            {needRetry && phase === "ready" ? (
+              <button
+                type="button"
+                className="ghost"
+                disabled={busy}
+                onClick={complete}
+              >
+                {tx("hatch.autoRetry")}
+              </button>
+            ) : null}
+            {phase === "expired" ? (
+              <button
+                type="button"
+                className="ghost"
+                disabled={busy}
+                onClick={expire}
+              >
+                {tx("hatch.expire")}
+              </button>
+            ) : null}
+          </div>
+        </>
       ) : null}
 
       {breedPending ? (
@@ -822,56 +949,58 @@ export function LifeDesk({
       ) : null}
       {breedBuyNote ? <p className="life-note">{breedBuyNote}</p> : null}
 
-      <section className="life-list" aria-label={tx("life.colony")}>
-        <h3>
-          {tx("life.colony")} <small>{souls.length}</small>
-        </h3>
-        <form className="life-find is-roster" onSubmit={findInRoster}>
-          <input
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setFindMiss(false);
-            }}
-            placeholder={tx("habitat.find")}
-            aria-label={tx("habitat.find")}
-          />
-          <button type="submit">{tx("habitat.findGo")}</button>
-        </form>
-        {findMiss ? (
-          <p className="life-note">{tx("habitat.findMiss")}</p>
-        ) : null}
-        {souls.length === 0 ? (
-          <p className="life-note">{tx("life.emptyColony")}</p>
-        ) : shown.length === 0 ? (
-          <p className="life-note">{tx("habitat.findMiss")}</p>
-        ) : (
-          <ol>
-            {shown.map((soul) => (
-              <li key={soul.tokenId}>
-                <button
-                  className={selected?.tokenId === soul.tokenId ? "is-on" : ""}
-                  onClick={() => setSelected(soul)}
-                >
-                  <i style={{ background: soul.phenotype.art.body }} />#
-                  {soul.tokenId} {labelOf(soul, locale)}
-                  <em>
-                    {soul.generation ? `G${soul.generation} · ` : ""}
-                    {soul.phenotype.summary[locale] ||
-                      soul.phenotype.summary.en}
-                  </em>
-                </button>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+      {habitat ? null : (
+        <section className="life-list" aria-label={tx("life.colony")}>
+          <h3>
+            {tx("life.colony")} <small>{souls.length}</small>
+          </h3>
+          <form className="life-find is-roster" onSubmit={findInRoster}>
+            <input
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setFindMiss(false);
+              }}
+              placeholder={tx("habitat.find")}
+              aria-label={tx("habitat.find")}
+            />
+            <button type="submit">{tx("habitat.findGo")}</button>
+          </form>
+          {findMiss ? (
+            <p className="life-note">{tx("habitat.findMiss")}</p>
+          ) : null}
+          {souls.length === 0 ? (
+            <p className="life-note">{tx("life.emptyColony")}</p>
+          ) : shown.length === 0 ? (
+            <p className="life-note">{tx("habitat.findMiss")}</p>
+          ) : (
+            <ol>
+              {shown.map((soul) => (
+                <li key={soul.tokenId}>
+                  <button
+                    className={selected?.tokenId === soul.tokenId ? "is-on" : ""}
+                    onClick={() => setSelected(soul)}
+                  >
+                    <i style={{ background: soul.phenotype.art.body }} />#
+                    {soul.tokenId} {labelOf(soul, locale)}
+                    <em>
+                      {soul.generation ? `G${soul.generation} · ` : ""}
+                      {soul.phenotype.summary[locale] ||
+                        soul.phenotype.summary.en}
+                    </em>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      )}
 
-      {mine.length ? (
+      {habitat || !mine.length ? null : (
         <p className="life-note">{tx("life.mineCount", { n: mine.length })}</p>
-      ) : null}
+      )}
 
-      {selected ? (
+      {habitat || !selected ? null : (
         <KinBoard
           souls={souls}
           selected={selected}
@@ -879,11 +1008,11 @@ export function LifeDesk({
           locale={locale}
           tx={tx}
         />
-      ) : null}
-      {deployment?.chainId === 97 ? (
+      )}
+      {habitat || deployment?.chainId !== 97 ? null : (
         <p className="life-note">{tx("life.testnet")}</p>
-      ) : null}
-      {deployment?.kin ? (
+      )}
+      {habitat || !deployment?.kin ? null : (
         <p className="life-note">
           {breedPriceWei === 0n
             ? tx("kin.feeFree")
@@ -892,9 +1021,9 @@ export function LifeDesk({
             ? ` ${tx("kin.cooldownWait", { t: formatCooldown(breedCool.remaining) })}`
             : ""}
         </p>
-      ) : null}
+      )}
 
-      {selected ? (
+      {habitat || !selected ? null : (
         <section className="life-specimen">
           {hideSpecimen ? null : (
             <PhenotypeReadout
@@ -1026,7 +1155,7 @@ export function LifeDesk({
             </button>
           </div>
         </section>
-      ) : null}
+      )}
 
       {error ? (
         <p className="pit-error" role="alert">

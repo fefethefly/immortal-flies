@@ -19,10 +19,11 @@ export function emptyBook() {
   };
 }
 
-export function seedBook() {
+export function seedBook(price = START_PRICE) {
+  const px = Math.max(1, Math.trunc(Number(price) || START_PRICE));
   const reserved = Math.trunc((START_BNB * 35) / 100);
-  const token = Math.trunc((reserved * TOKEN_UNIT) / START_PRICE);
-  const spent = Math.trunc((token * START_PRICE) / TOKEN_UNIT);
+  const token = Math.trunc((reserved * TOKEN_UNIT) / px);
+  const spent = Math.trunc((token * px) / TOKEN_UNIT);
   return {
     bnb: START_BNB - spent,
     token,
@@ -91,4 +92,19 @@ export function fillBook(book, price, intent, tick, flyId, meta = {}) {
 
 export function navOf(book, price) {
   return equityOf(book, price);
+}
+
+export function pnlOf(book, price) {
+  const equity = equityOf(book, price);
+  const inventory = Math.trunc((book.token * price) / TOKEN_UNIT);
+  const unrealized = inventory - (book.costBnb || 0);
+  const realized = book.realized || 0;
+  return {
+    equity,
+    inventory,
+    realized,
+    unrealized,
+    total: realized + unrealized,
+    vsStart: equity - START_BNB,
+  };
 }

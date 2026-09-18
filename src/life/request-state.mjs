@@ -56,7 +56,7 @@ export function watchWallet(ethereum, { scope, onReset, onAccount }) {
 }
 
 // Exactly one timer, irrespective of request kind; slow RPCs never overlap.
-export function startPendingPoll({ pending, breedPending, readHead, onHead, schedule = setTimeout, cancel = clearTimeout }) {
+export function startPendingPoll({ pending, breedPending, readHead, onHead, schedule = setTimeout, cancel = clearTimeout, intervalMs = 800 }) {
   if (!pending && !breedPending) return () => {};
   let stopped = false;
   let timer;
@@ -65,7 +65,7 @@ export function startPendingPoll({ pending, breedPending, readHead, onHead, sche
       const now = await readHead();
       if (!stopped) onHead(now);
     } catch { /* retain last successful head and retry */ }
-    if (!stopped) timer = schedule(tick, 2000);
+    if (!stopped) timer = schedule(tick, intervalMs);
   }
   void tick();
   return () => { stopped = true; if (timer !== undefined) cancel(timer); };

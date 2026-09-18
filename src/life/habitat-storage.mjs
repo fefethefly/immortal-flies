@@ -9,6 +9,10 @@ export function habitatStorageKey(deployment) {
   return `${SCHEMA}:${deployment.chainId}:${deployment.address.toLowerCase()}`;
 }
 
+export function habitatArchiveAlert(status) {
+  return status === "invalid" || status === "unavailable";
+}
+
 // Local, editable simulation only. Never restores ownership or chain authority.
 export function encodeHabitat(world, souls, seen = new Map()) {
   const lives = new Map(souls.map((soul) => [soul.tokenId, soul.life]));

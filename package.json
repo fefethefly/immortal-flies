@@ -18,6 +18,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "server": "node server/src/index.mjs",
     "server:dev": "node --watch server/src/index.mjs",
+    "pit:runner": "node server/src/pit-runner/index.mjs",
     "test": "node --test tests/*.test.mjs",
     "segment:replay": "node scripts/segment-replay.mjs verify",
     "segment:replay:full": "SEGMENT_REPLAY_FULL=1 node --test tests/segment-replay.test.mjs",
@@ -51,6 +52,9 @@
     "life:deploy:kin-cross:testnet": "node scripts/deploy-soulkin-cross.mjs",
     "life:check:market": "node scripts/deploy-soul-market.mjs --check",
     "life:deploy:market:testnet": "node scripts/deploy-soul-market.mjs",
+    "life:check:renderer": "node scripts/propose-soul-renderer.mjs --check",
+    "life:propose:renderer:mainnet": "node scripts/propose-soul-renderer.mjs",
+    "life:activate:renderer:mainnet": "node scripts/propose-soul-renderer.mjs --activate",
     "flap:prepare": "node scripts/flap-launch.mjs",
     "format": "prettier --write src tests scripts server index.html README.md DESIGN.md docs"
   },

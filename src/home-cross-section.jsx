@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Pause, Play } from "lucide-react";
-import { formatBnb, formatPrice } from "./swarm.mjs";
-import { useVenueQuotes } from "./use-venue-quotes.mjs";
+import { useRunnerStatus } from "./use-runner-status.mjs";
+import { formatBpsPct, formatUsd } from "./venue-quotes.mjs";
 import {
-  formatBpsPct,
-  formatUsd,
-  headlineAsset,
-} from "./venue-quotes.mjs";
+  formatBook,
+  formatMarketPrice,
+  hiveBook,
+  railMarket,
+} from "./paper-units.mjs";
 import { loadGraph } from "./brain/graph.mjs";
 import { loadLifeDeployment, readSoulCensus } from "./life/chain.mjs";
 import { birthHref } from "./life/birth-card.mjs";
@@ -34,7 +35,7 @@ const MODE_KEYS = {
   market: "home.crossMarket",
 };
 
-const SIDE_WORDS = /\b(SELL|BUY|HOLD|SIM|T\d+|#\d+)\b/g;
+const SIDE_WORDS = /\b(SELL|BUY|HOLD|SIM|T\d+|#\d+|WBNB|BTCB|ETH|USDT|IFS)\b/g;
 
 // Trade sides and ledger tokens read in bright gold inside the tape lines,
 // like the reference terminal: the rest of the line stays champagne.
@@ -142,6 +143,9 @@ export function HomeCrossSection({
   locale,
   paused,
   onPause,
+  quotes = null,
+  pitLive = false,
+  pitError = "",
   tx,
 }) {
   const canvas = useRef(null);
@@ -154,10 +158,11 @@ export function HomeCrossSection({
   const [field, setField] = useState(null);
   const [hatchOpen, setHatchOpen] = useState(false);
   const [census, setCensus] = useSoulCensus();
-  const venueQuotes = useVenueQuotes({ intervalMs: 4000 });
-  const headQuote = headlineAsset(venueQuotes);
-  const liveQuotes = (venueQuotes?.assets || []).filter(
-    (a) => a?.ok && a.usd != null && Number(a.usd) > 0,
+  const runner = useRunnerStatus();
+  const rail = useMemo(() => railMarket(swarm, quotes), [swarm, quotes]);
+  const book = useMemo(
+    () => formatBook(swarm.market, hiveBook(swarm)),
+    [swarm],
   );
   const mode = crossModeOf(swarm.tick, locked);
   const fly =
@@ -171,12 +176,19 @@ export function HomeCrossSection({
   );
   const tape = useMemo(() => utteranceTape(swarm, fly), [swarm, fly]);
   const truth = useMemo(
-    () => truthLines({ field, swarm, census, locale, quotes: venueQuotes }),
-    [field, swarm, census, locale, venueQuotes],
+    () =>
+      truthLines({
+        field,
+        swarm,
+        census,
+        locale,
+        quotes,
+        runner,
+        pitLive,
+        pitError,
+      }),
+    [field, swarm, census, locale, quotes, runner, pitLive, pitError],
   );
-  const prices = swarm.prices.slice(-60);
-  const first = prices[0] || swarm.market.price;
-  const change = (swarm.market.price / first - 1) * 100;
   const latest = useRef({});
   latest.current = {
     field,
@@ -308,22 +320,13 @@ export function HomeCrossSection({
         <header className="cross-top">
           <div className="cross-lead">
             <h1>{tx("home.crossTitle")}</h1>
-            <ol className="cross-truth">
-              {truth.map((row) => (
-                <li
-                  key={row.id}
-                  data-live={row.live ? "true" : undefined}
-                  data-paper={row.paper ? "true" : undefined}
-                >
-                  {row.text}
-                </li>
-              ))}
-            </ol>
+            <p>{tx("home.crossLead")}</p>
           </div>
           <div className="cross-tools">
             <button
               type="button"
               onClick={onPause}
+              disabled={pitLive}
               aria-label={
                 paused ? tx("home.crossResume") : tx("home.crossPause")
               }
@@ -337,9 +340,31 @@ export function HomeCrossSection({
               aria-expanded={hatchOpen}
               onClick={() => setHatchOpen((open) => !open)}
             >
-              {hatchOpen ? tx("home.crossHatchClose") : tx("home.crossHatch")}
+              {hatchOpen ? (
+                tx("home.crossHatchClose")
+              ) : (
+                <>
+                  <span className="cross-hatch-full">
+                    {tx("home.crossHatch")}
+                  </span>
+                  <span className="cross-hatch-short">
+                    {tx("home.crossHatchShort")}
+                  </span>
+                </>
+              )}
             </button>
           </div>
+          <ol className="cross-truth">
+            {truth.map((row) => (
+              <li
+                key={row.id}
+                data-live={row.live ? "true" : undefined}
+                data-paper={row.paper ? "true" : undefined}
+              >
+                {row.text}
+              </li>
+            ))}
+          </ol>
         </header>
         {hatchOpen ? (
           <div className="cross-desk">
@@ -374,27 +399,17 @@ export function HomeCrossSection({
           ))}
         </ol>
         <aside className="cross-rail" data-hot={mode === "market"}>
-          <span>
-            {headQuote ? tx("home.crossQuote") : tx("home.crossPrice")}
-          </span>
-          <strong>
-            {headQuote ? formatUsd(headQuote.usd) : formatPrice(swarm.market.price)}
-          </strong>
-          <small
-            className={
-              (headQuote ? headQuote.changeBps : change) < 0 ? "sell" : "buy"
-            }
-          >
-            {headQuote
-              ? `${headQuote.symbol} ${formatBpsPct(headQuote.changeBps)}`
-              : `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`}
+          <span>{tx(rail.labelKey, { symbol: rail.symbol || "" })}</span>
+          <strong>{rail.value}</strong>
+          <small className={rail.down ? "sell" : "buy"}>
+            {rail.symbol ? `${rail.symbol} ${rail.change}` : rail.change}
           </small>
-          {liveQuotes.length > 0 ? (
+          {rail.liveQuotes.length > 0 ? (
             <ul className="cross-quotes">
-              {liveQuotes.map((a) => (
+              {rail.liveQuotes.map((a) => (
                 <li
                   key={a.id}
-                  className={a.id === headQuote?.id ? "focus" : undefined}
+                  className={a.id === rail.loopId ? "focus" : undefined}
                 >
                   <b>{a.symbol}</b>
                   <strong>{formatUsd(a.usd)}</strong>
@@ -421,41 +436,32 @@ export function HomeCrossSection({
               </li>
             ))}
           </ul>
-          <span>{tx("home.crossBook")}</span>
-          <strong className="cross-book">
-            {formatBnb(read.bnb)} <small>BNB</small>
-          </strong>
-          <small>
-            {sideWords(`${read.buys} BUY · ${read.sells} SELL`)}
-          </small>
+          <span>{tx(pitLive ? "home.crossBookLive" : "home.crossBook")}</span>
+          <strong className="cross-book">{book.equity}</strong>
+          {pitError ? (
+            <small className="sell">{tx("pit.liveDown")}</small>
+          ) : (
+            <small className={book.down ? "sell" : "buy"}>
+              {tx("home.crossPnl")} {book.pnl}
+            </small>
+          )}
           <em>{tx("home.crossIfs")}</em>
         </aside>
         <div className="cross-mobile-rail">
           <div className="cross-mobile-row">
-            <span>
-              {headQuote ? tx("home.crossQuote") : tx("home.crossPrice")}
-            </span>
-            <strong>
-              {headQuote
-                ? formatUsd(headQuote.usd)
-                : formatPrice(swarm.market.price)}
-            </strong>
-            <small
-              className={
-                (headQuote ? headQuote.changeBps : change) < 0 ? "sell" : "buy"
-              }
-            >
-              {headQuote
-                ? `${headQuote.symbol} ${formatBpsPct(headQuote.changeBps)}`
-                : `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`}
+            <span>{tx(rail.labelKey, { symbol: rail.symbol || "" })}</span>
+            <strong>{rail.value}</strong>
+            <small className={rail.down ? "sell" : "buy"}>
+              {rail.symbol ? `${rail.symbol} ${rail.change}` : rail.change}
             </small>
             <b>
-              {tx("home.crossBook")} · {formatBnb(read.bnb)} <i>BNB</i>
+              {tx(pitLive ? "home.crossBookLive" : "home.crossBook")} ·{" "}
+              {book.equity}
             </b>
           </div>
-          {liveQuotes.length > 0 ? (
+          {rail.liveQuotes.length > 0 ? (
             <ul className="cross-quotes is-mobile">
-              {liveQuotes.map((a) => (
+              {rail.liveQuotes.map((a) => (
                 <li key={a.id}>
                   <b>{a.symbol}</b> {formatUsd(a.usd)}
                 </li>
@@ -481,8 +487,10 @@ export function HomeCrossSection({
         <footer className="cross-foot">
           <p className="cross-cause">
             #{String(cause.id).padStart(3, "0")} {cause.act} → {cause.side} ·{" "}
-            {formatPrice(cause.price)} · T{String(cause.tick).padStart(6, "0")}{" "}
-            · {cause.buy}/{cause.hold}/{cause.sell}
+            {formatMarketPrice(swarm.market).text}{" "}
+            {formatMarketPrice(swarm.market).suffix} · T
+            {String(cause.tick).padStart(6, "0")} · {cause.buy}/{cause.hold}/
+            {cause.sell}
             {cause.fill ? ` · ${cause.heard} heard` : ""}
           </p>
           <div

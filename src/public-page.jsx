@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Activity,
   ArrowUpRight,
-  BookOpen,
   Compass,
   Cpu,
   HardDrive,
@@ -16,17 +15,18 @@ import {
 import { loadOfficialToken } from "./token.mjs";
 import { useLocale } from "./use-locale.mjs";
 import { LocaleContext } from "./locale-context.jsx";
-import { SiteBar, SiteLink } from "./site-chrome.jsx";
+import { SiteBar, SiteLink, SocialX } from "./site-chrome.jsx";
 import { SealBar } from "./seal-bar.jsx";
-import { useHomeSwarm } from "./home-field.jsx";
+import { useHomePit } from "./use-home-pit.mjs";
 import { HomeCrossSection } from "./home-cross-section.jsx";
 import { PhenotypeReadout } from "./phenotype-view.jsx";
 import { HomeMeshAtlas } from "./home-mesh.jsx";
 import { HomeLiveDecks } from "./home-live.jsx";
 import { LifeGlyph } from "./life-glyphs.jsx";
 import { tiltHandlers, usePrefersReduced } from "./rite.jsx";
-import { formatPrice, formatToken, reflexOf } from "./swarm.mjs";
+import { colonyLog } from "./home-colony-log.mjs";
 import { ProtocolResearch } from "./home-protocol.jsx";
+import { HomeCensus } from "./home-census.jsx";
 import "./public.css";
 
 const INDEX = [
@@ -46,90 +46,7 @@ const INDEX = [
 ];
 const LOG_ICONS = {
   ACT: Activity,
-  SENSE: Radio,
-  MEMORY: BookOpen,
-  BOOK: Landmark,
-  HOLD: Compass,
 };
-
-function popcount(value) {
-  let n = value >>> 0;
-  let count = 0;
-  while (n) {
-    n &= n - 1;
-    count += 1;
-  }
-  return count;
-}
-
-// The log is read straight off the live paper swarm: fills, reflexes, spikes,
-// price drift. When the book goes quiet the colony itself is still the news.
-function colonyLog(swarm, champ, tx) {
-  const rows = [];
-  for (const trade of swarm.trades.slice(0, 3)) {
-    rows.push({
-      key: `t${trade.tick}-${trade.flyId}`,
-      kind: "ACT",
-      tone: trade.side === "SELL" ? "red" : "gold",
-      tick: trade.tick,
-      text:
-        trade.side === "BUY"
-          ? tx("public.evBuy", {
-              id: trade.flyId,
-              amt: formatToken(trade.amount),
-            })
-          : tx("public.evSell", {
-              id: trade.flyId,
-              amt: formatToken(trade.amount),
-            }),
-    });
-  }
-  if (champ) {
-    const reflex = reflexOf(champ);
-    if (reflex && reflex.side !== "HOLD") {
-      rows.push({
-        key: `r${swarm.tick}-${champ.id}`,
-        kind: "SENSE",
-        tone: "neural",
-        tick: Math.max(0, swarm.tick - 1),
-        text: tx("public.evLean", { id: champ.id, side: reflex.side }),
-      });
-    }
-    rows.push({
-      key: `s${champ.brain?.spikes ?? 0}-${champ.id}`,
-      kind: "MEMORY",
-      tone: "quiet",
-      tick: Math.max(0, swarm.tick - 2),
-      text: tx("public.evSpikes", {
-        id: champ.id,
-        n: popcount(champ.brain?.spikes ?? 0),
-      }),
-    });
-  }
-  const prices = swarm.prices || [];
-  if (prices.length > 1) {
-    rows.push({
-      key: `p${swarm.tick}`,
-      kind: "BOOK",
-      tone: "bone",
-      tick: swarm.tick,
-      text: tx("public.evPrice", {
-        price: formatPrice(prices[prices.length - 1]),
-      }),
-    });
-  }
-  while (rows.length < 5) {
-    const i = rows.length;
-    rows.push({
-      key: `h${swarm.tick}-${i}`,
-      kind: "HOLD",
-      tone: "quiet",
-      tick: Math.max(0, swarm.tick - i * 3),
-      text: tx("public.evHeart"),
-    });
-  }
-  return rows.sort((a, b) => b.tick - a.tick).slice(0, 5);
-}
 
 function useReveal() {
   useEffect(() => {
@@ -157,8 +74,17 @@ function useReveal() {
 export function HomePage() {
   const [locale, setLocale, tx] = useLocale("meta.homeTitle", "meta.homeDesc");
   const [token, setToken] = useState(null);
-  const { swarm, selectedId, select, poke, paused, togglePause } =
-    useHomeSwarm();
+  const {
+    swarm,
+    selectedId,
+    select,
+    poke,
+    paused,
+    togglePause,
+    venueQuotes,
+    live: pitLive,
+    error: pitError,
+  } = useHomePit();
   const champ =
     swarm.flies.find((row) => row.id === selectedId) ||
     swarm.flies.find((row) => row.status === "alive") ||
@@ -170,7 +96,7 @@ export function HomePage() {
       .catch(() => {});
   }, [locale]);
   const live = token?.status === "live" && token.address;
-  const log = colonyLog(swarm, champ, tx);
+  const log = colonyLog(swarm, tx);
   const reduced = usePrefersReduced();
   const tilt = tiltHandlers(reduced);
   return (
@@ -183,18 +109,6 @@ export function HomePage() {
           tx={tx}
           current="home"
           token={token}
-          trailing={
-            token?.twitter ? (
-              <a
-                className="bar-x"
-                href={token.twitter}
-                target="_blank"
-                rel="noreferrer"
-              >
-                X
-              </a>
-            ) : null
-          }
         />
         <HomeCrossSection
           swarm={swarm}
@@ -204,6 +118,9 @@ export function HomePage() {
           locale={locale}
           paused={paused}
           onPause={togglePause}
+          quotes={venueQuotes}
+          pitLive={pitLive}
+          pitError={pitError}
           tx={tx}
         />
 
@@ -213,6 +130,54 @@ export function HomePage() {
           </summary>
           <SealBar token={token} tx={tx} />
         </details>
+
+        <HomeCensus tx={tx} />
+
+        <HomeLiveDecks swarm={swarm} fly={champ} onSelect={select} />
+
+        <section
+          className="home-event-stream"
+          aria-label={tx("public.logLabel")}
+          data-reveal="wait"
+        >
+          <div className="event-head">
+            <span>{tx("public.logLabel")}</span>
+            <small key={swarm.tick} className="event-tick">
+              TICK {String(swarm.tick).padStart(4, "0")}
+            </small>
+          </div>
+          <p className="event-note">{tx("public.logHint")}</p>
+          {log.length ? (
+            <ol
+              className="event-tape"
+              aria-live="polite"
+              aria-relevant="additions"
+            >
+              {log.map((row, i) => {
+                const Icon = LOG_ICONS[row.kind] || Radio;
+                return (
+                  <li
+                    className={`event-row ${row.tone}${row.fresh ? " is-fresh" : ""}`}
+                    key={row.key}
+                    style={{ "--event-delay": `${Math.min(i, 4) * 50}ms` }}
+                  >
+                    <b>
+                      <Icon size={11} aria-hidden="true" />
+                      {row.kind}
+                    </b>
+                    <span>{row.text}</span>
+                    <em>{String(row.tick % 100000).padStart(4, "0")}</em>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <p className="event-empty">{tx("public.logEmpty")}</p>
+          )}
+        </section>
+
+        <HomeMeshAtlas tx={tx} />
+        <ProtocolResearch locale={locale} />
 
         <section
           className="home-pheno-band"
@@ -230,50 +195,6 @@ export function HomePage() {
           </div>
           <PhenotypeReadout fly={champ} locale={locale} compact />
         </section>
-
-        <HomeLiveDecks swarm={swarm} fly={champ} onSelect={select} />
-
-        <section
-          className="home-event-stream"
-          aria-label={tx("public.logLabel")}
-          data-reveal="wait"
-        >
-          <div className="event-head">
-            <span>{tx("public.logLabel")}</span>
-            <small>TICK {String(swarm.tick).padStart(4, "0")}</small>
-          </div>
-          <p className="event-note">{tx("public.logHint")}</p>
-          <div className="event-grid">
-            {log.map((row, i) => {
-              const Icon = LOG_ICONS[row.kind] || Radio;
-              return (
-                <div
-                  className={`event-row ${row.tone}`}
-                  key={row.key}
-                  style={{ "--event-delay": `${i * 90}ms` }}
-                >
-                  <b>
-                    <Icon size={11} />
-                    {row.kind}
-                  </b>
-                  <span>{row.text}</span>
-                  <em>{String(row.tick % 100000).padStart(4, "0")}</em>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <header className="protocol-section-head protocol-research">
-          <span>03 / DISTRIBUTED COMPUTE</span>
-          <small>
-            {locale === "zh"
-              ? "运行器网络 · 本地托管沙盘"
-              : "Runner network · local hosting sandbox"}
-          </small>
-        </header>
-        <HomeMeshAtlas tx={tx} />
-        <ProtocolResearch locale={locale} />
 
         <section
           className="world-map"
@@ -374,40 +295,64 @@ export function HomePage() {
             <p>{tx("public.laterLead")}</p>
           </div>
           <SiteLink href="/blueprint.html">
-            {tx("nav.blueprint")}
+            {tx("public.laterGo")}
             <ArrowUpRight size={15} />
           </SiteLink>
         </section>
 
-        <p className="note disclaimer">{tx("public.disclaimer")}</p>
         <footer className="home-foot">
-          <span className="foot-brand">IMMORTAL / IFS</span>
-          <span>{tx("public.footScience")}</span>
-          <span className="foot-links">
-            {live ? (
-              <>
-                <a
-                  href={`https://bscscan.com/token/${token.address}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  BscScan
-                </a>
-                <a
-                  href={token.flapUrl || `https://flap.sh/bnb/${token.address}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Flap
-                </a>
-              </>
-            ) : null}
-            {token?.twitter ? (
-              <a href={token.twitter} target="_blank" rel="noreferrer">
-                X
-              </a>
-            ) : null}
-          </span>
+          <div className="foot-grid">
+            <div className="foot-brand-block">
+              <SiteLink href="/" className="foot-wordmark">
+                IMMORTAL
+              </SiteLink>
+              <p>{tx("public.footTag")}</p>
+            </div>
+            <nav aria-label={tx("public.footProduct")}>
+              <small>{tx("public.footProduct")}</small>
+              <SiteLink href="/field.html">{tx("nav.field")}</SiteLink>
+              <SiteLink href="/habitat.html">{tx("nav.habitat")}</SiteLink>
+              <SiteLink href="/market.html">{tx("nav.market")}</SiteLink>
+              <SiteLink href="/swarm.html">{tx("nav.pit")}</SiteLink>
+            </nav>
+            <nav aria-label={tx("public.footExplore")}>
+              <small>{tx("public.footExplore")}</small>
+              <SiteLink href="/brain.html">{tx("nav.canon")}</SiteLink>
+              <SiteLink href="/blueprint.html">{tx("nav.blueprint")}</SiteLink>
+              <SiteLink href="/docs.html">{tx("nav.docs")}</SiteLink>
+              <SiteLink href="/economy.html">{tx("nav.economy")}</SiteLink>
+            </nav>
+            <nav aria-label={tx("public.footOfficial")}>
+              <small>{tx("public.footOfficial")}</small>
+              {live ? (
+                <>
+                  <a
+                    href={`https://bscscan.com/token/${token.address}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {tx("public.footBsc")}
+                  </a>
+                  <a
+                    className="foot-trade"
+                    href={
+                      token.flapUrl || `https://flap.sh/bnb/${token.address}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {tx("public.footFlap")}
+                  </a>
+                </>
+              ) : null}
+              {token?.twitter ? <SocialX href={token.twitter} tx={tx} /> : null}
+            </nav>
+          </div>
+          <div className="foot-colophon">
+            <p>{tx("public.footScience")}</p>
+            <p>{tx("public.disclaimer")}</p>
+            <small>{tx("public.footCopy")}</small>
+          </div>
         </footer>
       </div>
     </LocaleContext.Provider>

@@ -33,9 +33,12 @@ import {
   stepMarketFeed,
 } from "./market.mjs";
 import { snapshotBaseline } from "./layers.mjs";
-import { clamp, START_PRICE } from "../../swarm.mjs";
+import { clamp, START_BNB, START_PRICE, equityOf } from "../../swarm.mjs";
 import { genomeOf } from "./genome.mjs";
 import { phenotypeOf } from "./phenotype.mjs";
+import { pnlOf } from "../book.mjs";
+import { applyLiveMark, repairLiveBooks } from "../colony.mjs";
+import { restorePort } from "../fill-admit.mjs";
 
 export const PIT_MODEL = "iff-pit-colony-v1";
 export const PIT_STORE = "iff-pit-colony-v1";
@@ -64,10 +67,11 @@ function freshAux(seed) {
 export async function createPitSession({
   seed = 20260916,
   graph: injectedGraph = null,
+  size = 5,
 } = {}) {
   const graph = injectedGraph || (await loadGraph(MANIFEST_URL));
   const kernel = createKernel(graph, {
-    size: 5,
+    size,
     seed: seed >>> 0,
     stepsPerTick: 6,
   });
@@ -95,6 +99,10 @@ export function savePitSession({ kernel, aux, world, protocol }) {
     settleAt: aux.settleAt,
     tick: kernel.colony.tick,
     marketPrice: kernel.colony.market.price,
+    marketMark: kernel.colony.market.mark || "IFS",
+    marketAssetId: kernel.colony.market.assetId || null,
+    marketEdge: [...(kernel.colony.market.edgeWindow || [])],
+    trades: structuredClone(kernel.colony.trades || []),
     members: kernel.colony.members.map((member) => ({
       id: member.id,
       gen: member.gen,
@@ -103,6 +111,7 @@ export function savePitSession({ kernel, aux, world, protocol }) {
       state: structuredClone(member.session.state),
       book: structuredClone(member.book),
       overlay: structuredClone(member.overlay),
+      port: structuredClone(member.port || null),
       genome: structuredClone(member.genome || genomeOf(member)),
     })),
     lineage: structuredClone(kernel.colony.lineage),
@@ -135,6 +144,7 @@ export async function restorePitSession(
     session: new BrainSession(graph, structuredClone(member.state)),
     book: structuredClone(member.book),
     overlay: structuredClone(member.overlay),
+    port: restorePort(member.port),
     genome: structuredClone(
       member.genome ||
         genomeOf({
@@ -152,6 +162,16 @@ export async function restorePitSession(
   kernel.colony.nextId = saved.nextId;
   kernel.colony.lineage = structuredClone(saved.lineage);
   kernel.colony.market.price = saved.marketPrice;
+  kernel.colony.market.mark = saved.marketMark || "IFS";
+  kernel.colony.market.assetId = saved.marketAssetId || null;
+  kernel.colony.market.quote = saved.marketMark === "USD" ? "LIVE" : "SIM";
+  kernel.colony.market.edgeWindow = Array.isArray(saved.marketEdge)
+    ? saved.marketEdge.map((n) => Math.trunc(Number(n) || 0))
+    : [];
+  kernel.colony.trades = Array.isArray(saved.trades)
+    ? structuredClone(saved.trades)
+    : [];
+  repairLiveBooks(kernel.colony);
   const roster = createRoster();
   for (const entry of saved.roster) {
     roster.register({
@@ -329,6 +349,15 @@ export function stepPit(session, { compact = true } = {}) {
     });
     aux.market = stepped.feed;
     aux.rng = stepped.rng;
+    if (stepped.usd) {
+      const firstMark = applyLiveMark(kernel.colony, stepped.usd, {
+        assetId: stepped.assetId || stepped.provenance?.assetId,
+      });
+      if (firstMark) {
+        aux.baseline = snapshotBaseline(kernel);
+        aux.prices = [kernel.colony.market.price];
+      }
+    }
     const stimulus = {
       food: aux.pending?.food || 0,
       threat: aux.pending?.threat || 0,
@@ -340,6 +369,7 @@ export function stepPit(session, { compact = true } = {}) {
       intensity: aux.pending?.intensity ?? 60,
       assetId: stepped.assetId || stepped.provenance?.assetId || null,
       mid: stepped.mid ?? null,
+      usdAtoms: stepped.usd || null,
       quoteSource:
         stepped.provenance?.kind === "aggregator-quote"
           ? "kyberswap"
@@ -373,48 +403,81 @@ export function stepPit(session, { compact = true } = {}) {
 export function pitView({ kernel, aux }) {
   const colony = kernel.colony;
   const price = colony.market.price;
-  const flies = colony.members.map((member) => ({
-    id: member.id,
-    gen: member.gen,
-    parent: member.parent,
-    status: member.status,
-    seed: member.genome?.seed || member.session.state.rng,
-    fingerprint: (member.genome?.seed || member.session.state.rng)
-      .toString(16)
-      .padStart(8, "0"),
-    bnb: member.book.bnb,
-    token: member.book.token,
-    costBnb: member.book.costBnb,
-    trades: member.book.trades,
-    wins: member.book.wins,
-    losses: member.book.losses,
-    realized: member.book.realized,
-    lastSide: member.intent?.side || "HOLD",
-    lastConfidence: member.intent?.confidence || 0,
-    lastRates: {
-      left: member.ethology?.left || 0,
-      right: member.ethology?.right || 0,
-      buy: member.intent?.side === "BUY" ? 1 : 0,
-      sell: member.intent?.side === "SELL" ? 1 : 0,
-      hold: member.intent?.side === "HOLD" ? 1 : 0,
-    },
-    soulId: member.session.state.soulId,
-    genome: member.genome || genomeOf(member),
-    phenotype: phenotypeOf(member.genome || member),
-  }));
+  const mark = colony.market.mark || "IFS";
+  const assetId =
+    colony.market.assetId || aux.market?.last?.payload?.assetId || null;
+  const flies = colony.members.map((member) => {
+    const pnl = pnlOf(member.book, price);
+    return {
+      id: member.id,
+      gen: member.gen,
+      parent: member.parent,
+      status: member.status,
+      seed: member.genome?.seed || member.session.state.rng,
+      fingerprint: (member.genome?.seed || member.session.state.rng)
+        .toString(16)
+        .padStart(8, "0"),
+      bnb: member.book.bnb,
+      token: member.book.token,
+      costBnb: member.book.costBnb,
+      trades: member.book.trades,
+      wins: member.book.wins,
+      losses: member.book.losses,
+      realized: member.book.realized,
+      pnl,
+      lastSide: member.intent?.side || "HOLD",
+      lastConfidence: member.intent?.confidence || 0,
+      hold: member.intent?.hold || null,
+      lastRates: {
+        left: member.ethology?.left || 0,
+        right: member.ethology?.right || 0,
+        buy: member.intent?.side === "BUY" ? 1 : 0,
+        sell: member.intent?.side === "SELL" ? 1 : 0,
+        hold: member.intent?.side === "HOLD" ? 1 : 0,
+      },
+      soulId: member.session.state.soulId,
+      genome: member.genome || genomeOf(member),
+      phenotype: phenotypeOf(member.genome || member),
+    };
+  });
+  const living = flies.filter((row) => row.status === "alive");
+  const hiveEquity = living.reduce((sum, row) => sum + row.pnl.equity, 0);
+  const hive = {
+    mark,
+    assetId,
+    cash: living.reduce((sum, row) => sum + row.bnb, 0),
+    token: living.reduce((sum, row) => sum + row.token, 0),
+    equity: hiveEquity,
+    realized: living.reduce((sum, row) => sum + (row.realized || 0), 0),
+    unrealized: living.reduce((sum, row) => sum + row.pnl.unrealized, 0),
+    pnl: living.reduce((sum, row) => sum + row.pnl.total, 0),
+    vsStart: hiveEquity - living.length * START_BNB,
+    fills: (colony.trades || []).length,
+  };
   return {
     model: PIT_MODEL,
     seed: aux.seed,
     tick: colony.tick,
     size: flies.length,
     flies,
+    hive,
+    host: aux.host || {
+      kind: "browser",
+      dataset: colony.graph?.manifest?.id || "malecns-circuit",
+      neurons: colony.graph?.n || 0,
+      size: living.length,
+    },
     market: {
       price,
       prev: aux.prices[aux.prices.length - 2] ?? price,
       delta: 0,
-      focusAssetId: aux.market?.last?.payload?.assetId || null,
+      mark,
+      assetId,
+      focusAssetId: assetId,
       quote:
-        aux.market?.last?.provenance?.kind === "aggregator-quote" ? "LIVE" : "SIM",
+        mark === "USD" || aux.market?.last?.provenance?.kind === "aggregator-quote"
+          ? "LIVE"
+          : "SIM",
       fill: "SIM",
       lastChangeBps: aux.market?.last?.payload?.changeBps ?? null,
       lastSource: aux.market?.last?.source || null,
@@ -432,6 +495,31 @@ export function pitView({ kernel, aux }) {
     nextCullAt: aux.settleAt,
     trades: colony.trades,
     lineage: colony.lineage,
+    audit: "SIM",
+  };
+}
+
+/** 首页把 MaleCNS 交易场视图当成 swarm 形状读。 */
+export function pitAsSwarm(view) {
+  if (!view) return null;
+  return {
+    model: view.model,
+    tick: view.tick,
+    flies: (view.flies || []).map((fly) => ({
+      ...fly,
+      brain: {
+        spikes: Math.min(
+          0xffffff,
+          (fly.lastRates?.left || 0) + (fly.lastRates?.right || 0),
+        ),
+      },
+    })),
+    market: view.market,
+    prices: view.prices || [],
+    trades: view.trades || [],
+    lineage: view.lineage || [],
+    hive: view.hive || null,
+    host: view.host || null,
     audit: "SIM",
   };
 }

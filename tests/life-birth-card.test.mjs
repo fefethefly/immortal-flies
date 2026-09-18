@@ -10,6 +10,7 @@ import {
   catalogBadge,
   describeBirth,
   displayName,
+  rarityOf,
   mixOf,
   parentsOf,
   wantsBirthCard,
@@ -64,6 +65,8 @@ test("gen0 birth card has no parent mix and a colony share link", () => {
   assert.equal(card.series, CARD_SERIES);
   assert.equal(card.plateName, "烬翅");
   assert.equal(card.tokenMark, "#1");
+  assert.match(card.rarityLine, /≈.+\/1024/);
+  assert.equal(card.rarityLine, rarityOf(child));
   assert.match(card.accession, /第 0 代 · 孵化/);
   assert.equal(card.parentLine, "");
   assert.equal(/rare|legendary|common|epic|mythic/i.test(card.badge), false);
@@ -175,4 +178,20 @@ test("catalog badge names a distinctive trait and never a rarity grade", () => {
   assert.ok(badge);
   assert.equal(/rare|legendary|common|epic|mythic|rank/i.test(badge), false);
   assert.match(badge, /[A-Z]/);
+});
+
+test("birth card rarity matches the colony per-1024 readout", () => {
+  const child = soul(1, 1963528436, { givenName: "Pip" });
+  const mark = rarityOf(child);
+  assert.match(mark, /^≈.+\/1024$/);
+  assert.equal(/rare|legendary|common|epic|mythic/i.test(mark), false);
+  assert.ok(child.phenotype.scarcity);
+  const card = describeBirth(child, [child], {
+    locale: "en",
+    origin: "https://example.test",
+    tx: (key, vars) => t("en", key, vars),
+  });
+  assert.equal(card.rarityLine, mark);
+  assert.equal(card.traitRows.length, 2);
+  assert.ok(card.traitRows.every((row) => row.text && row.color));
 });

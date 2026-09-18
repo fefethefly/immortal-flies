@@ -1,3 +1,4 @@
+import { formatExpected } from "../brain/flyswarm/phenotype-loci.mjs";
 import { catalogIndex, traitSwatches } from "./fly-traits.mjs";
 import { labelOf, trueNameOf } from "./names.mjs";
 
@@ -107,6 +108,12 @@ export function catalogTags(soul, locale = "en") {
 
 export function catalogBadge(soul, locale = "en") {
   return catalogTags(soul, locale).join(" · ");
+}
+
+export function rarityOf(soul) {
+  const n = soul?.phenotype?.scarcity?.expectedPer1024;
+  if (!Number.isFinite(n)) return "";
+  return `≈${formatExpected(n)}/1024`;
 }
 
 const CJK = /[\u4e00-\u9fff]/;
@@ -221,6 +228,7 @@ export function describeBirth(
     tokenMark: `#${soul.tokenId}`,
     plateIndex: catalogIndex(soul),
     traitRows: traitSwatches(soul, locale),
+    rarityLine: rarityOf(soul),
     vitalLine: `${
       locale === "zh" ? `第${soul.generation || 0}代` : `Gen ${soul.generation || 0}`
     } · ${tx("ledger.card.alive")}`,

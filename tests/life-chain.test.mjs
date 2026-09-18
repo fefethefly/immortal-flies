@@ -10,6 +10,7 @@ import {
   marketListingPath,
   parseLifeDeployment,
   parseMarketDeployment,
+  queryAllLogs,
   queryLatestLog,
   readBreedBuy,
   readPendingHatch,
@@ -114,6 +115,57 @@ test("loadOpenListings still probes hinted token ids when logs are empty", async
   const rows = await loadOpenListings(market, 0, [4, 7]);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].tokenId, 4);
+});
+
+test("loadOpenListings probes soul supply when public logs are unreadable", async () => {
+  let logCalls = 0;
+  const market = {
+    soul: async () => "0x2222222222222222222222222222222222222222",
+    filters: { Listed: () => "listed", Relisted: () => "relisted" },
+    listings: async (id) =>
+      Number(id) === 1
+        ? {
+            seller: "0x1111111111111111111111111111111111111111",
+            lifeId: "0xab",
+            price: 5n,
+            listedAt: 9n,
+          }
+        : {
+            seller: "0x0000000000000000000000000000000000000000",
+            lifeId: "0x00",
+            price: 0n,
+            listedAt: 0n,
+          },
+    runner: {
+      provider: {
+        getBlockNumber: async () => 9000,
+        call: async () =>
+          "0x0000000000000000000000000000000000000000000000000000000000000002",
+      },
+    },
+    queryFilter: async () => {
+      logCalls += 1;
+      throw new Error("limit exceeded");
+    },
+  };
+  const rows = await loadOpenListings(market, 0);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].tokenId, 1);
+  assert.equal(logCalls, 0);
+});
+
+test("queryAllLogs stops after consecutive public RPC failures", async () => {
+  const calls = [];
+  const contract = {
+    runner: { provider: { getBlockNumber: async () => 9000 } },
+    queryFilter: async (_filter, from, to) => {
+      calls.push([from, to]);
+      throw new Error("could not coalesce error");
+    },
+  };
+  const logs = await queryAllLogs(contract, {}, 0, 2000, 2);
+  assert.equal(logs.length, 0);
+  assert.equal(calls.length, 2);
 });
 
 test("explainMarketError keeps Unauthorized off the breed copy", () => {

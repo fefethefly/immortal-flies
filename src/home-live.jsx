@@ -3,17 +3,13 @@ import { ArrowUpRight } from "lucide-react";
 import { GOLD } from "./brand.mjs";
 import { useTx } from "./locale-context.jsx";
 import { SiteLink } from "./site-chrome.jsx";
-import {
-  LAYERS,
-  bookOf,
-  formatBnb,
-  formatPrice,
-  formatToken,
-  layerFires,
-  reflexOf,
-  summarize,
-} from "./swarm.mjs";
+import { LAYERS, bookOf, layerFires, reflexOf, summarize } from "./swarm.mjs";
 import { timeLabel } from "./swarm-pit.jsx";
+import {
+  formatMarketPrice,
+  formatPaperFill,
+  formatPaperValue,
+} from "./paper-units.mjs";
 
 function popcount(value) {
   let n = value >>> 0;
@@ -44,7 +40,12 @@ export function HomeMeters({ swarm, fly, token }) {
       </div>
       <div>
         <dt>{tx("public.metersPrice")}</dt>
-        <dd>{formatPrice(swarm.market.price)}</dd>
+        <dd>
+          {formatMarketPrice(swarm.market).text}
+          {formatMarketPrice(swarm.market).suffix
+            ? ` ${formatMarketPrice(swarm.market).suffix}`
+            : ""}
+        </dd>
       </div>
       <div>
         <dt>{fly ? `#${fly.id}` : "—"}</dt>
@@ -127,9 +128,7 @@ function HomePitDeck({ swarm, fly, onSelect }) {
           <small>
             {tx("pit.approach", { n: reflex.approach })} ·{" "}
             {tx("pit.retreat", { n: reflex.retreat })}
-            {bag
-              ? ` · ${tx("pit.equity", { bnb: formatBnb(bag.equity) })}`
-              : ""}
+            {bag ? ` · ${formatPaperValue(bag.equity, swarm.market)}` : ""}
           </small>
         </div>
       ) : (
@@ -145,11 +144,7 @@ function HomePitDeck({ swarm, fly, onSelect }) {
               <small>{timeLabel(row.tick)}</small>
               <b>{row.side}</b>
               <span>#{row.flyId}</span>
-              <em>
-                {row.side === "BUY"
-                  ? `${formatBnb(row.amount)} BNB`
-                  : `${formatToken(row.amount)} IFL`}
-              </em>
+              <em>{formatPaperFill(row, swarm.market)}</em>
             </li>
           ))
         ) : (

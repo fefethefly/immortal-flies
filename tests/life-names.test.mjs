@@ -115,12 +115,13 @@ test("habitat default view centres the dish and stays pulled back", () => {
   assert.ok(Math.abs(back.x - 0.5) < 1e-9);
   assert.ok(Math.abs(back.y - 0.5) < 1e-9);
   assert.ok(cam.zoom < 1);
+  assert.equal(cam.zoom, 0.5);
   focusCamera(cam, { x: 0.4, y: 0.6 }, 1.08);
   assert.equal(cam.x, 0.4);
   assert.equal(cam.y, 0.6);
   const empty = fitCamera({ x: 9, y: 9, zoom: 3 }, []);
   assert.equal(empty.x, 0.5);
-  assert.equal(empty.zoom, 0.84);
+  assert.equal(empty.zoom, 0.5);
 });
 
 test("habitat flight flicks then coasts instead of skating", () => {

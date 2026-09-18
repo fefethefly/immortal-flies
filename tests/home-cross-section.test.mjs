@@ -84,7 +84,10 @@ test("causal caption and tape read the live paper swarm", () => {
   assert.ok(["BUY", "SELL", "HOLD"].includes(cause.side));
   assert.equal(cause.tick, swarm.tick);
   assert.equal(typeof cause.heard, "number");
-  assert.equal(cause.heard, swarm.flies.filter((row) => row.status === "alive").length);
+  assert.equal(
+    cause.heard,
+    swarm.flies.filter((row) => row.status === "alive").length,
+  );
   const tape = utteranceTape(swarm, fly);
   assert.deepEqual(
     tape.slice(0, 2).map((row) => row.kind),
@@ -97,7 +100,12 @@ test("causal caption and tape read the live paper swarm", () => {
   assert.equal(read.tick, swarm.tick);
   assert.ok(read.look.length > 0);
   assert.equal(cause.buy + cause.hold + cause.sell, read.alive);
-  assert.equal(t("en", "home.crossTitle").includes("immortal flies"), true);
+  assert.equal(t("en", "home.crossTitle").includes("protocol"), true);
+  assert.equal(t("zh", "home.crossTitle").includes("群体智慧"), true);
+  assert.equal(t("en", "home.crossLead").includes("166,691"), true);
+  assert.equal(t("zh", "home.crossLead").includes("166,691"), true);
+  assert.equal(t("zh", "home.crossLead").includes("神经元"), true);
+  assert.equal(t("zh", "home.crossLead").includes("第一站"), true);
   assert.equal(t("zh", "home.crossHatch").includes("孵化"), true);
   assert.equal(nearestCrossFly([], 0, 0), null);
   assert.equal(
@@ -115,11 +123,26 @@ test("causal caption and tape read the live paper swarm", () => {
     { flyId: fly.id, side: "BUY", tick: swarm.tick, amount: 1 },
     ...swarm.trades,
   ];
-  assert.equal(utteranceTape(swarm, fly).find((row) => row.kind === "FILL")?.audit, "SIM");
-  assert.equal(utteranceTape(swarm, fly).find((row) => row.kind === "RELAY")?.key, "home.crossRelay");
-  assert.equal(utteranceTape(swarm, fly).find((row) => row.kind === "SYNC")?.key, "home.crossSync");
-  assert.equal(t("en", "home.crossRelay", { id: 3, side: "BUY", n: 16 }).includes("heard"), true);
-  assert.equal(t("zh", "home.crossRelay", { id: 3, side: "BUY", n: 16 }).includes("听见"), true);
+  assert.equal(
+    utteranceTape(swarm, fly).find((row) => row.kind === "FILL")?.audit,
+    "SIM",
+  );
+  assert.equal(
+    utteranceTape(swarm, fly).find((row) => row.kind === "RELAY")?.key,
+    "home.crossRelay",
+  );
+  assert.equal(
+    utteranceTape(swarm, fly).find((row) => row.kind === "SYNC")?.key,
+    "home.crossSync",
+  );
+  assert.equal(
+    t("en", "home.crossRelay", { id: 3, side: "BUY", n: 16 }).includes("heard"),
+    true,
+  );
+  assert.equal(
+    t("zh", "home.crossRelay", { id: 3, side: "BUY", n: 16 }).includes("听见"),
+    true,
+  );
   assert.equal(t("en", "home.crossSync", { n: 16 }).includes("locked"), true);
   assert.equal(t("zh", "home.crossSync", { n: 16 }).includes("静止"), true);
   assert.equal(t("en", "home.crossHatchClose").includes("Close"), true);
@@ -206,10 +229,11 @@ test("truth strip separates live soul from paper swarm", () => {
   assert.equal(lines[0].live, true);
   assert.match(lines[0].text, /7 \/ 1024/);
   assert.match(lines[1].text, /MALECNS_CIRCUIT/);
-  assert.equal(lines[2].paper, true);
+  assert.match(lines[2].text, /MALECNS/);
   assert.match(lines[3].text, /SIM/);
   assert.equal(lines[4].paper, true);
   assert.match(lines[4].text, /报价/);
+  assert.match(lines[5].text, /RAILWAY/);
   const liveQuote = truthLines({
     field,
     swarm,
@@ -237,6 +261,26 @@ test("truth strip separates live soul from paper swarm", () => {
     locale: "en",
   });
   assert.match(unread[0].text, /SOUL · MAINNET/);
+  const hosted = truthLines({
+    field,
+    swarm: {
+      ...swarm,
+      host: { kind: "full", dataset: "malecns-full", neurons: 161839, size: 1 },
+    },
+    census: { status: "live", gen0: 7, cap: 1024, live: true },
+    locale: "en",
+    pitLive: true,
+  });
+  assert.equal(hosted[2].live, true);
+  assert.match(hosted[2].text, /TRADE \d+ · malecns-full · 161,839/);
+  const down = truthLines({
+    field,
+    swarm,
+    census: { status: "live", gen0: 7, cap: 1024, live: true },
+    locale: "en",
+    pitError: "PIT_RUNNER_DOWN",
+  });
+  assert.match(down[2].text, /SHARED BOOK DOWN/);
 });
 
 test("a signal hop reaches every living fly and is deterministic", () => {
@@ -256,13 +300,21 @@ test("a signal hop reaches every living fly and is deterministic", () => {
   assert.ok(links.get(0).includes(1));
   assert.ok(links.get(3).includes(4));
   assert.equal(links.get(2).includes(3), false);
-  const hops = signalWave(0, links, living.map((fly) => fly.id));
+  const hops = signalWave(
+    0,
+    links,
+    living.map((fly) => fly.id),
+  );
   assert.deepEqual(
     hops.map((row) => row.to).sort((a, b) => a - b),
     [1, 2, 3, 4],
   );
   assert.deepEqual(hops, signalWave(0, links, [4, 2, 0, 1, 3]));
-  const isolated = signalWave(3, links, living.map((fly) => fly.id));
+  const isolated = signalWave(
+    3,
+    links,
+    living.map((fly) => fly.id),
+  );
   assert.ok(isolated.some((row) => row.to === 0));
   const wave = { originId: 0, born: 1, hops, rgb: [10, 20, 30] };
   assert.equal(signalGain(wave, 0, 1), 1);
@@ -271,13 +323,18 @@ test("a signal hop reaches every living fly and is deterministic", () => {
   assert.ok(first);
   const arrive = 1 + (first.hop - 1) * SIGNAL_HOP + SIGNAL_TRAVEL;
   assert.ok(signalGain(wave, 1, arrive) > 0.9);
-  assert.ok(packetProgress(wave, first, 1 + (first.hop - 1) * SIGNAL_HOP) === 0);
+  assert.ok(
+    packetProgress(wave, first, 1 + (first.hop - 1) * SIGNAL_HOP) === 0,
+  );
   const olive = pigmentRgb({ body: "#7fae66" });
   const wine = pigmentRgb({ body: "#8a3040" });
   assert.notDeepEqual(olive, wine);
   const fill = { kind: "fill", originId: 0, born: 1, hops, rgb: [10, 20, 30] };
   const settled = waveSettledAt(fill);
-  assert.equal(colonySync({ ...fill, kind: "sense" }, settled + 0.1).phase, "idle");
+  assert.equal(
+    colonySync({ ...fill, kind: "sense" }, settled + 0.1).phase,
+    "idle",
+  );
   assert.equal(colonySync(fill, settled - 0.01).phase, "idle");
   assert.equal(colonySync(fill, settled + SYNC_STILL * 0.5).phase, "still");
   const locked = colonySync(fill, settled + SYNC_STILL + SYNC_LOCK * 0.4);
@@ -285,6 +342,23 @@ test("a signal hop reaches every living fly and is deterministic", () => {
   assert.equal(locked.hold, 1);
   assert.ok(locked.beat >= 0 && locked.beat <= 1);
   assert.ok(locked.glow > 0.3);
-  assert.equal(colonySync(fill, settled + SYNC_STILL + SYNC_LOCK + 0.1).phase, "fade");
-  assert.equal(activeColonySync([fill], settled + SYNC_STILL + 0.2).phase, "lock");
+  assert.equal(
+    colonySync(fill, settled + SYNC_STILL + SYNC_LOCK + 0.1).phase,
+    "fade",
+  );
+  assert.equal(
+    activeColonySync([fill], settled + SYNC_STILL + 0.2).phase,
+    "lock",
+  );
+});
+
+test("phone hero parks the hatch under a full-width title", () => {
+  const css = readFileSync(
+    new URL("../src/home-cross-section.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(css, /"lead lead"/);
+  assert.match(css, /"tools tools"/);
+  assert.equal(t("en", "home.crossHatchShort"), "Hatch — free");
+  assert.equal(t("zh", "home.crossHatchShort"), "免费孵化");
 });

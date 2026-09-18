@@ -1,8 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SiteLink, SitePage } from "../site-chrome.jsx";
+import { SitePage } from "../site-chrome.jsx";
 import { useLocale } from "../use-locale.mjs";
-import { openLifeReader, queryLatestLog } from "./chain.mjs";
+import { connectLife, openLifeReader, queryLatestLog } from "./chain.mjs";
 import { connectChosenLife, useWalletPick } from "./wallet-pick.jsx";
+import {
+  getActiveWallet,
+  hydrateActiveWallet,
+  subscribeActiveWallet,
+} from "./wallets.mjs";
 import { LifeDesk, useLifeWorld } from "./desk.jsx";
 import {
   applyStimulus,
@@ -21,10 +26,11 @@ import {
 import { drawHabitatWorld } from "./habitat-render.mjs";
 import { withBirthQuery } from "./birth-card.mjs";
 import { matchSoul, setGivenName } from "./names.mjs";
-import { withNet } from "./net.mjs";
-import { pickFocusedSoul, querySoulId } from "./souls.mjs";
+import { pickFocusedSoul, querySoulId, shortAddr } from "./souls.mjs";
+import { habitatCareSoul } from "./habitat-care.mjs";
 import { SpecimenHologram } from "./specimen.jsx";
 import {
+  habitatArchiveAlert,
   habitatStorageKey,
   loadHabitat,
   saveHabitat,
@@ -43,6 +49,7 @@ export function HabitatPage() {
   const [selected, setSelected] = useState(null);
   const [mineOnly, setMineOnly] = useState(false);
   const [wallet, setWallet] = useState("");
+  const [walletReady, setWalletReady] = useState(false);
   const { pick, dialog } = useWalletPick(tx);
   const [tool, setTool] = useState("move");
   const [rate, setRate] = useState(1);
@@ -82,6 +89,45 @@ export function HabitatPage() {
     }
   }
 
+  function noteWallet(addr) {
+    setWallet(addr || "");
+    setWalletReady(true);
+  }
+
+  useEffect(() => {
+    hydrateActiveWallet();
+    return subscribeActiveWallet((state) => {
+      if (!state.provider) {
+        setWallet("");
+        setWalletReady(true);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (deployment === undefined) return undefined;
+    if (!deployment?.address) {
+      noteWallet("");
+      return undefined;
+    }
+    const provider = getActiveWallet().provider;
+    if (!provider) {
+      noteWallet("");
+      return undefined;
+    }
+    let gone = false;
+    connectLife(provider, deployment, undefined, { silent: true })
+      .then((session) => {
+        if (!gone) noteWallet(session?.address || "");
+      })
+      .catch(() => {
+        if (!gone) noteWallet("");
+      });
+    return () => {
+      gone = true;
+    };
+  }, [deployment]);
+
   useEffect(() => {
     const key = habitatStorageKey(deployment);
     if (key && souls.length && booted.current !== key) {
@@ -105,8 +151,8 @@ export function HabitatPage() {
       current: selectedRef.current,
     });
     setSelected(next);
-    if (next && pinned.current !== next.tokenId) {
-      pinned.current = next.tokenId;
+    if (next) pinned.current = next.tokenId;
+    if (id && next) {
       const body = world.current.bodies.find(
         (item) => item.tokenId === next.tokenId,
       );
@@ -144,6 +190,15 @@ export function HabitatPage() {
 
   selectedRef.current = selected;
   latest.current = { souls, selected, mineOnly, wallet, locale, deployment };
+  const care = habitatCareSoul({
+    souls,
+    wallet,
+    selected,
+    walletReady,
+  });
+  bodyReader.current = () =>
+    world.current.bodies.find((item) => item.tokenId === care?.tokenId) ||
+    null;
 
   useEffect(() => {
     const save = () => persistNow();
@@ -157,9 +212,6 @@ export function HabitatPage() {
       save();
     };
   }, []);
-  bodyReader.current = () =>
-    world.current.bodies.find((item) => item.tokenId === selected?.tokenId) ||
-    null;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -167,6 +219,7 @@ export function HabitatPage() {
     const ctx = canvas.getContext("2d");
     let frame = 0;
     let running = true;
+    let last = performance.now();
     const reduced =
       typeof matchMedia === "function" &&
       matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -179,10 +232,13 @@ export function HabitatPage() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    function draw() {
+    function draw(now) {
       if (!running) return;
       frame = requestAnimationFrame(draw);
-      if (!reduced && !document.hidden) stepHabitat(world.current, 1);
+      const t = typeof now === "number" ? now : performance.now();
+      const dt = Math.min(3, Math.max(0, (t - last) / (1000 / 60)));
+      last = t;
+      if (!reduced && !document.hidden) stepHabitat(world.current, dt);
       resize();
       const box = canvas.getBoundingClientRect();
       const {
@@ -432,9 +488,7 @@ export function HabitatPage() {
               <button onClick={() => zoomBy(0.85)}>
                 {tx("habitat.zoomOut")}
               </button>
-              <button
-                onClick={() => fitCamera(camera.current, visibleBodies())}
-              >
+              <button onClick={() => resetCamera(camera.current)}>
                 {tx("habitat.fit")}
               </button>
               <button
@@ -500,65 +554,54 @@ export function HabitatPage() {
             {findMiss
               ? tx("habitat.findMiss")
               : selected
-                ? thoughtOf(selected, locale, bodyReader.current())
+                ? thoughtOf(
+                    selected,
+                    locale,
+                    world.current.bodies.find(
+                      (item) => item.tokenId === selected.tokenId,
+                    ),
+                  )
                 : tx("habitat.hint")}
           </p>
         </section>
         <aside className="life-rail">
-          <span className="eyebrow">HABITAT / COLONY</span>
+          <span className="eyebrow">{tx("habitat.careKicker")}</span>
           <h1>
-            {tx("habitat.title")} <small>{tx("habitat.kicker")}</small>
+            {tx("habitat.careTitle")}{" "}
+            <small>{tx("habitat.kicker")}</small>
           </h1>
-          <p>{tx("habitat.lead")}</p>
-          <p className="life-note" role="status">
-            {tx(`habitat.archive.${archiveNote}`)}
-          </p>
-          {selected ? (
-            <SiteLink
-              href={withNet(`/field.html?soul=${selected.tokenId}`)}
-              className="life-cross"
-            >
-              {tx("habitat.toPerch", { id: selected.tokenId })}
-            </SiteLink>
+          {walletReady && wallet ? (
+            <p className="life-meta">{shortAddr(wallet)}</p>
           ) : null}
-          <SiteLink
-            href={withNet(
-              selected
-                ? `/market.html?soul=${selected.tokenId}`
-                : "/market.html",
-            )}
-            className="life-cross"
-          >
-            {tx("habitat.toMarket")}
-          </SiteLink>
-          <SiteLink
-            href={withNet(
-              selected ? `/host.html?soul=${selected.tokenId}` : "/host.html",
-            )}
-            className="life-cross"
-          >
-            {tx("habitat.toHost")}
-          </SiteLink>
-          <SiteLink href="/#mesh" className="life-cross">
-            {tx("habitat.toMesh")}
-          </SiteLink>
+          {habitatArchiveAlert(archiveNote) ? (
+            <p className="life-note" role="status">
+              {tx(`habitat.archive.${archiveNote}`)}
+            </p>
+          ) : null}
           <SpecimenHologram
-            soul={selected}
+            quiet
+            soul={care}
+            emptyText={
+              !walletReady
+                ? tx("habitat.careWait")
+                : wallet
+                  ? tx("habitat.noMine")
+                  : tx("habitat.needWallet")
+            }
             bodyReader={bodyReader}
             locale={locale}
             tx={tx}
             wallet={wallet}
             onRename={async (clean) => {
-              if (!selected || !deployment)
-                return { ...selected, givenName: clean };
+              if (!care || !deployment) return care;
               const session = await connectChosenLife(pick, deployment);
-              if (!session) return selected;
-              setWallet(session.address);
+              if (!session) return care;
+              noteWallet(session.address);
               await (
-                await session.soul.setGivenName(selected.tokenId, clean)
+                await session.soul.setGivenName(care.tokenId, clean)
               ).wait();
-              setGivenName(deployment.chainId, selected.life, clean);
-              const next = { ...selected, givenName: clean };
+              setGivenName(deployment.chainId, care.life, clean);
+              const next = { ...care, givenName: clean };
               setSouls((list) =>
                 list.map((item) =>
                   item.tokenId === next.tokenId ? next : item,
@@ -583,9 +626,9 @@ export function HabitatPage() {
             deployment={deployment}
             souls={souls}
             setSouls={setSouls}
-            selected={selected}
+            selected={care}
             setSelected={pinSoul}
-            onWallet={setWallet}
+            onWallet={noteWallet}
             onBorn={(soul, list) => {
               syncHabitat(world.current, list || [...souls, soul]);
               pinSoul(soul, true);
@@ -600,7 +643,7 @@ export function HabitatPage() {
               persistNow();
             }}
             compact
-            hideSpecimen
+            surface="habitat"
           />
           {rosterError ? (
             <p className="life-note">{tx("life.colonyMiss")}</p>

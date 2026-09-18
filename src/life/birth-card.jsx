@@ -95,6 +95,7 @@ export function BirthCardDialog({ soul, souls = [], locale, tx, onClose }) {
     card?.childTitle,
     card?.plateName,
     card?.badge,
+    card?.rarityLine,
     card?.accession,
     card?.formLine,
     card?.finishLine,

@@ -14,7 +14,9 @@ import {
   readPendingHatch,
 } from "./chain.mjs";
 import { useHatchWatch } from "./hatch-watch.mjs";
-import { MarketThumb } from "./market-thumb.jsx";
+import { HatchWait } from "./hatch-wait.jsx";
+import { hatchActionKey, hatchWaitStage } from "./hatch-wait.mjs";
+import { CatalogPortrait as MarketThumb } from "./catalog-portrait.jsx";
 import {
   normalizeGiven,
   peekPendingGiven,
@@ -41,7 +43,6 @@ export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
     blockNow,
     setBlockNow,
     phase,
-    deadline,
   } = useHatchWatch(deployment);
   const [born, setBorn] = useState(null);
   const [showCard, setShowCard] = useState(false);
@@ -51,6 +52,7 @@ export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
   const [needRetry, setNeedRetry] = useState(false);
   const autoFor = useRef(0);
   const { pick, dialog } = useWalletPick(tx);
+  const stage = hatchWaitStage({ busy, pending, phase, needRetry });
 
   useEffect(() => {
     loadLifeDeployment()
@@ -189,6 +191,7 @@ export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
     <section
       className={`hatch${compact ? " is-hero" : ""}`}
       aria-label={tx("hatch.aria")}
+      aria-busy={busy || stage === "wait" || undefined}
     >
       {compact ? (
         <span className="eyebrow">SOUL / LIVE</span>
@@ -206,57 +209,62 @@ export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
         <p className="hatch-note">{tx("hatch.undeployed")}</p>
       ) : (
         <>
-          <p className="hatch-note">
-            {tx(compact ? "hatch.kicker" : "hatch.liveHint")}
-          </p>
+          {stage ? null : (
+            <p className="hatch-note">
+              {tx(compact ? "hatch.kicker" : "hatch.liveHint")}
+            </p>
+          )}
           <label className="hatch-name">
             {tx("hatch.name")}
             <input
               value={given}
               maxLength={24}
-              disabled={used}
+              disabled={used || Boolean(pending) || busy}
               onChange={(event) => setGiven(event.target.value)}
               placeholder={tx("hatch.nameHint")}
             />
           </label>
+          <HatchWait
+            stage={stage}
+            pending={pending}
+            blockNow={blockNow}
+            compact={compact}
+            tx={tx}
+          />
           <div className="hatch-actions">
             <button
+              type="button"
               className="primary"
               disabled={busy || used || Boolean(pending)}
               onClick={request}
             >
-              {tx("hatch.request")}
+              {tx(hatchActionKey(stage))}
             </button>
             {needRetry && phase === "ready" ? (
-              <button className="ghost" disabled={busy} onClick={complete}>
+              <button
+                type="button"
+                className="ghost"
+                disabled={busy}
+                onClick={complete}
+              >
                 {tx("hatch.autoRetry")}
               </button>
             ) : null}
             {phase === "expired" ? (
-              <button className="ghost" disabled={busy} onClick={expire}>
+              <button
+                type="button"
+                className="ghost"
+                disabled={busy}
+                onClick={expire}
+              >
                 {tx("hatch.expire")}
               </button>
             ) : null}
           </div>
-          {wallet ? (
+          {wallet && !stage ? (
             <p className="hatch-meta">
               {wallet} · {deployment.address}
               {used ? ` · ${tx("hatch.already")}` : ""}
-            </p>
-          ) : null}
-          {pending ? (
-            <p className="hatch-meta">
-              {phase === "ready"
-                ? tx("hatch.ready", { id: pending.requestId, deadline })
-                : phase === "expired"
-                  ? tx("hatch.expired", { id: pending.requestId })
-                  : tx("hatch.pending", {
-                      id: pending.requestId,
-                      block: pending.entropyBlock,
-                    })}{" "}
-              {blockNow
-                ? tx("life.blockNow", { n: blockNow })
-                : tx("life.waitingBlock")}
             </p>
           ) : null}
         </>

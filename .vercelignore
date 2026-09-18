@@ -1,7 +1,11 @@
-scripts/data/cache
-artifacts
-test-results
+.tmp-*
+.git
 node_modules
+dist
+artifacts
 server
 contracts
+scripts/data/cache
+test-results
+reports
 .env.example

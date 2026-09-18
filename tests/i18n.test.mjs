@@ -56,6 +56,9 @@ test("blueprint swarm copy is paired and does not claim intelligence is live", (
     "blue.market",
     "public.doorBlueprint",
     "public.laterLead",
+    "public.researchLead",
+    "public.researchGo",
+    "public.footTag",
   ];
   for (const key of keys) {
     assert.notEqual(t("en", key), key);
@@ -74,6 +77,41 @@ test("blueprint swarm copy is paired and does not claim intelligence is live", (
   assert.doesNotMatch(t("zh", "blue.vault"), /已销毁/);
   assert.equal(t("en", "blue.h1"), "Drawn, not shipped.");
   assert.equal(t("zh", "blue.h1"), "画好了，还没上线。");
+});
+
+test("homepage public copy is user-facing and does not cite T3/T4", () => {
+  const keys = [
+    "public.laterLead",
+    "public.laterGo",
+    "public.researchLead",
+    "public.censusNote",
+    "public.researchEm",
+    "public.doorBlueprint",
+    "public.mesh.lead",
+    "public.archLead",
+    "public.footTag",
+    "meta.blueprintDesc",
+    "blue.lead",
+  ];
+  for (const locale of ["en", "zh"]) {
+    for (const key of keys) {
+      const copy = t(locale, key);
+      assert.doesNotMatch(copy, /\bT3\b|\bT4\b/);
+      assert.doesNotMatch(copy, /五个可验证接口|verifiable interfaces/i);
+      assert.doesNotMatch(copy, /复算包|recomputable/i);
+    }
+  }
+  assert.match(t("zh", "public.researchLead"), /不把这称作已经实现的群体智能/);
+  assert.match(
+    t("en", "public.researchLead"),
+    /do not call this swarm intelligence/i,
+  );
+  assert.match(t("zh", "public.laterTitle"), /接下来/);
+  assert.match(t("en", "public.laterTitle"), /What's next/);
+  assert.equal(t("en", "public.footFlap"), "Trade $IFS On Flap");
+  assert.equal(t("zh", "public.footFlap"), "在 Flap 交易 $IFS");
+  assert.match(t("en", "public.openX"), /Follow on X/);
+  assert.match(t("zh", "public.openX"), /关注 X/);
 });
 
 test("breed fee copy exists in both locales and does not claim a burn", () => {

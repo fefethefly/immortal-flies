@@ -71,8 +71,8 @@
 }
 
 .colony-section {
-  padding: 8px 0 26px;
-  scroll-margin-top: 122px;
+  padding: 4px 0 14px;
+  scroll-margin-top: 118px;
 }
 
 .colony-section + .colony-section {
@@ -89,7 +89,7 @@
 /* life-thought 默认是栖息地画布的绝对定位浮层；台账页作为普通段落参与排版。 */
 .colony-section .life-thought {
   position: static;
-  margin: 12px 24px 0;
+  margin: 8px 28px 4px;
   max-width: 62ch;
   padding: 0;
   border: 0;
@@ -181,7 +181,7 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  padding: 0 24px 40px;
+  padding: 4px 24px 30px;
 }
 
 .colony-pages small {
@@ -615,91 +615,136 @@
   text-transform: uppercase;
 }
 
-/* Collectible cabinet: the illustration and its two traits form one reading unit. */
+/* Collectible cabinet: single-band banner, compact codex cards, rare spotlight. */
 .life-shell.is-colony {
   display: block;
   max-width: 1680px;
   margin: auto;
   background:
-    radial-gradient(ellipse at 50% 0, #29201455, transparent 460px), #0b0b09;
+    radial-gradient(ellipse at 50% 0, #29201455, transparent 460px),
+    radial-gradient(rgba(226, 208, 160, 0.05) 1px, transparent 1.6px) 0 0 /
+      44px 44px,
+    #0b0b09;
 }
 .colony-cover {
-  display: grid;
-  grid-template-columns: 1fr 2.6fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 24px;
-  padding: 34px 36px 30px;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding: 10px 32px;
   border-bottom: 1px solid #a5844438;
-  text-align: center;
+}
+.colony-cover-title {
+  min-width: 0;
+}
+.colony-cover-kicker {
+  display: block;
+  color: #bba271;
+  font: 8px/1.6 monospace;
+  letter-spacing: 0.3em;
 }
 .colony-cover h1 {
-  margin: 8px 0 12px;
+  margin: 0;
   font:
-    600 clamp(32px, 4.1vw, 66px) / 1.15 "Noto Serif SC",
+    600 clamp(20px, 2.2vw, 28px) / 1.15 "Noto Serif SC",
     "Songti SC",
     Georgia,
     serif;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: #ffe0a0;
-  text-shadow: 0 2px 20px #d7a64d45;
+  text-shadow: 0 2px 14px #d7a64d40;
 }
-.colony-cover p {
+.colony-cover-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
   margin: 0;
-  color: #dbccb0;
-  font-size: 13px;
-  letter-spacing: 0.22em;
 }
-.colony-cover-kicker {
-  color: #bba271;
-  font: 10px/1.5 monospace;
-  letter-spacing: 0.3em;
+.colony-cover-stats > span,
+.colony-cover-seal {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 9px;
+  border: 1px solid rgba(180, 148, 84, 0.32);
+  border-radius: 999px;
+  background: rgba(20, 17, 11, 0.55);
+  color: #9c8d6f;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
 }
-.colony-cover .colony-cover-note {
-  text-align: left;
-  color: #d6adc5;
-  font-family: "Kaiti SC", "STKaiti", Georgia, serif;
-  font-size: 17px;
-  line-height: 1.8;
-  letter-spacing: 0.06em;
-  transform: rotate(-5deg);
-}
-.colony-cover-note span {
-  font-size: 13px;
+.colony-cover-stats b {
+  color: #e8c877;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.04em;
 }
 .colony-cover-seal {
-  justify-self: end;
-  display: grid;
-  gap: 2px;
-  width: 128px;
-  padding: 12px 8px;
-  border: 1px solid #cfb274;
-  border-radius: 45% 45% 38% 38%;
-  color: #ead4a2;
-  text-decoration: none;
-  box-shadow: inset 0 0 16px #c4a35e12;
-  font-size: 11px;
+  color: #e8c877;
+  border-color: rgba(240, 185, 11, 0.45);
+  transition: background 0.2s;
+}
+.colony-cover-seal:hover {
+  background: rgba(240, 185, 11, 0.1);
 }
 .colony-cover-seal b {
-  font:
-    32px/1 Georgia,
-    serif;
+  font-size: 12px;
 }
+.colony-cover-seal span {
+  font-size: 9px;
+}
+/* 台账条：钱包操作与台账摘要共处一行的细条。 */
 .life-shell.is-colony .life-rail {
   position: static;
   max-height: none;
   overflow: visible;
-  padding: 0 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 4px 32px;
   border: 0;
-  background: transparent;
+  border-bottom: 1px solid rgba(47, 42, 31, 0.7);
+  background: rgba(12, 11, 9, 0.4);
+}
+.life-shell.is-colony .life-rail .colony-wallet {
+  margin: 0;
+  gap: 10px;
+  max-width: none;
+  flex: 0 1 auto;
+}
+.life-shell.is-colony .life-rail .colony-wallet button {
+  min-height: 26px;
+  padding: 4px 10px;
+  font-size: 10px;
+}
+.life-shell.is-colony .life-rail .colony-wallet .life-meta {
+  font-size: 10px;
+}
+.life-shell.is-colony .life-rail .colony-wallet .colony-mine {
+  font-size: 10px;
+}
+.life-shell.is-colony .life-rail .colony-ledger-info {
+  margin-left: auto;
+  min-width: 0;
 }
 .colony-ledger-info > summary {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
-  padding: 13px 0;
+  padding: 5px 0;
   cursor: pointer;
   color: #bfae8c;
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
 }
 .colony-ledger-info > summary span {
   color: #938873;
@@ -720,80 +765,161 @@
 .colony-tabs {
   top: 70px;
   justify-content: center;
-  padding: 8px 16px;
+  padding: 6px 16px;
   border-top: 1px solid #a5844430;
 }
-.colony-tabs a {
+.colony-tabs a,
+.colony-tabs .colony-tab-mine {
+  padding: 8px 12px;
   font-size: 10px;
   letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.colony-tabs .colony-tab-mine {
+  background: transparent;
+  cursor: pointer;
+  border: 1px solid transparent;
+  color: #a89e8c;
+  min-height: 0;
+  font:
+    11px "IBM Plex Mono",
+    monospace;
+}
+.colony-tab-mine:hover {
+  color: #f0ead9;
+  border-color: #2f2a1f;
+}
+.colony-tab-mine.is-on {
+  color: #f0b90b;
+  border-color: rgba(240, 185, 11, 0.4);
+  text-shadow: 0 0 12px rgba(240, 185, 11, 0.35);
 }
 .is-colony .life-market-head {
-  padding: 22px 28px 8px;
+  padding: 10px 28px 2px;
+  gap: 10px;
 }
 .is-colony .life-market-head h2 {
-  font-size: 26px;
+  margin: 2px 0 0;
+  font-size: 20px;
   color: #ebd6ae;
 }
 .is-colony .life-market-head .eyebrow {
   color: #98825b;
-  font-size: 9px;
+  font-size: 8px;
   letter-spacing: 0.18em;
 }
+.is-colony .life-market-head small {
+  font-size: 10px;
+}
 .is-colony .life-market-filters {
-  padding: 8px 28px;
-  gap: 10px;
+  padding: 4px 28px 10px;
+  gap: 8px 12px;
+  align-items: center;
 }
 .is-colony .life-market-filters label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 10px;
+  white-space: nowrap;
 }
 .is-colony .life-market-filters select,
 .is-colony .life-market-filters input {
   border-radius: 5px;
   border-color: #aa8b493b;
   background: #13120e;
+  padding: 5px 6px;
+  min-width: 6.5rem;
+  font-size: 10.5px;
+}
+.is-colony .life-market-filters input {
+  min-width: 9rem;
+}
+.is-colony .life-market-filters .ghost {
+  align-self: center;
 }
 .colony-lead {
   max-width: 100ch;
-  margin: 8px 28px 0;
-  font-size: 12px;
+  margin: 2px 28px 0;
+  font-size: 11px;
   color: #9f9685;
 }
 .is-colony .life-market-grid {
-  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
-  gap: 14px;
-  padding: 22px 28px 32px;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 12px;
+  padding: 10px 28px 28px;
   align-items: start;
 }
+/* 图鉴卡：竖向收藏卡。编号+稀有度 → 立绘 → 名字 → 性状点 → 世代。 */
 .is-colony .life-market-card {
   position: relative;
   display: grid;
-  grid-template-columns: 49% minmax(0, 1fr);
-  grid-template-rows: 22px auto auto 26px auto;
-  gap: 5px 10px;
-  min-height: 208px;
-  padding: 17px 14px 10px 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 5px 8px;
+  padding: 9px 10px 8px;
   overflow: hidden;
-  border: 1px solid #b49454a6;
-  border-radius: 13px;
+  border: 1px solid #9a7a3f66;
+  border-radius: 10px;
   background:
     radial-gradient(
-      ellipse at 26% 55%,
-      color-mix(in srgb, var(--pheno-body) 13%, transparent),
-      transparent 62%
+      ellipse at 50% 26%,
+      color-mix(in srgb, var(--pheno-body) 15%, transparent),
+      transparent 58%
     ),
-    linear-gradient(130deg, #19150e88, #080908 68%);
-  box-shadow: inset 0 1px 0 #f5d99810;
+    linear-gradient(165deg, #17130a, #0a0a08 78%);
+  box-shadow:
+    inset 0 0 0 1px rgba(245, 216, 148, 0.05),
+    inset 0 1px 0 rgba(245, 216, 148, 0.1),
+    0 6px 16px rgba(0, 0, 0, 0.4);
   transition:
     border-color 0.25s,
     transform 0.25s,
     box-shadow 0.25s;
 }
+/* 四角刻度，收藏卡边框 */
+.is-colony .life-market-card::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 7px;
+  pointer-events: none;
+  color: rgba(214, 179, 106, 0.45);
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 9px 1px,
+    linear-gradient(currentColor, currentColor) 0 0 / 1px 9px,
+    linear-gradient(currentColor, currentColor) 100% 0 / 9px 1px,
+    linear-gradient(currentColor, currentColor) 100% 0 / 1px 9px,
+    linear-gradient(currentColor, currentColor) 0 100% / 9px 1px,
+    linear-gradient(currentColor, currentColor) 0 100% / 1px 9px,
+    linear-gradient(currentColor, currentColor) 100% 100% / 9px 1px,
+    linear-gradient(currentColor, currentColor) 100% 100% / 1px 9px;
+  background-repeat: no-repeat;
+}
+/* 悬停扫光 */
+.is-colony .life-market-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 235, 190, 0.13) 46%,
+    transparent 60%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+}
+.is-colony .life-market-card:hover::after {
+  transform: translateX(130%);
+}
 .is-colony .life-market-card:hover {
   transform: translateY(-3px);
   border-color: #e1bd79;
   box-shadow:
-    0 8px 26px #0005,
-    inset 0 0 24px #b7933410;
+    0 10px 26px #0006,
+    inset 0 0 22px #b7933414;
 }
 .is-colony .life-market-card.is-clickable {
   cursor: pointer;
@@ -801,62 +927,88 @@
 .is-colony .life-market-card.is-open {
   border-color: #e1bd79;
   box-shadow:
-    0 8px 26px #0005,
-    inset 0 0 24px #b7933410;
+    0 10px 26px #0006,
+    inset 0 0 22px #b7933414;
 }
 .is-colony .life-market-card .fly-index {
-  grid-column: 2;
+  align-self: center;
   color: #cfb67f;
-  font: 12px/1.5 monospace;
+  font: 10px/1.5 monospace;
   letter-spacing: 0.06em;
 }
-.is-colony .life-market-card .life-market-thumb {
-  grid-column: 1;
-  grid-row: 1 / 5;
-  width: 100%;
-  height: 172px;
+.colony-rarity {
+  grid-row: 1;
+  justify-self: end;
   align-self: center;
-  border: 0;
-  background: transparent;
+  padding: 1px 7px;
+  border: 1px solid rgba(240, 185, 11, 0.42);
+  border-radius: 999px;
+  color: #e8c877;
+  font:
+    8.5px/1.7 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.is-colony .life-market-card .life-market-thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  align-self: center;
   object-fit: contain;
   object-position: center;
+  border: 1px solid rgba(180, 148, 84, 0.32);
+  border-radius: 8px;
+  background:
+    radial-gradient(
+      90px 60px at 50% 58%,
+      rgba(240, 234, 217, 0.07),
+      transparent 75%
+    ),
+    rgba(5, 4, 3, 0.55);
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 .is-colony .life-market-card > strong {
-  grid-column: 2;
   align-self: center;
+  text-align: center;
   color: color-mix(in srgb, var(--pheno-body) 38%, #fff0d8);
   font:
-    600 20px/1.25 "Noto Serif SC",
+    600 15px/1.25 "Noto Serif SC",
     "Songti SC",
     Georgia,
     serif;
   text-transform: capitalize;
-  overflow-wrap: anywhere;
 }
 .is-colony .life-market-card .fly-traits {
-  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 12px;
   align-self: center;
-  gap: 9px;
+}
+.is-colony .life-market-card .fly-traits li {
+  gap: 5px;
+  min-width: 0;
 }
 .is-colony .life-market-card .fly-traits small {
   display: none;
 }
 .is-colony .life-market-card .fly-traits span {
-  font-size: 12px;
+  font-size: 11px;
 }
 .is-colony .fly-traits-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   box-shadow:
     inset 0 2px 3px #ffffff99,
     inset 0 -2px 3px #0005;
 }
 .is-colony .life-market-card .fly-vital,
 .is-colony .life-market-card .colony-unborn {
-  grid-column: 2;
+  justify-self: center;
   border: 0;
-  padding: 4px 0 0;
-  font: 11px/1.4 monospace;
+  padding: 1px 0 0;
+  font: 9.5px/1.4 monospace;
   color: #bba87d;
   letter-spacing: 0;
 }
@@ -866,12 +1018,13 @@
 .colony-card-data {
   grid-column: 1 / -1;
   border-top: 1px solid #b4945428;
-  padding: 7px 6px 0;
+  padding: 6px 6px 0;
+  text-align: center;
 }
 .colony-card-data summary {
   cursor: pointer;
   color: #a18e69;
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 0.05em;
 }
 .colony-card-data[open] summary {
@@ -879,60 +1032,157 @@
 }
 .colony-card-data dl {
   margin-top: 12px;
+  text-align: left;
 }
 .colony-card-data .life-kin-row {
   flex-wrap: wrap;
   margin-top: 12px;
 }
+
+/* ── 稀世 spotlight：预览区最稀缺的 6 种。金环呼吸 + 浮动 + 循环扫光（均走合成器） ── */
+.colony-spotlight-wrap {
+  padding: 2px 28px 0;
+}
+.colony-spotlight-lead {
+  margin: 0 0 8px;
+  color: #d8b76a;
+  font:
+    10px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.colony-spotlight {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+.is-spotlight {
+  border-color: #d9b36a99;
+  box-shadow:
+    inset 0 0 0 1px rgba(245, 216, 148, 0.08),
+    inset 0 1px 0 rgba(245, 216, 148, 0.14),
+    0 0 18px rgba(240, 185, 11, 0.1),
+    0 8px 22px rgba(0, 0, 0, 0.5);
+  animation: spot-float 4.2s ease-in-out infinite;
+  animation-delay: calc(var(--spot, 0) * -0.6s);
+}
+.colony-spotlight-ring {
+  position: absolute;
+  inset: 2px;
+  border-radius: 8px;
+  border: 1px solid rgba(240, 185, 11, 0.5);
+  box-shadow:
+    0 0 12px rgba(240, 185, 11, 0.22),
+    inset 0 0 12px rgba(240, 185, 11, 0.12);
+  animation: spot-glow 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--spot, 0) * -0.45s);
+  pointer-events: none;
+  will-change: opacity;
+}
+@keyframes spot-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes spot-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.is-spotlight::after {
+  animation: spot-sheen 4.6s ease-in-out infinite;
+}
+@keyframes spot-sheen {
+  0%,
+  55% {
+    transform: translateX(-130%);
+  }
+  78%,
+  100% {
+    transform: translateX(130%);
+  }
+}
+.colony-spotlight-rank {
+  grid-row: 1;
+  justify-self: center;
+  align-self: center;
+  color: #f4cf7d;
+  font:
+    9px/1.5 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(240, 185, 11, 0.45);
+}
+.colony-spotlight .colony-rarity {
+  grid-row: 2;
+}
+.colony-spotlight .colony-unborn {
+  justify-self: center;
+  padding: 1px 0 0;
+}
 .is-colony :is(button, a, summary, input, select):focus-visible {
   outline: 2px solid #e4c17c;
   outline-offset: 4px;
 }
-@media (min-width: 1500px) {
+@media (min-width: 1280px) {
   .is-colony .life-market-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+@media (min-width: 900px) and (max-width: 1279px) {
+  .is-colony .life-market-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .colony-spotlight {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @media (max-width: 700px) {
   .colony-cover {
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    padding: 28px 20px;
-    text-align: left;
-  }
-  .colony-cover .colony-cover-note {
-    display: none;
+    padding: 12px 20px 10px;
+    gap: 8px 12px;
   }
   .colony-cover h1 {
-    font-size: 32px;
+    font-size: 22px;
   }
-  .colony-cover p {
-    font-size: 11px;
-    letter-spacing: 0.08em;
+  .colony-cover-stats {
+    justify-content: flex-start;
+    gap: 5px;
   }
+  .colony-cover-stats > span,
   .colony-cover-seal {
-    width: 82px;
-  }
-  .colony-cover-seal b {
-    font-size: 26px;
-  }
-  .colony-cover-kicker {
+    padding: 2px 8px;
     font-size: 8px;
   }
   .colony-tabs {
     position: static;
     gap: 0;
   }
-  .colony-tabs a {
+  .colony-tabs a,
+  .colony-tabs .colony-tab-mine {
     padding: 8px;
     font-size: 9px;
   }
   .is-colony .life-market-grid {
-    padding: 18px 16px;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    padding: 12px 16px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
   }
   .life-shell.is-colony .life-rail {
-    padding: 0 20px;
+    padding: 6px 20px;
   }
   .colony-ledger-info .life-census {
     grid-template-columns: repeat(3, 1fr);
@@ -941,16 +1191,43 @@
     padding-left: 20px;
     padding-right: 20px;
   }
+  .is-colony .life-market-filters {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .colony-lead {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  .colony-spotlight-wrap {
+    padding: 2px 16px 0;
+  }
+  .colony-spotlight {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .is-colony .life-market-card {
+  .is-colony .life-market-card,
+  .is-colony .life-market-card::after,
+  .is-spotlight,
+  .colony-spotlight-ring {
+    animation: none;
     transition: none;
   }
-  .is-colony .life-market-card:hover {
+  .is-colony .life-market-card:hover,
+  .is-spotlight {
     transform: none;
   }
 }
 .is-colony .life-market-card .colony-card-name {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border: 0;
   padding: 0;
   background: transparent;
@@ -962,4 +1239,14 @@
   filter: drop-shadow(0 0 5px #e3b96020);
   object-fit: contain;
   object-position: center;
+}
+
+/* 台账条里的钱包操作组（connect 按钮 + 「只看我的」）。 */
+.colony-wallet {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: 420px;
+  margin: 0 0 12px;
 }

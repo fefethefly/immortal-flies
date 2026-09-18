@@ -399,7 +399,16 @@ export function nearestNeuron(hits, x, y, reach = 22) {
   return best;
 }
 
-export function truthLines({ field, swarm, census, locale = "en", quotes = null }) {
+export function truthLines({
+  field,
+  swarm,
+  census,
+  locale = "en",
+  quotes = null,
+  runner = null,
+  pitLive = false,
+  pitError = "",
+}) {
   const zh = locale === "zh";
   const cap = census?.cap || 1024;
   const net = census?.live ? "MAINNET" : "TESTNET";
@@ -438,8 +447,14 @@ export function truthLines({ field, swarm, census, locale = "en", quotes = null 
     },
     {
       id: "swarm",
-      paper: true,
-      text: `${zh ? "蜂群" : "SWARM"} ${alive} · PAPER · 24-NODE`,
+      live: pitLive || swarm?.host?.kind === "full",
+      text: pitError
+        ? zh
+          ? "交易场 共享账本中断"
+          : "PIT SHARED BOOK DOWN"
+        : swarm?.host?.kind === "full"
+          ? `${zh ? "交易" : "TRADE"} ${alive} · ${swarm.host.dataset || "malecns-full"} · ${Number(swarm.host.neurons || 0).toLocaleString("en-US")}`
+          : `${zh ? "蜂群" : "SWARM"} ${alive} · MALECNS`,
     },
     { id: "fill", paper: true, text: `${zh ? "成交" : "FILL"} SIM` },
     liveQuote
@@ -452,6 +467,19 @@ export function truthLines({ field, swarm, census, locale = "en", quotes = null 
           id: "quote",
           paper: true,
           text: zh ? "报价 …" : "QUOTE …",
+        },
+    runner?.ok
+      ? {
+          id: "runner",
+          live: true,
+          text: zh
+            ? `全脑 RAILWAY · ${runner.dataset || "malecns-full"}`
+            : `FULL BRAIN RAILWAY · ${runner.dataset || "malecns-full"}`,
+        }
+      : {
+          id: "runner",
+          paper: true,
+          text: zh ? "全脑 RAILWAY …" : "FULL BRAIN RAILWAY …",
         },
   ];
 }
@@ -564,9 +592,7 @@ export function colonyLinks(living, perchOf, adj, field, near = 0.16) {
       const nb = field?.neurons?.[ib];
       const wired = ia != null && ib != null && adj?.[ia]?.includes(ib);
       const close =
-        na &&
-        nb &&
-        Math.hypot(na.x - nb.x, na.y - nb.y, na.z - nb.z) < near;
+        na && nb && Math.hypot(na.x - nb.x, na.y - nb.y, na.z - nb.z) < near;
       if (wired || close) join(a.id, b.id);
     }
   }
@@ -757,6 +783,8 @@ export function colonyReadout(swarm, fly, locale = "en") {
     hue: pheno ? pheno.hue[lang] : "",
     look: pheno ? pheno.summary[lang] : "",
     lastFills: (swarm?.trades || []).slice(0, 3),
+    hive: swarm?.hive || null,
+    mark: swarm?.market?.mark || "IFS",
   };
 }
 
@@ -1342,7 +1370,7 @@ export function createCrossSectionRenderer(canvas, read) {
       TAU,
     );
     ctx.fill();
-    drawInletRail();
+    if (width >= 760 && height >= 520) drawInletRail();
 
     if (field.edges?.length) {
       const hot = new Path2D();
@@ -1506,7 +1534,10 @@ export function createCrossSectionRenderer(canvas, read) {
             for (const node of adj[perch] || [])
               shimmer[node] = Math.max(shimmer[node], 0.32);
           }
-          if (n > loudN || (n === loudN && (loud == null || fly.id < loud.id))) {
+          if (
+            n > loudN ||
+            (n === loudN && (loud == null || fly.id < loud.id))
+          ) {
             loud = fly;
             loudN = n;
           }
@@ -1588,8 +1619,8 @@ export function createCrossSectionRenderer(canvas, read) {
           ctx.strokeStyle = pulse
             ? `rgba(${lockRgb[0]},${lockRgb[1]},${lockRgb[2]},${0.28 + sync.glow * 0.5})`
             : split
-            ? "rgba(198,164,82,0.55)"
-            : "rgba(196,165,106,0.28)";
+              ? "rgba(198,164,82,0.55)"
+              : "rgba(196,165,106,0.28)";
           ctx.beginPath();
           ctx.moveTo(pa.x, pa.y);
           ctx.lineTo(pb.x, pb.y);
@@ -1700,17 +1731,24 @@ export function createCrossSectionRenderer(canvas, read) {
         const fromPerch = sender ? perchOf.get(sender.id) : null;
         const fromPt = flyDraw.find((row) => row.id === fromId);
         if (fromPt) {
-          raw += wrapDelta(Math.atan2(fromPt.y - p.y, fromPt.x - p.x), raw) * gain * 0.55;
+          raw +=
+            wrapDelta(Math.atan2(fromPt.y - p.y, fromPt.x - p.x), raw) *
+            gain *
+            0.55;
         } else if (fromPerch != null && projected[fromPerch]) {
           const src = projected[fromPerch];
-          raw += wrapDelta(Math.atan2(src.y - p.y, src.x - p.x), raw) * gain * 0.4;
+          raw +=
+            wrapDelta(Math.atan2(src.y - p.y, src.x - p.x), raw) * gain * 0.4;
         }
       }
       if (sync.hold > 0.25 && sync.wave) {
         const originPerch = perchOf.get(sync.wave.originId);
         const src = originPerch != null ? projected[originPerch] : null;
         if (src) {
-          raw += wrapDelta(Math.atan2(src.y - p.y, src.x - p.x), raw) * sync.hold * 0.7;
+          raw +=
+            wrapDelta(Math.atan2(src.y - p.y, src.x - p.x), raw) *
+            sync.hold *
+            0.7;
         }
       }
       let phase = reduced ? 0 : flyPhase(time, fly.id);
@@ -1779,9 +1817,10 @@ export function createCrossSectionRenderer(canvas, read) {
           : row.speaker
             ? 0.55 + row.gain * 0.4
             : 0.88;
-        ctx.strokeStyle = row.locked || row.speaker
-          ? `rgba(${row.signalRgb[0]},${row.signalRgb[1]},${row.signalRgb[2]},0.85)`
-          : "rgba(240,234,217,0.7)";
+        ctx.strokeStyle =
+          row.locked || row.speaker
+            ? `rgba(${row.signalRgb[0]},${row.signalRgb[1]},${row.signalRgb[2]},0.85)`
+            : "rgba(240,234,217,0.7)";
         ctx.lineWidth = row.locked ? 1.05 : row.speaker ? 1.4 : 1.2;
         ctx.beginPath();
         ctx.arc(
@@ -1950,7 +1989,9 @@ export function createCrossSectionRenderer(canvas, read) {
       ctx.arc(x, y, 2, 0, TAU);
       ctx.fill();
     }
-    drawRibbon(swarm?.prices?.slice(-60) || [], cam.ribbon);
+    if (width >= 760 && height >= 520) {
+      drawRibbon(swarm?.prices?.slice(-60) || [], cam.ribbon);
+    }
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = 1;
     if (animate) raf = requestAnimationFrame(draw);

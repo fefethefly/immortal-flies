@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Pause, Play } from "lucide-react";
 import { SiteLink } from "./site-chrome.jsx";
 import { createHeroWebGL } from "./hero-webgl.mjs";
+import { t } from "./i18n.mjs";
 import "./home-protocol.css";
 
 export function ProtocolVisual({ locale, paused, onPause, onStimulus }) {
@@ -16,8 +17,10 @@ export function ProtocolVisual({ locale, paused, onPause, onStimulus }) {
     if (!node) return;
     let instance;
     try {
-      instance = createHeroWebGL(node, () => read.current(), () =>
-        setState("fallback"),
+      instance = createHeroWebGL(
+        node,
+        () => read.current(),
+        () => setState("fallback"),
       );
     } catch {
       setState("fallback");
@@ -36,7 +39,7 @@ export function ProtocolVisual({ locale, paused, onPause, onStimulus }) {
   }, [paused]);
   const stimulate = () => {
     if (!engine.current?.stimulate()) return;
-    setStimuli(n => n + 1);
+    setStimuli((n) => n + 1);
     onStimulus?.();
   };
   const zh = locale === "zh";
@@ -106,53 +109,47 @@ export function ProtocolVisual({ locale, paused, onPause, onStimulus }) {
         ) : null}
       </div>
       <div className="webgl-controls">
-        <button onClick={stimulate} disabled={paused || state !== "live"}>{zh ? "注入视觉刺激" : "Send visual stimulus"} ↗</button>
-        <span>{zh ? "美术粒子 / 示意信号，不是生物放电数据" : "Art particles / illustrative signals, not biological recordings"}</span>
+        <button onClick={stimulate} disabled={paused || state !== "live"}>
+          {zh ? "注入视觉刺激" : "Send visual stimulus"} ↗
+        </button>
+        <span>
+          {zh
+            ? "美术粒子 / 示意信号，不是生物放电数据"
+            : "Art particles / illustrative signals, not biological recordings"}
+        </span>
       </div>
     </div>
   );
 }
 
 const layers = [
-  [
-    "L0",
-    "Life core",
-    "生命内核",
-    "Identity persists. State can be replayed.",
-    "身份延续，状态可重放。",
-    "Soul · Genome · Session · Replay",
-    "/brain.html",
-  ],
-  [
-    "L1",
-    "Agent society",
-    "生命社会",
-    "Independent lives. A shared behavioral language.",
-    "独立经历，共同的行为语言。",
-    "SENSE · ACT · MEMORY · PROPOSE",
-    "/swarm.html",
-  ],
+  ["L0", "public.archL0", "public.archL0p", "public.archL0tag", "/brain.html"],
+  ["L1", "public.archL1", "public.archL1p", "public.archL1tag", "/swarm.html"],
   [
     "L2",
-    "Open worlds",
-    "开放世界",
-    "Different tasks. The same accountable lives.",
-    "不同任务，同一个可追溯的生命。",
-    "World · Task · Port · Policy",
+    "public.archL2",
+    "public.archL2p",
+    "public.archL2tag",
     "/blueprint.html",
   ],
   [
     "L3",
-    "Agent economy",
-    "智能体经济",
-    "Tools expand capability. Rules bound authority.",
-    "工具扩展能力，规则约束权限。",
-    "LLM · Tools · Credit · IFS",
+    "public.archL3",
+    "public.archL3p",
+    "public.archL3tag",
     "/economy.html",
   ],
 ];
+const researchSteps = [
+  ["public.research1", "public.research1p"],
+  ["public.research2", "public.research2p"],
+  ["public.research3", "public.research3p"],
+  ["public.research4", "public.research4p"],
+  ["public.research5", "public.research5p"],
+];
+
 export function ProtocolArchitecture({ locale }) {
-  const zh = locale === "zh";
+  const tx = (key) => t(locale, key);
   return (
     <section
       className="protocol-section"
@@ -160,105 +157,65 @@ export function ProtocolArchitecture({ locale }) {
       aria-labelledby="architecture-title"
     >
       <header className="protocol-section-head">
-        <span>01 / PROTOCOL ARCHITECTURE</span>
-        <small>
-          {zh ? "四层架构 · 分阶段交付" : "Four layers · incremental delivery"}
-        </small>
+        <span>{tx("public.archKicker")}</span>
+        <small>{tx("public.archSide")}</small>
       </header>
       <div className="protocol-thesis">
         <h2 id="architecture-title">
-          {zh ? "不止一个智能体。" : "Beyond a single agent."}
-          <em>
-            {zh ? "是一套共同生长的规则。" : "A shared structure for growth."}
-          </em>
+          {tx("public.archTitle")}
+          <em>{tx("public.archEm")}</em>
         </h2>
-        <p>
-          {zh
-            ? "果蝇是起点，不是协议的边界。将生命、社会、世界与经济解耦，让新模型、新任务和新工具可以接入，而不改写一个生命的过去。"
-            : "The fly is a starting point, not the protocol’s boundary. Separate life, society, worlds and economy so new models, tasks and tools can connect without rewriting a life’s past."}
-        </p>
+        <p>{tx("public.archLead")}</p>
       </div>
       <div className="protocol-stack">
-        {layers.map(([id, en, cn, descEn, descCn, code, href]) => (
+        {layers.map(([id, title, body, tag, href]) => (
           <SiteLink className="protocol-layer" href={href} key={id}>
             <span className="protocol-layer-id">{id}</span>
-            <h3>{zh ? cn : en}</h3>
+            <h3>{tx(title)}</h3>
             <p>
-              {zh ? descCn : descEn}
-              <code>{code}</code>
+              {tx(body)}
+              <code>{tx(tag)}</code>
             </p>
             <ArrowUpRight size={22} />
           </SiteLink>
         ))}
       </div>
-      <p className="protocol-boundary">
-        {zh
-          ? "架构不等于全部上线：交易与经济页面仍为 SIM；群体智慧协议是设计稿，未实现。跨链、跨物种迁徙是预留能力，尚未开放。"
-          : "Architecture is not a shipping claim: trading and economy remain SIM; the swarm intelligence protocol is a design, not implemented. Cross-chain and cross-species migration are reserved capabilities, not open features."}
-      </p>
+      <p className="protocol-boundary">{tx("public.archBound")}</p>
     </section>
   );
 }
 
 export function ProtocolResearch({ locale }) {
-  const zh = locale === "zh";
+  const tx = (key) => t(locale, key);
   return (
     <section
       id="research"
       className="protocol-section protocol-research"
+      data-reveal="wait"
       aria-labelledby="research-title"
     >
       <header className="protocol-section-head">
-        <span>04 / RESEARCH FRONTIER</span>
-        <small>
-          {zh
-            ? "研究路线 · 尚未完成"
-            : "Research direction · not yet delivered"}
-        </small>
+        <span>{tx("public.researchKicker")}</span>
+        <small>{tx("public.researchSide")}</small>
       </header>
       <div className="protocol-thesis">
         <h2 id="research-title">
-          {zh ? "智慧不是一句宣言。" : "Intelligence is not a slogan."}
-          <em>
-            {zh
-              ? "每一次增益，都应能复算。"
-              : "Every gain should be reproducible."}
-          </em>
+          {tx("public.researchTitle")}
+          <em>{tx("public.researchEm")}</em>
         </h2>
-        <p>
-          {zh
-            ? "协议标准化的不是智慧本身，而是任务、语言、学习、聚合、身份五个可验证接口。增益必须能被复算。T3、T4 通过前，不说群体智能已实现。"
-            : "The protocol does not standardize intelligence. It standardizes five verifiable interfaces: task, message, learn, pool, identity. Every gain must be recomputable. Until T3 and T4 pass, we do not say swarm intelligence is here."}
-        </p>
+        <p>{tx("public.researchLead")}</p>
       </div>
       <ol className="protocol-research-steps">
-        {(zh
-          ? [
-              ["任务", "先定义成功，再谈活动。"],
-              ["语言", "观察与确认补依据。收到不等于服从。"],
-              ["学习", "可回滚的状态变更。旧版本永不覆盖。"],
-              ["聚合", "经验经对照与复现，才晋升。"],
-              ["身份", "生命与运行器分开。晋升不进 Soul。"],
-            ]
-          : [
-              ["Task", "Define success before counting activity."],
-              ["Message", "Observe and confirm carry evidence. Received is not obeyed."],
-              ["Learn", "Reversible state change. Old versions stay."],
-              ["Pool", "Promote experience only after controlled replication."],
-              ["Identity", "Life and runner stay apart. Promotion never enters Soul."],
-            ]
-        ).map(([title, desc], i) => (
-          <li key={title}>
+        {researchSteps.map(([title, desc], i) => (
+          <li key={title} style={{ "--step": i }}>
             <span>0{i + 1}</span>
-            <h3>{title}</h3>
-            <p>{desc}</p>
+            <h3>{tx(title)}</h3>
+            <p>{tx(desc)}</p>
           </li>
         ))}
       </ol>
-      <SiteLink className="protocol-research-link" href="/blueprint.html#swarm">
-        {zh
-          ? "阅读群体智慧协议与交付边界"
-          : "Read the swarm protocol and delivery boundaries"}
+      <SiteLink className="protocol-research-link" href="/blueprint.html">
+        {tx("public.researchGo")}
         <ArrowUpRight size={18} />
       </SiteLink>
     </section>

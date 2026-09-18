@@ -6,11 +6,14 @@ import {
   PIT_STORE,
   bootPitSession,
   createPitSession,
+  pitView,
   savePitSession,
   stepPit,
 } from "../src/brain/flyswarm/pit.mjs";
 import { offerObservation } from "../src/brain/flyswarm/market.mjs";
 import { LAYER_IDS, paperLayer, paperLayers } from "../src/brain/flyswarm/layers.mjs";
+import { START_BNB, equityOf } from "../src/swarm.mjs";
+import { seedBook } from "../src/brain/book.mjs";
 
 function fixtureGraph() {
   return bindManifest(
@@ -86,7 +89,13 @@ test("observation queues changeBps and never accepts calldata", async () => {
 test("aggregator-quote observation tags focus asset and keeps SIM fills", async () => {
   const session = await makePit(9);
   offerObservation(session.aux.market, {
-    payload: { changeBps: -400, activity: 80, assetId: "ETH", mid: 3_000_000 },
+    payload: {
+      changeBps: -400,
+      activity: 80,
+      assetId: "ETH",
+      mid: 3_000_000,
+      usd: 3_500_000_000,
+    },
     provenance: {
       kind: "aggregator-quote",
       chainId: 56,
@@ -102,6 +111,16 @@ test("aggregator-quote observation tags focus asset and keeps SIM fills", async 
   await stepPit(session, { compact: false });
   assert.equal(session.aux.market.last.source, "aggregator-quote");
   assert.equal(session.aux.market.last.payload.assetId, "ETH");
+  assert.equal(session.kernel.colony.market.mark, "USD");
+  assert.equal(session.kernel.colony.market.price, 3_500_000_000);
+  const view = pitView(session);
+  assert.equal(view.hive.mark, "USD");
+  assert.equal(view.hive.assetId, "ETH");
+  assert.ok(view.hive.equity > 0);
+  assert.ok(view.hive.equity <= 5 * START_BNB * 2);
+  await stepPit(session, { compact: false });
+  assert.equal(session.kernel.colony.market.price, 3_500_000_000);
+  assert.equal(session.aux.market.last.source, "aggregator-hold");
   const layers = paperLayers(session);
   assert.equal(layers.market.quote, "LIVE");
   assert.equal(layers.market.fill, "SIM");
@@ -111,6 +130,15 @@ test("aggregator-quote observation tags focus asset and keeps SIM fills", async 
     assert.equal(tagged.fill, "SIM");
     assert.equal(tagged.quote, "LIVE");
   }
+  const store = memoryStore({
+    [PIT_STORE]: JSON.stringify(savePitSession(session)),
+  });
+  const boot = await bootPitSession({ store, graph: fixtureGraph() });
+  assert.equal(boot.session.kernel.colony.market.mark, "USD");
+  assert.equal(
+    boot.session.kernel.colony.trades.length,
+    session.kernel.colony.trades.length,
+  );
 });
 
 test("P2 layers split colony/intent/risk/execution and expose baseline", async () => {
@@ -154,6 +182,33 @@ test("bootPitSession discards an incompatible snapshot and opens a fresh book", 
   assert.equal(store.getItem(PIT_STORE), null);
   assert.equal(boot.session.aux.seed, 99);
   assert.equal(boot.session.kernel.colony.members.length, 5);
+});
+
+test("bootPitSession reseeds leftover IFS inventory marked as USD", async () => {
+  const graph = fixtureGraph();
+  const origin = await createPitSession({ seed: 4, graph });
+  const leftover = seedBook();
+  for (const member of origin.kernel.colony.members) {
+    member.book = structuredClone(leftover);
+  }
+  origin.kernel.colony.market.mark = "USD";
+  origin.kernel.colony.market.price = 751_050_000;
+  origin.kernel.colony.market.assetId = "WBNB";
+  origin.kernel.colony.trades = [{ side: "BUY", amount: 1 }];
+  const store = memoryStore({
+    [PIT_STORE]: JSON.stringify(savePitSession(origin)),
+  });
+  const boot = await bootPitSession({ store, graph });
+  const colony = boot.session.kernel.colony;
+  assert.equal(colony.market.mark, "USD");
+  assert.equal(colony.market.price, 751_050_000);
+  assert.equal(colony.trades.length, 0);
+  for (const member of colony.members) {
+    if (member.status !== "alive") continue;
+    const equity = equityOf(member.book, colony.market.price);
+    assert.ok(equity <= START_BNB * 2);
+    assert.ok(equity >= START_BNB / 2);
+  }
 });
 
 test("bootPitSession treats corrupt localStorage as a fresh book", async () => {

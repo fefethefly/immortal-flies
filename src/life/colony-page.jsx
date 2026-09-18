@@ -339,7 +339,10 @@ export function ColonyPage() {
   const [mark, setMark] = useState(firstView.mark);
   const [generation, setGeneration] = useState(firstView.generation);
   const [sort, setSort] = useState(firstView.sort);
-  const [mineOnly, setMineOnly] = useState(false);
+  const [mineOnly, setMineOnly] = useState(
+    () =>
+      typeof window !== "undefined" && window.location.hash === "#mine",
+  );
   const [page, setPage] = useState(1);
   const [detailKey, setDetailKey] = useState("");
   const [parentA, setParentA] = useState("");
@@ -364,6 +367,7 @@ export function ColonyPage() {
   const unseen = useMemo(() => unseenCombos(souls), [souls]);
   const boards = useMemo(() => boardsOf(souls, BOARD_LIMIT), [souls]);
   const previews = useMemo(() => previewSpecimens(), []);
+  const spotlight = useMemo(() => previews.slice(0, 6), [previews]);
   const view = useMemo(
     () => ({ query, hue, eye, size, stripes, mark, generation, sort }),
     [query, hue, eye, size, stripes, mark, generation, sort],
@@ -396,7 +400,7 @@ export function ColonyPage() {
     [previews, locale, hue, eye, size, stripes, mark, generation, sort],
   );
   const previewPaged = useMemo(
-    () => paginate(previewRows, previewPage, 12),
+    () => paginate(previewRows, previewPage, 18),
     [previewRows, previewPage],
   );
 
@@ -489,6 +493,26 @@ export function ColonyPage() {
     setMark("");
     setGeneration("");
     setMineOnly(false);
+    if (typeof window !== "undefined" && window.location.hash === "#mine") {
+      const url = new URL(window.location.href);
+      url.hash = "";
+      window.history.replaceState(null, "", url);
+    }
+  }
+
+  function toggleMine() {
+    const next = !mineOnly;
+    setMineOnly(next);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (next) url.hash = "mine";
+      else url.hash = "";
+      window.history.replaceState(null, "", url);
+    }
+    document
+      .getElementById("explore")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (next && !wallet) onConnect();
   }
 
   const detailSoul = soulFromDetailKey(detailKey, { souls, previews });
@@ -602,38 +626,64 @@ export function ColonyPage() {
       {dialog}
       <main className="life-shell is-colony">
         <header className="colony-cover">
-          <p className="colony-cover-note">
-            {locale === "zh"
-              ? "收集微小的美好"
-              : "A little life. A little wonder."}
-            <br />
-            <span>
-              {locale === "zh"
-                ? "看见不一样的世界"
-                : "A world worth looking closer at."}
-            </span>
-          </p>
-          <div>
+          <div className="colony-cover-title">
             <span className="colony-cover-kicker">THE IMMORTAL COLLECTION</span>
             <h1>
               {locale === "zh" ? "萌果蝇图鉴" : "Tiny flies, big wonders"}
             </h1>
-            <p>
-              {locale === "zh"
-                ? "小小的翅膀 · 装下大大的奇妙世界"
-                : "Small wings. An extraordinary world."}
-            </p>
           </div>
-          <a className="colony-cover-seal" href="#preview">
-            <span>✧</span>
-            <b>{previews.length}</b>
-            <span>{locale === "zh" ? "种预览形态" : "preview forms"}</span>
-          </a>
+          <p className="colony-cover-stats">
+            <span>
+              <b>{census.total}</b>
+              {tx("ledger.census.total")}
+            </span>
+            <span>
+              <b>{census.gen0}</b>
+              {tx("ledger.census.gen0")}
+            </span>
+            <span>
+              <b>{census.bred}</b>
+              {tx("ledger.census.bred")}
+            </span>
+            <span>
+              <b>{census.rare}</b>
+              {tx("ledger.census.rare")}
+            </span>
+            <a href="#preview" className="colony-cover-seal">
+              ✧ <b>{previews.length}</b>
+              <span>{locale === "zh" ? "种预览" : "previews"}</span>
+            </a>
+          </p>
         </header>
         <aside className="life-rail">
+          <div className="life-kin colony-wallet">
+            <button type="button" onClick={onConnect} disabled={busy}>
+              {wallet ? shortAddr(wallet) : tx("life.connect")}
+            </button>
+            {wallet ? (
+              <>
+                <p className="life-meta">
+                  {tx("life.mineCount", {
+                    n: souls.filter(
+                      (soul) =>
+                        soul.owner?.toLowerCase() === wallet.toLowerCase(),
+                    ).length,
+                  })}
+                </p>
+                <label className="colony-mine">
+                  <input
+                    type="checkbox"
+                    checked={mineOnly}
+                    onChange={(event) => setMineOnly(event.target.checked)}
+                  />
+                  {tx("ledger.mine")}
+                </label>
+              </>
+            ) : null}
+          </div>
           <details className="colony-ledger-info">
             <summary>
-              {locale === "zh" ? "群体台账与钱包" : "Colony ledger & wallet"}
+              {locale === "zh" ? "群体台账" : "Colony ledger"}
               <span>
                 {census.total}{" "}
                 {locale === "zh" ? "只链上果蝇" : "on-chain souls"} ↗
@@ -668,35 +718,6 @@ export function ColonyPage() {
               <p className="life-note">{tx("life.colonyMiss")}</p>
             ) : null}
             <ColonyCensus census={census} tx={tx} />
-            <div className="life-kin">
-              <button
-                type="button"
-                onClick={onConnect}
-                disabled={busy || !deployment}
-              >
-                {wallet ? shortAddr(wallet) : tx("life.connect")}
-              </button>
-              {wallet ? (
-                <>
-                  <p className="life-meta">
-                    {tx("life.mineCount", {
-                      n: souls.filter(
-                        (soul) =>
-                          soul.owner?.toLowerCase() === wallet.toLowerCase(),
-                      ).length,
-                    })}
-                  </p>
-                  <label className="colony-mine">
-                    <input
-                      type="checkbox"
-                      checked={mineOnly}
-                      onChange={(event) => setMineOnly(event.target.checked)}
-                    />
-                    {tx("ledger.mine")}
-                  </label>
-                </>
-              ) : null}
-            </div>
             <div className="life-cross-row">
               <SiteLink href={withNet("/habitat.html")} className="life-cross">
                 {tx("ledger.toHabitat")}
@@ -715,6 +736,14 @@ export function ColonyPage() {
         <section className="life-stage is-colony">
           <nav className="colony-tabs" aria-label={tx("nav.label")}>
             <a href="#explore">{tx("ledger.tab.explore")}</a>
+            <button
+              type="button"
+              className={`colony-tab-mine${mineOnly ? " is-on" : ""}`}
+              aria-pressed={mineOnly}
+              onClick={toggleMine}
+            >
+              ★ {tx("ledger.tab.mine")}
+            </button>
             <a href="#preview">{tx("ledger.tab.preview")}</a>
             <a href="#atlas">{tx("ledger.tab.atlas")}</a>
             <a href="#predict">{tx("ledger.tab.predict")}</a>
@@ -877,6 +906,13 @@ export function ColonyPage() {
                         }}
                       >
                         <FlyIndex soul={soul} />
+                        <span className="colony-rarity">
+                          {Number.isFinite(
+                            soul.phenotype?.scarcity?.expectedPer1024,
+                          )
+                            ? `≈${formatExpected(soul.phenotype.scarcity.expectedPer1024)}/1024`
+                            : "—"}
+                        </span>
                         <MarketThumb soul={soul} />
                         <strong>
                           <button
@@ -1015,6 +1051,67 @@ export function ColonyPage() {
                 </small>
               </div>
             </header>
+            {spotlight.length ? (
+              <div className="colony-spotlight-wrap">
+                <p className="colony-spotlight-lead">
+                  ✦{" "}
+                  {locale === "zh"
+                    ? "稀世形态 · 每 1024 只里最稀缺的 6 种"
+                    : "Rarest forms · the 6 scarcest per 1024"}
+                </p>
+                <ol className="colony-spotlight">
+                  {spotlight.map((soul, index) => {
+                    const open = detailKey === colonyDetailKey(soul);
+                    return (
+                      <li
+                        key={`s-${soul.seed}`}
+                        className={`life-market-card is-preview is-spotlight is-clickable${open ? " is-open" : ""}`}
+                        style={{
+                          "--pheno-body":
+                            soul.phenotype?.art?.body || "#8a6a2a",
+                          "--spot": index,
+                        }}
+                        onClick={(event) => {
+                          if (cardChromeClick(event)) return;
+                          openDetail(soul);
+                        }}
+                      >
+                        <i
+                          className="colony-spotlight-ring"
+                          aria-hidden="true"
+                        />
+                        <span className="colony-spotlight-rank">
+                          {locale === "zh"
+                            ? `稀世 · ${index + 1}`
+                            : `RARE · ${index + 1}`}
+                        </span>
+                        <FlyIndex soul={soul} />
+                        <span className="colony-rarity">
+                          ≈{formatExpected(soul.expectedPer1024)}/1024
+                        </span>
+                        <MarketThumb soul={soul} />
+                        <strong>
+                          <button
+                            type="button"
+                            className="colony-card-name"
+                            onClick={() => openDetail(soul)}
+                          >
+                            {soul.phenotype.hue[locale] ||
+                              soul.phenotype.hue.en}
+                          </button>
+                        </strong>
+                        <FlyTraitRows soul={soul} locale={locale} />
+                        <p className="colony-unborn">
+                          {locale === "zh"
+                            ? "第0代 · 未出生"
+                            : "Gen 0 · Unborn"}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            ) : null}
             <p className="colony-lead">{tx("ledger.previewLead")}</p>
             {previewRows.length ? (
               <>
@@ -1035,6 +1132,9 @@ export function ColonyPage() {
                         }}
                       >
                         <FlyIndex soul={soul} />
+                        <span className="colony-rarity">
+                          ≈{formatExpected(soul.expectedPer1024)}/1024
+                        </span>
                         <MarketThumb soul={soul} />
                         <strong>
                           <button

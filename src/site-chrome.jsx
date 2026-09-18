@@ -9,7 +9,35 @@ import { BrandLockup } from "./vitruvian.jsx";
 import { LocaleContext } from "./locale-context.jsx";
 import { LocaleSwitch } from "./locale-switch.jsx";
 import { SiteCa } from "./seal-bar.jsx";
+import { loadOfficialToken } from "./token.mjs";
 import "./chrome.css";
+
+function XMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M18.244 2H21.5l-7.5 8.57L22.5 22h-6.59l-5.16-6.74L5.2 22H1.93l8.02-9.16L1.5 2h6.76l4.66 6.18L18.244 2Zm-1.16 18h1.81L7 3.9H5.06L17.084 20Z"
+      />
+    </svg>
+  );
+}
+
+export function SocialX({ href, tx, className = "bar-x" }) {
+  if (!href) return null;
+  return (
+    <a
+      className={className}
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={tx("public.openX")}
+    >
+      <XMark />
+      <span>{tx("public.openX")}</span>
+    </a>
+  );
+}
 
 export const FOCUS_FLY = "iff.focusFly";
 
@@ -176,10 +204,24 @@ export function SiteLink({ href, className, children, ...rest }) {
 
 export function SiteBar({ locale, setLocale, tx, current, trailing, token }) {
   const [open, setOpen] = useState(false);
+  const [remote, setRemote] = useState(null);
   const toggle = useRef(null);
   useEffect(() => {
     setOpen(false);
   }, [current]);
+  useEffect(() => {
+    if (token?.twitter) return;
+    let gone = false;
+    loadOfficialToken()
+      .then((next) => {
+        if (!gone) setRemote(next);
+      })
+      .catch(() => {});
+    return () => {
+      gone = true;
+    };
+  }, [token]);
+  const twitter = token?.twitter || remote?.twitter;
   return (
     <header
       className={`site-bar${open ? " is-menu-open" : ""}`}
@@ -194,6 +236,7 @@ export function SiteBar({ locale, setLocale, tx, current, trailing, token }) {
         <SiteBrand href="/" small />
         <SiteCa token={token} tx={tx} />
       </div>
+      <SocialX href={twitter} tx={tx} className="bar-x bar-x-dock" />
       <button
         className="site-menu-toggle"
         type="button"
@@ -208,6 +251,7 @@ export function SiteBar({ locale, setLocale, tx, current, trailing, token }) {
       <div className="site-bar-tools" id="site-navigation">
         <SiteNav tx={tx} current={current} onNavigate={() => setOpen(false)} />
         {trailing}
+        <SocialX href={twitter} tx={tx} />
         <LocaleSwitch locale={locale} onChange={setLocale} />
       </div>
     </header>

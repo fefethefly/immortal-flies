@@ -175,11 +175,43 @@ html {
 .site-nav a[aria-current="page"]::after {
   content: none;
 }
-.bar-x {
+.bar-x,
+.foot-trade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(240, 185, 11, 0.55);
+  background: rgba(240, 185, 11, 0.16);
+  color: var(--gold-bright, #fcd535);
   font-family: var(--mono, "IBM Plex Mono", monospace);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  color: var(--gold, #f0b90b);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.12s ease;
+}
+.bar-x svg,
+.foot-trade svg {
+  flex-shrink: 0;
+}
+.bar-x:hover,
+.foot-trade:hover {
+  border-color: var(--gold, #f0b90b);
+  background: var(--gold, #f0b90b);
+  color: var(--gold-ink, #0b0e11);
+}
+.bar-x:active,
+.foot-trade:active {
+  transform: scale(0.98);
+}
+.bar-x-dock {
+  display: none;
 }
 .site-ca {
   display: inline-flex;
@@ -338,7 +370,11 @@ html {
     min-height: 72px;
     padding: 10px 5%;
     flex-wrap: wrap;
-    gap: 0;
+    gap: 10px;
+  }
+  .site-bar-lead {
+    flex: 1 1 auto;
+    min-width: 0;
   }
   .site-bar .site-menu-toggle {
     display: flex;
@@ -350,6 +386,15 @@ html {
     background: #1c150c;
     color: #f0ead9;
     font-size: 14px;
+  }
+  .bar-x-dock {
+    display: inline-flex;
+    margin-left: auto;
+    min-width: 40px;
+    padding: 0 12px;
+  }
+  .site-bar-tools .bar-x {
+    display: none;
   }
   .site-bar .site-bar-tools {
     display: none;
@@ -403,5 +448,17 @@ html {
   .site-bar .site-lockup {
     height: 34px;
     max-width: 148px;
+  }
+  .bar-x-dock {
+    position: relative;
+    width: 40px;
+    padding: 0;
+  }
+  .bar-x-dock span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
   }
 }

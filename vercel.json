@@ -3,6 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    {
+      "source": "/nft/soul/:id/:seed/:file",
+      "destination": "/api/nft-soul-svg?id=:id&seed=:seed&file=:file"
+    },
     { "source": "/blueprint", "destination": "/blueprint.html" },
     { "source": "/economy", "destination": "/economy.html" },
     { "source": "/habitat", "destination": "/habitat.html" },
@@ -27,6 +31,15 @@
     {
       "source": "/token/official.json",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=60" }]
+    },
+    {
+      "source": "/mark/(app|ifs|seal).png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
     },
     {
       "source": "/contract/life/ImmortalSoul.deployment.json",

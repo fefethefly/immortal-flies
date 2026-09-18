@@ -4,7 +4,6 @@ import { LifeGlyph } from "./life-glyphs.jsx";
 import {
   FINANCIAL_PORTS,
   STIMULI,
-  formatBnb,
   formatToken,
   reflexOf,
   summarize,
@@ -44,9 +43,22 @@ import { useVenueQuotes } from "./use-venue-quotes.mjs";
 import {
   formatBpsPct,
   formatUsd,
-  headlineAsset,
   observationFromQuotes,
 } from "./venue-quotes.mjs";
+import {
+  formatBook,
+  hiveBook,
+  railMarket,
+  sensedAsset,
+} from "./paper-units.mjs";
+import {
+  connectOfficialPit,
+  fetchPitQuotes,
+  fetchPitView,
+  fetchPitWorld,
+  PitRunnerDown,
+  postPitStimulus,
+} from "./pit-live.mjs";
 import { createBranch, worldView } from "./brain/flyswarm/world.mjs";
 import {
   ColonyView,
@@ -78,13 +90,21 @@ export function PitPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const sessionRef = useRef(null);
+  const listingRef = useRef(null);
+  const liveRef = useRef(false);
   const remoteRef = useRef(null);
   const mirrorFailures = useRef(0);
+  const [live, setLive] = useState(false);
   const [remote, setRemote] = useState(null);
   const [creditRemote, setCreditRemote] = useState(null);
   const [vaultRemote, setVaultRemote] = useState(null);
-  const venueQuotes = useVenueQuotes({ enabled: ready, intervalMs: 3000 });
-  const headQuote = headlineAsset(venueQuotes);
+  const [venueQuotesLive, setVenueQuotesLive] = useState(null);
+  const venueQuotesLocal = useVenueQuotes({
+    enabled: ready && !live,
+    intervalMs: 3000,
+  });
+  const venueQuotes = live ? venueQuotesLive : venueQuotesLocal;
+  const rail = railMarket(view, venueQuotes);
 
   const stats = useMemo(() => (view ? summarize(view) : null), [view]);
   const fly = view
@@ -97,7 +117,7 @@ export function PitPage() {
   const wash =
     lastStim && view && view.tick - lastStim.tick < 12 ? lastStim.kind : null;
   const lastFill = view
-    ? view.trades.find((row) => row.flyId === fly?.id) || view.trades[0]
+    ? view.trades.find((row) => row.flyId === fly?.id && row.tick === view.tick)
     : null;
   const labels = Object.fromEntries(
     STIMULI.map((kind) => [kind, tx(`pit.stim.${kind}`)]),
@@ -107,12 +127,12 @@ export function PitPage() {
   );
 
   useEffect(() => {
-    setNotice(tx("pit.noticeOpen"));
-  }, [locale]);
+    setNotice(live ? tx("pit.noticeLive") : tx("pit.noticeOpen"));
+  }, [locale, live]);
 
   // 可选后端：创建同种子的服务端镜像会话（存档 + LLM）。失败只降级，不阻塞本地场。
   useEffect(() => {
-    if (!ready) return undefined;
+    if (!ready || live) return undefined;
     let cancelled = false;
     (async () => {
       try {
@@ -138,7 +158,7 @@ export function PitPage() {
 
   // 只读 Kyber 报价注入本地 market-feed（成交仍 SIM）。静态站无 /v1 时走浏览器直连。
   useEffect(() => {
-    if (!ready || !venueQuotes?.enabled) return;
+    if (!ready || live || !venueQuotes?.enabled) return;
     const obs = observationFromQuotes(venueQuotes);
     if (!obs) return;
     const session = sessionRef.current;
@@ -244,9 +264,35 @@ export function PitPage() {
     let cancelled = false;
     (async () => {
       try {
+        const connected = await connectOfficialPit();
+        if (cancelled) return;
+        if (connected.mode === "live") {
+          listingRef.current = connected.listing;
+          liveRef.current = true;
+          setLive(true);
+          setView(connected.view);
+          if (connected.world) setWorld(connected.world);
+          if (connected.quotes) setVenueQuotesLive(connected.quotes);
+          setReady(true);
+          setNotice(tx("pit.noticeLive"));
+          return;
+        }
+      } catch (err) {
+        if (cancelled) return;
+        if (err instanceof PitRunnerDown || err?.code === "PIT_RUNNER_DOWN") {
+          liveRef.current = false;
+          setLive(false);
+          setError(tx("pit.liveDown"));
+          return;
+        }
+        console.warn("[pit] live boot failed", err);
+      }
+      try {
         const { session, discarded } = await bootPitSession();
         if (cancelled) return;
         sessionRef.current = session;
+        liveRef.current = false;
+        setLive(false);
         setView(pitView(session));
         setWorld(worldView(session));
         setReady(true);
@@ -264,29 +310,42 @@ export function PitPage() {
 
   // 主循环：每秒一个完整蝇群协议 tick（话语/记忆/聚合 + 纸面世界），空闲时不推进。
   useEffect(() => {
-    if (!ready || !running) return undefined;
+    if (!ready) return undefined;
+    if (!live && !running) return undefined;
     let busy = false;
     const id = setInterval(async () => {
-      if (busy || document.hidden) return;
+      if (busy) return;
+      if (!liveRef.current && document.hidden) return;
       busy = true;
       try {
-        const next = await stepPit(sessionRef.current);
-        setView(next);
-        setWorld(worldView(sessionRef.current));
-        mirror((r) =>
-          iffApi.tick(
-            r.sessionId,
-            r.ownerToken,
-            `t${sessionRef.current.kernel.colony.tick}`,
-          ),
-        );
-        try {
-          localStorage.setItem(
-            PIT_STORE,
-            JSON.stringify(savePitSession(sessionRef.current)),
+        if (liveRef.current && listingRef.current) {
+          const [next, worldNext, quotes] = await Promise.all([
+            fetchPitView(listingRef.current),
+            fetchPitWorld(listingRef.current).catch(() => null),
+            fetchPitQuotes(listingRef.current),
+          ]);
+          setView(next);
+          if (worldNext) setWorld(worldNext);
+          if (quotes) setVenueQuotesLive(quotes);
+        } else if (sessionRef.current) {
+          const next = await stepPit(sessionRef.current);
+          setView(next);
+          setWorld(worldView(sessionRef.current));
+          mirror((r) =>
+            iffApi.tick(
+              r.sessionId,
+              r.ownerToken,
+              `t${sessionRef.current.kernel.colony.tick}`,
+            ),
           );
-        } catch {
-          /* 私有模式仍可运行，只是不持久 */
+          try {
+            localStorage.setItem(
+              PIT_STORE,
+              JSON.stringify(savePitSession(sessionRef.current)),
+            );
+          } catch {
+            /* 私有模式仍可运行，只是不持久 */
+          }
         }
       } catch (err) {
         console.warn("[pit] tick failed:", err?.stack || err);
@@ -295,7 +354,7 @@ export function PitPage() {
       busy = false;
     }, 1000);
     return () => clearInterval(id);
-  }, [ready, running]);
+  }, [ready, live, running]);
 
   function selectFly(id) {
     setSelected(id);
@@ -310,6 +369,19 @@ export function PitPage() {
 
   function pulse(kind) {
     try {
+      if (liveRef.current && listingRef.current) {
+        postPitStimulus(listingRef.current, { kind, intensity }).then(
+          (next) => {
+            setView(next);
+            setError("");
+            setNotice(tx("pit.noticePulse", { label: labels[kind] }));
+          },
+          (err) => {
+            setError(err.message);
+          },
+        );
+        return;
+      }
       pulsePit(sessionRef.current, kind, intensity);
       mirror((r) =>
         iffApi.stimulus(r.sessionId, r.ownerToken, { kind, intensity }),
@@ -345,7 +417,7 @@ export function PitPage() {
   }
 
   function branchNow() {
-    if (!sessionRef.current) return;
+    if (!sessionRef.current || liveRef.current) return;
     const branch = createBranch(sessionRef.current, `exp-${view?.tick ?? 0}`);
     setWorld(worldView(sessionRef.current));
     setNotice(`${tx("colony.branchDone")} · ${branch.id}`);
@@ -432,9 +504,14 @@ export function PitPage() {
                   <span className="stage-frame tl" />
                   <span className="stage-frame br" />
                   <div className="stage-notes">
-                    <span>MALECNS / 12000 NODES / TRADER</span>
                     <span>
-                      TICK #{view.tick} · {formatBnb(stats.bnb)} BNB
+                      {view.host?.kind === "full"
+                        ? `MALECNS-FULL / ${Number(view.host.neurons || 0).toLocaleString("en-US")} NODES / ${view.host.size || 1} FLY`
+                        : "MALECNS / 12000 NODES / TRADER"}
+                    </span>
+                    <span>
+                      TICK #{view.tick} ·{" "}
+                      {formatBook(view.market, hiveBook(view)).equity}
                     </span>
                   </div>
                   <PitCanvas
@@ -449,7 +526,11 @@ export function PitPage() {
                     <em className={reflex?.side.toLowerCase()}>
                       {reflex?.side || "—"}
                     </em>
-                    <PriceMark price={view.market.price} />
+                    <PriceMark
+                      price={view.market.price}
+                      mark={view.market.mark}
+                      assetId={view.market.assetId}
+                    />
                   </div>
                   <p className="stage-caption">{tx("pit.caption")}</p>
                 </div>
@@ -473,6 +554,8 @@ export function PitPage() {
                       }
                       reflex={reflex}
                       trade={lastFill}
+                      hold={fly.hold}
+                      market={view.market}
                     />
                   ) : (
                     <p className="empty">{tx("pit.emptyFly")}</p>
@@ -498,7 +581,12 @@ export function PitPage() {
                         caption={tx("pheno.claim")}
                         note={tx("pheno.note")}
                       />
-                      <BookSplit fly={fly} price={view.market.price} />
+                      <BookSplit
+                        fly={fly}
+                        price={view.market.price}
+                        mark={view.market.mark}
+                        assetId={view.market.assetId || view.hive?.assetId}
+                      />
                       <Balance fly={fly} />
                     </>
                   )}
@@ -517,6 +605,7 @@ export function PitPage() {
                     <button
                       className="primary"
                       onClick={() => setRunning((v) => !v)}
+                      disabled={live}
                     >
                       {running ? <Pause size={14} /> : <Play size={14} />}
                       {running ? tx("pit.pause") : tx("pit.resume")}
@@ -524,7 +613,7 @@ export function PitPage() {
                     <button
                       className="ghost"
                       onClick={cullNow}
-                      disabled={stats.alive < 2}
+                      disabled={live || stats.alive < 2}
                     >
                       {tx("pit.settleNow")}
                     </button>
@@ -553,7 +642,7 @@ export function PitPage() {
                     {tx("pit.riverHint", { n: Math.min(18, stats.trades) })}
                   </small>
                 </h2>
-                <TradeRiver trades={view.trades} />
+                <TradeRiver trades={view.trades} market={view.market} />
               </div>
             </section>
 
@@ -612,7 +701,11 @@ export function PitPage() {
                   ))}
                 </div>
                 <div className="card-foot">
-                  <span>MALECNS / 1,400 NODE SUBGRAPH</span>
+                  <span>
+                    {view.host?.kind === "full"
+                      ? `MALECNS-FULL / ${Number(view.host.neurons || 0).toLocaleString("en-US")} NODE`
+                      : "MALECNS / 1,400 NODE SUBGRAPH"}
+                  </span>
                   <span>REPLAYABLE</span>
                 </div>
               </div>
@@ -631,38 +724,34 @@ export function PitPage() {
                   </b>
                 </div>
                 <div className="market-price">
-                  {headQuote
-                    ? formatUsd(headQuote.usd)
-                    : formatBnb(view.market.price)}{" "}
+                  {rail.value}{" "}
                   <small>
-                    {headQuote
-                      ? `${headQuote.symbol} / USDT`
-                      : view.market.focusAssetId || venueQuotes?.focus?.assetId
-                        ? `FOCUS ${view.market.focusAssetId || venueQuotes.focus.assetId}`
-                        : "BNB / IFS"}
+                    {rail.kind === "usd"
+                      ? `${rail.symbol} / USDT`
+                      : "BNB / paper IFS"}
                   </small>
                 </div>
-                {Array.isArray(venueQuotes?.assets) && venueQuotes.assets.length > 0 && (
-                  <div className="venue-quotes" aria-label="venue quotes">
-                    {venueQuotes.assets.map((a) => (
-                      <span
-                        key={a.id}
-                        className={
-                          venueQuotes.focus?.assetId === a.id ||
-                          headQuote?.id === a.id
-                            ? "venue-quote focus"
-                            : "venue-quote"
-                        }
-                      >
-                        <b>{a.symbol}</b>{" "}
-                        {a.usd != null ? formatUsd(a.usd) : "—"}{" "}
-                        {formatBpsPct(a.changeBps)}
-                        {a.stale ? " · stale" : ""}
-                      </span>
-                    ))}
-                    <em className="venue-note">{tx("pit.venueNote")}</em>
-                  </div>
-                )}
+                {Array.isArray(venueQuotes?.assets) &&
+                  venueQuotes.assets.length > 0 && (
+                    <div className="venue-quotes" aria-label="venue quotes">
+                      {venueQuotes.assets.map((a) => (
+                        <span
+                          key={a.id}
+                          className={
+                            rail.loopId === a.id
+                              ? "venue-quote focus"
+                              : "venue-quote"
+                          }
+                        >
+                          <b>{a.symbol}</b>{" "}
+                          {a.usd != null ? formatUsd(a.usd) : "—"}{" "}
+                          {formatBpsPct(a.changeBps)}
+                          {a.stale ? " · stale" : ""}
+                        </span>
+                      ))}
+                      <em className="venue-note">{tx("pit.venueNote")}</em>
+                    </div>
+                  )}
                 <div className="market-lines">
                   {(view.prices || []).slice(-18).map((price, i, arr) => {
                     const min = Math.min(...arr);
@@ -704,6 +793,7 @@ export function PitPage() {
                 board={stats.board}
                 selectedId={fly?.id}
                 onSelect={selectFly}
+                market={view.market}
               />
             </section>
           </>
@@ -761,7 +851,11 @@ export function PitPage() {
           </span>
           <p>
             <RichText
-              text={tx("pit.footer")}
+              text={tx(
+                live || view.host?.kind === "full"
+                  ? "pit.footerLive"
+                  : "pit.footer",
+              )}
               tags={{
                 field: <a href="/field.html">{tx("nav.field")}</a>,
                 altar: <a href="/blueprint.html">{tx("nav.altar")}</a>,
@@ -770,7 +864,7 @@ export function PitPage() {
             />
           </p>
           <small>
-            BUY {stats.buys} · SELL {stats.sells} · IFL{" "}
+            BUY {stats.buys} · SELL {stats.sells} · {sensedAsset(view.market)}{" "}
             {formatToken(stats.token)}
           </small>
         </footer>

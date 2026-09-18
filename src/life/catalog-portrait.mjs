@@ -22,8 +22,10 @@ export const CATALOG_WING_HINGES = Object.freeze({
 let catalogFlyPromise = null;
 let catalogFlyFailed = false;
 let catalogFlyData = null;
+let catalogFlyImage = null;
 const spriteCache = new Map();
 const SPRITE_MAX = 64;
+const CATALOG_NATIVE = 1254;
 
 /** 底图 420×420 ImageData。加载失败后记住，调用方走回退。 */
 export function loadCatalogFly() {
@@ -32,6 +34,7 @@ export function loadCatalogFly() {
     catalogFlyPromise = new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = () => {
+        catalogFlyImage = image;
         const buffer = document.createElement("canvas");
         buffer.width = buffer.height = CATALOG_RASTER;
         const ctx = buffer.getContext("2d", { willReadFrequently: true });
@@ -45,6 +48,7 @@ export function loadCatalogFly() {
         catalogFlyFailed = true;
         catalogFlyPromise = null;
         catalogFlyData = null;
+        catalogFlyImage = null;
         reject(new Error("Portrait unavailable"));
       };
       image.src = CATALOG_SRC;
@@ -89,6 +93,32 @@ export function catalogSprite(art = {}) {
     0,
     0,
   );
+  if (spriteCache.size >= SPRITE_MAX) spriteCache.clear();
+  spriteCache.set(key, canvas);
+  return canvas;
+}
+
+/**
+ * 出生卡等比放大：从原图上色，避免 420 栅格再拉大发糊。
+ * 超过原图像素边长时仍停在原图，不凭空插值。
+ */
+export function catalogSpriteAt(art = {}, size = CATALOG_RASTER) {
+  const want = Math.max(
+    CATALOG_RASTER,
+    Math.min(CATALOG_NATIVE, Math.round(Number(size) || CATALOG_RASTER)),
+  );
+  if (want === CATALOG_RASTER || !catalogFlyImage) return catalogSprite(art);
+  const key = `${catalogSpriteKey(art)}@${want}`;
+  const hit = spriteCache.get(key);
+  if (hit) return hit;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = want;
+  const g = canvas.getContext("2d", { willReadFrequently: true });
+  g.imageSmoothingEnabled = true;
+  g.imageSmoothingQuality = "high";
+  g.drawImage(catalogFlyImage, 0, 0, want, want);
+  const tinted = tintCatalogPixels(g.getImageData(0, 0, want, want), art);
+  g.putImageData(new ImageData(tinted.data, want, want), 0, 0);
   if (spriteCache.size >= SPRITE_MAX) spriteCache.clear();
   spriteCache.set(key, canvas);
   return canvas;

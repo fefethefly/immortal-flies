@@ -1,0 +1,12 @@
+{
+  "status": "LIVE",
+  "audit": "SIM",
+  "yield": false,
+  "fill": "SIM",
+  "chainId": 56,
+  "url": "https://pit-production-56b5.up.railway.app",
+  "health": "https://pit-production-56b5.up.railway.app/health",
+  "dataset": "malecns-full",
+  "size": 1,
+  "note": "Hosted full MaleCNS paper pit. Kyber quotes drive sense. Fills stay SIM. Separate from the mining PrivateRunner."
+}

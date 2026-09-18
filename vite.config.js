@@ -1,4 +1,5 @@
 import { verifyGenesisAssets } from "./scripts/verify-life-genesis.mjs";
+import { attachSoulTokenSvgServer } from "./src/life/soul-token-svg.mjs";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -45,6 +46,11 @@ export default defineConfig({
     },
   },
   plugins: [
+    {
+      name: "soul-token-svg",
+      configureServer: attachSoulTokenSvgServer,
+      configurePreviewServer: attachSoulTokenSvgServer,
+    },
     {
       name: "verify-pinned-genesis",
       apply: "build",

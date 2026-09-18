@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHabitat, stepHabitat, feedBody } from "../src/life/habitat-sim.mjs";
 import {
+  habitatArchiveAlert,
   habitatStorageKey,
   restoreHabitat,
   saveHabitat,
@@ -60,4 +61,11 @@ test("missing storage never breaks habitat boot", () => {
   const bomb = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
   assert.equal(loadHabitat(bomb, "k", SOULS(OWNER)).status, "unavailable");
   assert.equal(saveHabitat(bomb, "k", createHabitat([]), [], new Map()), false);
+});
+
+test("habitat rail only surfaces archive alerts, not routine save copy", () => {
+  assert.equal(habitatArchiveAlert("new"), false);
+  assert.equal(habitatArchiveAlert("restored"), false);
+  assert.equal(habitatArchiveAlert("invalid"), true);
+  assert.equal(habitatArchiveAlert("unavailable"), true);
 });

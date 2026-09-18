@@ -2,9 +2,25 @@
  * 浏览器侧只读报价：先问本机 /v1/venue/quotes，没有服务端就直连 Kyber GET /routes。
  * 不 import venue.mjs（那里有 node:fs）。不成交、无 calldata。
  */
-import { usdPerToken, formatUsd, formatBpsPct } from "./venue-price.mjs";
+import {
+  usdPerToken,
+  formatUsd,
+  formatBpsPct,
+  priceAtomsFromUsd,
+  formatUsdSigned,
+  usdFromAtoms,
+  saneUsdAtoms,
+} from "./venue-price.mjs";
 
-export { usdPerToken, formatUsd, formatBpsPct };
+export {
+  usdPerToken,
+  formatUsd,
+  formatBpsPct,
+  priceAtomsFromUsd,
+  formatUsdSigned,
+  usdFromAtoms,
+  saneUsdAtoms,
+};
 export const WATCHLIST_PATH = "/token/venue-watchlist.json";
 export const KYBER_ROUTES =
   "https://aggregator-api.kyberswap.com/bsc/api/v1/routes";
@@ -69,9 +85,7 @@ export function decorateQuotes(raw, source = "server") {
     quote: live.length > 0 ? "LIVE" : raw.quote || null,
     fill: "SIM",
     assets,
-    focus: focus
-      ? { ...focus, usd: focus.usd ?? null }
-      : raw.focus || null,
+    focus: focus ? { ...focus, usd: focus.usd ?? null } : raw.focus || null,
   };
 }
 
@@ -79,7 +93,8 @@ async function fetchWatchlist(fetchImpl) {
   const res = await fetchImpl(WATCHLIST_PATH, { cache: "no-store" });
   if (!res.ok) throw new Error("WATCHLIST_FETCH");
   const list = await res.json();
-  if (list?.schema !== "iff.venue-watchlist/1") throw new Error("WATCHLIST_SCHEMA");
+  if (list?.schema !== "iff.venue-watchlist/1")
+    throw new Error("WATCHLIST_SCHEMA");
   return list;
 }
 
@@ -103,7 +118,8 @@ async function fetchKyberAmount(list, asset, fetchImpl) {
   }
   return {
     amountOut,
-    amountOutUsd: summary.amountOutUsd != null ? String(summary.amountOutUsd) : null,
+    amountOutUsd:
+      summary.amountOutUsd != null ? String(summary.amountOutUsd) : null,
   };
 }
 
@@ -121,10 +137,7 @@ function bpsFromPrev(prevOut, nextOut) {
 /**
  * @param {{ fetchImpl?: typeof fetch, prev?: object }} [opts]
  */
-export async function loadVenueQuotes({
-  fetchImpl = fetch,
-  prev = null,
-} = {}) {
+export async function loadVenueQuotes({ fetchImpl = fetch, prev = null } = {}) {
   try {
     const res = await fetchImpl("/v1/venue/quotes", { cache: "no-store" });
     if (res.ok) {
@@ -198,18 +211,20 @@ export async function loadVenueQuotes({
 }
 
 export function observationFromQuotes(quotes) {
-  const focus = quotes?.focus;
-  if (!focus?.assetId) return null;
-  const asset = (quotes.assets || []).find((a) => a.id === focus.assetId);
+  const focus = headlineAsset(quotes);
+  if (!focus?.id) return null;
+  const asset = (quotes.assets || []).find((a) => a.id === focus.id) || focus;
   const src = quotes.quoteToken?.address;
   const dst = asset?.address || focus.address;
+  const usdAtoms = priceAtomsFromUsd(focus.usd);
   if (!src || !dst || focus.changeBps == null) return null;
   return {
     payload: {
       changeBps: focus.changeBps,
       activity: Math.min(1000, Math.abs(focus.changeBps || 0)),
-      assetId: focus.assetId,
+      assetId: focus.id,
       mid: focus.mid ?? null,
+      ...(usdAtoms ? { usd: usdAtoms } : {}),
     },
     provenance: {
       kind: "aggregator-quote",
@@ -217,7 +232,7 @@ export function observationFromQuotes(quotes) {
       adapter: "kyberswap",
       src,
       dst,
-      assetId: focus.assetId,
+      assetId: focus.id,
       quotedAt: focus.quotedAt || Date.now(),
       quote: "LIVE",
       fill: "SIM",

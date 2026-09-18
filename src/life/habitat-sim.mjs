@@ -1,5 +1,22 @@
 const TAU = Math.PI * 2;
 
+/** One `stepHabitat` unit is 1/60s of dish time. Local vitality only — not MiningHub fuel. */
+export const HABITAT_ENERGY = Object.freeze({
+  max: 1000,
+  collapse: 1,
+  faint: 140,
+  hungry: 320,
+  sated: 720,
+  wake: 160,
+  takeoff: 340,
+  restCeiling: 560,
+  flyDrain: 0.018,
+  thrustDrain: 0.008,
+  walkRecover: 0.035,
+  downRecover: 0.028,
+  gustDrain: 0.12,
+});
+
 function hash32(text) {
   let h = 2166136261;
   const raw = String(text || "");
@@ -18,10 +35,10 @@ function wrapAngle(a) {
 
 export function hungerOf(energy) {
   const n = Number(energy) || 0;
-  if (n <= 1) return "collapsed";
-  if (n < 140) return "faint";
-  if (n < 320) return "hungry";
-  if (n < 720) return "sated";
+  if (n <= HABITAT_ENERGY.collapse) return "collapsed";
+  if (n < HABITAT_ENERGY.faint) return "faint";
+  if (n < HABITAT_ENERGY.hungry) return "hungry";
+  if (n < HABITAT_ENERGY.sated) return "sated";
   return "full";
 }
 
@@ -30,13 +47,14 @@ export function thoughtOf(soul, locale = "en", body) {
   const hue = soul.phenotype?.hue?.[locale] || soul.phenotype?.hue?.en || "amber";
   const eye = soul.phenotype?.eye?.[locale] || soul.phenotype?.eye?.en || "wild";
   if (locale === "zh") {
-    if (hunger === "collapsed") return "它倒下了。链上的灵魂还在。投食能唤醒，不会删掉。";
+    if (hunger === "collapsed")
+      return "它歇下了。歇一会儿会自己起来。投食能快一点。链上的灵魂还在。";
     if (hunger === "faint") return `${hue}躯体已经很轻。它还走得动，但飞不起来。`;
     if (hunger === "hungry") return `${hue}躯体，${eye}眼。它在找地上的食物。`;
     return `${hue}躯体，${eye}眼。动作是本地演算；链上只记刺激与所有权。`;
   }
   if (hunger === "collapsed") {
-    return "It collapsed. The soul is still on-chain. Food wakes it. This is not deletion.";
+    return "It is resting. A short rest wakes it. Food is faster. The soul is still on-chain.";
   }
   if (hunger === "faint") {
     return `${hue} body, almost empty. It can walk. It cannot fly.`;
@@ -150,7 +168,7 @@ export function feedBody(state, tokenId, amount = 220) {
   const body = state.bodies.find((item) => item.tokenId === tokenId);
   if (!body) return state;
   const collapsed = hungerOf(body.energy) === "collapsed";
-  body.energy = Math.min(1000, body.energy + amount);
+  body.energy = Math.min(HABITAT_ENERGY.max, body.energy + amount);
   if (collapsed) body.energy = Math.max(body.energy, 260);
   if (collapsed) {
     body.mode = "takeoff";
@@ -161,8 +179,8 @@ export function feedBody(state, tokenId, amount = 220) {
   return state;
 }
 
-/** Look-at the dish centre. Zoom < 1 leaves air around the plate. */
-export const HABITAT_VIEW = Object.freeze({ x: 0.5, y: 0.5, zoom: 0.84 });
+/** Look-at the dish centre at the farthest zoom the page allows. */
+export const HABITAT_VIEW = Object.freeze({ x: 0.5, y: 0.5, zoom: 0.5 });
 
 export function resetCamera(camera = {}) {
   camera.x = HABITAT_VIEW.x;
@@ -253,12 +271,21 @@ function tickHabitat(state, step) {
       body.saccade = 0;
       body.bank *= 0.8;
       body.pitch *= 0.8;
+      body.energy = Math.min(
+        HABITAT_ENERGY.restCeiling,
+        body.energy + HABITAT_ENERGY.downRecover * step,
+      );
+      body.hunger = hungerOf(body.energy);
+      if (body.energy >= HABITAT_ENERGY.wake) body.mode = "walk";
       continue;
     }
 
     const traits = traitsOf(body.seed);
     const hungry = body.hunger === "hungry" || body.hunger === "faint";
     const tired = body.hunger === "faint";
+    const grounded =
+      body.mode === "walk" || body.mode === "land" || body.mode === "down";
+    const resting = tired || (grounded && body.energy < HABITAT_ENERGY.takeoff);
     const crumb = hungry
       ? state.food.reduce((best, item) => {
           if (!best) return item;
@@ -288,18 +315,18 @@ function tickHabitat(state, step) {
       if (Math.hypot(gust.x - body.x, gust.y - body.y) < gust.r) {
         startSaccade(body, wrapAngle(inward + (noise01(state.tick, body.seed, "gust") - 0.5) * 2), 8);
         body.vz += 0.003 * step;
-        body.energy = Math.max(0, body.energy - 1.4 * step);
+        body.energy = Math.max(0, body.energy - HABITAT_ENERGY.gustDrain * step);
       }
     }
 
-    if (tired) {
+    if (resting) {
       body.mode = body.alt > 0.008 ? "land" : "walk";
     } else if (body.mode === "takeoff") {
       body.takeoff = Math.max(0, (body.takeoff || 0) - step);
       if (body.takeoff <= 0) body.mode = "fly";
     } else if (body.mode === "land") {
       if (body.alt <= 0.006) body.mode = "walk";
-    } else if (body.mode === "walk" && body.energy > 340) {
+    } else if (body.mode === "walk" && body.energy > HABITAT_ENERGY.takeoff) {
       body.mode = "takeoff";
       body.takeoff = 12;
       body.vz = 0.005;
@@ -395,10 +422,22 @@ function tickHabitat(state, step) {
       : 0;
 
     if (crumb && crumbDist < 0.028) {
-      body.energy = Math.min(1000, body.energy + 90);
+      body.energy = Math.min(HABITAT_ENERGY.max, body.energy + 90);
       crumb.life = 0;
     }
-    body.energy = Math.max(0, body.energy - (0.46 + body.thrust * 0.2) * step);
+    if (airborne) {
+      body.energy = Math.max(
+        0,
+        body.energy -
+          (HABITAT_ENERGY.flyDrain + body.thrust * HABITAT_ENERGY.thrustDrain) *
+            step,
+      );
+    } else if (body.energy < HABITAT_ENERGY.restCeiling) {
+      body.energy = Math.min(
+        HABITAT_ENERGY.restCeiling,
+        body.energy + HABITAT_ENERGY.walkRecover * step,
+      );
+    }
     body.hunger = hungerOf(body.energy);
 
     if (body.x < 0.07) {
@@ -434,7 +473,7 @@ export function applyStimulus(state, tokenId, kind, intensity = 640) {
     body.vz = 0.008;
   } else if (kind === 2) {
     body.dart = 34;
-    body.energy = Math.min(1000, body.energy + 36 * scale);
+    body.energy = Math.min(HABITAT_ENERGY.max, body.energy + 36 * scale);
     body.mode = "takeoff";
     body.takeoff = 10;
     body.vz = 0.01;

@@ -227,9 +227,50 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 28px;
 }
+@keyframes figureIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ruleDraw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
 .protocol-research-steps li {
-  border-top: 1px solid var(--line);
-  padding: 24px 0;
+  border-top: 0;
+  padding: 24px 0 0;
+  position: relative;
+}
+.protocol-research-steps li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--line);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.protocol-research[data-reveal="in"] .protocol-research-steps li,
+.protocol-research[data-reveal="done"] .protocol-research-steps li {
+  animation: figureIn 0.7s var(--ease) both;
+  animation-delay: calc(var(--step, 0) * 90ms);
+}
+.protocol-research[data-reveal="in"] .protocol-research-steps li::before,
+.protocol-research[data-reveal="done"] .protocol-research-steps li::before {
+  background: rgba(240, 185, 11, 0.55);
+  animation: ruleDraw 0.8s var(--ease) both;
+  animation-delay: calc(var(--step, 0) * 90ms);
 }
 .protocol-research-steps span {
   font: 12px var(--mono);
@@ -393,5 +434,13 @@
 @media (prefers-reduced-motion: reduce) {
   .protocol-specimen img {
     animation: none;
+  }
+  .protocol-research-steps li,
+  .protocol-research-steps li::before {
+    animation: none;
+    transform: none;
+  }
+  .protocol-research-steps li::before {
+    transform: scaleX(1);
   }
 }

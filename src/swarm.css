@@ -477,6 +477,16 @@ button:active:not(:disabled) {
   font:
     500 20px/1 "Barlow Condensed",
     var(--mono);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.book-split strong small {
+  font: 11px/1.2 var(--mono);
+  color: #8a8172;
+  letter-spacing: 0.04em;
 }
 .book-split i,
 .book-split i.inv {

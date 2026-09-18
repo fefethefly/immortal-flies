@@ -39,7 +39,7 @@ import {
   sortListed,
   writeMarketView,
 } from "./market.mjs";
-import { MarketThumb } from "./market-thumb.jsx";
+import { CatalogPortrait } from "./catalog-portrait.jsx";
 import { FlyTraitRows, FlyVital } from "./fly-card.jsx";
 import { labelOf } from "./names.mjs";
 import { withNet } from "./net.mjs";
@@ -153,9 +153,6 @@ export function MarketPage() {
       if (focusId) hintIds.push(focusId);
       const rows = await loadOpenListings(market, dep.fromBlock || 0, hintIds);
       setRawAsks(rows);
-      setActivity(
-        await loadMarketActivity(market, dep.fromBlock || 0).catch(() => []),
-      );
       try {
         setFeeBps(Number(await market.feeBps()));
       } catch {
@@ -177,6 +174,9 @@ export function MarketPage() {
         }
       }
       setAsksReady(true);
+      setActivity(
+        await loadMarketActivity(market, dep.fromBlock || 0).catch(() => []),
+      );
     },
     [deployment, extras, focusId, setSouls],
   );
@@ -788,7 +788,7 @@ export function MarketPage() {
                       "--pheno-body": soul?.phenotype?.art?.body || "#8a6a2a",
                     }}
                   >
-                    <MarketThumb soul={soul} />
+                    <CatalogPortrait soul={soul} />
                     <strong>
                       {soul?.givenName ||
                         (soul ? labelOf(soul, locale) : `#${row.tokenId}`)}{" "}
@@ -963,7 +963,7 @@ export function MarketPage() {
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id="market-buy-title">{tx("market.buyTitle")}</h2>
-            <MarketThumb soul={buying.soul} />
+            <CatalogPortrait soul={buying.soul} />
             <FlyTraitRows soul={buying.soul} locale={locale} />
             <FlyVital soul={buying.soul} locale={locale} tx={tx} />
             <p>{tx("market.buyConfirm", { id: buying.tokenId })}</p>

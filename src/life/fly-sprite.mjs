@@ -37,7 +37,7 @@ function poseOf(opts = {}) {
 /**
  * 萌系果蝇的外接框（本地坐标，span=58 为基准）：
  * 左右翅尖 ±37.5，触角球到上缘 -39，接触影到下缘 +34。
- * 卡片、全息、出生卡都按这个框反推 span，避免裁掉触角或翅膀。
+ * 卡片与全息按这个框反推 span，避免裁掉触角或翅膀。
  */
 export const FLY_BOX = Object.freeze({
   per: 58,

@@ -1,0 +1,96 @@
+.hatch-wait {
+  display: grid;
+  gap: 6px;
+  max-width: 36rem;
+  margin: 0 0 12px;
+  padding: 12px 12px 10px;
+  border: 1px solid #4a3c24;
+  background: rgba(20, 16, 10, 0.88);
+}
+
+.hatch-wait[data-stage="sign1"],
+.hatch-wait[data-stage="sign2"],
+.hatch-wait[data-stage="retry"] {
+  border-color: #c4a56a;
+}
+
+.hatch-wait[data-stage="expired"] {
+  border-color: #8a5348;
+}
+
+.hatch-wait-kicker {
+  font: 9px / 1 var(--mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c4a56a;
+}
+
+.hatch-wait-title,
+.hatch-wait-lead,
+.hatch-wait-count {
+  margin: 0;
+}
+
+.hatch-wait-title {
+  color: #f0ead9;
+  font: 13px / 1.4 var(--sans, "IBM Plex Sans", sans-serif);
+}
+
+.hatch-wait-lead {
+  color: #9a8c72;
+  font: 12px / 1.45 var(--sans, "IBM Plex Sans", sans-serif);
+}
+
+.hatch-wait-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.hatch-wait-tick {
+  height: 3px;
+  background: #2a241c;
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.hatch-wait-tick.is-on {
+  background: var(--gold-bright, #fcd535);
+}
+
+.hatch-wait-tick.is-now {
+  background: #c4a56a;
+  animation: hatch-wait-pulse 1.15s ease-in-out infinite;
+}
+
+.hatch-wait-count {
+  color: #c4a56a;
+  font: 11px / 1.4 var(--mono, "IBM Plex Mono", monospace);
+}
+
+.hatch-wait.is-compact {
+  margin: 8px 0 0;
+  padding: 10px 10px 8px;
+}
+
+.hatch-wait.is-compact .hatch-wait-title {
+  font-size: 12px;
+}
+
+@keyframes hatch-wait-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hatch-wait-tick.is-now {
+    animation: none;
+    opacity: 1;
+  }
+}

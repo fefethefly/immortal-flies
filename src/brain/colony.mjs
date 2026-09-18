@@ -9,13 +9,24 @@ import { createOverlay, modulate } from "./learn.mjs";
 import { buildGenome, mutateRootOf } from "./flyswarm/genome.mjs";
 import { phenotypeOf } from "./flyswarm/phenotype.mjs";
 import {
+  admitFill,
+  edgeBpsOf,
+  edgeWindowOf,
+  emptyPort,
+  markFilled,
+  updateIntentStreak,
+} from "./fill-admit.mjs";
+import {
+  START_BNB,
   START_PRICE,
+  TOKEN_UNIT,
   bookOf,
   createSwarm,
   equityOf,
   random32,
   tickSwarm,
 } from "../swarm.mjs";
+import { saneUsdAtoms } from "../venue-price.mjs";
 
 /** One fly = one MaleCNS session + one paper book. The 24-node swarm is not used here. */
 function datasetOf(graph) {
@@ -44,6 +55,7 @@ export function createColony(graph, { size = 5, seed = 43, stepsPerTick = 6 } = 
       genome,
       ethology: null,
       intent: null,
+      port: emptyPort(),
     });
   }
   return {
@@ -57,8 +69,105 @@ export function createColony(graph, { size = 5, seed = 43, stepsPerTick = 6 } = 
     trades: [],
     nextId: size,
     lineage: [],
-    market: { price: START_PRICE, changeBps: 0 },
+    market: {
+      price: START_PRICE,
+      changeBps: 0,
+      mark: "IFS",
+      assetId: null,
+      quote: "SIM",
+      edgeWindow: [],
+    },
   };
+}
+
+/** Paper SIM starts at $1000/fly. 20× is past skill; leftover IFS inventory blows past it. */
+const BLOWN_EQUITY = START_BNB * 20;
+
+function liveBooksBlown(colony, price) {
+  const expected = Math.max(
+    1,
+    Math.trunc((START_BNB * 35 * TOKEN_UNIT) / 100 / price),
+  );
+  for (const member of colony.members) {
+    if (member.status !== "alive") continue;
+    const token = Number(member.book?.token) || 0;
+    if (
+      !Number.isSafeInteger(token) ||
+      !Number.isSafeInteger(token * price) ||
+      token > expected * 20
+    ) {
+      return true;
+    }
+    const equity = equityOf(member.book, price);
+    if (!Number.isSafeInteger(equity) || equity > BLOWN_EQUITY || equity < 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function reseedLiveBooks(colony, price) {
+  for (const member of colony.members) {
+    if (member.status !== "alive") continue;
+    member.book = seedBook(price);
+  }
+  colony.trades = [];
+}
+
+/** Relays a $1000 paper book at the current mark. Does not reset neural state. */
+export function resetSharedBook(colony) {
+  const marked = colony?.market?.mark === "USD";
+  const price = marked
+    ? saneUsdAtoms(colony.market.price) || START_PRICE
+    : Math.max(1, Math.trunc(Number(colony.market?.price) || START_PRICE));
+  reseedLiveBooks(colony, price);
+  for (const member of colony.members || []) {
+    if (member.status === "alive") member.port = emptyPort();
+  }
+  if (colony.market) colony.market.edgeWindow = [];
+  return { price, mark: colony.market?.mark || "IFS" };
+}
+
+/**
+ * Kyber USD 进场：第一次换标，或旧纸面库存/非法价把净值撑爆时，重铺 $1000 账本。
+ * 之后只更新标价，保留持仓。
+ * @returns {boolean} 是否重铺了账本
+ */
+export function applyLiveMark(colony, usdAtoms, { assetId = "WBNB" } = {}) {
+  const price = saneUsdAtoms(usdAtoms);
+  if (!price) return false;
+  const first = colony.market.mark !== "USD";
+  const blown = liveBooksBlown(colony, price);
+  colony.market.price = price;
+  colony.market.mark = "USD";
+  colony.market.quote = "LIVE";
+  colony.market.assetId = assetId || colony.market.assetId || "WBNB";
+  if (!first && !blown) return false;
+  reseedLiveBooks(colony, price);
+  return true;
+}
+
+/** Restore / boot: drop wei-scale marks and leftover IFS inventory marked as USD. */
+export function repairLiveBooks(colony) {
+  if (!colony?.market) return false;
+  if (colony.market.mark !== "USD") {
+    if (colony.market.price > 220_000) {
+      colony.market.price = START_PRICE;
+      reseedLiveBooks(colony, START_PRICE);
+      return true;
+    }
+    return false;
+  }
+  const price = saneUsdAtoms(colony.market.price);
+  if (!price) {
+    colony.market.mark = "IFS";
+    colony.market.quote = "SIM";
+    colony.market.assetId = null;
+    colony.market.price = START_PRICE;
+    reseedLiveBooks(colony, START_PRICE);
+    return true;
+  }
+  return applyLiveMark(colony, price, { assetId: colony.market.assetId });
 }
 
 export async function tickColony(colony, stimulus = {}, clock = 1_700_000_000_000) {
@@ -69,8 +178,18 @@ export async function tickColony(colony, stimulus = {}, clock = 1_700_000_000_00
   const now = clock + colony.tick * 1000;
   colony.tick += 1;
   colony.market.changeBps = changeBps;
-  if (changeBps) {
-    colony.market.price = Math.max(1200, colony.market.price + Math.trunc((colony.market.price * changeBps) / 10000));
+  colony.market.edgeWindow = edgeWindowOf(colony.market.edgeWindow, changeBps);
+  const edgeBps = edgeBpsOf(colony.market.edgeWindow);
+  const usdAtoms = saneUsdAtoms(stimulus.usdAtoms);
+  if (usdAtoms) {
+    applyLiveMark(colony, usdAtoms, {
+      assetId: stimulus.assetId || colony.market.assetId,
+    });
+  } else if (changeBps && colony.market.mark !== "USD") {
+    colony.market.price = Math.max(
+      1200,
+      colony.market.price + Math.trunc((colony.market.price * changeBps) / 10000),
+    );
   }
   for (const member of colony.members) {
     if (member.status !== "alive") continue;
@@ -103,13 +222,28 @@ export async function tickColony(colony, stimulus = {}, clock = 1_700_000_000_00
         quote: stimulus.quote || "SIM",
       };
     }
+    const port = updateIntentStreak(member, member.intent.side);
+    const admit = admitFill(member.intent, port, {
+      edgeBps,
+      tick: colony.tick,
+    });
+    member.intent = {
+      ...member.intent,
+      hold: admit.hold,
+      fill: null,
+    };
+    if (!admit.ok) continue;
     const trade = fillBook(member.book, colony.market.price, member.intent, colony.tick, member.id, {
       assetId: stimulus.assetId || null,
       mid: stimulus.mid ?? null,
       quoteSource: stimulus.quoteSource || "paper",
       quote: stimulus.quote || "SIM",
     });
-    if (trade) colony.trades.unshift(trade);
+    if (trade) {
+      member.intent = { ...member.intent, hold: null, fill: "SIM" };
+      markFilled(member, colony.tick);
+      colony.trades.unshift(trade);
+    }
   }
   colony.trades = colony.trades.slice(0, 500);
   return colony;
@@ -181,7 +315,7 @@ export function settleColony(colony, price = colony.market.price, tick = colony.
     parent: champ.id,
     status: "alive",
     session: new BrainSession(colony.graph, childState),
-    book: seedBook(),
+    book: seedBook(price),
     overlay: inheritOverlay(champ.overlay),
     genome: buildGenome({
       soulId: `colony-${id}`,
@@ -193,6 +327,7 @@ export function settleColony(colony, price = colony.market.price, tick = colony.
     }),
     ethology: null,
     intent: null,
+    port: emptyPort(),
   };
   colony.nextId += 1;
   colony.members.push(child);
