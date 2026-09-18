@@ -8,6 +8,7 @@
 [![Token](https://img.shields.io/badge/%24IFS-tax%20coin%20live-2775ca)](./docs/FLAP-LAUNCH.md)
 [![Soul](https://img.shields.io/badge/Soul-ImmortalSoul%20%2F%20phenotype--loci%2F3-9b59b6)](./docs/LIFE-PROTOCOL.md)
 [![Connectome](https://img.shields.io/badge/Connectome-MaleCNS%20v1.0%20(CC%20BY)-e74c3c)](./docs/CONNECTOME-MALE-CNS.md)
+[![Science](https://img.shields.io/badge/Science-connectomics%20%C2%B7%20LIF%20%C2%B7%20ethology-1b4f72)](#scientific-basis--selected-references)
 [![Host](https://img.shields.io/badge/Host-Vercel-000000?logo=vercel&logoColor=white)](https://immortalflies.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -148,6 +149,54 @@ npm run connectome:prepare -- --full  # full graph, large local download
 ```
 
 The interactive subgraph ships with the repo; the full graph is generated locally and not committed. Details: [docs/CONNECTOME-MALE-CNS.md](docs/CONNECTOME-MALE-CNS.md).
+
+## Scientific basis & selected references
+
+This project is an **engineering system informed by Drosophila neuroscience**, not a claim that a full biological brain, consciousness, or “swarm intelligence” has been reproduced on-chain. Canon identity uses the **adult male CNS connectome** (Janelia FlyEM MaleCNS v1.0, CC BY). Larval whole-brain and FlyWire female-brain datasets are treated as **different animals / stages** and must not silently replace MaleCNS body IDs ([biology spine](docs/BIOLOGY-SPINE-V6.md)).
+
+Design choices that cite the literature—and the limits of those citations—are recorded in [SWARM-PROTOCOL-REEVALUATION](docs/SWARM-PROTOCOL-REEVALUATION-2026-09-18.md). In short:
+
+| Literature supports | Literature does **not** license |
+| --- | --- |
+| Structure-constrained LIF models with testable sensory–motor predictions | Treating a connectome dump as learning, all behavior, or “wisdom” |
+| Fixed anatomy + estimated dynamics as a research path | Equating synapse counts with measured physiological efficacy |
+| Multi-timescale, neuromodulated memory motifs | Uniform whole-brain weight bumps as fly learning |
+| Local mechanosensory cascades in collective avoidance | Equating chat broadcast with touch circuits |
+| Cross-species mediation via explicit interfaces | Claiming the product already is that mediator |
+
+### Primary data
+
+1. **Janelia FlyEM MaleCNS v1.0** — adult male central nervous system connectome (annotations, neurotransmitter predictions, significant connection weights). Public release under **CC BY**: [male-cns.janelia.org](https://male-cns.janelia.org/download/). Processing rules: [CONNECTOME-MALE-CNS](docs/CONNECTOME-MALE-CNS.md).
+
+### Connectome-constrained modeling & ethology
+
+2. **Shiu, P. K. et al.** A leaky integrate-and-fire connectome model of *Drosophila* sensory–motor transformations (feeding / grooming). *Nature* **634**, (2024). [doi:10.1038/s41586-024-07763-9](https://www.nature.com/articles/s41586-024-07763-9)
+
+3. **Lappalainen, J. K. et al.** Connectome-constrained task-optimized models of the *Drosophila* visual system. *Nature* **634**, (2024). [doi:10.1038/s41586-024-07939-3](https://www.nature.com/articles/s41586-024-07939-3)
+
+4. **Huang, C. et al.** Dopamine-mediated interactions between short- and long-term memory systems in *Drosophila*. *Nature* **634**, (2024). [doi:10.1038/s41586-024-07819-w](https://www.nature.com/articles/s41586-024-07819-w)
+
+5. **Ramdya, P. et al.** Mechanosensory interactions drive collective behaviour in *Drosophila*. *Nature* **519**, 233–236 (2015). [doi:10.1038/nature14024](https://www.nature.com/articles/nature14024)
+
+6. **Kacsoh, B. Z. et al.** Social communication of predator-induced cues across *Drosophila* species. *PLOS Genetics* **14**, e1007430 (2018). [doi:10.1371/journal.pgen.1007430](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1007430)
+
+### Embodied simulation & cross-species mediation
+
+7. **Lobato-Rios, V. et al.** NeuroMechFly v2 — simulating embodied sensorimotor control in *Drosophila*. *Nature Methods* **21**, (2024). [doi:10.1038/s41592-024-02497-y](https://www.nature.com/articles/s41592-024-02497-y)
+
+8. **Bonnet, F. et al.** Robots mediating interaction between honeybees and zebrafish. *Science Robotics* **4**, eaau7897 (2019). [doi:10.1126/scirobotics.aau7897](https://doi.org/10.1126/scirobotics.aau7897)
+
+### Related datasets (contrast, not canon)
+
+9. **Winding, M. et al.** The connectome of an insect brain (larval *Drosophila*). *Science* **379**, eadd9330 (2023). Cited as a **separate developmental stage** — not interchangeable with MaleCNS body IDs.
+
+10. **Dorkenwald, S. et al. / FlyWire Consortium.** Neuronal wiring diagram of an adult female *Drosophila* brain. *Nature* (2024). Adult female brain without VNC; used only as a **contrast** to MaleCNS for locomotion completeness.
+
+### Methodological caution (engineering risk, not fly law)
+
+11. **Lorenz, J. et al.** How social influence can undermine the wisdom of crowd effect. *PNAS* **108**, 9020–9025 (2011). [PMC3107299](https://pmc.ncbi.nlm.nih.gov/articles/PMC3107299/) — cited when arguing that synchronizing “best experience” across agents can collapse diversity.
+
+Attribution for MaleCNS-derived graphs must remain **CC BY** ([NOTICE](NOTICE)). Papers above **inform** adapters, LIF runtime, ethology, and swarm-protocol design; they do **not** certify on-chain NFT state, paper trading, or marketing claims as peer-reviewed biological results.
 
 ## License
 
