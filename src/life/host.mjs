@@ -172,3 +172,131 @@ export function dailyLeft(maxUserDaily, spent) {
   const left = max - BigInt(spent || 0);
   return left < 0n ? 0n : left;
 }
+
+export const SEG_OPEN = 1;
+export const SEG_COMMITTED = 2;
+export const SEG_CHALLENGED = 3;
+export const SEG_SETTLED = 4;
+export const SEG_SLASHED = 5;
+export const SEG_VOID = 6;
+
+export function decodeSegment(row, id = "") {
+  if (!row) return null;
+  return {
+    id: String(id || ""),
+    tokenId: Number(row.tokenId ?? row[0] ?? 0),
+    runner: String(row.runner ?? row[2] ?? ZERO_ADDR),
+    steps: Number(row.steps ?? row[3] ?? 0),
+    status: Number(row.status ?? row[4] ?? 0),
+    fee: String(row.fee ?? row[5] ?? 0n),
+    startRoot: String(row.startRoot ?? row[9] ?? ZERO_HASH),
+    finalRoot: String(row.finalRoot ?? row[10] ?? ZERO_HASH),
+    challengeUntil: Number(row.challengeUntil ?? row[15] ?? 0),
+    paid: String(row.paid ?? row[18] ?? 0n),
+  };
+}
+
+export function decodeOperator(row) {
+  if (!row) return null;
+  return {
+    roles: Number(row.roles ?? row[0] ?? 0),
+    status: Number(row.status ?? row[1] ?? 0),
+    bond: String(row.bond ?? row[2] ?? 0n),
+    exposure: String(row.exposure ?? row[3] ?? 0n),
+    accepted: Number(row.accepted ?? row[5] ?? 0),
+    disputed: Number(row.disputed ?? row[6] ?? 0),
+    lost: Number(row.lost ?? row[7] ?? 0),
+  };
+}
+
+export function windowLeftSec(until, nowSec) {
+  const u = Number(until || 0);
+  if (!u) return null;
+  const left = u - Number(nowSec || 0);
+  return left > 0 ? left : 0;
+}
+
+export function formatCountdown(sec) {
+  if (sec == null) return "—";
+  const s = Math.max(0, Math.floor(Number(sec)));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const r = s % 60;
+  if (h) return `${h}h ${String(m).padStart(2, "0")}m`;
+  if (m) return `${m}m ${String(r).padStart(2, "0")}s`;
+  return `${r}s`;
+}
+
+/** Live phase for the dashboard. No APY. */
+export function segmentPhase(seg, nowSec) {
+  const st = Number(seg?.status || 0);
+  if (!st) return "idle";
+  if (st === SEG_OPEN) return "open";
+  if (st === SEG_COMMITTED) {
+    const left = windowLeftSec(seg.challengeUntil, nowSec);
+    return left > 0 ? "window" : "ready";
+  }
+  if (st === SEG_CHALLENGED) return "challenged";
+  if (st === SEG_SETTLED) return "settled";
+  if (st === SEG_SLASHED) return "slashed";
+  if (st === SEG_VOID) return "void";
+  return "idle";
+}
+
+export function tankFuel(tank) {
+  return BigInt(tank?.ownerFuel || 0) + BigInt(tank?.giftFuel || 0);
+}
+
+export function capLeft(tank) {
+  const cap = BigInt(tank?.spendCap || 0);
+  const spent = BigInt(tank?.spent || 0);
+  return cap > spent ? cap - spent : 0n;
+}
+
+export function segmentsRemaining(tank) {
+  const fee = BigInt(tank?.fee || 0);
+  if (fee === 0n) return 0;
+  const byCap = capLeft(tank) / fee;
+  const byFuel = tankFuel(tank) / fee;
+  const n = byCap < byFuel ? byCap : byFuel;
+  return Number(n > 10_000n ? 10_000n : n);
+}
+
+export function parseLineage(data) {
+  if (!data || data.schema !== "iff.life-lineage/1" || data.yield) {
+    return { tokenId: 0, hub: null, segments: [] };
+  }
+  const rows = Array.isArray(data.segments) ? data.segments : [];
+  return {
+    tokenId: Number(data.tokenId || 0),
+    hub: data.hub || null,
+    segments: rows.map((row) => ({
+      segmentId: String(row.segmentId || ""),
+      nonce: Number(row.nonce || 0),
+      parentRoot: String(row.parentRoot || row.startRoot || ""),
+      startRoot: String(row.startRoot || ""),
+      finalRoot: String(row.finalRoot || ""),
+      archiveHash: String(row.archiveHash || ""),
+    })),
+  };
+}
+
+export function liveRunnerForToken(status, tokenId) {
+  const id = Number(tokenId);
+  const last = status?.lastSegment;
+  if (!status || !id || Number(last?.tokenId) !== id) return null;
+  return {
+    action: String(last.action || ""),
+    segmentId: String(last.segmentId || ""),
+    challengeUntil: Number(last.challengeUntil || 0),
+    error: status.lastError || null,
+    ready: Boolean(status.ready),
+    tick: String(status.lastTick || ""),
+    runner: String(status.runner || ""),
+    yield: false,
+  };
+}
+
+export function nativeSymbol(chainId) {
+  return Number(chainId) === 97 ? "tBNB" : "BNB";
+}

@@ -41,7 +41,8 @@ npm run dev            # Vite 将 /v1 /health /ready 反代到 8787
 3. 「改变一次经历」→ `POST .../branches`；「重放因果链」→ `GET /v1/branches/:id` 或 events
 4. Why / ask → `POST /v1/llm/explain` / `ask`；计划只校验不执行
 5. P2 纸面世界：`GET /v1/sessions/:id/world`（Colony / Intent / Risk / Execution + 买持基线与净成本）；单层 `GET .../layers/{colony|intent|risk|execution|market|baseline}`
-6. 只读行情：`POST /v1/sessions/:id/market` 注入 `changeBps` 观测（可带 `chain-observation` provenance）。禁止 calldata / 签名；下一 tick 消耗，过期回落纸面游走
+6. 只读行情：`POST /v1/sessions/:id/market` 注入 `changeBps` 观测（可带 `chain-observation` 或 `aggregator-quote` provenance）。禁止 calldata / 签名；下一 tick 消耗，过期回落纸面游走
+7. Venue 报价（默认开）：服务端轮询 KyberSwap BSC `GET /routes`；`GET /v1/venue/quotes` 只读返回白名单 USD / changeBps。生产静态站若没有 8787，浏览器会直连同一 Kyber 接口。成交仍是纸面 `fillBook`（SIM），不调用 `/route/build`。关轮询：`IFF_VENUE_ENABLED=0`。
 
 ## 托管网（架子，未挂路由）
 

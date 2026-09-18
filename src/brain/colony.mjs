@@ -94,7 +94,21 @@ export async function tickColony(colony, stimulus = {}, clock = 1_700_000_000_00
     await session.dispatch({ type: "step", count: colony.stepsPerTick });
     member.ethology = decodeEthology(session.state, colony.graph);
     member.intent = decodeFinance(member.ethology, bookOf({ ...member.book }, colony.market.price));
-    const trade = fillBook(member.book, colony.market.price, member.intent, colony.tick, member.id);
+    if (stimulus.assetId) {
+      member.intent = {
+        ...member.intent,
+        assetId: stimulus.assetId,
+        mid: stimulus.mid ?? null,
+        quoteSource: stimulus.quoteSource || "paper",
+        quote: stimulus.quote || "SIM",
+      };
+    }
+    const trade = fillBook(member.book, colony.market.price, member.intent, colony.tick, member.id, {
+      assetId: stimulus.assetId || null,
+      mid: stimulus.mid ?? null,
+      quoteSource: stimulus.quoteSource || "paper",
+      quote: stimulus.quote || "SIM",
+    });
     if (trade) colony.trades.unshift(trade);
   }
   colony.trades = colony.trades.slice(0, 500);

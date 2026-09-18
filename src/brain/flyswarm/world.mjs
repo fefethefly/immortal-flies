@@ -315,6 +315,11 @@ export async function stepWorld(
       verdictNote,
       cause: cause.length ? cause[0].id : null,
       audit: world.audit,
+      assetId: trade.assetId || null,
+      mid: trade.mid ?? null,
+      quoteSource: trade.quoteSource || "paper",
+      quote: trade.quote || "SIM",
+      fill: trade.fill || "SIM",
     });
     if (world.receipts.length > WORLD_POLICY.maxReceipts) {
       world.receipts = world.receipts.slice(-WORLD_POLICY.maxReceipts);

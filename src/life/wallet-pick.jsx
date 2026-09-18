@@ -24,19 +24,31 @@ function WalletPickDialog({ tx, onClose, onInjected, onDeeplink }) {
   const injected = discoverInjected();
   const mobile = isMobileBrowser();
   const sheet = useRef(null);
+  const armed = useRef(false);
   useEffect(() => {
     const node = sheet.current?.querySelector("button, a");
     node?.focus();
+    const arm = window.setTimeout(() => {
+      armed.current = true;
+    }, 0);
     const onKey = (event) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(arm);
+      window.removeEventListener("keydown", onKey);
+    };
   }, [onClose]);
+  function dismiss(event) {
+    if (event.target !== event.currentTarget) return;
+    if (!armed.current) return;
+    onClose();
+  }
   const apps = WALLET_CATALOG.filter((row) => row.mobile);
   const installs = WALLET_CATALOG.filter((row) => row.desktop);
   return createPortal(
-    <div className="wallet-veil" onClick={onClose}>
+    <div className="wallet-veil" onClick={dismiss}>
       <div
         ref={sheet}
         className="wallet-sheet"
@@ -109,8 +121,9 @@ function WalletPickDialog({ tx, onClose, onInjected, onDeeplink }) {
   );
 }
 
-export function useWalletPick() {
-  const tx = useTx();
+export function useWalletPick(pageTx) {
+  const ctxTx = useTx();
+  const tx = pageTx || ctxTx;
   const [open, setOpen] = useState(false);
   const pending = useRef(null);
 
@@ -120,17 +133,19 @@ export function useWalletPick() {
     pending.current = null;
   }, []);
 
-  const pick = useCallback(() => {
+  const pick = useCallback((options = {}) => {
     return new Promise((resolve) => {
-      const recalled = recallAnnouncedWallet();
-      if (recalled) {
-        setActiveWallet(recalled.provider, recalled);
-        resolve({
-          kind: "injected",
-          provider: recalled.provider,
-          info: recalled,
-        });
-        return;
+      if (!options.force) {
+        const recalled = recallAnnouncedWallet();
+        if (recalled?.provider) {
+          setActiveWallet(recalled.provider, recalled);
+          resolve({
+            kind: "injected",
+            provider: recalled.provider,
+            info: recalled,
+          });
+          return;
+        }
       }
       pending.current = resolve;
       setOpen(true);

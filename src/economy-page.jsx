@@ -90,6 +90,10 @@ export function EconomyPage() {
             <p className="kicker">{tx("nav.economy")}</p>
             <h1>{tx("econ.h1")}</h1>
             <p className="lead">{tx("econ.lead")}</p>
+            <p className="blue-dep">
+              {tx("econ.l3Note")}{" "}
+              <SiteLink href="/blueprint.html">{tx("nav.blueprint")}</SiteLink>
+            </p>
             <div className="econ-formula">
               <span>R − C = N</span>
               <i />

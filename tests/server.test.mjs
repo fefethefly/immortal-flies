@@ -482,6 +482,99 @@ test("P2 world layers and read-only market offer", async () => {
   });
 });
 
+test("GET /v1/venue/quotes is read-only and can inject aggregator-quote on tick", async () => {
+  const dataDir = await mkdtemp(join(tmpdir(), "iff-venue-"));
+  try {
+    let n = 0;
+    const fetchImpl = async () => {
+      n += 1;
+      const out = (1_000_000_000_000_000_000n + BigInt(n) * 30_000_000_000_000_000n).toString();
+      return {
+        ok: true,
+        json: async () => ({
+          data: {
+            routeSummary: {
+              amountOut: out,
+              amountOutUsd: "600",
+              amountIn: "1000000000000000000",
+              tokenIn: "0x55d398326f99059fF775485246999027B3197955",
+              tokenOut: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+              gas: "1",
+              gasPrice: "1",
+              gasUsd: "0",
+              route: [],
+              extraFee: {},
+            },
+            routerAddress: "0x6131B5fae19EA4f9D964eAc0408E4408b66337b5",
+          },
+        }),
+      };
+    };
+    const config = createConfig({
+      PORT: "0",
+      IFF_DATA_DIR: dataDir,
+      IFF_VENUE_ENABLED: "1",
+      IFF_VENUE_POLL_MS: "60000",
+    });
+    config.port = 0;
+    config.dataDir = dataDir;
+    config.venue.enabled = true;
+    const logger = createLogger("test");
+    const store = createStore(dataDir);
+    const { createVenueService } = await import("../server/src/venue/service.mjs");
+    const venue = createVenueService({ config, logger, fetchImpl });
+    await venue.refresh();
+    await venue.refresh();
+    const sessions = createSessionService({ config, store, logger, venue });
+    await sessions.boot(fixtureGraph());
+    const app = await createApp({
+      config,
+      logger,
+      store,
+      sessions,
+      venue,
+      provider: createFakeProvider(),
+      skipBoot: true,
+      fetchImpl,
+    });
+    const server = createServer(app.handler);
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const { port } = server.address();
+    const base = `http://127.0.0.1:${port}`;
+    try {
+      const quotes = await json(base, "/v1/venue/quotes");
+      assert.equal(quotes.status, 200);
+      assert.equal(quotes.data.enabled, true);
+      assert.equal(quotes.data.fill, "SIM");
+      assert.equal(quotes.data.quote, "LIVE");
+      assert.ok(Array.isArray(quotes.data.assets));
+      assert.ok(!JSON.stringify(quotes.data).includes("0xdead"));
+
+      const created = await json(base, "/v1/sessions", {
+        method: "POST",
+        body: { seed: 42 },
+      });
+      const { sessionId, ownerToken } = created.data;
+      await json(base, `/v1/sessions/${sessionId}/tick`, {
+        method: "POST",
+        token: ownerToken,
+      });
+      const market = await json(base, `/v1/sessions/${sessionId}/layers/market`);
+      assert.equal(market.status, 200);
+      if (market.data.market.last) {
+        assert.equal(market.data.market.last.kind, "aggregator-quote");
+        assert.equal(market.data.market.fill, "SIM");
+        assert.equal(market.data.market.quote, "LIVE");
+      }
+    } finally {
+      venue.stop();
+      await new Promise((resolve) => server.close(resolve));
+    }
+  } finally {
+    await rm(dataDir, { recursive: true, force: true });
+  }
+});
+
 test("llm degrades without provider key", async () => {
   const dataDir = await mkdtemp(join(tmpdir(), "iff-server-deg-"));
   try {

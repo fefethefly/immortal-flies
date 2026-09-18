@@ -1,4 +1,5 @@
 export const WALLET_RDNS_KEY = "iff.wallet.rdns";
+export const WALLET_CHOICE_KEY = "iff.wallet.choice";
 
 export const WALLET_CATALOG = Object.freeze([
   {
@@ -171,21 +172,87 @@ export function writeStoredRdns(rdns, store) {
   }
 }
 
+export function readStoredChoice(store) {
+  try {
+    const storage = store ?? globalThis.localStorage;
+    const raw = storage?.getItem(WALLET_CHOICE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return {
+          rdns: String(parsed.rdns || ""),
+          name: String(parsed.name || ""),
+          id: String(parsed.id || ""),
+        };
+      }
+    }
+    const rdns = readStoredRdns(store);
+    return rdns ? { rdns, name: "", id: "" } : null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeStoredChoice(info, store) {
+  try {
+    const storage = store ?? globalThis.localStorage;
+    if (!info) {
+      storage?.removeItem(WALLET_CHOICE_KEY);
+      storage?.removeItem(WALLET_RDNS_KEY);
+      return;
+    }
+    const choice = {
+      rdns: info.rdns || "",
+      name: info.name || "",
+      id: info.id || "",
+    };
+    storage?.setItem(WALLET_CHOICE_KEY, JSON.stringify(choice));
+    writeStoredRdns(choice.rdns, store);
+  } catch {
+    /* private mode */
+  }
+}
+
+function matchChoice(row, choice) {
+  if (!row || !choice) return false;
+  if (choice.rdns && row.rdns === choice.rdns) return true;
+  if (choice.id && row.id === choice.id) return true;
+  if (choice.name && row.name === choice.name) return true;
+  return false;
+}
+
+export function matchStoredWallet(host = globalThis, store) {
+  const choice = readStoredChoice(store);
+  if (!choice || (!choice.rdns && !choice.name && !choice.id)) return null;
+  return discoverInjected(host).find((row) => matchChoice(row, choice)) || null;
+}
+
+function asAnnounced(state) {
+  if (!state?.provider) return null;
+  return { ...(state.info || {}), provider: state.provider };
+}
+
 export function recallAnnouncedWallet(host = globalThis, store) {
-  const rdns = readStoredRdns(store);
-  if (!rdns) return null;
-  return discoverInjected(host).find((row) => row.rdns === rdns) || null;
+  return asAnnounced(active) || matchStoredWallet(host, store);
 }
 
 export function getActiveWallet() {
   return active;
 }
 
-export function setActiveWallet(provider, info) {
+export function setActiveWallet(provider, info, store) {
   active = { provider: provider || null, info: info || null };
-  if (info?.rdns) writeStoredRdns(info.rdns);
+  if (provider && info) writeStoredChoice(info, store);
   listeners.forEach((fn) => fn(active));
   return active;
+}
+
+export function hydrateActiveWallet(host = globalThis, store) {
+  const live = asAnnounced(active);
+  if (live) return live;
+  const found = matchStoredWallet(host, store);
+  if (found) setActiveWallet(found.provider, found, store);
+  return found;
 }
 
 export function subscribeActiveWallet(fn) {

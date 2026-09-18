@@ -3,13 +3,30 @@ import assert from "node:assert/strict";
 import {
   WALLET_CATALOG,
   discoverInjected,
+  getActiveWallet,
   guessLegacyName,
+  hydrateActiveWallet,
   pageUrl,
   readStoredRdns,
   recallAnnouncedWallet,
+  setActiveWallet,
   walletAppUrl,
+  writeStoredChoice,
   writeStoredRdns,
 } from "../src/life/wallets.mjs";
+
+function memoryStore() {
+  const store = new Map();
+  return {
+    getItem: (key) => store.get(key) ?? null,
+    setItem: (key, value) => store.set(key, value),
+    removeItem: (key) => store.delete(key),
+  };
+}
+
+function resetWallet() {
+  setActiveWallet(null, null);
+}
 
 test("recommended catalog never auto-opens Uniswap", () => {
   assert.equal(
@@ -76,12 +93,8 @@ test("MetaMask mobile link opens the current page in the app", () => {
 });
 
 test("recall prefers the wallet the user last chose", () => {
-  const store = new Map();
-  const storage = {
-    getItem: (key) => store.get(key) ?? null,
-    setItem: (key, value) => store.set(key, value),
-    removeItem: (key) => store.delete(key),
-  };
+  resetWallet();
+  const storage = memoryStore();
   writeStoredRdns("io.metamask", storage);
   assert.equal(readStoredRdns(storage), "io.metamask");
   const host = new EventTarget();
@@ -96,6 +109,43 @@ test("recall prefers the wallet the user last chose", () => {
     );
   });
   assert.equal(recallAnnouncedWallet(host, storage).provider.id, "mm");
+});
+
+test("recall keeps a live session and remembers legacy wallets without rdns", () => {
+  resetWallet();
+  const storage = memoryStore();
+  const host = new EventTarget();
+  host.ethereum = { isMetaMask: true, id: "legacy-mm" };
+  writeStoredChoice({ name: "MetaMask", id: "legacy-0" }, storage);
+  const recalled = recallAnnouncedWallet(host, storage);
+  assert.equal(recalled.name, "MetaMask");
+  assert.equal(recalled.provider, host.ethereum);
+
+  setActiveWallet({ id: "session" }, { name: "Session", rdns: "" }, storage);
+  assert.equal(recallAnnouncedWallet(host, storage).provider.id, "session");
+  assert.equal(getActiveWallet().provider.id, "session");
+  resetWallet();
+});
+
+test("hydrate restores the last injected wallet into the shared session", () => {
+  resetWallet();
+  const storage = memoryStore();
+  const host = new EventTarget();
+  host.addEventListener("eip6963:requestProvider", () => {
+    host.dispatchEvent(
+      new CustomEvent("eip6963:announceProvider", {
+        detail: {
+          info: { uuid: "mm", rdns: "io.metamask", name: "MetaMask" },
+          provider: { id: "hydrated" },
+        },
+      }),
+    );
+  });
+  writeStoredChoice({ rdns: "io.metamask", name: "MetaMask" }, storage);
+  const found = hydrateActiveWallet(host, storage);
+  assert.equal(found.provider.id, "hydrated");
+  assert.equal(getActiveWallet().provider.id, "hydrated");
+  resetWallet();
 });
 
 test("pageUrl and legacy names stay deterministic", () => {

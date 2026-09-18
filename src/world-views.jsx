@@ -782,9 +782,11 @@ export function ExecutionView({ world, tx }) {
   return (
     <ViewShell
       tx={tx}
-      eyebrow={`EXECUTION · SLIP ${world.execution.slippageBps / 100}% · TAX ${world.execution.taxBps / 100}%`}
+      eyebrow={`EXECUTION · SLIP ${world.execution.slippageBps / 100}% · TAX ${world.execution.taxBps / 100}% · ${world.execution.quote === "LIVE" ? "QUOTE LIVE / FILL SIM" : "PAPER SIM"}`}
       title={tx("exec.title")}
-      lead={tx("exec.lead")}
+      lead={
+        world.execution.quote === "LIVE" ? tx("exec.leadLive") : tx("exec.lead")
+      }
     >
       <div className="kpi-grid five">
         <div className="kpi">
@@ -822,6 +824,7 @@ export function ExecutionView({ world, tx }) {
                 <th>TICK</th>
                 <th>FLY</th>
                 <th>SIDE</th>
+                <th>ASSET</th>
                 <th>{tx("exec.notional").toUpperCase()}</th>
                 <th>{tx("exec.slippage").toUpperCase()}</th>
                 <th>{tx("exec.tax").toUpperCase()}</th>
@@ -837,6 +840,12 @@ export function ExecutionView({ world, tx }) {
                   <td>{r.tick}</td>
                   <td>#{r.flyId}</td>
                   <td className={SIDE_CLASS(r.side)}>{r.side}</td>
+                  <td>
+                    {r.assetId || "—"}
+                    {r.quote === "LIVE" ? (
+                      <small className="quote-tag"> LIVE/SIM</small>
+                    ) : null}
+                  </td>
                   <td>{formatBnb(r.notionalBnb)}</td>
                   <td>{(r.slippageBps / 100).toFixed(1)}%</td>
                   <td>{formatBnb(r.taxPaid)}</td>

@@ -12,7 +12,7 @@ import {
   openLifeReader,
   openReadProvider,
 } from "./chain.mjs";
-import { subscribeActiveWallet } from "./wallets.mjs";
+import { getActiveWallet, subscribeActiveWallet } from "./wallets.mjs";
 
 export function useHatchWatch(deployment, onWallet) {
   const [wallet, setWallet] = useState("");
@@ -22,7 +22,9 @@ export function useHatchWatch(deployment, onWallet) {
 
   const [breedPending, setBreedPending] = useState(null);
   const [walletEpoch, setWalletEpoch] = useState(0);
-  const [provider, setProvider] = useState(null);
+  const [provider, setProvider] = useState(
+    () => getActiveWallet().provider || null,
+  );
   const scope = useRef(createRequestScope()).current;
   const walletCallback = useRef(onWallet);
   walletCallback.current = onWallet;

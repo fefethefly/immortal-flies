@@ -1024,6 +1024,33 @@ button:active:not(:disabled) {
   color: var(--text);
   font-weight: 400;
 }
+.venue-quotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  margin: 6px 0 4px;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+.venue-quote {
+  opacity: 0.7;
+}
+.venue-quote.focus {
+  opacity: 1;
+  color: var(--gold);
+}
+.venue-note {
+  flex-basis: 100%;
+  opacity: 0.55;
+  font-style: normal;
+  font-size: 7px;
+}
+.quote-tag {
+  margin-left: 4px;
+  opacity: 0.65;
+  font-size: 0.7em;
+}
 .hatch {
   width: min(1440px, calc(100% - 8%));
   margin: 36px auto 0;

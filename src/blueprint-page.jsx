@@ -40,11 +40,46 @@ const PHASES = [
 ];
 
 const DRAWN = [
-  ["01", "blue.identityTitle", "blue.identity", Fingerprint],
-  ["02", "blue.marketTitle", "blue.market", Store],
-  ["03", "blue.vaultTitle", "blue.vault", Landmark],
-  ["04", "blue.capitalTitle", "blue.capital", Wallet],
-  ["05", "blue.swarmBoundTitle", "blue.swarmBound", Network],
+  [
+    "01",
+    "blue.identityTitle",
+    "blue.identity",
+    "/habitat.html",
+    "nav.habitat",
+    Fingerprint,
+  ],
+  [
+    "02",
+    "blue.marketTitle",
+    "blue.market",
+    "/market.html",
+    "nav.market",
+    Store,
+  ],
+  [
+    "03",
+    "blue.vaultTitle",
+    "blue.vault",
+    "/economy.html",
+    "nav.economy",
+    Landmark,
+  ],
+  [
+    "04",
+    "blue.capitalTitle",
+    "blue.capital",
+    "/economy.html",
+    "nav.economy",
+    Wallet,
+  ],
+  [
+    "05",
+    "blue.swarmBoundTitle",
+    "blue.swarmBound",
+    "/swarm.html",
+    "nav.pit",
+    Network,
+  ],
 ];
 
 export function BlueprintPage() {
@@ -57,10 +92,7 @@ export function BlueprintPage() {
   const specimen = useMemo(() => createFly(specimenSeed), [specimenSeed]);
   const reduced = usePrefersReduced();
   const tilt = tiltHandlers(reduced);
-  const labels = useMemo(
-    () => LAYERS.map((row) => tx(row[1])),
-    [locale, tx],
-  );
+  const labels = useMemo(() => LAYERS.map((row) => tx(row[1])), [locale, tx]);
   useReveal(locale);
 
   return (
@@ -173,13 +205,18 @@ export function BlueprintPage() {
 
         <section data-reveal>
           <h2>{tx("blue.later")}</h2>
+          <p className="blue-phase-note">{tx("blue.drawnNote")}</p>
           <ol className="blue-drawn">
-            {DRAWN.map(([no, title, body, Icon]) => (
+            {DRAWN.map(([no, title, body, href, go, Icon]) => (
               <li key={no} className="rite-card rite-tilt" {...tilt}>
                 <Icon size={18} />
                 <small>{no}</small>
                 <strong>{tx(title)}</strong>
                 <p>{tx(body)}</p>
+                <em className="blue-drawn-go">
+                  {tx("blue.drawnGo")} ·{" "}
+                  <SiteLink href={href}>{tx(go)}</SiteLink>
+                </em>
               </li>
             ))}
           </ol>

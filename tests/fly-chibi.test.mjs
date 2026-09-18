@@ -4,12 +4,14 @@ import {
   CHIBI_VIEWS,
   chibiPalette,
   chibiPose,
+  flyPigment,
   hexRgb,
   liftBody,
   luma,
   mix,
   normalizeView,
   paintChibi,
+  punchHue,
   sparkleSet,
   spriteKey,
 } from "../src/life/fly-chibi.mjs";
@@ -80,6 +82,21 @@ test("palette is derived from the genome colours only", () => {
   }
   assert.notDeepEqual(pal.bodyLight, pal.bodyDeep);
   assert.ok(luma(pal.body) > luma(hexRgb(ART.body)) - 1);
+  const wine = chibiPalette({
+    body: "#8a3040",
+    eye: "#e4d9c4",
+    eyeLeft: "#e4d9c4",
+    eyeRight: "#6b4a32",
+    gold: "#f0b90b",
+    vein: "#e6e0cf",
+  });
+  assert.notDeepEqual(pal.body, wine.body);
+  assert.notDeepEqual(pal.gold, wine.gold);
+  assert.notDeepEqual(pal.wingIce, wine.wingIce);
+  assert.notDeepEqual(pal.wingRose, wine.wingRose);
+  const punched = punchHue({ r: 90, g: 140, b: 80 });
+  assert.ok(punched.g - punched.r > 140 - 90);
+  assert.deepEqual(flyPigment(ART), pal.body);
 });
 
 test("dark genotypes are lifted so the face stays readable", () => {

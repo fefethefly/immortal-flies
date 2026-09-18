@@ -2,7 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { encodeGraph, bindManifest } from "../src/brain/graph.mjs";
 import { CANON } from "../src/brain/canon.mjs";
-import { createPitSession, stepPit } from "../src/brain/flyswarm/pit.mjs";
+import {
+  PIT_STORE,
+  bootPitSession,
+  createPitSession,
+  savePitSession,
+  stepPit,
+} from "../src/brain/flyswarm/pit.mjs";
 import { offerObservation } from "../src/brain/flyswarm/market.mjs";
 import { LAYER_IDS, paperLayer, paperLayers } from "../src/brain/flyswarm/layers.mjs";
 
@@ -43,6 +49,15 @@ async function makePit(seed = 11) {
   return createPitSession({ seed, graph: fixtureGraph() });
 }
 
+function memoryStore(start = {}) {
+  const data = new Map(Object.entries(start));
+  return {
+    getItem: (key) => (data.has(key) ? data.get(key) : null),
+    setItem: (key, value) => data.set(key, String(value)),
+    removeItem: (key) => data.delete(key),
+  };
+}
+
 test("same seed paper walk is bit-identical", async () => {
   const a = await makePit(2026);
   const b = await makePit(2026);
@@ -68,6 +83,36 @@ test("observation queues changeBps and never accepts calldata", async () => {
   assert.ok(session.kernel.colony.market.price !== before);
 });
 
+test("aggregator-quote observation tags focus asset and keeps SIM fills", async () => {
+  const session = await makePit(9);
+  offerObservation(session.aux.market, {
+    payload: { changeBps: -400, activity: 80, assetId: "ETH", mid: 3_000_000 },
+    provenance: {
+      kind: "aggregator-quote",
+      chainId: 56,
+      adapter: "kyberswap",
+      src: "0x55d398326f99059fF775485246999027B3197955",
+      dst: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+      assetId: "ETH",
+      quotedAt: Date.now(),
+      quote: "LIVE",
+      fill: "SIM",
+    },
+  });
+  await stepPit(session, { compact: false });
+  assert.equal(session.aux.market.last.source, "aggregator-quote");
+  assert.equal(session.aux.market.last.payload.assetId, "ETH");
+  const layers = paperLayers(session);
+  assert.equal(layers.market.quote, "LIVE");
+  assert.equal(layers.market.fill, "SIM");
+  assert.equal(layers.execution.fill, "SIM");
+  const tagged = session.kernel.colony.trades.find((t) => t.assetId === "ETH");
+  if (tagged) {
+    assert.equal(tagged.fill, "SIM");
+    assert.equal(tagged.quote, "LIVE");
+  }
+});
+
 test("P2 layers split colony/intent/risk/execution and expose baseline", async () => {
   const session = await makePit(8);
   for (let i = 0; i < 6; i++) await stepPit(session, { compact: false });
@@ -85,4 +130,36 @@ test("P2 layers split colony/intent/risk/execution and expose baseline", async (
   const riskOnly = paperLayer(session, "risk");
   assert.equal(riskOnly.layer, "risk");
   assert.ok(riskOnly.risk.aggregate.equity > 0);
+});
+
+test("bootPitSession restores a matching snapshot", async () => {
+  const graph = fixtureGraph();
+  const origin = await createPitSession({ seed: 11, graph });
+  const store = memoryStore({
+    [PIT_STORE]: JSON.stringify(savePitSession(origin)),
+  });
+  const boot = await bootPitSession({ store, graph });
+  assert.equal(boot.discarded, false);
+  assert.equal(boot.session.aux.seed, 11);
+  assert.equal(boot.session.kernel.colony.members.length, 5);
+});
+
+test("bootPitSession discards an incompatible snapshot and opens a fresh book", async () => {
+  const graph = fixtureGraph();
+  const store = memoryStore({
+    [PIT_STORE]: JSON.stringify({ model: "iff-pit-colony-v1", members: [] }),
+  });
+  const boot = await bootPitSession({ store, graph, seed: 99 });
+  assert.equal(boot.discarded, true);
+  assert.equal(store.getItem(PIT_STORE), null);
+  assert.equal(boot.session.aux.seed, 99);
+  assert.equal(boot.session.kernel.colony.members.length, 5);
+});
+
+test("bootPitSession treats corrupt localStorage as a fresh book", async () => {
+  const graph = fixtureGraph();
+  const store = memoryStore({ [PIT_STORE]: "{not-json" });
+  const boot = await bootPitSession({ store, graph, seed: 7 });
+  assert.equal(boot.discarded, false);
+  assert.equal(boot.session.aux.seed, 7);
 });

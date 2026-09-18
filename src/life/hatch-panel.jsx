@@ -50,7 +50,7 @@ export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
   const [given, setGiven] = useState("");
   const [needRetry, setNeedRetry] = useState(false);
   const autoFor = useRef(0);
-  const { pick, dialog } = useWalletPick();
+  const { pick, dialog } = useWalletPick(tx);
 
   useEffect(() => {
     loadLifeDeployment()

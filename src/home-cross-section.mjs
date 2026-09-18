@@ -14,6 +14,10 @@ const WASH = {
 export const SIGNAL_HOP = 0.12;
 export const SIGNAL_TRAVEL = 0.28;
 export const SIGNAL_HOLD = 0.62;
+export const SYNC_STILL = 0.28;
+export const SYNC_LOCK = 1.65;
+export const SYNC_FADE = 0.42;
+export const SYNC_BEAT = 2.15;
 const LOBES = [
   { x: -0.62, y: 0.2, z: 0.12, sx: 0.15, sy: 0.26, sz: 0.13, n: 0.27 },
   { x: 0.62, y: 0.2, z: 0.12, sx: 0.15, sy: 0.26, sz: 0.13, n: 0.27 },
@@ -24,19 +28,19 @@ const LOBES = [
 const TRANSMITTERS = [
   { hex: "#d2b15c", weight: 46 },
   { hex: "#c47a4a", weight: 16 },
-  { hex: "#6aa8b4", weight: 26 },
+  { hex: "#c4a56a", weight: 26 },
   { hex: "#e0c27a", weight: 4 },
-  { hex: "#8a9a6a", weight: 2 },
+  { hex: "#a8a060", weight: 2 },
   { hex: "#b08968", weight: 2 },
-  { hex: "#7a8aa0", weight: 2 },
+  { hex: "#9c9178", weight: 2 },
   { hex: "#6a645a", weight: 2 },
 ];
 export const CIRCUIT_OF = 165733;
 export const CIRCUIT_SHOWN = 1400;
 export const CIRCUIT_MANIFEST = "/data/malecns-circuit/manifest.json";
-export const FIELD_TX = Object.freeze([
+const FIELD_TX = Object.freeze([
   { id: "excit", hex: "#d2b15c" },
-  { id: "inhib", hex: "#6aa8b4" },
+  { id: "inhib", hex: "#b8a87a" },
   { id: "food", hex: "#e8c56a" },
   { id: "threat", hex: "#c47a4a" },
   { id: "light", hex: "#d8d0b8" },
@@ -395,7 +399,7 @@ export function nearestNeuron(hits, x, y, reach = 22) {
   return best;
 }
 
-export function truthLines({ field, swarm, census, locale = "en" }) {
+export function truthLines({ field, swarm, census, locale = "en", quotes = null }) {
   const zh = locale === "zh";
   const cap = census?.cap || 1024;
   const net = census?.live ? "MAINNET" : "TESTNET";
@@ -421,6 +425,10 @@ export function truthLines({ field, swarm, census, locale = "en" }) {
   const alive = (swarm?.flies || []).filter(
     (row) => row.status === "alive",
   ).length;
+  const liveQuote = Boolean(
+    quotes?.enabled &&
+      (quotes.assets || []).some((a) => a?.ok && a.usd != null),
+  );
   return [
     { id: "soul", live: census?.status === "live", text: soul },
     {
@@ -434,6 +442,17 @@ export function truthLines({ field, swarm, census, locale = "en" }) {
       text: `${zh ? "蜂群" : "SWARM"} ${alive} · PAPER · 24-NODE`,
     },
     { id: "fill", paper: true, text: `${zh ? "成交" : "FILL"} SIM` },
+    liveQuote
+      ? {
+          id: "quote",
+          live: true,
+          text: zh ? "报价 KYBER LIVE" : "QUOTE KYBER LIVE",
+        }
+      : {
+          id: "quote",
+          paper: true,
+          text: zh ? "报价 …" : "QUOTE …",
+        },
   ];
 }
 
@@ -621,6 +640,64 @@ export function signalGain(wave, flyId, time) {
   return Math.max(0, 1 - age / SIGNAL_HOLD);
 }
 
+export function waveSettledAt(wave) {
+  const born = wave?.born || 0;
+  const hops = wave?.hops || [];
+  if (!hops.length) return born + SIGNAL_TRAVEL;
+  let last = 1;
+  for (const hop of hops) if (hop.hop > last) last = hop.hop;
+  return born + (last - 1) * SIGNAL_HOP + SIGNAL_TRAVEL;
+}
+
+export function syncWindow(wave) {
+  const start = waveSettledAt(wave);
+  return {
+    start,
+    stillEnd: start + SYNC_STILL,
+    lockEnd: start + SYNC_STILL + SYNC_LOCK,
+    end: start + SYNC_STILL + SYNC_LOCK + SYNC_FADE,
+  };
+}
+
+const SYNC_IDLE = Object.freeze({
+  phase: "idle",
+  hold: 0,
+  beat: 0,
+  glow: 0,
+});
+
+export function colonySync(wave, time) {
+  if (!wave || wave.kind !== "fill") return SYNC_IDLE;
+  const w = syncWindow(wave);
+  if (time < w.start || time >= w.end) return SYNC_IDLE;
+  if (time < w.stillEnd) {
+    const t = (time - w.start) / SYNC_STILL;
+    return { phase: "still", hold: t, beat: 0, glow: 0.12 * t };
+  }
+  if (time < w.lockEnd) {
+    const beat = 0.5 + 0.5 * Math.sin(time * SYNC_BEAT * TAU);
+    return { phase: "lock", hold: 1, beat, glow: 0.32 + beat * 0.58 };
+  }
+  const t = (time - w.lockEnd) / SYNC_FADE;
+  const beat = (1 - t) * (0.5 + 0.5 * Math.sin(time * SYNC_BEAT * TAU));
+  return { phase: "fade", hold: 1 - t, beat, glow: (1 - t) * 0.38 };
+}
+
+export function activeColonySync(waves, time) {
+  let best = SYNC_IDLE;
+  let start = -Infinity;
+  for (const wave of waves || []) {
+    const next = colonySync(wave, time);
+    if (next.phase === "idle") continue;
+    const at = waveSettledAt(wave);
+    if (at >= start) {
+      best = { ...next, wave };
+      start = at;
+    }
+  }
+  return best;
+}
+
 export function causalState(swarm, fly) {
   const last = swarm?.trades?.[0];
   const subject =
@@ -642,6 +719,8 @@ export function causalState(swarm, fly) {
     buy: sides.BUY,
     hold: sides.HOLD,
     sell: sides.SELL,
+    spoke: last?.flyId ?? subject?.id ?? 0,
+    heard: living.length,
   };
 }
 
@@ -684,6 +763,7 @@ export function colonyReadout(swarm, fly, locale = "en") {
 export function utteranceTape(swarm, fly) {
   const spikes = fly?.brain?.spikes || 0;
   const side = fly?.lastSide || "HOLD";
+  const living = (swarm?.flies || []).filter((row) => row.status === "alive");
   const rows = [
     {
       kind: "SENSE",
@@ -697,6 +777,28 @@ export function utteranceTape(swarm, fly) {
     },
   ];
   const fills = swarm?.trades?.slice(0, 3) || [];
+  if (fills[0]) {
+    rows.push({
+      kind: "RELAY",
+      audit: "SIM",
+      key: "home.crossRelay",
+      vars: {
+        id: fills[0].flyId,
+        side: fills[0].side,
+        n: Math.max(0, living.length),
+      },
+    });
+    rows.push({
+      kind: "SYNC",
+      audit: "SIM",
+      key: "home.crossSync",
+      vars: {
+        id: fills[0].flyId,
+        side: fills[0].side,
+        n: Math.max(0, living.length),
+      },
+    });
+  }
   if (!fills.length) {
     rows.push({
       kind: "MEMORY",
@@ -775,6 +877,8 @@ export function createCrossSectionRenderer(canvas, read) {
   const comets = [];
   const inlets = [];
   const sparks = [];
+  const waves = [];
+  let lastWaveAt = -10;
   let shimmer = new Float32Array(0);
   let fieldNow = null;
   let glField = null;
@@ -809,10 +913,10 @@ export function createCrossSectionRenderer(canvas, read) {
     const g = tile.getContext("2d");
     const rgb = hexRgb(hex);
     const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
-    grad.addColorStop(0, "rgba(255,252,240,0.95)");
-    grad.addColorStop(0.18, `rgba(${rgb.r},${rgb.g},${rgb.b},0.85)`);
-    grad.addColorStop(0.55, `rgba(${rgb.r},${rgb.g},${rgb.b},0.26)`);
-    grad.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b},0)`);
+    grad.addColorStop(0, "rgba(245,200,32,1)");
+    grad.addColorStop(0.3, "rgba(240,192,48,0.9)");
+    grad.addColorStop(0.6, "rgba(224,168,32,0.45)");
+    grad.addColorStop(1, "rgba(224,168,32,0)");
     g.fillStyle = grad;
     g.fillRect(0, 0, 32, 32);
     glowTiles.set(hex, tile);
@@ -826,9 +930,9 @@ export function createCrossSectionRenderer(canvas, read) {
     dustSprite.height = 16;
     const g = dustSprite.getContext("2d");
     const grad = g.createRadialGradient(8, 8, 0, 8, 8, 8);
-    grad.addColorStop(0, "rgba(233,222,196,0.85)");
-    grad.addColorStop(0.5, "rgba(214,198,168,0.2)");
-    grad.addColorStop(1, "rgba(214,198,168,0)");
+    grad.addColorStop(0, "rgba(247,208,80,0.95)");
+    grad.addColorStop(0.5, "rgba(212,160,44,0.3)");
+    grad.addColorStop(1, "rgba(212,160,44,0)");
     g.fillStyle = grad;
     g.fillRect(0, 0, 16, 16);
     return dustSprite;
@@ -838,13 +942,13 @@ export function createCrossSectionRenderer(canvas, read) {
   const dust = [];
   function seedDust() {
     dust.length = 0;
-    const count = width < 720 ? 70 : 160;
+    const count = width < 720 ? 120 : 340;
     for (let i = 0; i < count; i += 1) {
       dust.push({
         x: Math.random(),
         y: Math.random(),
         z: 0.2 + Math.random() * 0.8,
-        r: 0.7 + Math.random() * 1.6,
+        r: 0.9 + Math.random() * 2.4,
         drift: 0.004 + Math.random() * 0.012,
         sway: Math.random() * TAU,
         tw: 0.4 + Math.random() * 1.2,
@@ -865,14 +969,16 @@ export function createCrossSectionRenderer(canvas, read) {
     bgOre = ctx.createRadialGradient(
       width * 0.46,
       height * 0.5,
-      20,
+      16,
       width * 0.5,
-      height * 0.5,
-      Math.max(width, height) * 0.72,
+      height * 0.48,
+      Math.max(width, height) * 0.52,
     );
-    bgOre.addColorStop(0, "rgba(58, 42, 16, 0.55)");
-    bgOre.addColorStop(0.42, "rgba(18, 14, 8, 0.78)");
-    bgOre.addColorStop(1, "rgba(8, 7, 5, 0.98)");
+    bgOre.addColorStop(0, "rgba(104, 64, 16, 0.52)");
+    bgOre.addColorStop(0.22, "rgba(56, 34, 10, 0.4)");
+    bgOre.addColorStop(0.46, "rgba(16, 10, 4, 0.68)");
+    bgOre.addColorStop(0.75, "rgba(5, 3, 2, 0.92)");
+    bgOre.addColorStop(1, "rgba(2, 2, 2, 1)");
     bgVeil = ctx.createRadialGradient(
       width / 2,
       height / 2,
@@ -882,7 +988,7 @@ export function createCrossSectionRenderer(canvas, read) {
       Math.max(width, height) * 0.64,
     );
     bgVeil.addColorStop(0, "rgba(8,7,5,0)");
-    bgVeil.addColorStop(1, "rgba(8,7,5,0.48)");
+    bgVeil.addColorStop(1, "rgba(0,0,0,0.5)");
   }
 
   // Per-frame arrays live across frames; no per-draw allocation.
@@ -1105,7 +1211,7 @@ export function createCrossSectionRenderer(canvas, read) {
       if (i) ctx.lineTo(x, y);
       else ctx.moveTo(x, y);
     });
-    ctx.strokeStyle = `rgba(147,161,129,${0.22 + alpha * 0.7})`;
+    ctx.strokeStyle = `rgba(196,165,106,${0.22 + alpha * 0.7})`;
     ctx.lineWidth = 1.4;
     ctx.stroke();
     ctx.strokeStyle = `rgba(240,185,11,${0.35 + alpha * 0.5})`;
@@ -1132,9 +1238,9 @@ export function createCrossSectionRenderer(canvas, read) {
       }
       const px = ((((m.x + pointerX * m.z * 0.05) % 1) + 1) % 1) * width;
       const py = m.y * height;
-      const size = m.r * (1.6 + m.z * 2.6);
+      const size = m.r * (1.8 + m.z * 3.0);
       const twinkle = 0.55 + 0.45 * Math.sin(time * m.tw + m.ph);
-      ctx.globalAlpha = (0.045 + 0.05 * m.z) * (animate ? twinkle : 1);
+      ctx.globalAlpha = (0.05 + 0.055 * m.z) * (animate ? twinkle : 1);
       ctx.drawImage(tile, px - size / 2, py - size / 2, size, size);
     }
     ctx.globalAlpha = 1;
@@ -1218,18 +1324,19 @@ export function createCrossSectionRenderer(canvas, read) {
       24,
       (minX + maxX) / 2,
       (minY + maxY) / 2,
-      Math.max(maxX - minX, maxY - minY) * 0.55,
+      Math.max(maxX - minX, maxY - minY) * 0.62,
     );
-    mass.addColorStop(0, "rgba(88, 62, 22, 0.32)");
-    mass.addColorStop(0.55, "rgba(36, 24, 10, 0.16)");
+    mass.addColorStop(0, "rgba(232, 176, 48, 0.18)");
+    mass.addColorStop(0.4, "rgba(184, 120, 24, 0.14)");
+    mass.addColorStop(0.72, "rgba(112, 70, 14, 0.08)");
     mass.addColorStop(1, "rgba(10, 8, 5, 0)");
     ctx.fillStyle = mass;
     ctx.beginPath();
     ctx.ellipse(
       (minX + maxX) / 2,
       (minY + maxY) / 2,
-      (maxX - minX) * 0.4,
-      (maxY - minY) * 0.46,
+      (maxX - minX) * 0.52,
+      (maxY - minY) * 0.6,
       0,
       0,
       TAU,
@@ -1245,11 +1352,11 @@ export function createCrossSectionRenderer(canvas, read) {
         hot.lineTo(projected[b].x, projected[b].y);
       }
       ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgba(240,185,11,0.32)";
+      ctx.strokeStyle = "rgba(240,185,11,0.5)";
       ctx.stroke(hot);
     }
 
-    const dim = mode === "market" ? 0.42 : mode === "society" ? 0.78 : 1;
+    const dim = mode === "market" ? 0.58 : mode === "society" ? 0.9 : 1;
     if (field.count > 2000) {
       const gl = fieldGL(field);
       if (gl) {
@@ -1305,7 +1412,9 @@ export function createCrossSectionRenderer(canvas, read) {
           0.86 + 0.14 * Math.sin(time * 0.6 + (neuron.x + neuron.y) * 9);
         ctx.globalAlpha = Math.min(
           1,
-          (0.34 + depth * 0.58 + pulse * 0.7 + (rare ? 0.1 : 0)) * dim * breath,
+          (0.64 + depth * 0.36 + pulse * 0.7 + (rare ? 0.12 : 0)) *
+            dim *
+            breath,
         );
         const tile = glowTile(transmitter.hex);
         ctx.drawImage(tile, p.x - size, p.y - size, size * 2, size * 2);
@@ -1336,10 +1445,39 @@ export function createCrossSectionRenderer(canvas, read) {
 
     const trade = swarm?.trades?.[0];
     const tradeKey = trade ? `${trade.tick}:${trade.flyId}:${trade.side}` : "";
+    const links = colonyLinks(living, perchOf, adj, field);
+    const spawnWave = (origin, side, kind) => {
+      if (!origin || !animate) return;
+      const hops = signalWave(
+        origin.id,
+        links,
+        living.map((row) => row.id),
+      );
+      const rgb = pigmentRgb(phenotypeOf(origin).art);
+      waves.push({
+        originId: origin.id,
+        side: side || origin.lastSide || "HOLD",
+        rgb,
+        kind,
+        born: time,
+        hops,
+      });
+      lastWaveAt = time;
+      if (waves.length > 2) waves.splice(0, waves.length - 2);
+      const perch = perchOf.get(origin.id);
+      if (perch != null) {
+        shimmer[perch] = 1;
+        for (const n of adj[perch] || [])
+          shimmer[n] = Math.max(shimmer[n], 0.7);
+      }
+    };
+    let spoke = false;
     if (tradeKey && tradeKey !== seenTrade && seenTick >= 0 && animate) {
       const origin = living.find((row) => row.id === trade.flyId);
       const perch = origin ? perchOf.get(origin.id) : 0;
       const from = projected[perch] || food;
+      spawnWave(origin, trade.side, "fill");
+      spoke = true;
       comets.push({
         x: from.x,
         y: from.y,
@@ -1348,23 +1486,48 @@ export function createCrossSectionRenderer(canvas, read) {
         born: time,
         side: trade.side,
       });
-      pulses.push({ x: from.x, y: from.y, born: time, side: trade.side });
-      for (const n of adj[perch] || []) shimmer[n] = 0.9;
-      shimmer[perch] = 1;
+      pulses.push({
+        x: from.x,
+        y: from.y,
+        born: time,
+        side: trade.side,
+        rgb: origin ? pigmentRgb(phenotypeOf(origin).art) : WASH[trade.side],
+      });
     }
     if (swarm?.tick !== seenTick) {
       if (seenTick >= 0 && animate) {
+        let loud = living[0];
+        let loudN = -1;
         for (const fly of living) {
+          const n = popcount(fly.brain?.spikes || 0);
           const perch = perchOf.get(fly.id);
-          if (popcount(fly.brain?.spikes || 0) < 4) continue;
-          shimmer[perch] = Math.max(shimmer[perch], 0.55);
-          for (const n of adj[perch] || [])
-            shimmer[n] = Math.max(shimmer[n], 0.32);
+          if (n >= 4) {
+            shimmer[perch] = Math.max(shimmer[perch], 0.55);
+            for (const node of adj[perch] || [])
+              shimmer[node] = Math.max(shimmer[node], 0.32);
+          }
+          if (n > loudN || (n === loudN && (loud == null || fly.id < loud.id))) {
+            loud = fly;
+            loudN = n;
+          }
+        }
+        if (
+          !spoke &&
+          loud &&
+          loudN >= 4 &&
+          time - lastWaveAt > 1.8 &&
+          activeColonySync(waves, time).phase === "idle"
+        ) {
+          spawnWave(loud, loud.lastSide, "sense");
         }
       }
       seenTick = swarm?.tick ?? seenTick;
     }
     seenTrade = tradeKey;
+    const sync = activeColonySync(waves, time);
+    canvas.dataset.sync = sync.phase;
+    const frozen = 1 - sync.hold;
+    const lockRgb = sync.wave?.rgb || WASH.HOLD;
     const price = swarm?.market?.price;
     const delta = swarm?.market?.delta ?? 0;
     if (
@@ -1421,14 +1584,17 @@ export function createCrossSectionRenderer(canvas, read) {
           const near = Math.hypot(na.x - nb.x, na.y - nb.y, na.z - nb.z) < 0.16;
           if (!linked && !near) continue;
           const split = living[a].lastSide !== living[b].lastSide;
-          ctx.strokeStyle = split
+          const pulse = sync.hold > 0.2;
+          ctx.strokeStyle = pulse
+            ? `rgba(${lockRgb[0]},${lockRgb[1]},${lockRgb[2]},${0.28 + sync.glow * 0.5})`
+            : split
             ? "rgba(198,164,82,0.55)"
-            : "rgba(147,161,129,0.28)";
+            : "rgba(196,165,106,0.28)";
           ctx.beginPath();
           ctx.moveTo(pa.x, pa.y);
           ctx.lineTo(pb.x, pb.y);
           ctx.stroke();
-          if (split && animate && Math.random() < 0.04) {
+          if (split && animate && !pulse && Math.random() < 0.012) {
             sparks.push({
               x: pa.x,
               y: pa.y,
@@ -1444,6 +1610,11 @@ export function createCrossSectionRenderer(canvas, read) {
     if (comets.length > 12) comets.splice(0, comets.length - 12);
     if (pulses.length > 8) pulses.splice(0, pulses.length - 8);
     if (sparks.length > 16) sparks.splice(0, sparks.length - 16);
+    if (waves.length) {
+      for (let i = waves.length - 1; i >= 0; i -= 1) {
+        if (time - waves[i].born > 7.5) waves.splice(i, 1);
+      }
+    }
 
     ctx.globalCompositeOperation = "source-over";
     ctx.globalAlpha = 1;
@@ -1454,9 +1625,19 @@ export function createCrossSectionRenderer(canvas, read) {
       const perch = perchOf.get(fly.id);
       const neuron = field.neurons[perch];
       if (!neuron) continue;
-      const shift = behaviorShift(fly, time, mode);
-      const dart = saccadeShift(fly, time, mode, reduced);
-      const bob = Math.sin(time * 1.4 + fly.id * 1.9) * 0.02;
+      const shift0 = behaviorShift(fly, time, mode);
+      const dart0 = saccadeShift(fly, time, mode, reduced);
+      const shift = {
+        x: shift0.x * frozen,
+        y: shift0.y * frozen,
+        z: shift0.z * frozen,
+      };
+      const dart = {
+        x: dart0.x * frozen,
+        y: dart0.y * frozen,
+        z: dart0.z * frozen,
+      };
+      const bob = Math.sin(time * 1.4 + fly.id * 1.9) * 0.02 * frozen;
       const p = project(
         {
           x: neuron.x + shift.x + dart.x,
@@ -1469,19 +1650,32 @@ export function createCrossSectionRenderer(canvas, read) {
       );
       const picked = fly.id === selectedId || fly.id === hoverId;
       const art = phenotypeOf(fly).art;
-      const wash = WASH[fly.lastSide] || WASH.HOLD;
+      const pigment = pigmentRgb(art);
+      const wash = mixRgb(pigment, WASH[fly.lastSide] || WASH.HOLD, 0.28);
+      let gain = 0;
+      let signalRgb = pigment;
+      let speaker = false;
+      let fromId = fly.id;
+      for (const wave of waves) {
+        const next = signalGain(wave, fly.id, time);
+        if (next > gain) {
+          gain = next;
+          signalRgb = wave.rgb;
+          speaker = wave.originId === fly.id;
+          fromId = signalFrom(wave, fly.id);
+        }
+      }
       const trail = trails.get(fly.id) || [];
-      if (animate) {
+      if (animate && frozen > 0.45) {
         trail.push({ x: p.x, y: p.y });
         if (trail.length > 10) trail.shift();
         trails.set(fly.id, trail);
       }
-      // Trails glow with the field: additive, faded toward the head.
       ctx.globalCompositeOperation = "lighter";
       ctx.strokeStyle = `rgb(${wash[0]},${wash[1]},${wash[2]})`;
       for (let i = 1; i < trail.length; i += 1) {
         const f = i / trail.length;
-        ctx.globalAlpha = (picked ? 0.3 : 0.08) * f;
+        ctx.globalAlpha = (picked ? 0.32 : 0.1) * f + gain * 0.18 * f;
         ctx.lineWidth = (picked ? 2.2 : 1.3) * f + 0.2;
         ctx.beginPath();
         ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
@@ -1489,54 +1683,122 @@ export function createCrossSectionRenderer(canvas, read) {
         ctx.stroke();
       }
       ctx.globalCompositeOperation = "source-over";
-      const k = (0.92 + ((p.depth + 1) / 2) * 0.28) * (picked ? 1.22 : 1);
+      const k =
+        (0.92 + ((p.depth + 1) / 2) * 0.28) *
+        (picked ? 1.22 : 1) *
+        (1 + gain * 0.08);
       const sz = (width < 720 ? 64 : 80) * k * (art.scale || 1);
       const prev = trail.length >= 2 ? trail[trail.length - 2] : null;
       const tdx = prev ? p.x - prev.x : 0;
       const tdy = prev ? p.y - prev.y : 0;
-      const raw =
+      let raw =
         Math.hypot(tdx, tdy) > 0.85
           ? Math.atan2(tdy, tdx)
           : flyHeading(fly, shift);
+      if (gain > 0.08 && fromId !== fly.id) {
+        const sender = living.find((row) => row.id === fromId);
+        const fromPerch = sender ? perchOf.get(sender.id) : null;
+        const fromPt = flyDraw.find((row) => row.id === fromId);
+        if (fromPt) {
+          raw += wrapDelta(Math.atan2(fromPt.y - p.y, fromPt.x - p.x), raw) * gain * 0.55;
+        } else if (fromPerch != null && projected[fromPerch]) {
+          const src = projected[fromPerch];
+          raw += wrapDelta(Math.atan2(src.y - p.y, src.x - p.x), raw) * gain * 0.4;
+        }
+      }
+      if (sync.hold > 0.25 && sync.wave) {
+        const originPerch = perchOf.get(sync.wave.originId);
+        const src = originPerch != null ? projected[originPerch] : null;
+        if (src) {
+          raw += wrapDelta(Math.atan2(src.y - p.y, src.x - p.x), raw) * sync.hold * 0.7;
+        }
+      }
+      let phase = reduced ? 0 : flyPhase(time, fly.id);
+      if (sync.phase === "still") phase = 0;
+      else if (sync.phase === "lock" || sync.phase === "fade") {
+        phase = Math.floor(time * 5.4) & 3;
+      }
       flyDraw.push({
         picked,
         wash,
+        pigment,
+        signalRgb: sync.hold > 0.4 ? lockRgb : signalRgb,
+        gain: Math.max(gain, sync.glow),
+        speaker,
+        locked: sync.hold > 0.45,
         id: fly.id,
         side: fly.lastSide,
         x: p.x,
         y: p.y,
-        sz,
+        sz: sz * (1 + sync.glow * 0.05),
         depth: p.depth,
         alpha: mode === "neural" && !picked ? 0.92 : 1,
         heading: smoothYaw(fly.id, raw) + Math.PI / 2,
         art,
-        phase: reduced ? 0 : flyPhase(time, fly.id),
+        phase,
       });
     }
 
     flyDraw.sort((a, b) => a.depth - b.depth);
-    for (const row of flyDraw) {
+    if (sync.hold > 0.12) {
       ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = row.picked ? 0.22 : 0.1;
-      ctx.fillStyle = `rgb(${row.wash[0]},${row.wash[1]},${row.wash[2]})`;
+      ctx.globalAlpha = sync.glow * 0.11;
+      ctx.fillStyle = `rgb(${lockRgb[0]},${lockRgb[1]},${lockRgb[2]})`;
       ctx.beginPath();
-      ctx.ellipse(row.x, row.y + 2, row.sz * 0.1, row.sz * 0.14, 0, 0, TAU);
+      ctx.ellipse(
+        (minX + maxX) / 2,
+        (minY + maxY) / 2,
+        (maxX - minX) * (0.34 + sync.beat * 0.04),
+        (maxY - minY) * (0.4 + sync.beat * 0.04),
+        0,
+        0,
+        TAU,
+      );
       ctx.fill();
       ctx.globalCompositeOperation = "source-over";
-      if (row.picked) {
-        ctx.globalAlpha = 0.88;
-        ctx.strokeStyle = "rgba(240,234,217,0.7)";
-        ctx.lineWidth = 1.2;
+    }
+    for (const row of flyDraw) {
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = (row.picked ? 0.2 : 0.08) + row.gain * 0.22;
+      ctx.fillStyle = `rgb(${row.signalRgb[0]},${row.signalRgb[1]},${row.signalRgb[2]})`;
+      ctx.beginPath();
+      ctx.ellipse(
+        row.x,
+        row.y + 2,
+        row.sz * (0.1 + row.gain * 0.08),
+        row.sz * (0.14 + row.gain * 0.1),
+        0,
+        0,
+        TAU,
+      );
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+      if (row.picked || row.speaker || row.locked) {
+        ctx.globalAlpha = row.locked
+          ? 0.28 + sync.glow * 0.55
+          : row.speaker
+            ? 0.55 + row.gain * 0.4
+            : 0.88;
+        ctx.strokeStyle = row.locked || row.speaker
+          ? `rgba(${row.signalRgb[0]},${row.signalRgb[1]},${row.signalRgb[2]},0.85)`
+          : "rgba(240,234,217,0.7)";
+        ctx.lineWidth = row.locked ? 1.05 : row.speaker ? 1.4 : 1.2;
         ctx.beginPath();
-        ctx.arc(row.x, row.y, 13, 0, TAU);
+        ctx.arc(
+          row.x,
+          row.y,
+          row.locked ? 12 + sync.beat * 3.2 : row.speaker ? 15 : 13,
+          0,
+          TAU,
+        );
         ctx.stroke();
       }
       ctx.globalAlpha = row.alpha;
       ctx.save();
       ctx.translate(row.x, row.y);
       ctx.rotate(row.heading);
-      ctx.shadowColor = "rgba(232, 214, 170, 0.32)";
-      ctx.shadowBlur = row.picked ? 6 : 3.5;
+      ctx.shadowColor = `rgba(${row.signalRgb[0]},${row.signalRgb[1]},${row.signalRgb[2]},${0.38 + sync.glow * 0.35})`;
+      ctx.shadowBlur = (row.picked ? 6 : 3.5) + row.gain * 7 + sync.glow * 8;
       ctx.drawImage(
         flySprite(row.art, {
           flying: true,
@@ -1570,12 +1832,64 @@ export function createCrossSectionRenderer(canvas, read) {
     ctx.globalAlpha = 1;
 
     ctx.globalCompositeOperation = "lighter";
+    const atOf = new Map(flyDraw.map((row) => [row.id, row]));
+    for (const wave of waves) {
+      const origin = atOf.get(wave.originId);
+      const age = time - wave.born;
+      if (origin && age >= 0 && age < 1.2) {
+        const fade = 1 - age / 1.2;
+        ctx.strokeStyle = `rgba(${wave.rgb[0]},${wave.rgb[1]},${wave.rgb[2]},${fade * 0.82})`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.ellipse(
+          origin.x,
+          origin.y,
+          8 + age * 54,
+          (8 + age * 54) * 0.62,
+          0,
+          0,
+          TAU,
+        );
+        ctx.stroke();
+      }
+      for (const hop of wave.hops) {
+        const t = packetProgress(wave, hop, time);
+        if (t < 0 || t > 1) continue;
+        const from = atOf.get(hop.from);
+        const to = atOf.get(hop.to);
+        if (!from || !to) continue;
+        const e = t * t * (3 - 2 * t);
+        const x = from.x + (to.x - from.x) * e;
+        const y = from.y + (to.y - from.y) * e;
+        const fade = 1 - Math.abs(t - 0.55) * 1.1;
+        ctx.strokeStyle = `rgba(${wave.rgb[0]},${wave.rgb[1]},${wave.rgb[2]},${Math.max(0.18, fade) * 0.62})`;
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+        ctx.strokeStyle = `rgba(${wave.rgb[0]},${wave.rgb[1]},${wave.rgb[2]},${(1 - t) * 0.95})`;
+        ctx.lineWidth = 2.6 - t;
+        ctx.beginPath();
+        ctx.moveTo(x - (to.x - from.x) * 0.1, y - (to.y - from.y) * 0.1);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.fillStyle = `rgba(${wave.rgb[0]},${wave.rgb[1]},${wave.rgb[2]},${1.08 - t})`;
+        ctx.beginPath();
+        ctx.arc(x, y, 3.2 + (1 - t) * 2.1, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = `rgba(255,248,230,${0.85 - t * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(x, y, 1.35, 0, TAU);
+        ctx.fill();
+      }
+    }
     for (const burst of pulses) {
       const age = time - burst.born;
       if (age > 1.2) continue;
       const fade = 1 - age / 1.2;
-      const rgb = WASH[burst.side] || WASH.HOLD;
-      ctx.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${fade * 0.55})`;
+      const rgb = burst.rgb || WASH[burst.side] || WASH.HOLD;
+      ctx.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${fade * 0.5})`;
       ctx.lineWidth = 1.1;
       ctx.beginPath();
       ctx.ellipse(

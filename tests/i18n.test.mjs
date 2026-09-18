@@ -63,7 +63,10 @@ test("blueprint swarm copy is paired and does not claim intelligence is live", (
   }
   assert.match(t("en", "blue.swarmKicker"), /not implemented/i);
   assert.match(t("zh", "blue.swarmKicker"), /未实现/);
-  assert.match(t("en", "blue.honest4"), /do not say swarm intelligence is achieved/i);
+  assert.match(
+    t("en", "blue.honest4"),
+    /do not say swarm intelligence is achieved/i,
+  );
   assert.match(t("zh", "blue.honest4"), /不说群体智能已实现/);
   assert.match(t("en", "blue.split.meshp"), /Mesh is not swarm intelligence/i);
   assert.match(t("zh", "blue.split.meshp"), /托管网不是群体智慧/);
@@ -86,7 +89,9 @@ test("breed fee copy exists in both locales and does not claim a burn", () => {
 });
 
 test("host copy is paired and does not call the mesh MiningHub", () => {
-  const keys = Object.keys(MESSAGES.en).filter((key) => key.startsWith("host."));
+  const keys = Object.keys(MESSAGES.en).filter((key) =>
+    key.startsWith("host."),
+  );
   const zh = Object.keys(MESSAGES.zh).filter((key) => key.startsWith("host."));
   assert.deepEqual(new Set(keys), new Set(zh));
   assert.ok(keys.length > 40);
@@ -107,4 +112,8 @@ test("host copy is paired and does not call the mesh MiningHub", () => {
   assert.doesNotMatch(t("en", "host.lead"), /APY|yield farming/i);
   assert.equal(t("en", "nav.host"), "Hosting");
   assert.equal(t("zh", "nav.host"), "生命托管");
+  assert.equal(t("zh", "host.dash"), "仪表盘");
+  assert.match(t("en", "host.wageLead"), /not mining yield/i);
+  assert.doesNotMatch(t("en", "host.wage"), /APY/);
+  assert.equal(t("zh", "host.okRefresh"), "已刷新。");
 });

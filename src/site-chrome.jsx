@@ -34,6 +34,13 @@ export const NAV_GROUPS = [
       ["/economy.html", "nav.economy", "economy", "07"],
     ],
   },
+  {
+    verb: "nav.docsGroup",
+    items: [
+      ["/docs.html", "nav.docs", "docs", "01"],
+      ["/protocol.html", "nav.protocol", "protocol", "02"],
+    ],
+  },
 ];
 
 export const NAV = NAV_GROUPS.flatMap((group) => group.items);
@@ -63,6 +70,8 @@ const ROUTE_ALIASES = {
   "/live.html": "/live.html",
   "/protocol": "/protocol.html",
   "/protocol.html": "/protocol.html",
+  "/docs": "/docs.html",
+  "/docs.html": "/docs.html",
 };
 
 export const SiteGoContext = createContext(null);

@@ -16,13 +16,23 @@ import { createCreditService } from "./credit/service.mjs";
 import { mountCreditRoutes } from "./credit/http.mjs";
 import { createVaultService } from "./vault/service.mjs";
 import { mountVaultRoutes } from "./vault/http.mjs";
+import { createVenueService } from "./venue/service.mjs";
+import { mountVenueRoutes } from "./venue/http.mjs";
 
 export async function createApp(options = {}) {
   const config = options.config || createConfig(options.env || process.env);
   const logger = options.logger || createLogger("iff-server");
   const store = options.store || createStore(config.dataDir);
+  const venue =
+    options.venue ||
+    createVenueService({
+      config,
+      logger,
+      fetchImpl: options.fetchImpl || fetch,
+    });
   const sessions =
-    options.sessions || createSessionService({ config, store, logger });
+    options.sessions ||
+    createSessionService({ config, store, logger, venue });
   const provider =
     options.provider ||
     createOpenAIProvider({
@@ -39,6 +49,7 @@ export async function createApp(options = {}) {
 
   if (!options.skipBoot) {
     await sessions.boot(options.graph || null);
+    venue.start();
   }
 
   const router = createRouter();
@@ -46,6 +57,7 @@ export async function createApp(options = {}) {
   mountLlmRoutes({ router, llm });
   mountCreditRoutes({ router, credit });
   mountVaultRoutes({ router, vault });
+  mountVenueRoutes({ router, venue });
   const limiter = options.limiter || createRateLimiter();
 
   const corsOrigins = new Set(config.corsOrigins);
@@ -166,6 +178,7 @@ export async function createApp(options = {}) {
     llm,
     credit,
     vault,
+    venue,
     provider,
     handler,
   };
@@ -194,6 +207,7 @@ export async function startServer(options = {}) {
   const shutdown = async (signal) => {
     app.logger.info("shutdown", { signal });
     try {
+      app.venue?.stop?.();
       await app.sessions.flushAll();
     } catch (err) {
       app.logger.error("flush on shutdown failed", {

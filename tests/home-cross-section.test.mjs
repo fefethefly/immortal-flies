@@ -7,7 +7,10 @@ import {
   buildHeroField,
   cameraRegister,
   causalState,
+  colonyLinks,
   colonyReadout,
+  colonySync,
+  activeColonySync,
   crossModeOf,
   downsampleField,
   fieldFromCircuit,
@@ -15,11 +18,20 @@ import {
   inletKindOf,
   nearestCrossFly,
   nearestNeuron,
+  packetProgress,
   perchOfFly,
+  pigmentRgb,
+  SIGNAL_HOP,
+  SIGNAL_TRAVEL,
+  SYNC_LOCK,
+  SYNC_STILL,
+  signalGain,
+  signalWave,
   stimKindOfNeuron,
   strongestEdges,
   truthLines,
   utteranceTape,
+  waveSettledAt,
 } from "../src/home-cross-section.mjs";
 import { encodeGraph } from "../src/brain/graph.mjs";
 import { createSwarm, tickSwarm } from "../src/swarm.mjs";
@@ -71,12 +83,14 @@ test("causal caption and tape read the live paper swarm", () => {
   assert.ok(["FORAGE", "AVOID", "REST", "EXPLORE"].includes(cause.act));
   assert.ok(["BUY", "SELL", "HOLD"].includes(cause.side));
   assert.equal(cause.tick, swarm.tick);
+  assert.equal(typeof cause.heard, "number");
+  assert.equal(cause.heard, swarm.flies.filter((row) => row.status === "alive").length);
   const tape = utteranceTape(swarm, fly);
   assert.deepEqual(
     tape.slice(0, 2).map((row) => row.kind),
     ["SENSE", "ACT"],
   );
-  assert.ok(["MEMORY", "FILL"].includes(tape[2].kind));
+  assert.ok(["MEMORY", "FILL", "RELAY"].includes(tape[2].kind));
   const read = colonyReadout(swarm, fly, "zh");
   assert.equal(read.alive + read.total - read.alive, swarm.flies.length);
   assert.equal(read.sides.BUY + read.sides.HOLD + read.sides.SELL, read.alive);
@@ -102,6 +116,12 @@ test("causal caption and tape read the live paper swarm", () => {
     ...swarm.trades,
   ];
   assert.equal(utteranceTape(swarm, fly).find((row) => row.kind === "FILL")?.audit, "SIM");
+  assert.equal(utteranceTape(swarm, fly).find((row) => row.kind === "RELAY")?.key, "home.crossRelay");
+  assert.equal(utteranceTape(swarm, fly).find((row) => row.kind === "SYNC")?.key, "home.crossSync");
+  assert.equal(t("en", "home.crossRelay", { id: 3, side: "BUY", n: 16 }).includes("heard"), true);
+  assert.equal(t("zh", "home.crossRelay", { id: 3, side: "BUY", n: 16 }).includes("听见"), true);
+  assert.equal(t("en", "home.crossSync", { n: 16 }).includes("locked"), true);
+  assert.equal(t("zh", "home.crossSync", { n: 16 }).includes("静止"), true);
   assert.equal(t("en", "home.crossHatchClose").includes("Close"), true);
 });
 
@@ -188,6 +208,20 @@ test("truth strip separates live soul from paper swarm", () => {
   assert.match(lines[1].text, /MALECNS_CIRCUIT/);
   assert.equal(lines[2].paper, true);
   assert.match(lines[3].text, /SIM/);
+  assert.equal(lines[4].paper, true);
+  assert.match(lines[4].text, /报价/);
+  const liveQuote = truthLines({
+    field,
+    swarm,
+    census: { status: "live", gen0: 7, cap: 1024, live: true },
+    locale: "en",
+    quotes: {
+      enabled: true,
+      assets: [{ id: "WBNB", ok: true, usd: 600 }],
+    },
+  });
+  assert.equal(liveQuote[4].live, true);
+  assert.match(liveQuote[4].text, /KYBER LIVE/);
   const fake = truthLines({
     field: buildHeroField(40),
     swarm,
@@ -203,4 +237,54 @@ test("truth strip separates live soul from paper swarm", () => {
     locale: "en",
   });
   assert.match(unread[0].text, /SOUL · MAINNET/);
+});
+
+test("a signal hop reaches every living fly and is deterministic", () => {
+  const living = [0, 1, 2, 3, 4].map((id) => ({ id }));
+  const perchOf = new Map(living.map((fly) => [fly.id, fly.id]));
+  const adj = [[1], [0, 2], [1], [], []];
+  const field = {
+    neurons: [
+      { x: 0, y: 0, z: 0 },
+      { x: 0.05, y: 0, z: 0 },
+      { x: 0.1, y: 0, z: 0 },
+      { x: 2, y: 0, z: 0 },
+      { x: 2.1, y: 0, z: 0 },
+    ],
+  };
+  const links = colonyLinks(living, perchOf, adj, field);
+  assert.ok(links.get(0).includes(1));
+  assert.ok(links.get(3).includes(4));
+  assert.equal(links.get(2).includes(3), false);
+  const hops = signalWave(0, links, living.map((fly) => fly.id));
+  assert.deepEqual(
+    hops.map((row) => row.to).sort((a, b) => a - b),
+    [1, 2, 3, 4],
+  );
+  assert.deepEqual(hops, signalWave(0, links, [4, 2, 0, 1, 3]));
+  const isolated = signalWave(3, links, living.map((fly) => fly.id));
+  assert.ok(isolated.some((row) => row.to === 0));
+  const wave = { originId: 0, born: 1, hops, rgb: [10, 20, 30] };
+  assert.equal(signalGain(wave, 0, 1), 1);
+  assert.equal(signalGain(wave, 1, 1), 0);
+  const first = hops.find((row) => row.to === 1);
+  assert.ok(first);
+  const arrive = 1 + (first.hop - 1) * SIGNAL_HOP + SIGNAL_TRAVEL;
+  assert.ok(signalGain(wave, 1, arrive) > 0.9);
+  assert.ok(packetProgress(wave, first, 1 + (first.hop - 1) * SIGNAL_HOP) === 0);
+  const olive = pigmentRgb({ body: "#7fae66" });
+  const wine = pigmentRgb({ body: "#8a3040" });
+  assert.notDeepEqual(olive, wine);
+  const fill = { kind: "fill", originId: 0, born: 1, hops, rgb: [10, 20, 30] };
+  const settled = waveSettledAt(fill);
+  assert.equal(colonySync({ ...fill, kind: "sense" }, settled + 0.1).phase, "idle");
+  assert.equal(colonySync(fill, settled - 0.01).phase, "idle");
+  assert.equal(colonySync(fill, settled + SYNC_STILL * 0.5).phase, "still");
+  const locked = colonySync(fill, settled + SYNC_STILL + SYNC_LOCK * 0.4);
+  assert.equal(locked.phase, "lock");
+  assert.equal(locked.hold, 1);
+  assert.ok(locked.beat >= 0 && locked.beat <= 1);
+  assert.ok(locked.glow > 0.3);
+  assert.equal(colonySync(fill, settled + SYNC_STILL + SYNC_LOCK + 0.1).phase, "fade");
+  assert.equal(activeColonySync([fill], settled + SYNC_STILL + 0.2).phase, "lock");
 });

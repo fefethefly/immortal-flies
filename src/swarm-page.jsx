@@ -11,14 +11,14 @@ import {
 } from "./swarm.mjs";
 import {
   PIT_STORE,
-  createPitSession,
+  bootPitSession,
   pitView,
   pulsePit,
-  restorePitSession,
   savePitSession,
   settleNow,
   stepPit,
 } from "./brain/flyswarm/pit.mjs";
+import { offerObservation } from "./brain/flyswarm/market.mjs";
 import { PhenotypeReadout } from "./phenotype-view.jsx";
 import {
   Balance,
@@ -40,6 +40,13 @@ import { SiteBar, recallFly, rememberFly } from "./site-chrome.jsx";
 import { SealBar } from "./seal-bar.jsx";
 import { loadOfficialToken } from "./token.mjs";
 import { iffApi } from "./api-client.mjs";
+import { useVenueQuotes } from "./use-venue-quotes.mjs";
+import {
+  formatBpsPct,
+  formatUsd,
+  headlineAsset,
+  observationFromQuotes,
+} from "./venue-quotes.mjs";
 import { createBranch, worldView } from "./brain/flyswarm/world.mjs";
 import {
   ColonyView,
@@ -76,6 +83,8 @@ export function PitPage() {
   const [remote, setRemote] = useState(null);
   const [creditRemote, setCreditRemote] = useState(null);
   const [vaultRemote, setVaultRemote] = useState(null);
+  const venueQuotes = useVenueQuotes({ enabled: ready, intervalMs: 3000 });
+  const headQuote = headlineAsset(venueQuotes);
 
   const stats = useMemo(() => (view ? summarize(view) : null), [view]);
   const fly = view
@@ -126,6 +135,25 @@ export function PitPage() {
       cancelled = true;
     };
   }, [ready]);
+
+  // 只读 Kyber 报价注入本地 market-feed（成交仍 SIM）。静态站无 /v1 时走浏览器直连。
+  useEffect(() => {
+    if (!ready || !venueQuotes?.enabled) return;
+    const obs = observationFromQuotes(venueQuotes);
+    if (!obs) return;
+    const session = sessionRef.current;
+    if (session?.aux?.market) {
+      try {
+        offerObservation(session.aux.market, obs);
+      } catch {
+        /* stale or forbidden — keep paper walk */
+      }
+    }
+    const r = remoteRef.current;
+    if (r) {
+      iffApi.offerMarket(r.sessionId, r.ownerToken, obs).catch(() => {});
+    }
+  }, [ready, venueQuotes]);
 
   /** 拉取服务端信用账本；失败回落本地纸面信用。 */
   async function fetchCredit(r = remoteRef.current) {
@@ -216,16 +244,13 @@ export function PitPage() {
     let cancelled = false;
     (async () => {
       try {
-        const raw = localStorage.getItem(PIT_STORE);
-        const saved = raw ? JSON.parse(raw) : null;
-        const session = saved
-          ? await restorePitSession(saved)
-          : await createPitSession();
+        const { session, discarded } = await bootPitSession();
         if (cancelled) return;
         sessionRef.current = session;
         setView(pitView(session));
         setWorld(worldView(session));
         setReady(true);
+        if (discarded) setNotice(tx("pit.noticeReset"));
       } catch (err) {
         if (cancelled) return;
         console.warn("[pit] boot failed:", err?.stack || err);
@@ -593,12 +618,51 @@ export function PitPage() {
               </div>
               <div className="market-card">
                 <div className="card-top">
-                  <span>IFS / HIVE VAULT</span>
-                  <b className="live-dot">● LIVE</b>
+                  <span>
+                    {view.market.quote === "LIVE" || venueQuotes?.enabled
+                      ? tx("pit.venueLive")
+                      : "IFS / HIVE VAULT"}
+                  </span>
+                  <b className="live-dot">
+                    ●{" "}
+                    {view.market.quote === "LIVE" || venueQuotes?.focus
+                      ? "LIVE QUOTE"
+                      : "LIVE"}
+                  </b>
                 </div>
                 <div className="market-price">
-                  {formatBnb(view.market.price)} <small>BNB / IFS</small>
+                  {headQuote
+                    ? formatUsd(headQuote.usd)
+                    : formatBnb(view.market.price)}{" "}
+                  <small>
+                    {headQuote
+                      ? `${headQuote.symbol} / USDT`
+                      : view.market.focusAssetId || venueQuotes?.focus?.assetId
+                        ? `FOCUS ${view.market.focusAssetId || venueQuotes.focus.assetId}`
+                        : "BNB / IFS"}
+                  </small>
                 </div>
+                {Array.isArray(venueQuotes?.assets) && venueQuotes.assets.length > 0 && (
+                  <div className="venue-quotes" aria-label="venue quotes">
+                    {venueQuotes.assets.map((a) => (
+                      <span
+                        key={a.id}
+                        className={
+                          venueQuotes.focus?.assetId === a.id ||
+                          headQuote?.id === a.id
+                            ? "venue-quote focus"
+                            : "venue-quote"
+                        }
+                      >
+                        <b>{a.symbol}</b>{" "}
+                        {a.usd != null ? formatUsd(a.usd) : "—"}{" "}
+                        {formatBpsPct(a.changeBps)}
+                        {a.stale ? " · stale" : ""}
+                      </span>
+                    ))}
+                    <em className="venue-note">{tx("pit.venueNote")}</em>
+                  </div>
+                )}
                 <div className="market-lines">
                   {(view.prices || []).slice(-18).map((price, i, arr) => {
                     const min = Math.min(...arr);
@@ -623,7 +687,10 @@ export function PitPage() {
                     </b>
                   </span>
                   <span>
-                    IFS <b>SIM</b>
+                    FILL <b>SIM</b>
+                    {view.market.quote === "LIVE" || venueQuotes?.focus
+                      ? " · QUOTE LIVE"
+                      : ""}
                   </span>
                 </div>
               </div>

@@ -115,4 +115,5 @@ export const iffApi = {
   vaultExit: (token, body) =>
     request("/v1/vault/exit", { method: "POST", token, body }),
   vaultSettle: () => request("/v1/vault/settle", { method: "POST" }),
+  venueQuotes: () => request("/v1/venue/quotes"),
 };

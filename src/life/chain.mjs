@@ -10,8 +10,11 @@ import {
 } from "ethers";
 import {
   IFS_ABI,
+  decodeOperator,
+  decodeSegment,
   decodeTank,
   hubListingPath,
+  isZeroHash,
   parseHubDeployment,
   parseRunnerListing,
   runnerListingPath,
@@ -134,7 +137,9 @@ export async function loadHubDeployment(
 export async function loadRunnerListing(
   search = typeof window === "undefined" ? "" : window.location.search,
 ) {
-  const response = await fetch(runnerListingPath(search), { cache: "no-store" });
+  const response = await fetch(runnerListingPath(search), {
+    cache: "no-store",
+  });
   if (!response.ok) return null;
   return parseRunnerListing(await response.json());
 }
@@ -178,6 +183,7 @@ export async function readHostSnapshot(hub, tokenId, wallet) {
   const [
     lastFinalRoot,
     lastSettledId,
+    leaseId,
     maxUserDaily,
     maxProtocolDaily,
     spendDay,
@@ -186,12 +192,17 @@ export async function readHostSnapshot(hub, tokenId, wallet) {
   ] = await Promise.all([
     hub.lastFinalRoot(id),
     hub.lastSettledId(id),
+    hub.activeLease(id),
     hub.maxUserDaily(),
     hub.maxProtocolDaily(),
     hub.spendDay(),
     hub.paused(),
     hub.arbiter(),
   ]);
+  let lease = null;
+  if (leaseId && !isZeroHash(leaseId)) {
+    lease = decodeSegment(await hub.segments(leaseId), leaseId);
+  }
   let refunds = 0n;
   let userDaySpend = 0n;
   let userSpendDay = 0;
@@ -209,6 +220,7 @@ export async function readHostSnapshot(hub, tokenId, wallet) {
       disputed: Number(workRaw.disputed ?? workRaw[1] ?? 0),
       slashed: Number(workRaw.slashed ?? workRaw[2] ?? 0),
     },
+    lease,
     lastFinalRoot,
     lastSettledId,
     maxUserDaily: String(maxUserDaily),
@@ -219,6 +231,27 @@ export async function readHostSnapshot(hub, tokenId, wallet) {
     refunds: String(refunds),
     userDaySpend: String(userDaySpend),
     userSpendDay: Number(userSpendDay),
+  };
+}
+
+export async function readHostPurse(hub, { wallet, provider, ifs } = {}) {
+  if (!hub || !wallet || !provider) return null;
+  const [native, ifsBal, earnings, refunds, operator, allowlisted] =
+    await Promise.all([
+      provider.getBalance(wallet),
+      ifs ? ifs.balanceOf(wallet) : 0n,
+      hub.earnings(wallet),
+      hub.refunds(wallet),
+      hub.operators(wallet),
+      hub.allowlisted(wallet),
+    ]);
+  return {
+    native: String(native),
+    ifs: String(ifsBal || 0n),
+    earnings: String(earnings),
+    refunds: String(refunds),
+    allowlisted: Boolean(allowlisted),
+    operator: decodeOperator(operator),
   };
 }
 
@@ -309,7 +342,10 @@ export async function readParentCooldown(kin, parentA, parentB) {
       kin.runner?.provider?.getBlock("latest"),
     ]);
     const now = Number(block?.timestamp ?? 0);
-    const ready = Math.max(Number(tA) + Number(cool), Number(tB) + Number(cool));
+    const ready = Math.max(
+      Number(tA) + Number(cool),
+      Number(tB) + Number(cool),
+    );
     return {
       cooldown: Number(cool),
       remaining: Math.max(0, ready - now),
@@ -666,7 +702,7 @@ export function explainLifeError(err, tx) {
   return raw;
 }
 
-export async function connectLife(ethereum, deployment, network) {
+export async function connectLife(ethereum, deployment, network, options = {}) {
   if (!ethereum) throw new Error("未检测到钱包");
   if (!deployment?.address) throw new Error("Soul 合约尚未部署");
   const resolved = network || networkOf(deployment.chainId);
@@ -674,6 +710,7 @@ export async function connectLife(ethereum, deployment, network) {
     .request({ method: "eth_accounts" })
     .catch(() => []);
   if (!accounts?.length) {
+    if (options.silent) return null;
     await ethereum.request({ method: "eth_requestAccounts" });
   }
   await ensureChain(ethereum, resolved);

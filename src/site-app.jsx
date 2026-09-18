@@ -1,6 +1,9 @@
 import React, { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { SiteGoContext, isSitePath, normalizePath } from "./site-chrome.jsx";
+import { hydrateActiveWallet } from "./life/wallets.mjs";
+
+if (typeof window !== "undefined") hydrateActiveWallet();
 
 const PAGES = {
   "/": lazy(() =>
@@ -38,6 +41,9 @@ const PAGES = {
   ),
   "/protocol.html": lazy(() =>
     import("./protocol-page.jsx").then((m) => ({ default: m.ProtocolPage })),
+  ),
+  "/docs.html": lazy(() =>
+    import("./docs-page.jsx").then((m) => ({ default: m.DocsPage })),
   ),
 };
 

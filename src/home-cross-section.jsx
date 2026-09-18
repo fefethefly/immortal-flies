@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Pause, Play } from "lucide-react";
 import { formatBnb, formatPrice } from "./swarm.mjs";
+import { useVenueQuotes } from "./use-venue-quotes.mjs";
+import {
+  formatBpsPct,
+  formatUsd,
+  headlineAsset,
+} from "./venue-quotes.mjs";
 import { loadGraph } from "./brain/graph.mjs";
 import { loadLifeDeployment, readSoulCensus } from "./life/chain.mjs";
 import { birthHref } from "./life/birth-card.mjs";
@@ -27,6 +33,23 @@ const MODE_KEYS = {
   society: "home.crossSociety",
   market: "home.crossMarket",
 };
+
+const SIDE_WORDS = /\b(SELL|BUY|HOLD|SIM|T\d+|#\d+)\b/g;
+
+// Trade sides and ledger tokens read in bright gold inside the tape lines,
+// like the reference terminal: the rest of the line stays champagne.
+function sideWords(text) {
+  const parts = String(text).split(SIDE_WORDS);
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <em className="gold-side" key={`${part}-${i}`}>
+        {part}
+      </em>
+    ) : (
+      part
+    ),
+  );
+}
 
 function glAvailable() {
   if (typeof window === "undefined") return false;
@@ -131,6 +154,11 @@ export function HomeCrossSection({
   const [field, setField] = useState(null);
   const [hatchOpen, setHatchOpen] = useState(false);
   const [census, setCensus] = useSoulCensus();
+  const venueQuotes = useVenueQuotes({ intervalMs: 4000 });
+  const headQuote = headlineAsset(venueQuotes);
+  const liveQuotes = (venueQuotes?.assets || []).filter(
+    (a) => a?.ok && a.usd != null && Number(a.usd) > 0,
+  );
   const mode = crossModeOf(swarm.tick, locked);
   const fly =
     swarm.flies.find((row) => row.id === selectedId) ||
@@ -143,8 +171,8 @@ export function HomeCrossSection({
   );
   const tape = useMemo(() => utteranceTape(swarm, fly), [swarm, fly]);
   const truth = useMemo(
-    () => truthLines({ field, swarm, census, locale }),
-    [field, swarm, census, locale],
+    () => truthLines({ field, swarm, census, locale, quotes: venueQuotes }),
+    [field, swarm, census, locale, venueQuotes],
   );
   const prices = swarm.prices.slice(-60);
   const first = prices[0] || swarm.market.price;
@@ -326,7 +354,9 @@ export function HomeCrossSection({
           <li className="cross-watch" data-kind="WATCH">
             <b>{tx("home.crossWatch", { id: read.flyId })}</b>
             <span>
-              {read.flyAct} · {read.flySide} · {read.flySpikes}/24
+              {sideWords(
+                `${read.flyAct} · ${read.flySide} · ${read.flySpikes}/24`,
+              )}
             </span>
             <small>{read.look || read.hue}</small>
           </li>
@@ -339,17 +369,42 @@ export function HomeCrossSection({
                 {row.kind}
                 {row.audit ? ` · ${row.audit}` : ""}
               </b>
-              <span>{tx(row.key, row.vars)}</span>
+              <span>{sideWords(tx(row.key, row.vars))}</span>
             </li>
           ))}
         </ol>
         <aside className="cross-rail" data-hot={mode === "market"}>
-          <span>{tx("home.crossPrice")}</span>
-          <strong>{formatPrice(swarm.market.price)}</strong>
-          <small className={change < 0 ? "sell" : "buy"}>
-            {change >= 0 ? "+" : ""}
-            {change.toFixed(2)}%
+          <span>
+            {headQuote ? tx("home.crossQuote") : tx("home.crossPrice")}
+          </span>
+          <strong>
+            {headQuote ? formatUsd(headQuote.usd) : formatPrice(swarm.market.price)}
+          </strong>
+          <small
+            className={
+              (headQuote ? headQuote.changeBps : change) < 0 ? "sell" : "buy"
+            }
+          >
+            {headQuote
+              ? `${headQuote.symbol} ${formatBpsPct(headQuote.changeBps)}`
+              : `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`}
           </small>
+          {liveQuotes.length > 0 ? (
+            <ul className="cross-quotes">
+              {liveQuotes.map((a) => (
+                <li
+                  key={a.id}
+                  className={a.id === headQuote?.id ? "focus" : undefined}
+                >
+                  <b>{a.symbol}</b>
+                  <strong>{formatUsd(a.usd)}</strong>
+                  <i className={a.changeBps < 0 ? "sell" : "buy"}>
+                    {formatBpsPct(a.changeBps)}
+                  </i>
+                </li>
+              ))}
+            </ul>
+          ) : null}
           <span>{tx("home.crossSplit")}</span>
           <ul className="cross-split">
             {["BUY", "HOLD", "SELL"].map((side) => (
@@ -371,22 +426,42 @@ export function HomeCrossSection({
             {formatBnb(read.bnb)} <small>BNB</small>
           </strong>
           <small>
-            {read.buys} BUY · {read.sells} SELL
+            {sideWords(`${read.buys} BUY · ${read.sells} SELL`)}
           </small>
           <em>{tx("home.crossIfs")}</em>
         </aside>
         <div className="cross-mobile-rail">
           <div className="cross-mobile-row">
-            <span>{tx("home.crossPrice")}</span>
-            <strong>{formatPrice(swarm.market.price)}</strong>
-            <small className={change < 0 ? "sell" : "buy"}>
-              {change >= 0 ? "+" : ""}
-              {change.toFixed(2)}%
+            <span>
+              {headQuote ? tx("home.crossQuote") : tx("home.crossPrice")}
+            </span>
+            <strong>
+              {headQuote
+                ? formatUsd(headQuote.usd)
+                : formatPrice(swarm.market.price)}
+            </strong>
+            <small
+              className={
+                (headQuote ? headQuote.changeBps : change) < 0 ? "sell" : "buy"
+              }
+            >
+              {headQuote
+                ? `${headQuote.symbol} ${formatBpsPct(headQuote.changeBps)}`
+                : `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`}
             </small>
             <b>
               {tx("home.crossBook")} · {formatBnb(read.bnb)} <i>BNB</i>
             </b>
           </div>
+          {liveQuotes.length > 0 ? (
+            <ul className="cross-quotes is-mobile">
+              {liveQuotes.map((a) => (
+                <li key={a.id}>
+                  <b>{a.symbol}</b> {formatUsd(a.usd)}
+                </li>
+              ))}
+            </ul>
+          ) : null}
           <div className="cross-mobile-split" aria-hidden="true">
             {["BUY", "HOLD", "SELL"].map((side) => (
               <em
@@ -402,11 +477,13 @@ export function HomeCrossSection({
         <div className="cross-scroll" aria-hidden="true">
           <ChevronDown size={14} />
         </div>
+        <div className="cross-rule" aria-hidden="true" />
         <footer className="cross-foot">
           <p className="cross-cause">
             #{String(cause.id).padStart(3, "0")} {cause.act} → {cause.side} ·{" "}
             {formatPrice(cause.price)} · T{String(cause.tick).padStart(6, "0")}{" "}
             · {cause.buy}/{cause.hold}/{cause.sell}
+            {cause.fill ? ` · ${cause.heard} heard` : ""}
           </p>
           <div
             className="cross-modes"

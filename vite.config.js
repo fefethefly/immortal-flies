@@ -6,6 +6,9 @@ export default defineConfig({
     include: ["three"],
   },
   server: {
+    watch: {
+      ignored: ["**/.tmp-*/**", "**/.tmp-*"],
+    },
     proxy: {
       "/v1": {
         target: "http://127.0.0.1:8787",
@@ -37,6 +40,7 @@ export default defineConfig({
         market: "market.html",
         live: "live.html",
         protocol: "protocol.html",
+        docs: "docs.html",
       },
     },
   },

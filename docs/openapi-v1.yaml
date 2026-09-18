@@ -273,6 +273,36 @@ paths:
           description: Queued
         "400":
           description: Forbidden fields or bad provenance
+  /v1/venue/quotes:
+    get:
+      summary: Read-only KyberSwap BSC quotes for the venue watchlist
+      description: |
+        Returns USD / changeBps for WBNB, BTCB, ETH vs USDT.
+        Server poller is on by default (set IFF_VENUE_ENABLED=0 to stop it).
+        Never includes calldata. Paper fills remain SIM.
+      responses:
+        "200":
+          description: Venue quote snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                  quote:
+                    type: string
+                    enum: [LIVE, null]
+                  fill:
+                    type: string
+                    enum: [SIM]
+                  focus:
+                    type: object
+                    nullable: true
+                  assets:
+                    type: array
+                    items:
+                      type: object
   /v1/souls/{soulId}:
     get:
       summary: Soul roster summary

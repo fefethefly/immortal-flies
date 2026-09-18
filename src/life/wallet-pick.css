@@ -1,7 +1,7 @@
 .wallet-veil {
   position: fixed;
   inset: 0;
-  z-index: 28;
+  z-index: 80;
   display: grid;
   place-items: end center;
   padding: 18px;

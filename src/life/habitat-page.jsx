@@ -43,7 +43,7 @@ export function HabitatPage() {
   const [selected, setSelected] = useState(null);
   const [mineOnly, setMineOnly] = useState(false);
   const [wallet, setWallet] = useState("");
-  const { pick, dialog } = useWalletPick();
+  const { pick, dialog } = useWalletPick(tx);
   const [tool, setTool] = useState("move");
   const [rate, setRate] = useState(1);
   const [query, setQuery] = useState("");
@@ -523,7 +523,9 @@ export function HabitatPage() {
           ) : null}
           <SiteLink
             href={withNet(
-              selected ? `/market.html?soul=${selected.tokenId}` : "/market.html",
+              selected
+                ? `/market.html?soul=${selected.tokenId}`
+                : "/market.html",
             )}
             className="life-cross"
           >

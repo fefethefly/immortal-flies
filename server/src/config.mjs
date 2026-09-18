@@ -61,5 +61,19 @@ export function createConfig(env = process.env) {
       apiKey: env.OPENAI_API_KEY || "",
       model: env.OPENAI_MODEL || "deepseek-chat",
     },
+    venue: {
+      enabled: (() => {
+        const raw = env.IFF_VENUE_ENABLED;
+        if (raw == null || raw === "") return true;
+        if (/^(0|false|no|off)$/i.test(String(raw))) return false;
+        return /^(1|true|yes|on)$/i.test(String(raw));
+      })(),
+      pollMs: intEnv(env, "IFF_VENUE_POLL_MS", 3000),
+      staleMs: intEnv(env, "IFF_VENUE_STALE_MS", 15_000),
+      clientId: env.IFF_KYBER_CLIENT_ID || "immortalflies",
+      watchlistPath: env.IFF_VENUE_WATCHLIST
+        ? resolve(root, env.IFF_VENUE_WATCHLIST)
+        : resolve(root, "./public/token/venue-watchlist.json"),
+    },
   };
 }

@@ -2,7 +2,10 @@
   position: relative;
   min-height: 100dvh;
   margin: -72px 0 0;
-  background: #080705;
+  /* Deep space: near-black, with a faint ember core behind the gold mine. */
+  background:
+    radial-gradient(80% 62% at 48% 46%, #140b03 0%, #050403 58%, #020202 100%),
+    #020202;
   overflow: clip;
   contain: layout style paint;
 }
@@ -18,7 +21,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  color: #d9d0bb;
+  color: #e8ddbd;
 }
 .cross-hud a,
 .cross-hud button,
@@ -38,11 +41,17 @@
 }
 .cross-top h1 {
   margin: 0;
-  max-width: 34ch;
-  font: 400 clamp(19px, 2.2vw, 30px) / 1.35 var(--sans);
-  letter-spacing: -0.02em;
-  color: #e6dcc4;
+  max-width: 36ch;
+  font: 600 clamp(24px, 2.9vw, 40px) / 1.22 var(--display);
+  font-style: italic;
+  letter-spacing: 0.01em;
   text-wrap: pretty;
+  /* Champagne gradient like the sign of the pit. */
+  background: linear-gradient(165deg, #faf5e0 8%, #f3e4ae 52%, #e6cc78 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 .cross-truth {
   display: flex;
@@ -53,10 +62,10 @@
   list-style: none;
   font: 10.5px / 1.5 var(--mono);
   letter-spacing: 0.1em;
-  color: #8a8172;
+  color: #a09070;
 }
 .cross-truth [data-live="true"] {
-  color: #93a181;
+  color: #c4a56a;
 }
 .cross-truth [data-paper="true"] {
   color: #7a7165;
@@ -72,8 +81,8 @@
   height: 44px;
   display: grid;
   place-items: center;
-  border: 1px solid #3a3428;
-  color: #d9d0bb;
+  border: 1px solid #4a3c24;
+  color: #e8ddbd;
 }
 .cross-tools .cross-hatch {
   width: auto;
@@ -113,8 +122,8 @@
   z-index: 4;
   width: min(360px, 46vw);
   padding: 16px 16px 14px;
-  border: 1px solid #3a3428;
-  background: rgba(10, 9, 7, 0.92);
+  border: 1px solid #4a3c24;
+  background: rgba(15, 10, 5, 0.94);
   pointer-events: auto;
 }
 .cross-desk .hatch {
@@ -126,14 +135,14 @@
 .cross-desk .eyebrow {
   font: 9px var(--mono);
   letter-spacing: 0.16em;
-  color: #93a181;
+  color: #c4a56a;
 }
 .cross-desk .hatch-note,
 .cross-desk .hatch-meta {
   max-width: none;
   margin: 8px 0;
   font: 11px / 1.45 var(--sans);
-  color: #9a9182;
+  color: #a09070;
 }
 .cross-desk .hatch-name {
   display: grid;
@@ -141,11 +150,11 @@
   max-width: none;
   margin: 0 0 10px;
   font: 11px var(--mono);
-  color: #8a8172;
+  color: #a09070;
 }
 .cross-desk .hatch-name input {
-  border: 1px solid #2f2a1f;
-  background: #100e0b;
+  border: 1px solid #4a3c24;
+  background: #171106;
   color: #f0ead9;
   padding: 8px;
   font: 12px var(--mono);
@@ -159,8 +168,8 @@
 .cross-desk button {
   min-height: 36px;
   padding: 0 12px;
-  border: 1px solid #2f2a1f;
-  background: #16130f;
+  border: 1px solid #4a3c24;
+  background: #1c150b;
   color: #f0ead9;
   font: 12px / 1 var(--mono);
   letter-spacing: 0.06em;
@@ -201,7 +210,7 @@
   list-style: none;
   display: grid;
   gap: 10px;
-  border-left: 1px solid #342e22;
+  border-left: 1px solid #4a3c24;
   padding-left: 14px;
 }
 .cross-tape li {
@@ -211,22 +220,43 @@
 .cross-tape b {
   font: 9px var(--mono);
   letter-spacing: 0.16em;
-  color: #8a8172;
+  color: #b09a68;
 }
 .cross-tape span {
   font: 12px / 1.45 var(--mono);
-  color: #d4cbb4;
+  color: #f0e2b8;
+}
+/* Trade sides read in bright gold inside the tape lines. */
+.cross-tape .gold-side,
+.cross-watch .gold-side {
+  font-style: normal;
+  font-weight: 500;
+  color: #f0d010;
 }
 .cross-tape [data-kind="ACT"] b,
 .cross-tape [data-kind="WATCH"] b {
   color: var(--gold, #f0b90b);
 }
+.cross-tape [data-kind="SENSE"] b,
 .cross-tape [data-kind="FILL"] b {
-  color: #93a181;
+  color: #f0d010;
+}
+.cross-tape [data-kind="RELAY"] b {
+  color: #e0b840;
+}
+.cross-tape [data-kind="SYNC"] b {
+  color: #e2d0a0;
+}
+.cross-hero:has(.cross-canvas[data-sync="lock"]) .cross-tape [data-kind="SYNC"] b,
+.cross-hero:has(.cross-canvas[data-sync="still"]) .cross-tape [data-kind="SYNC"] b {
+  color: #f0e6c8;
+}
+.cross-hero:has(.cross-canvas[data-sync="lock"]) .cross-tape [data-kind="SYNC"] span {
+  color: #f3ead4;
 }
 .cross-watch small {
   font: 11px / 1.45 var(--sans);
-  color: #9a9182;
+  color: #a09070;
 }
 .cross-rail {
   position: absolute;
@@ -236,7 +266,7 @@
   display: grid;
   gap: 6px;
   text-align: right;
-  opacity: 0.78;
+  opacity: 0.96;
   transition: opacity 0.4s var(--ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 .cross-rail[data-hot="true"] {
@@ -248,9 +278,9 @@
 }
 .cross-rail span,
 .cross-rail em {
-  font: 9px var(--mono);
+  font: 500 9px var(--mono);
   letter-spacing: 0.16em;
-  color: #8a8172;
+  color: #d0b050;
 }
 .cross-rail strong {
   font: 22px / 1 var(--mono);
@@ -258,13 +288,20 @@
   color: #f0ead9;
 }
 .cross-rail small {
-  font: 11px var(--mono);
+  font: 500 11px var(--mono);
+  color: #d0b050;
+}
+.cross-rail .gold-side {
+  font-style: normal;
+  font-weight: 500;
+  color: #f0d010;
+  margin-top: 0;
 }
 .cross-rail .buy {
-  color: #c4b07a;
+  color: #f0d010;
 }
 .cross-rail .sell {
-  color: #b07a6a;
+  color: #c0705a;
 }
 .cross-rail em {
   margin-top: 10px;
@@ -274,7 +311,55 @@
 }
 .cross-book small {
   font-size: 10px;
-  color: #8a8172;
+  font-weight: 500;
+  color: #d0b050;
+}
+.cross-quotes {
+  list-style: none;
+  margin: 2px 0 6px;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+.cross-quotes li {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  font: 10px / 1.2 var(--mono);
+  letter-spacing: 0.04em;
+  color: #a09070;
+  text-align: left;
+}
+.cross-quotes li.focus {
+  color: #e8ddbd;
+}
+.cross-quotes b {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.cross-rail .cross-quotes strong {
+  font: 10px / 1.2 var(--mono);
+  letter-spacing: 0;
+  color: inherit;
+}
+.cross-quotes i {
+  font-style: normal;
+  min-width: 4.8em;
+  text-align: right;
+}
+.cross-quotes.is-mobile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  font: 10px var(--mono);
+  color: #a09070;
+}
+.cross-quotes.is-mobile li {
+  display: flex;
+  grid-template-columns: none;
+  gap: 6px;
 }
 .cross-split {
   list-style: none;
@@ -297,7 +382,7 @@
 .cross-split i {
   display: block;
   height: 3px;
-  background: #2a261c;
+  background: #332a18;
 }
 .cross-split em {
   display: block;
@@ -306,10 +391,10 @@
   background: currentColor;
 }
 .cross-split .buy {
-  color: #c4b07a;
+  color: #f0c43a;
 }
 .cross-split .hold {
-  color: #8a8172;
+  color: #9c8f74;
 }
 .cross-split .sell {
   color: #b07a6a;
@@ -344,7 +429,7 @@
   padding: 0 10px;
   font: 10px var(--mono);
   letter-spacing: 0.14em;
-  color: #8a8172;
+  color: #b89a58;
   border-bottom: 1px solid transparent;
 }
 .cross-modes button[aria-pressed="true"] {
@@ -352,17 +437,40 @@
   border-bottom-color: var(--gold, #f0b90b);
 }
 .cross-modes .cross-auto {
-  color: #d9d0bb;
+  color: #e0d4b0;
+}
+/* The sign-off rule: a fading antique-gold band across the width of the pit. */
+.cross-rule {
+  position: absolute;
+  left: 10%;
+  right: 4%;
+  bottom: 84px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(160, 96, 16, 0) 0%,
+    rgba(160, 96, 16, 0.22) 12%,
+    rgba(196, 126, 26, 0.78) 42%,
+    rgba(160, 96, 16, 0.3) 76%,
+    rgba(160, 96, 16, 0) 100%
+  );
+  box-shadow:
+    0 0 26px 8px rgba(160, 96, 16, 0.22),
+    0 1px 2px rgba(160, 96, 16, 0.5);
+  pointer-events: none;
+}
+.cross-hero[data-hatch="open"] .cross-rule {
+  opacity: 0;
 }
 /* Scroll cue: a quiet drift under the HUD columns, above the foot. */
 .cross-scroll {
   position: absolute;
   left: 50%;
-  bottom: 82px;
+  bottom: 98px;
   transform: translateX(-50%);
   display: grid;
   justify-items: center;
-  color: #8a8172;
+  color: #a09070;
   animation: cross-scroll-drift 2.6s var(--ease, cubic-bezier(0.16, 1, 0.3, 1))
     infinite;
 }
@@ -427,7 +535,7 @@
   .cross-mobile-row span {
     font: 9px var(--mono);
     letter-spacing: 0.16em;
-    color: #8a8172;
+    color: #a09070;
   }
   .cross-mobile-row strong {
     font: 20px / 1 var(--mono);
@@ -438,43 +546,46 @@
     font: 11px var(--mono);
   }
   .cross-mobile-row .buy {
-    color: #c4b07a;
+    color: #f0d010;
   }
   .cross-mobile-row .sell {
-    color: #b07a6a;
+    color: #c0705a;
   }
   .cross-mobile-row b {
     margin-left: auto;
     font: 400 11px var(--mono);
-    color: #d4cbb4;
+    color: #e8ddbd;
   }
   .cross-mobile-row b i {
     font-style: normal;
     font-size: 9px;
-    color: #8a8172;
+    color: #a09070;
   }
   .cross-mobile-split {
     display: flex;
     gap: 2px;
     height: 3px;
-    background: #2a261c;
+    background: #332a18;
   }
   .cross-mobile-split em {
     display: block;
     height: 100%;
   }
   .cross-mobile-split .buy {
-    background: #c4b07a;
+    background: #e6c05c;
   }
   .cross-mobile-split .hold {
-    background: #8a8172;
+    background: #9c8f74;
   }
   .cross-mobile-split .sell {
-    background: #b07a6a;
+    background: #c0705a;
   }
   .cross-truth {
     gap: 6px 12px;
     font-size: 10px;
+  }
+  .cross-rule {
+    bottom: 172px;
   }
   .cross-desk {
     top: auto;

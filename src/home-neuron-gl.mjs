@@ -41,7 +41,7 @@ void main() {
   float depth01 = (z2 + 1.15) / 2.3;
   float breath = 0.86 + 0.14 * sin(u_time * 0.6 + (p.x + p.y) * 9.0);
   float rareAdd = a_rare > 0.5 ? 0.1 : 0.0;
-  v_alpha = min(1.0, (0.34 + depth01 * 0.58 + max(a_activity, 0.0) * 0.7 + rareAdd) * u_dim * breath);
+  v_alpha = min(1.0, (0.64 + depth01 * 0.36 + max(a_activity, 0.0) * 0.7 + rareAdd) * u_dim * breath);
   if (a_activity < 0.0) v_alpha = 0.0;
   v_color = a_color;
   v_activity = max(a_activity, 0.0);

@@ -6,16 +6,26 @@ import {
   acceptancePolicy,
   archiveUrl,
   dailyLeft,
+  decodeOperator,
+  decodeSegment,
   decodeTank,
+  formatCountdown,
   formatIfs,
   hubListingPath,
   isLiveIfs,
   isMockIfsNetwork,
+  liveRunnerForToken,
+  nativeSymbol,
   parseBindForm,
   parseHubDeployment,
+  parseLineage,
   runnerListingPath,
+  segmentPhase,
+  segmentsRemaining,
   spentToday,
+  tankFuel,
   validUntilOf,
+  windowLeftSec,
 } from "../src/life/host.mjs";
 import { assertRunnerEnv } from "../server/src/runner/guard.mjs";
 
@@ -101,6 +111,92 @@ test("tank decode and daily caps", () => {
   assert.equal(dailyLeft(10n ** 20n, 10n ** 18n), 99n * 10n ** 18n);
 });
 
+test("dashboard phase, countdown, remaining segments, and lineage", () => {
+  assert.equal(segmentPhase(null, 100), "idle");
+  assert.equal(segmentPhase({ status: 1 }, 100), "open");
+  assert.equal(segmentPhase({ status: 2, challengeUntil: 200 }, 100), "window");
+  assert.equal(segmentPhase({ status: 2, challengeUntil: 100 }, 100), "ready");
+  assert.equal(segmentPhase({ status: 4 }, 1), "settled");
+  assert.equal(windowLeftSec(200, 150), 50);
+  assert.equal(windowLeftSec(100, 150), 0);
+  assert.equal(formatCountdown(90), "1m 30s");
+  assert.equal(formatCountdown(3661), "1h 01m");
+  const tank = decodeTank({
+    owner: "0x1111111111111111111111111111111111111111",
+    lifeId: "0x22",
+    ownerFuel: 5n * 10n ** 18n,
+    giftFuel: 0n,
+    reserved: 0n,
+    runner: "0x3333333333333333333333333333333333333333",
+    fee: 10n ** 18n,
+    steps: 1000,
+    spendCap: 10n * 10n ** 18n,
+    spent: 2n * 10n ** 18n,
+    validUntil: 0,
+  });
+  assert.equal(tankFuel(tank), 5n * 10n ** 18n);
+  assert.equal(segmentsRemaining(tank), 5);
+  const book = parseLineage({
+    schema: "iff.life-lineage/1",
+    yield: false,
+    tokenId: 1,
+    hub: "0xdb80def1828236A5af09965F46c6BEE63ccc1f4e",
+    segments: [
+      { segmentId: "0x11", nonce: 22, startRoot: "0xaa", finalRoot: "0xbb" },
+    ],
+  });
+  assert.equal(book.segments.length, 1);
+  assert.equal(book.segments[0].nonce, 22);
+  assert.equal(
+    parseLineage({ schema: "iff.life-lineage/1", yield: true }).segments.length,
+    0,
+  );
+  const live = liveRunnerForToken(
+    {
+      lastSegment: {
+        tokenId: 1,
+        action: "awaiting-window",
+        segmentId: "0x53",
+        challengeUntil: 9,
+      },
+      lastError: null,
+      ready: true,
+    },
+    1,
+  );
+  assert.equal(live.action, "awaiting-window");
+  assert.equal(liveRunnerForToken({ lastSegment: { tokenId: 2 } }, 1), null);
+  assert.equal(nativeSymbol(97), "tBNB");
+  assert.equal(nativeSymbol(56), "BNB");
+  const seg = decodeSegment(
+    {
+      tokenId: 1,
+      runner: "0x3333333333333333333333333333333333333333",
+      steps: 1000,
+      status: 2,
+      fee: 10n ** 18n,
+      startRoot: "0xaa",
+      finalRoot: "0xbb",
+      challengeUntil: 9,
+      paid: 0n,
+    },
+    "0x53",
+  );
+  assert.equal(seg.id, "0x53");
+  assert.equal(seg.status, 2);
+  const op = decodeOperator({
+    roles: 1,
+    status: 1,
+    bond: 99n * 10n ** 18n,
+    exposure: 10n ** 18n,
+    accepted: 1,
+    disputed: 0,
+    lost: 0,
+  });
+  assert.equal(op.status, 1);
+  assert.equal(op.accepted, 1);
+});
+
 test("mainnet runner cannot reuse testnet dir or mock IFS", () => {
   assert.throws(
     () =>
@@ -109,7 +205,12 @@ test("mainnet runner cannot reuse testnet dir or mock IFS", () => {
         mainnetFlag: "",
         dataDir: "/tmp/main",
         defaultTestnetDir: "/tmp/test",
-        listing: { status: "LIVE", address: "0x1", ifs: MAINNET_IFS, hive: MAINNET_HIVE },
+        listing: {
+          status: "LIVE",
+          address: "0x1",
+          ifs: MAINNET_IFS,
+          hive: MAINNET_HIVE,
+        },
       }),
     /IFF_MAINNET_RUNNER/,
   );
@@ -120,7 +221,12 @@ test("mainnet runner cannot reuse testnet dir or mock IFS", () => {
         mainnetFlag: "1",
         dataDir: "/tmp/test",
         defaultTestnetDir: "/tmp/test",
-        listing: { status: "LIVE", address: "0x1", ifs: MAINNET_IFS, hive: MAINNET_HIVE },
+        listing: {
+          status: "LIVE",
+          address: "0x1",
+          ifs: MAINNET_IFS,
+          hive: MAINNET_HIVE,
+        },
       }),
     /testnet data directory/,
   );
@@ -183,4 +289,15 @@ test("mainnet runner cannot reuse testnet dir or mock IFS", () => {
     }),
     { audit: "TESTNET", yield: false, chainId: 97 },
   );
+});
+
+test("host connect and refresh stay clickable without a live hub", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const src = await readFile(
+    new URL("../src/life/host-page.jsx", import.meta.url),
+    "utf8",
+  );
+  assert.equal(src.includes("disabled={busy || !liveHub}"), false);
+  assert.match(src, /useConnectedWallet\(\s*deployment/);
+  assert.match(src, /onClick=\{onRefresh\}/);
 });

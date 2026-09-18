@@ -1,9 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { EYES, HUES, MARKS } from "../brain/flyswarm/phenotype-loci.mjs";
 import { SiteLink, SitePage } from "../site-chrome.jsx";
 import { useLocale } from "../use-locale.mjs";
 import {
-  connectLife,
   explainMarketError,
   loadMarketActivity,
   loadMarketDeployment,
@@ -39,8 +44,8 @@ import { FlyTraitRows, FlyVital } from "./fly-card.jsx";
 import { labelOf } from "./names.mjs";
 import { withNet } from "./net.mjs";
 import { mergeSoul, querySoulId, readSoulCard, shortAddr } from "./souls.mjs";
-import { recallAnnouncedWallet } from "./wallets.mjs";
-import { connectChosenLife, useWalletPick } from "./wallet-pick.jsx";
+import { useConnectedWallet } from "./use-connected-wallet.mjs";
+import { connectChosenLife } from "./wallet-pick.jsx";
 import "./life.css";
 
 function traitLabel(row, locale) {
@@ -94,7 +99,6 @@ export function MarketPage() {
   const [marketDep, setMarketDep] = useState(undefined);
   const [rawAsks, setRawAsks] = useState([]);
   const [asksReady, setAsksReady] = useState(false);
-  const [wallet, setWallet] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [pendingBreed, setPendingBreed] = useState(null);
@@ -112,7 +116,10 @@ export function MarketPage() {
   const [activity, setActivity] = useState([]);
   const [heldRefund, setHeldRefund] = useState("0");
   const [flash, setFlash] = useState("");
-  const { pick, dialog } = useWalletPick();
+  const { wallet, setWallet, pick, dialog, connect } = useConnectedWallet(
+    deployment,
+    tx,
+  );
   const [focusId, setFocusId] = useState(() =>
     querySoulId(typeof window === "undefined" ? "" : window.location.search),
   );
@@ -144,11 +151,7 @@ export function MarketPage() {
       const market = await openLifeMarket(dep.address, reader.provider);
       const hintIds = soulsRef.current.map((soul) => soul.tokenId);
       if (focusId) hintIds.push(focusId);
-      const rows = await loadOpenListings(
-        market,
-        dep.fromBlock || 0,
-        hintIds,
-      );
+      const rows = await loadOpenListings(market, dep.fromBlock || 0, hintIds);
       setRawAsks(rows);
       setActivity(
         await loadMarketActivity(market, dep.fromBlock || 0).catch(() => []),
@@ -235,11 +238,11 @@ export function MarketPage() {
   );
   const listingRisk = breedTouchesListing(pendingBreed, tokenId);
   const listedMine = asks.find(
-    (row) =>
-      Number(row.tokenId) === Number(tokenId) &&
-      isSelfAsk(row, wallet),
+    (row) => Number(row.tokenId) === Number(tokenId) && isSelfAsk(row, wallet),
   );
-  const railSoul = mine.find((soul) => Number(soul.tokenId) === Number(tokenId));
+  const railSoul = mine.find(
+    (soul) => Number(soul.tokenId) === Number(tokenId),
+  );
   const previewWei = askWei(price);
   const previewOk = previewWei >= askWei(MIN_ASK_BNB);
   const filteredOut =
@@ -310,23 +313,31 @@ export function MarketPage() {
   }
 
   useEffect(() => {
-    if (!deployment || !marketDep?.address || wallet) return undefined;
-    const recalled = recallAnnouncedWallet();
-    if (!recalled?.provider) return undefined;
+    if (!wallet || !deployment || !marketDep?.address) {
+      if (!wallet) {
+        setPendingBreed(null);
+        setHeldRefund("0");
+      }
+      return undefined;
+    }
     let gone = false;
-    connectLife(recalled.provider, deployment)
-      .then(async (session) => {
-        if (gone || !session) return;
-        setWallet(session.address);
-        const market = await openLifeMarket(marketDep.address, session.signer);
-        setPendingBreed(await readPendingBreed(session.kin, session.address));
-        setHeldRefund(await readMarketRefund(market, session.address));
+    openLifeReader(deployment)
+      .then(async (reader) => {
+        if (!reader || gone) return;
+        const market = await openLifeMarket(marketDep.address, reader.provider);
+        const [breed, refund] = await Promise.all([
+          readPendingBreed(reader.kin, wallet),
+          readMarketRefund(market, wallet),
+        ]);
+        if (gone) return;
+        setPendingBreed(breed);
+        setHeldRefund(refund);
       })
       .catch(() => {});
     return () => {
       gone = true;
     };
-  }, [deployment, marketDep, wallet]);
+  }, [wallet, deployment, marketDep]);
 
   useEffect(() => {
     if (!buying) return undefined;
@@ -338,7 +349,15 @@ export function MarketPage() {
   }, [buying, busy]);
 
   async function onConnect() {
-    await withSession(async () => null);
+    setNote("");
+    setFlash("");
+    try {
+      await connect();
+    } catch (err) {
+      setNote(explainMarketError(err, tx));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function onList(id, nextPrice, mode) {
@@ -427,8 +446,12 @@ export function MarketPage() {
         setNote(tx("market.needBnb", { n: formatAsk(live.price) }));
         return;
       }
-      await (await market.buy(live.tokenId, { value: BigInt(live.price) })).wait();
-      const card = await readSoulCard(soul, live.tokenId, extras).catch(() => null);
+      await (
+        await market.buy(live.tokenId, { value: BigInt(live.price) })
+      ).wait();
+      const card = await readSoulCard(soul, live.tokenId, extras).catch(
+        () => null,
+      );
       if (card) setSouls((current) => mergeSoul(current, card));
       setBuying(null);
       setFocusId(Number(live.tokenId));
@@ -503,11 +526,7 @@ export function MarketPage() {
             {tx("market.toHost")}
           </SiteLink>
           <div className="life-kin">
-            <button
-              type="button"
-              onClick={onConnect}
-              disabled={busy || !liveMarket}
-            >
+            <button type="button" onClick={onConnect} disabled={busy}>
               {wallet ? shortAddr(wallet) : tx("life.connect")}
             </button>
             {wallet ? (
@@ -542,7 +561,8 @@ export function MarketPage() {
                     const ask = listingForToken(asks, soul.tokenId);
                     return (
                       <option key={soul.tokenId} value={soul.tokenId}>
-                        #{soul.tokenId} {soul.givenName || labelOf(soul, locale)}
+                        #{soul.tokenId}{" "}
+                        {soul.givenName || labelOf(soul, locale)}
                         {ask ? ` · ${formatAsk(ask.price)} BNB` : ""}
                       </option>
                     );
@@ -646,7 +666,8 @@ export function MarketPage() {
             </div>
             <div className="life-market-tools">
               <small>
-                {tx("market.shown", { n: shown.length })} · {tx("market.noFloor")}
+                {tx("market.shown", { n: shown.length })} ·{" "}
+                {tx("market.noFloor")}
               </small>
               <button
                 type="button"
@@ -732,11 +753,7 @@ export function MarketPage() {
               />
             </label>
             {hasMarketFilters({ body, eyes, mark, generation, query }) ? (
-              <button
-                type="button"
-                className="ghost"
-                onClick={clearFilters}
-              >
+              <button type="button" className="ghost" onClick={clearFilters}>
                 {tx("market.clearFilters")}
               </button>
             ) : null}
@@ -952,7 +969,9 @@ export function MarketPage() {
             <p>{tx("market.buyConfirm", { id: buying.tokenId })}</p>
             <p className="life-meta">
               {buying.soul?.givenName ||
-                (buying.soul ? labelOf(buying.soul, locale) : `#${buying.tokenId}`)}{" "}
+                (buying.soul
+                  ? labelOf(buying.soul, locale)
+                  : `#${buying.tokenId}`)}{" "}
               · #{buying.tokenId} · {shortLife(buying.lifeId)}
             </p>
             <p className="life-meta">

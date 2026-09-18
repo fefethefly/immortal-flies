@@ -166,7 +166,7 @@ export function LifeDesk({
   const [journalLoading, setJournalLoading] = useState(false);
   const [journalTick, setJournalTick] = useState(0);
   const autoFor = useRef(0);
-  const { pick, dialog } = useWalletPick();
+  const { pick, dialog } = useWalletPick(tx);
   const [ask, setAsk] = useState(null);
   const network = deployment ? networkOf(deployment.chainId) : null;
   const mine = souls.filter(
@@ -606,11 +606,17 @@ export function LifeDesk({
       check();
       setBreedPriceWei(price);
       setBreedBuyNote("");
-      const cool = await readParentCooldown(kin, selected.tokenId, Number(mate));
+      const cool = await readParentCooldown(
+        kin,
+        selected.tokenId,
+        Number(mate),
+      );
       check();
       setBreedCool(cool);
       if (cool.remaining > 0) {
-        throw new Error(tx("kin.cooldownWait", { t: formatCooldown(cool.remaining) }));
+        throw new Error(
+          tx("kin.cooldownWait", { t: formatCooldown(cool.remaining) }),
+        );
       }
       const receipt = await (
         await kin.requestBreed(selected.tokenId, Number(mate), { value: price })

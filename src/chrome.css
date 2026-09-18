@@ -84,10 +84,17 @@ html {
   gap: 20px;
   min-height: 72px;
   padding: 0 4%;
-  border-bottom: 1px solid var(--line, #2f2a1f);
-  background: rgba(10, 9, 7, 0.82);
-  backdrop-filter: blur(14px);
+  /* Translucent glass: the living field glows through the bar. */
+  border-bottom: 1px solid rgba(240, 185, 11, 0.16);
+  background: rgba(16, 10, 4, 0.45);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  backdrop-filter: blur(18px) saturate(1.35);
   view-transition-name: site-bar;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .site-bar {
+    background: rgba(7, 5, 2, 0.92);
+  }
 }
 .site-bar-lead {
   display: flex;
@@ -112,7 +119,7 @@ html {
   flex-wrap: nowrap;
   align-items: baseline;
   gap: 18px;
-  color: var(--muted, #a89e8c);
+  color: #d8cdaa;
   font-size: 12.5px;
 }
 .site-nav-group {
@@ -122,7 +129,7 @@ html {
 }
 .site-nav-group + .site-nav-group {
   padding-left: 16px;
-  border-left: 1px solid var(--line, #2f2a1f);
+  border-left: 1px solid #42371f;
 }
 .site-nav-verb {
   font-size: 11px;
@@ -180,8 +187,8 @@ html {
   gap: 8px;
   min-height: 36px;
   padding: 0 10px;
-  border: 1px solid #5f5544;
-  background: #18150f;
+  border: 1px solid #6a5a3a;
+  background: #1c150c;
   color: inherit;
   font-family: var(--mono, "IBM Plex Mono", monospace);
   min-width: 0;
@@ -339,8 +346,8 @@ html {
     gap: 24px;
     min-height: 44px;
     padding: 8px 14px;
-    border: 1px solid #5f5544;
-    background: #18150f;
+    border: 1px solid #6a5a3a;
+    background: #1c150c;
     color: #f0ead9;
     font-size: 14px;
   }

@@ -186,6 +186,51 @@ export async function restorePitSession(
   };
 }
 
+/**
+ * 打开交易场：有可用快照则恢复，对不上当前连接组时丢掉快照并新开一场。
+ * 旧 1,400 节点场存在 localStorage 里时，12k 子图会 DATASET_MISMATCH；
+ * 不能把错误停在启动屏上，否则页面只剩暗色空舞台。
+ */
+export async function bootPitSession({
+  seed = 20260916,
+  graph: injectedGraph = null,
+  store = globalThis.localStorage,
+} = {}) {
+  let saved = null;
+  try {
+    const raw = store?.getItem?.(PIT_STORE);
+    saved = raw ? JSON.parse(raw) : null;
+  } catch {
+    saved = null;
+  }
+  if (saved) {
+    try {
+      return {
+        session: await restorePitSession(saved, { graph: injectedGraph }),
+        discarded: false,
+      };
+    } catch (err) {
+      console.warn(
+        "[pit] snapshot restore failed, starting fresh:",
+        err?.message || err,
+      );
+      try {
+        store?.removeItem?.(PIT_STORE);
+      } catch {
+        /* 私有模式 */
+      }
+      return {
+        session: await createPitSession({ seed, graph: injectedGraph }),
+        discarded: true,
+      };
+    }
+  }
+  return {
+    session: await createPitSession({ seed, graph: injectedGraph }),
+    discarded: false,
+  };
+}
+
 /** 每 COMPACT_EVERY tick 压缩会话事件日志：状态保留，历史根链继续，SIM 层允许。 */
 function compactSessions(kernel) {
   for (const member of kernel.colony.members) {
@@ -293,6 +338,15 @@ export function stepPit(session, { compact = true } = {}) {
       adapter: stepped.source === "paper-walk" ? "environment" : "market",
       by: aux.pending?.by || "paper:pit",
       intensity: aux.pending?.intensity ?? 60,
+      assetId: stepped.assetId || stepped.provenance?.assetId || null,
+      mid: stepped.mid ?? null,
+      quoteSource:
+        stepped.provenance?.kind === "aggregator-quote"
+          ? "kyberswap"
+          : stepped.provenance?.kind === "chain-observation"
+            ? "chain"
+            : "paper",
+      quote: stepped.provenance?.kind === "aggregator-quote" ? "LIVE" : "SIM",
     };
     aux.pending = null;
     await tickKernel(kernel, stimulus);
@@ -358,6 +412,12 @@ export function pitView({ kernel, aux }) {
       price,
       prev: aux.prices[aux.prices.length - 2] ?? price,
       delta: 0,
+      focusAssetId: aux.market?.last?.payload?.assetId || null,
+      quote:
+        aux.market?.last?.provenance?.kind === "aggregator-quote" ? "LIVE" : "SIM",
+      fill: "SIM",
+      lastChangeBps: aux.market?.last?.payload?.changeBps ?? null,
+      lastSource: aux.market?.last?.source || null,
     },
     prices: aux.prices,
     stimulus: {

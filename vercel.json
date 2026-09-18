@@ -12,7 +12,8 @@
     { "source": "/field", "destination": "/field.html" },
     { "source": "/swarm", "destination": "/swarm.html" },
     { "source": "/brain", "destination": "/brain.html" },
-    { "source": "/protocol", "destination": "/protocol.html" }
+    { "source": "/protocol", "destination": "/protocol.html" },
+    { "source": "/docs", "destination": "/docs.html" }
   ],
   "redirects": [
     { "source": "/altar", "destination": "/blueprint", "permanent": false },

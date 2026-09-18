@@ -43,7 +43,10 @@ export function validateInput(frame, state, registry, now) {
   const adapter = registry.get(`${frame.adapter}@${frame.adapterVersion}`);
   requireValue(adapter, 'UNKNOWN_ADAPTER', '未知输入适配器版本');
   requireValue(frame.payload && typeof frame.payload === 'object', 'INPUT_PAYLOAD');
-  requireValue(['simulation', 'chain-observation'].includes(frame.provenance?.kind), 'INPUT_PROVENANCE');
+  requireValue(
+    ['simulation', 'chain-observation', 'aggregator-quote'].includes(frame.provenance?.kind),
+    'INPUT_PROVENANCE',
+  );
   if (frame.provenance.kind === 'chain-observation') {
     requireValue(frame.adapter === 'market', 'INPUT_PROVENANCE');
     const { chainId, blockNumber, blockHash, previousBlockNumber, previousBlockHash, pair } = frame.provenance;
@@ -52,6 +55,23 @@ export function validateInput(frame, state, registry, now) {
     integer(previousBlockNumber, 0, blockNumber - 1, '前一区块');
     requireValue(/^0x[0-9a-f]{64}$/i.test(blockHash) && /^0x[0-9a-f]{64}$/i.test(previousBlockHash), 'BLOCK_HASH');
     requireValue(/^0x[0-9a-f]{40}$/i.test(pair), 'PAIR_ADDRESS');
+  }
+  if (frame.provenance.kind === 'aggregator-quote') {
+    requireValue(frame.adapter === 'market', 'INPUT_PROVENANCE');
+    const { chainId, adapter, src, dst, quotedAt } = frame.provenance;
+    requireValue(chainId === 56, 'WRONG_CHAIN');
+    requireValue(adapter === 'kyberswap', 'MARKET_ADAPTER');
+    requireValue(/^0x[0-9a-f]{40}$/i.test(src || ''), 'SRC_ADDRESS');
+    requireValue(/^0x[0-9a-f]{40}$/i.test(dst || ''), 'DST_ADDRESS');
+    integer(quotedAt, 1, Number.MAX_SAFE_INTEGER, 'quotedAt');
+    requireValue(
+      frame.provenance.calldata == null &&
+        frame.provenance.to == null &&
+        frame.provenance.value == null &&
+        frame.provenance.data == null,
+      'MARKET_FORBIDDEN',
+      '只读行情不得携带签名或 calldata',
+    );
   }
   const value = adapter.normalize(clone(frame.payload));
   for (const k of ['food', 'threat', 'light']) integer(value[k], 0, 1000, k);

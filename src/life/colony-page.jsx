@@ -10,7 +10,7 @@ import {
 import { PhenotypeReadout } from "../phenotype-view.jsx";
 import { SiteLink, SitePage } from "../site-chrome.jsx";
 import { useLocale } from "../use-locale.mjs";
-import { connectLife, loadLifeDeployment, openLifeReader } from "./chain.mjs";
+import { loadLifeDeployment, openLifeReader } from "./chain.mjs";
 import {
   ATLAS_LOCI,
   KIN_LOCI,
@@ -43,8 +43,7 @@ import { CatalogPortrait as MarketThumb } from "./catalog-portrait.jsx";
 import { labelOf } from "./names.mjs";
 import { withNet } from "./net.mjs";
 import { hydrateColony, querySoulId, shortAddr } from "./souls.mjs";
-import { recallAnnouncedWallet } from "./wallets.mjs";
-import { connectChosenLife, useWalletPick } from "./wallet-pick.jsx";
+import { useConnectedWallet } from "./use-connected-wallet.mjs";
 import "./life.css";
 import "./colony.css";
 
@@ -325,10 +324,9 @@ export function ColonyPage() {
     "meta.colonyDesc",
   );
   const { deployment, souls, error, rosterError, progress } = useColonyWorld();
-  const [wallet, setWallet] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
-  const { pick, dialog } = useWalletPick();
+  const { wallet, dialog, connect } = useConnectedWallet(deployment, tx);
 
   const firstView = parseColonyView(
     typeof window === "undefined" ? "" : window.location.search,
@@ -456,21 +454,6 @@ export function ColonyPage() {
   }, [deployment?.kin]);
 
   useEffect(() => {
-    if (!deployment || wallet) return undefined;
-    const recalled = recallAnnouncedWallet();
-    if (!recalled?.provider) return undefined;
-    let gone = false;
-    connectLife(recalled.provider, deployment)
-      .then((session) => {
-        if (!gone && session) setWallet(session.address);
-      })
-      .catch(() => {});
-    return () => {
-      gone = true;
-    };
-  }, [deployment, wallet]);
-
-  useEffect(() => {
     if (focusOpened.current || !souls.length || !focusId) return;
     const hit = souls.find((soul) => Number(soul.tokenId) === focusId);
     if (hit) {
@@ -487,12 +470,9 @@ export function ColonyPage() {
   }, [focusId, paged.slice.length]);
 
   async function onConnect() {
-    if (!deployment) return;
-    setBusy(true);
     setNote("");
     try {
-      const session = await connectChosenLife(pick, deployment);
-      if (session) setWallet(session.address);
+      await connect();
     } catch (err) {
       setNote(err?.shortMessage || err?.message || String(err));
     } finally {

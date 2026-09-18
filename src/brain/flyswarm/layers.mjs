@@ -82,13 +82,15 @@ export function transparencyOf(session) {
 }
 
 /** 完整 P2 视图。纯读。 */
-export function paperLayers(session) {
+export function paperLayers(session, { venue = null } = {}) {
   const view = worldView(session);
-  const market = marketView(session.aux.market, session);
+  const market = marketView(session.aux.market, { ...session, venue });
   const baseline = compareBaseline(session);
   return {
     schema: LAYERS_SCHEMA,
     audit: "SIM",
+    quote: market.quote,
+    fill: "SIM",
     tick: view.tick,
     seed: view.seed,
     colony: {
@@ -105,7 +107,14 @@ export function paperLayers(session) {
       note: "Trade-port interpretation of ACT. Native language stays REST/FORAGE/AVOID/EXPLORE.",
     },
     risk: view.risk,
-    execution: view.execution,
+    execution: {
+      ...view.execution,
+      quote: market.quote,
+      fill: "SIM",
+      note: market.quote === "LIVE"
+        ? "Quotes from KyberSwap; fills remain paper SIM."
+        : view.execution.note || "Paper fills marked SIM.",
+    },
     market,
     baseline,
     transparency: transparencyOf(session),
@@ -114,9 +123,9 @@ export function paperLayers(session) {
   };
 }
 
-export function paperLayer(session, layer) {
+export function paperLayer(session, layer, opts = {}) {
   const id = String(layer || "");
   if (!LAYER_IDS.includes(id)) return null;
-  const all = paperLayers(session);
+  const all = paperLayers(session, opts);
   return { schema: LAYERS_SCHEMA, layer: id, audit: "SIM", tick: all.tick, [id]: all[id] };
 }

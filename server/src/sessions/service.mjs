@@ -72,7 +72,7 @@ function mapBrainError(err) {
 }
 
 /** 内存 Session 运行时 + 磁盘档案。tick 由客户端驱动；compact 关闭以保留完整重放。 */
-export function createSessionService({ config, store, logger }) {
+export function createSessionService({ config, store, logger, venue = null }) {
   /** @type {Map<string, object>} */
   const live = new Map();
   /** @type {Map<string, string>} soulId -> sessionId */
@@ -263,9 +263,11 @@ export function createSessionService({ config, store, logger }) {
   }
 
   function composeView(session) {
+    const venueSnap = venue?.getQuotes?.() || null;
     return {
       pit: pitView(session),
       world: worldView(session),
+      venue: venueSnap,
     };
   }
 
@@ -552,6 +554,19 @@ export function createSessionService({ config, store, logger }) {
       if (cached) return cached;
     }
     try {
+      if (venue?.enabled) {
+        const obs = await venue.observationForTick();
+        if (obs) {
+          if (!row.session.aux.market) row.session.aux.market = createMarketFeed();
+          try {
+            offerObservation(row.session.aux.market, obs);
+          } catch (err) {
+            logger?.warn?.("venue observation rejected", {
+              error: err?.message || String(err),
+            });
+          }
+        }
+      }
       await stepPit(row.session, { compact: false });
     } catch (err) {
       throw mapBrainError(err);
@@ -727,7 +742,10 @@ export function createSessionService({ config, store, logger }) {
 
   async function getWorld(sessionId) {
     const row = await getLive(sessionId);
-    return { sessionId, world: paperLayers(row.session) };
+    return {
+      sessionId,
+      world: paperLayers(row.session, { venue: venue?.getQuotes?.() || null }),
+    };
   }
 
   async function getProtocol(sessionId) {
@@ -740,7 +758,10 @@ export function createSessionService({ config, store, logger }) {
     if (!LAYER_IDS.includes(layer)) {
       throw badRequest("UNKNOWN_LAYER", `layer must be ${LAYER_IDS.join("|")}`);
     }
-    return { sessionId, ...paperLayer(row.session, layer) };
+    return {
+      sessionId,
+      ...paperLayer(row.session, layer, { venue: venue?.getQuotes?.() || null }),
+    };
   }
 
   async function offerMarket(sessionId, body, req) {
