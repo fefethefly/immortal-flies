@@ -25,6 +25,8 @@ import {
   takePendingGiven,
 } from "./names.mjs";
 import { decorateSoul } from "./souls.mjs";
+import { hatchIntentHref } from "./hatch-intent.mjs";
+import { pageUrl } from "./wallets.mjs";
 import { connectChosenLife, useWalletPick } from "./wallet-pick.jsx";
 
 export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
@@ -93,6 +95,10 @@ export function HatchPanel({ compact = false, onBorn, fieldCount = 1400 }) {
         pick,
         deployment,
         networkOf(deployment.chainId),
+        {
+          force: !wallet,
+          href: hatchIntentHref(pageUrl(), given),
+        },
       );
       if (!session) return;
       guard = scope.capture();

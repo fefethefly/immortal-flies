@@ -28,7 +28,7 @@ Skip everything else until you need a lab replay or a design memo.
 | [SOUL-MARKET.md](SOUL-MARKET.md) | Current satellite | Official NFT market. Not OpenSea. |
 | [SOULKIN-FEE.md](SOULKIN-FEE.md) | Current satellite | Paid kin (testnet). Mainnet hatch kin is free SoulKinCross. |
 | [FLAP-LAUNCH.md](FLAP-LAUNCH.md) | Current fact sheet | `$IFS` launch record on BSC. |
-| [FRONTENDS.md](FRONTENDS.md) | Current | Site vs Flap embed. |
+| [FRONTENDS.md](FRONTENDS.md) | Current | Site vs Flap embed. Hatch deep link `?hatch=1`. Host copy says vial; chain still says `Tank`. |
 | [CONNECTOME-MALE-CNS.md](CONNECTOME-MALE-CNS.md) | Current | MaleCNS ingest, licenses, two graph sizes. |
 | [BIOLOGY-SPINE-V6.md](BIOLOGY-SPINE-V6.md) | Current discipline | Adult male CNS is canon. Larva / FlyWire / 16-node toy are other animals. |
 | [assets.md](assets.md) | Current | Art and font provenance. |

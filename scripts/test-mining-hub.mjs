@@ -226,7 +226,7 @@ try{
  const fuelMid=(await tankOf(hub,1)).ownerFuel;
  await tx(hub.connect(other).drainOwnerFuel(1,drainAmt));
  assert.equal((await tankOf(hub,1)).ownerFuel,fuelMid-drainAmt);
- pass('gate 3: in-flight reserved refunds to original funder after transfer; pause blocks new fuel and open');
+ pass('gate 3: in-flight reserved refunds to original funder after transfer; pause blocks new medium and open');
 
  const voidId=keccak256(toUtf8Bytes('seg-void'));
  await rejectTx(hub.connect(runner).openSegment(voidId,1,10,packed.commitment.startRoot));

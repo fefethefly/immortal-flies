@@ -236,6 +236,10 @@ export function recallAnnouncedWallet(host = globalThis, store) {
   return asAnnounced(active) || matchStoredWallet(host, store);
 }
 
+export function shouldSkipWalletPick(options = {}, recalled) {
+  return !options.force && Boolean(recalled?.provider);
+}
+
 export function getActiveWallet() {
   return active;
 }

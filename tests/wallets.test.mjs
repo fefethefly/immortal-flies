@@ -10,10 +10,16 @@ import {
   readStoredRdns,
   recallAnnouncedWallet,
   setActiveWallet,
+  shouldSkipWalletPick,
   walletAppUrl,
   writeStoredChoice,
   writeStoredRdns,
 } from "../src/life/wallets.mjs";
+import {
+  hatchIntentHref,
+  parseHatchIntent,
+  withHatchIntent,
+} from "../src/life/hatch-intent.mjs";
 
 function memoryStore() {
   const store = new Map();
@@ -146,6 +152,50 @@ test("hydrate restores the last injected wallet into the shared session", () => 
   assert.equal(found.provider.id, "hydrated");
   assert.equal(getActiveWallet().provider.id, "hydrated");
   resetWallet();
+});
+
+test("wallet picker stays visible until the page already has a live session", () => {
+  assert.equal(shouldSkipWalletPick({}, { provider: { id: "mm" } }), true);
+  assert.equal(
+    shouldSkipWalletPick({ force: true }, { provider: { id: "mm" } }),
+    false,
+  );
+  assert.equal(shouldSkipWalletPick({ force: true }, null), false);
+  assert.equal(shouldSkipWalletPick({}, null), false);
+});
+
+test("hatch intent survives a mobile wallet hop", () => {
+  assert.deepEqual(parseHatchIntent("https://immortalflies.com/"), {
+    open: false,
+    given: "",
+  });
+  assert.deepEqual(
+    parseHatchIntent("https://immortalflies.com/?hatch=1&given=Ember"),
+    {
+      open: true,
+      given: "Ember",
+    },
+  );
+  assert.deepEqual(parseHatchIntent("https://immortalflies.com/#hatch"), {
+    open: true,
+    given: "",
+  });
+  assert.equal(
+    withHatchIntent("https://immortalflies.com/?lang=zh", "  Ember  "),
+    "/?lang=zh&hatch=1&given=Ember",
+  );
+  assert.equal(
+    hatchIntentHref("https://immortalflies.com/?lang=zh", "Moss"),
+    "https://immortalflies.com/?lang=zh&hatch=1&given=Moss",
+  );
+  const metamask = WALLET_CATALOG.find((row) => row.id === "metamask");
+  assert.match(
+    walletAppUrl(
+      metamask,
+      hatchIntentHref("https://immortalflies.com/?lang=zh", "Moss"),
+    ),
+    /immortalflies\.com\/\?lang=zh&hatch=1&given=Moss/,
+  );
 });
 
 test("pageUrl and legacy names stay deterministic", () => {

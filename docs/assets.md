@@ -20,6 +20,15 @@ Create a spectacular and anatomically recognizable Drosophila fruit fly floating
 
 `public/assets/card-direction.png` 是此前生成的三状态卡片视觉方向，仅供设计迭代参考，未用作发行资产。
 
+## 品牌标与社交卡片
+
+- `public/mark/ifs.png`：站点 favicon。
+- `public/mark/app.png`：金底 app 图标（含透明通道）。Apple touch / 启动图。
+- `public/mark/og.jpg`：不透明 1200×1200 JPEG，给 X / Open Graph。RGBA PNG 会被 X 丢掉。由 `scripts/render-og-card.py` 从 `app.png` 铺金底导出。
+- `public/mark/lockup.png`：横版 fly + wordmark。
+
+预览页：`public/mark/preview.html`。
+
 ## 字体
 
 Barlow Condensed 500/600、IBM Plex Mono 400/500，从 Google Fonts 的公开字体分发服务取得。字体与对应 OFL 许可证保存在 `public/fonts/`。运行时无需访问外部字体服务。

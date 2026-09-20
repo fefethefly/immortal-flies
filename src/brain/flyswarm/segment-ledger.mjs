@@ -4,7 +4,7 @@
  * 规格：docs/MINING-SEGMENT-PROOF-DESIGN-2026-09-17.md §5–§6。
  *
  * 四本账互不挪用，任何一本空了都不从另一本借（AGENTS.md 分账纪律）：
- *   Tank   罐（每 lifeId）  买方的钱：主人 ownerFuel 可退；围观 giftFuel 留在生命上
+ *   Tank   培养基（每 lifeId）  买方的钱：主人 ownerFuel 可退；围观 giftFuel 留在生命上
  *   Budget 预算（公共轨）   协议的钱：只认到账回执；A ≥ L 永远成立
  *   Bond   押金（每运营方） 卖方的钱：一笔押金一个身份；只在二分判负时罚没
  *   Seat   座位锁（每主人） 持币者的名额：不生息、不进票权、不改表型
@@ -132,7 +132,7 @@ const addEarnings = (ledger, operatorId, wage) => {
     (ledger.earnings.get(operatorId) || 0) + wage,
   );
 };
-/** 私有轨预留费按原路退回罐：主人的回 ownerFuel，打赏的回 giftFuel。 */
+/** 私有轨预留费按原路退回培养基：主人的回 ownerFuel，投喂的回 giftFuel。 */
 const refundReserved = (ledger, seg) => {
   const tank = tankOf(ledger, seg.lifeId);
   tank.reserved -= seg.fee;
@@ -146,9 +146,9 @@ const endLease = (ledger, seg, keepClaim) => {
   if (!keepClaim && seg.workKey) ledger.claimed.delete(seg.workKey);
 };
 
-// ───────────────────────── Tank 罐 ─────────────────────────
+// ───────────────────────── Tank 培养基 ─────────────────────────
 
-/** 加油。OWNER 可退；GIFT 不可退、主人不可提、随生命走。 */
+/** 添料。OWNER 可退；GIFT 不可退、主人不可提、随生命走。 */
 export function refuel(ledger, { lifeId, amount: n, kind = "OWNER", tick }) {
   at(ledger, tick);
   amount(n, "amount");
@@ -164,7 +164,7 @@ export function refuel(ledger, { lifeId, amount: n, kind = "OWNER", tick }) {
   return tankView(ledger, lifeId);
 }
 
-/** 主人退油：只退未预留的 ownerFuel。 */
+/** 主人取回余料：只退未预留的 ownerFuel。 */
 export function drainOwnerFuel(ledger, { lifeId, amount: n, tick }) {
   at(ledger, tick);
   const tank = tankOf(ledger, lifeId);
@@ -213,7 +213,7 @@ export function tankView(ledger, lifeId) {
     reserved: tank.reserved,
     available: tank.ownerFuel + tank.giftFuel,
     binding: tank.binding ? clone(tank.binding) : null,
-    /** 罐还能发几段（按当前绑定报价；0 费视为无限 → 用 null 表示） */
+    /** 培养基还能发几段（按当前绑定报价；0 费视为无限 → 用 null 表示） */
     segmentsLeft:
       tank.binding && tank.binding.feePerSegment > 0
         ? Math.trunc(
@@ -433,7 +433,7 @@ export function seatDiscountBps(ledger, ownerId) {
 // ───────────────────────── 段：开 → 承诺 → 抽检 → 结算 / 争议 ─────────────────────────
 
 /**
- * 领段。私有轨用罐里的绑定报价预留费用；公共轨要求不同运营方、价格等于预登记价。
+ * 领段。私有轨用培养基里的绑定报价预留费用；公共轨要求不同运营方、价格等于预登记价。
  * 两条轨都锁 bondMultiple × fee 的押金曝险。
  */
 export function openSegment(
@@ -472,7 +472,7 @@ export function openSegment(
     requireValue(
       available >= fee,
       "TANK_EMPTY",
-      "罐空则段不开，生命休眠，不删",
+      "断料则段不开，生命休眠，不删",
     );
     requireValue(
       !ledger.leases.has(lifeId),
@@ -491,7 +491,7 @@ export function openSegment(
       "WORK_TAKEN",
       "同一工作不能换 ID 再付",
     );
-    // 先烧主人的油，打赏留作这只的底：转移时 giftFuel 随生命走。
+    // 先扣主人料，投喂留作这只的底：转移时 giftFuel 随生命走。
     // 记住拆分：任何退回都按原路退，主人拿不到打赏。
     const fromOwner = Math.min(tank.ownerFuel, fee);
     fuel = { fromOwner, fromGift: fee - fromOwner };
@@ -1086,7 +1086,7 @@ const segmentSchema = {
     }
     if (r.track === "PUBLIC") {
       identifier(r.taskId, "taskId");
-      requireValue(r.fuel === null, "SEGMENT_FUEL", "公共轨不烧罐");
+      requireValue(r.fuel === null, "SEGMENT_FUEL", "公共轨不扣培养基");
     }
     integer(r.exposure, 0, Number.MAX_SAFE_INTEGER, "exposure");
     isHash(r.startRoot, "startRoot");

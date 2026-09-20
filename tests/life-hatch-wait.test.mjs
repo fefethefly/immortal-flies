@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { t } from "../src/i18n.mjs";
 import {
   habitatShowsHatch,
@@ -97,4 +98,12 @@ test("habitat hatch stays available until used, and while a request is open", ()
   assert.equal(habitatShowsHatch({ used: true, pending }), true);
   assert.equal(habitatShowsHatch({ used: true, hatchStage: "wait" }), true);
   assert.equal(habitatShowsHatch({ used: true, needRetry: true }), true);
+});
+
+test("hatch wait jsx imports React so the classic runtime does not black the page", () => {
+  const src = readFileSync(
+    new URL("../src/life/hatch-wait.jsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(src, /import React from "react"/);
 });

@@ -15,6 +15,10 @@
 按[再评估](SWARM-PROTOCOL-REEVALUATION-2026-09-18.md)推进开放群体智慧方向，交易世界保留为应用插件。首轮仅新增 opt-in 工程关联学习器 `context-association/1`：情境关联、延迟资格迹、衰减、反转、冻结与状态恢复；不静默替换旧 overlay/runtime，不修改 Soul 或历史图制品。**尚未接入生产运行器或完成神经行为、共享记忆、跨物种学习增益验收。** 此前 §21 的协议整体“设计”状态不能解读为这些新能力已上线；新增模块也不能解读为 T4 通过。交付范围、测试与 swarm.family 调研见 [首轮升级记录](SWARM-UPGRADE-2026-09-18.md)。
 
 
+## 当前站点（2026-09-20）
+
+主站在 [immortalflies.com](https://immortalflies.com) 生产。免费孵化接 LIVE Soul（仅 gas）。`?hatch=1&given=` 打开孵化并保留起名，供钱包 App 回跳。首页 WebGL 丢上下文回退到 2D。社交卡片用不透明 `public/mark/og.jpg`（RGBA PNG 会被 X 丢掉）。托管页对用户称培养基 / Vial；链上标识仍是 `Tank` / `refuel`。MiningHub 主网仍 `UNDEPLOYED`。大份实验室 `reports/` 与依赖它们的测试不入库。
+
 ## 当前工程交接状态（2026-09-18）
 
 BSC 主网身份核已换成 `phenotype-loci/3` 集合：`ImmortalSoul` `0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`，`SoulRenderer` `0x06E2B1e2F03E2573874540BbE439eEccb33b234C`，`LifeJournal` `0xB0fE4BbfE3afE64347e8Cb5aD77A087C36cBE419`，`SoulKinCross` `0x838A30868Bb82D4dABe70d586e87aeC948CC5825`（免费、24h 亲本冷却），`SoulMarket` `0x42E10Dc1e1D90e5F10580a8967E80F38B3e03e5D`。旧 `/2` 集合 `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` 与旧市场 `0x5f67e862d7519FC38D9d78a1c2A35DE17AFc7875` 标 RETIRED；`#1`「Elon Musk」仍在旧地址，不是这只集合。清单 `ImmortalSoul.deployment.json`。`ImmortalFly.sol` 未上 56。这一只 LIVE 集合禁止再靠重部迭代。
@@ -33,7 +37,7 @@ BSC 主网身份核已换成 `phenotype-loci/3` 集合：`ImmortalSoul` `0x9341F
 
 ## 0. 审阅快照（交给外部模型时先读这里）
 
-核验日：2026-09-16。下面「已开 / 未开」以仓库与主网回执为准，不是路线图愿望。
+核验日：2026-09-16；站点事实补到 2026-09-20。下面「已开 / 未开」以仓库与主网回执为准，不是路线图愿望。
 
 ### 0.1 已开
 
@@ -46,13 +50,13 @@ BSC 主网身份核已换成 `phenotype-loci/3` 集合：`ImmortalSoul` `0x9341F
 | 纸面交易世界 | `/swarm.html` 七视图、Colony / Intent / Risk / Execution、纸面金库与 IFS 面板。数据标 SIM。 |
 | 纸面经济沙盘 | `/economy` 情景计算器。`FEE_SPLIT` 里仍有「回购 / 销毁」旧标签，**不是链上动作**。 |
 | 16 节点原型合约 | `contracts/ImmortalFly.sol` 可编译、可测、有测试网脚本。`public/contract/ImmortalFly.deployment.json` = `UNDEPLOYED`。 |
+| 免费孵化前端 | 主站 [immortalflies.com](https://immortalflies.com) 首页与栖息地接 LIVE Soul。`?hatch=1&given=` 打开孵化并保留起名。仅网络 gas。旧祭坛 `/altar` 仍重定向到蓝图。 |
 
 ### 0.2 未开
 
 | 项 | 事实 |
 | --- | --- |
-| 真实 mint 前端 | 栖息地已接主网清单。生产网站尚未推送；创世 URI 指向 immortalflies.com，域名上线前该链接会 404。旧祭坛 `/altar` 仍重定向到蓝图。 |
-| 段证明 / 托管加油 | 本地 SIM + Anvil 门已按评审改过。主网 `UNDEPLOYED`。测试网旧卫星不是真 IFS。不是挖矿收益。 |
+| 段证明 / 托管添料 | 本地 SIM + Anvil 门已按评审改过。主网 `UNDEPLOYED`。测试网旧卫星不是真 IFS。不是挖矿收益。 |
 | 销毁 | 没有任何已核验、会使 IFS `totalSupply` 下降的路径。 |
 | 回购执行 | 只有已实现盈余 D 的纸面预算；路由 `later`，`spent` 不会真去买。繁衍费买 IFS 是另一条卫星路径（§22），未上线。 |
 | 用户金库 / 锁仓 / Credit | 纸面或未接线。§11 的资金漏洞未修完前，禁止开放真实抵押、借贷、金库收益、自动回购。 |
@@ -895,7 +899,7 @@ Anvil 挂/买/撤 → 测试网对着现有 Soul → `/market.html?net=test` →
 2. **这是服务费（§8.2 的 R），不是收益、APY、回购或销毁。** 页面禁用挖矿收益文案。T3/T4 通过前禁止「更聪明 / 群体智能已实现」。
 3. **卫星不进 `modules[]`，无 UUPS。** 私有轨承诺走已部署 LifeJournal 的 `archiveHash`。失败不卡孵化转移。
 4. **合约不执行神经计算。** 哈希不匹配不罚本金；罚没只在双方确认同一判定、一方超时，或双方不一致时超时双输。
-5. **围观打赏 `giftFuel` 主人不可直接提现，随生命走；未用主人油和在途退款回原出资人退款账户。** 罐空则休眠，不删 NFT。
+5. **围观投喂 `giftFuel` 主人不可直接提现，随生命走；未用主人料和在途退款回原出资人退款账户。** 断料则休眠，不删 NFT。对用户称培养基；链上标识仍是 `Tank`。
 6. **跨平台逐位一致未在 Linux CI 出绿并合进发布分支之前，不开真钱。** 向量：`reports/segment-replay-full-v1.json`，`n=1000`，`L=10`。Linux 工作流 `.github/workflows/segment-replay.yml` 已在 `ci/malecns-full-replay` 出绿（含 12k circuit 图钉死）。
 7. **v1 验收是「官方 Runner、无人挑战即付」。** 无独立链上 Verifier。未公布仲裁人，争议对不上只走超时双输。
 8. **主网日限额默认 100 IFS / 用户 / 日、1000 IFS 协议日总量。** Runner 工价 ≠ 协议收入。真 IFS `0x65b66BB4…7777`，蜂巢 `0xfAdb2FE1…1467`。测试网 Mock 币不能当真钱。
@@ -903,5 +907,5 @@ Anvil 挂/买/撤 → 测试网对着现有 Soul → `/market.html?net=test` →
 
 ### 24.2 上线顺序
 
-Anvil 罐 / 税差 / 领段 / Journal 对拍 / 无开叶不付款 / 同工作不重复付 / 转移退款原路 / 争议超时双输 / 日限额 / 订单过期 / 错段撤销（`npm run life:test:hub`）。公开恢复包可在另一目录独立重放并续跑（`iff.life-restore/1`，`npm run life:restore`）。完整重放对抽样对照见 `reports/segment-verify-compare-v1.json`（`npm run segment:compare`）。测试网卫星 `0xdb80def1828236A5af09965F46c6BEE63ccc1f4e`，旧 `0x1dAd…55A1` 与 `0xF0e07ff3…71825` 为 STALE。Runner 接新卫星后才能把公开 `/archive` 写成恢复包。主网卫星未做。对外不说挖矿已开，也不说能挖到真 IFS。生命托管页 `/host.html`；托管网 `/#mesh` 不是 MiningHub。
+Anvil 培养基 / 税差 / 领段 / Journal 对拍 / 无开叶不付款 / 同工作不重复付 / 转移退款原路 / 争议超时双输 / 日限额 / 订单过期 / 错段撤销（`npm run life:test:hub`）。公开恢复包可在另一目录独立重放并续跑（`iff.life-restore/1`，`npm run life:restore`）。完整重放对抽样对照见 `reports/segment-verify-compare-v1.json`（`npm run segment:compare`）。测试网卫星 `0xdb80def1828236A5af09965F46c6BEE63ccc1f4e`，旧 `0x1dAd…55A1` 与 `0xF0e07ff3…71825` 为 STALE。Runner 接新卫星后才能把公开 `/archive` 写成恢复包。主网卫星未做。对外不说挖矿已开，也不说能挖到真 IFS。生命托管页 `/host.html`；托管网 `/#mesh` 不是 MiningHub。
 

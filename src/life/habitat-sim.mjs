@@ -1,6 +1,6 @@
 const TAU = Math.PI * 2;
 
-/** One `stepHabitat` unit is 1/60s of dish time. Local vitality only — not MiningHub fuel. */
+/** One `stepHabitat` unit is 1/60s of dish time. Local vitality only — not MiningHub medium. */
 export const HABITAT_ENERGY = Object.freeze({
   max: 1000,
   collapse: 1,

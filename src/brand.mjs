@@ -13,5 +13,7 @@ export const EYE = "#c23a32";
 export const BRAND_MARK = "/mark/ifs.png?v=drosomark";
 /** Gold-field app icon. Apple touch and launch variants. */
 export const BRAND_APP_ICON = "/mark/app.png?v=drosomark";
+/** Opaque JPEG for X / Open Graph. RGBA PNGs are dropped by X. */
+export const BRAND_OG = "/mark/og.jpg";
 /** Horizontal fly + wordmark for the site bar. */
 export const BRAND_LOCKUP = "/mark/lockup.png?v=lockup";

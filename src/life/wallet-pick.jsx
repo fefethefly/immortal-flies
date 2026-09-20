@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { connectLife } from "./chain.mjs";
 import { useTx } from "../locale-context.jsx";
 import {
@@ -10,6 +10,7 @@ import {
   pageUrl,
   recallAnnouncedWallet,
   setActiveWallet,
+  shouldSkipWalletPick,
 } from "./wallets.mjs";
 import "./wallet-pick.css";
 
@@ -126,26 +127,26 @@ export function useWalletPick(pageTx) {
   const tx = pageTx || ctxTx;
   const [open, setOpen] = useState(false);
   const pending = useRef(null);
+  const deeplinkHref = useRef("");
 
   const finish = useCallback((value) => {
-    setOpen(false);
+    flushSync(() => setOpen(false));
     pending.current?.(value);
     pending.current = null;
   }, []);
 
   const pick = useCallback((options = {}) => {
     return new Promise((resolve) => {
-      if (!options.force) {
-        const recalled = recallAnnouncedWallet();
-        if (recalled?.provider) {
-          setActiveWallet(recalled.provider, recalled);
-          resolve({
-            kind: "injected",
-            provider: recalled.provider,
-            info: recalled,
-          });
-          return;
-        }
+      deeplinkHref.current = options.href || "";
+      const recalled = recallAnnouncedWallet();
+      if (shouldSkipWalletPick(options, recalled)) {
+        setActiveWallet(recalled.provider, recalled);
+        resolve({
+          kind: "injected",
+          provider: recalled.provider,
+          info: recalled,
+        });
+        return;
       }
       pending.current = resolve;
       setOpen(true);
@@ -165,7 +166,7 @@ export function useWalletPick(pageTx) {
         });
       }}
       onDeeplink={(wallet) => {
-        openWalletApp(wallet, pageUrl());
+        openWalletApp(wallet, deeplinkHref.current || pageUrl());
         finish({ kind: "deeplink" });
       }}
     />
@@ -174,8 +175,13 @@ export function useWalletPick(pageTx) {
   return { pick, dialog };
 }
 
-export async function connectChosenLife(pick, deployment, network) {
-  const choice = await pick();
+export async function connectChosenLife(
+  pick,
+  deployment,
+  network,
+  options = {},
+) {
+  const choice = await pick({ force: options.force, href: options.href });
   if (!choice || choice.kind !== "injected") return null;
   return connectLife(choice.provider, deployment, network);
 }

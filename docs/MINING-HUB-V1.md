@@ -10,7 +10,7 @@ v1 只做私有轨：主人给自己的 Soul 加 IFS，绑定已登记 Runner，
 
 | 问                        | 答                                                                                                                                  |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 身份还是玩法？            | 玩法。lifeId、基因组、主人仍在 Soul。罐、押金、工价、段、争议在卫星。                                                               |
+| 身份还是玩法？            | 玩法。lifeId、基因组、主人仍在 Soul。培养基（链上 `Tank`）、押金、工价、段、争议在卫星。                                                               |
 | 能否不重部 Soul？         | 能。只读 `ownerOf` / `lifeId` / `canControl` / `controlEpoch` / `authorizedRunner`。私有轨承诺仍走已部署 `LifeJournal.checkpoint`。 |
 | 规则以后会不会改？        | 会。整只卫星再部署替换。无 UUPS，无透明代理。                                                                                       |
 | 失败能否卡住孵化 / 转移？ | 不能。不是 `MODULE_HOOK`，不进 `modules[]`。Hub 暂停时 NFT 仍能转；日记仍能由 `canControl` 写。                                     |
@@ -71,16 +71,16 @@ function _pull(from, amount) returns (received)
   require received > 0
 ```
 
-罐 / 押金 / 工价全部用 `received`，不用参数 `amount`。出站 `transfer` 的税记入「税损」事件，不从别的账补。
+培养基 / 押金 / 工价全部用 `received`，不用参数 `amount`。出站 `transfer` 的税记入「税损」事件，不从别的账补。
 
 ## 5. 存储（概念）
 
 ```text
 operator / arbiter / allowlisted
-paused              停新领段与新加油；已开段仍可承诺、结算、作废
+paused              停新领段与新添料；已开段仍可承诺、结算、作废
 maxFeePerSegment / minBond / bondMultiple / challengeWindow / challengeBond
 
-Tank[tokenId]:
+Tank[tokenId]:          // 对用户称培养基 / Vial；标识不改
   owner, lifeId, ownerFuel, giftFuel, reserved
   runner, fee, steps, spendCap, spent, validUntil
 
@@ -100,12 +100,12 @@ activeLease[tokenId]  当前 OPEN/COMMITTED/CHALLENGED 段
 workClaimed[key]      keccak(tokenId, startRoot, steps, inputFrom, inputTo, inputRoot)
 lastFinalRoot[tokenId] 最近一次 SETTLED 的终态
 earnings[runner]      窗关后可提工价
-refunds[funder]       转移未预留油 + 作废/判负的主人出资
+refunds[funder]       转移未预留主人料 + 作废/判负的主人出资
 ```
 
-`tokenId` 是链上主键；`lifeId` 每次写罐时再读 `soul.lifeId`，对不上回退。Soul 转移不回调 Hub：任何会碰罐的函数先 `_syncOwner(tokenId)`——若 `ownerOf != tank.owner`，把未预留的 `ownerFuel` 记到 `refunds[oldOwner]`，清绑定，留下 `giftFuel` 与 `reserved`。在途段作废时 `fromOwner` 进 `refunds[funder]`，不是新主人的 `ownerFuel`。
+`tokenId` 是链上主键；`lifeId` 每次写培养基时再读 `soul.lifeId`，对不上回退。Soul 转移不回调 Hub：任何会碰培养基的函数先 `_syncOwner(tokenId)`——若 `ownerOf != tank.owner`，把未预留的 `ownerFuel` 记到 `refunds[oldOwner]`，清绑定，留下 `giftFuel` 与 `reserved`。在途段作废时 `fromOwner` 进 `refunds[funder]`，不是新主人的 `ownerFuel`。
 
-`openSegment` 的 `startRoot` 必须等于 `lastFinalRoot`（parent）。日记刺激按序合并后，承诺里的 `startRoot` 可以是 primed 根，不必再等于罐上的 parent。谱系续跑核 `parentRoot`。`revokeAcceptance` 沿 `prevSettled` 走后代，释放 `workClaimed`，把头滚回 parent；不改 Journal。
+`openSegment` 的 `startRoot` 必须等于 `lastFinalRoot`（parent）。日记刺激按序合并后，承诺里的 `startRoot` 可以是 primed 根，不必再等于 Tank 上的 parent。谱系续跑核 `parentRoot`。`revokeAcceptance` 沿 `prevSettled` 走后代，释放 `workClaimed`，把头滚回 parent；不改 Journal。
 
 主网日限额默认 `maxUserDaily = 100 ether`、`maxProtocolDaily = 1000 ether`。测试网 / Anvil 为 0（不限额）。
 
@@ -117,7 +117,7 @@ refunds[funder]       转移未预留油 + 作废/判负的主人出资
 | -------------------------------------------------------------------------- | ------------ | ----------------------------------------- | ----------------------------------------------------- |
 | `constructor(soul, journal, ifs, hive)`                                    | —            | 钉死四地址；chainId 56 核 IFS / hive      | `BadConfig`                                           |
 | `setOperator(addr)`                                                        | A            | 换钥匙                                    | `Unauthorized`                                        |
-| `setPaused(bool)`                                                          | A            | 停新加油 / 领段                           | `Unauthorized`                                        |
+| `setPaused(bool)`                                                          | A            | 停新添料 / 领段                           | `Unauthorized`                                        |
 | `setLimits(maxFee, minBond, bondMultiple, challengeWindow, challengeBond)` | A            | 硬顶；已开段不追溯                        | `Unauthorized` `LimitCap`                             |
 | `setSpendLimits(userDaily, protocolDaily)`                                     | A            | 日限额；0 = 不限额；已花不追溯            | `Unauthorized`                                        |
 | `setAllowlisted(who, ok)`                                                      | A            | 运营方准入                                                    | `Unauthorized`                                        |
@@ -129,7 +129,7 @@ refunds[funder]       转移未预留油 + 作废/判负的主人出资
 | `refuel(tokenId, amount)`                                                      | O            | ownerFuel += received                     | `PausedHub` `NotOwner` `ZeroIn`                   |
 | `giftFuel(tokenId, amount)`                                                    | \*           | giftFuel += received；不可退              | `PausedHub` `ZeroIn`                              |
 | `drainOwnerFuel(tokenId, amount)`                                              | O            | 退未预留 ownerFuel                        | `Insufficient`                                    |
-| `claimRefund()`                                                                | \*           | 取转移退油                                | `Insufficient`                                    |
+| `claimRefund()`                                                                | \*           | 取转移后的主人料退款                                | `Insufficient`                                    |
 | `bindRunner(tokenId, runner, fee, steps, spendCap, validUntil)`                            | O            | 授权步数、支出上限与有效期；runner 必须 ACTIVE+RUNNER+白名单 | `PausedHub` `FeeCap` `NotActive` `WrongSteps` `CapExceeded` `OrderExpired` |
 | `openSegment(id, tokenId, steps, startRoot)`                                   | R            | 预留 fee，锁租约与工作键，冻结 Journal 输入区间      | `Unbound` `TankEmpty` `BondLow` `DupSegment` `LeaseHeld` `WorkTaken` `NeedContinuity` `PausedHub` |
 | `commitPrivate(id, c, epoch, previous, uri)`                                   | R            | 核 Journal checkpointRoot 与冻结输入；开挑战窗        | `BadStatus` `BadArchive` `StaleEpoch`             |
@@ -209,9 +209,9 @@ LimitsChanged(maxFee, minBond, bondMultiple, challengeWindow, challengeBond)
 
 ## 11. 实现顺序
 
-1. ~~罐 + 押金 + 绑定 + `_pull` 税差（Anvil + MockIFSTax 1%）~~ 已过
+1. ~~培养基 + 押金 + 绑定 + `_pull` 税差（Anvil + MockIFSTax 1%）~~ 已过
 2. ~~领段 / 承诺 / Journal 对拍 / 锁种 / 结算 / 过窗~~ 已过
-3. ~~转移退油、重复 claim、暂停~~ 已过
+3. ~~转移退回主人料、重复 claim、暂停~~ 已过
 4. ~~争议超时双输 / 可选 arbiter；快照 challengeBond 与窗口~~ 已过
 5. ~~测试网重部卫星~~ 已过：现址 `0xdb80def1828236A5af09965F46c6BEE63ccc1f4e`。`0x1dAd6d5D9C407553814888917Ff45F0d1Fee55A1` 与 `0xF0e07ff3…71825` 为 STALE。未 `setModule`。`npm run life:wire:hub:testnet`。主网部署脚本默认拒绝。
 6. ~~公开档案在另一台机器恢复生命~~ 本地门已过：`iff.life-restore/1`，`npm run life:restore` / `node --test tests/restore-life.test.mjs`。两个临时目录当作另一台机器；不需要原 Runner 的 `state-*.json`。不是真钱，也不是挖矿页。

@@ -747,17 +747,25 @@ export function explainLifeError(err, tx) {
   return raw;
 }
 
+export async function requestLifeAccounts(ethereum, options = {}) {
+  if (!ethereum) throw new Error("未检测到钱包");
+  if (options.silent) {
+    const accounts = await ethereum
+      .request({ method: "eth_accounts" })
+      .catch(() => []);
+    return accounts?.length ? accounts : null;
+  }
+  // First wallet RPC must be the prompt. A prior eth_accounts round-trip
+  // spends the click gesture, and MetaMask then stays silent.
+  return ethereum.request({ method: "eth_requestAccounts" });
+}
+
 export async function connectLife(ethereum, deployment, network, options = {}) {
   if (!ethereum) throw new Error("未检测到钱包");
   if (!deployment?.address) throw new Error("Soul 合约尚未部署");
   const resolved = network || networkOf(deployment.chainId);
-  const accounts = await ethereum
-    .request({ method: "eth_accounts" })
-    .catch(() => []);
-  if (!accounts?.length) {
-    if (options.silent) return null;
-    await ethereum.request({ method: "eth_requestAccounts" });
-  }
+  const accounts = await requestLifeAccounts(ethereum, options);
+  if (options.silent && !accounts) return null;
   await ensureChain(ethereum, resolved);
   const provider = new BrowserProvider(ethereum, resolved.chainId);
   const signer = await provider.getSigner();

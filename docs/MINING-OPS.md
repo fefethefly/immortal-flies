@@ -4,7 +4,7 @@
 
 ## 1. 产品边界
 
-`/host.html` 是生命托管页（加油、绑定、账单、档案、换 Runner）。首页「托管网」是 MaleCNS 分片覆盖沙盘，不是 MiningHub。
+`/host.html` 是生命托管页（添料、绑定、账单、档案、换 Runner）。首页「托管网」是 MaleCNS 分片覆盖沙盘，不是 MiningHub。对用户说培养基 / 添料 / 投喂；链上仍是 `Tank` / `refuel`。
 
 v1 验收口径：**官方白名单 Runner，无人挑战即付。** 链上没有独立 Verifier。`openingHash` 只是开口承诺，不是神经计算证明。
 
@@ -24,7 +24,7 @@ v1 验收口径：**官方白名单 Runner，无人挑战即付。** 链上没�
 | `settlePrivate` 工价 | Runner `earnings` → `withdrawEarnings` | **否。运营方工资。** |
 | IFS 1% 入站税 | 税币合约分账（蜂巢 80 / 运营 20） | 代币税，不是 Hub 工价 |
 | 争议罚没 | 只进蜂巢 | 罚没，不是回购、不是销毁 |
-| 主人加油 / 打赏 | Tank | 买方预付服务费 |
+| 主人添料 / 投喂 | Tank（培养基） | 买方预付服务费 |
 
 对外禁止把 Runner 工价写成协议收入、APY、挖矿收益。
 

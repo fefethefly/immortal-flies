@@ -62,7 +62,7 @@ void main() {
 
 export function createNeuronFieldGL(
   { positions, colors, rare, count },
-  { width, height },
+  { width, height, onLost } = {},
 ) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -166,26 +166,52 @@ export function createNeuronFieldGL(
   gl.clearColor(0, 0, 0, 0);
   gl.disable(gl.DEPTH_TEST);
 
+  let lost = false;
+  const lose = () => {
+    if (lost) return;
+    lost = true;
+    onLost?.();
+  };
+  const onContextLost = (event) => {
+    event.preventDefault();
+    lose();
+  };
+  canvas.addEventListener("webglcontextlost", onContextLost);
+
   return {
     canvas,
     resize(w, h) {
+      if (lost) return;
       canvas.width = w;
       canvas.height = h;
     },
     draw(activity, { yaw, pitch, zoom, dim, time, width, height, dpr }) {
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform2f(uniforms.u_resolution, width, height);
-      gl.uniform1f(uniforms.u_dpr, dpr);
-      gl.uniform1f(uniforms.u_yaw, yaw);
-      gl.uniform1f(uniforms.u_pitch, pitch);
-      gl.uniform1f(uniforms.u_zoom, zoom);
-      gl.uniform1f(uniforms.u_time, time);
-      gl.uniform1f(uniforms.u_dim, dim);
-      gl.bindBuffer(gl.ARRAY_BUFFER, activityBuffer);
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, activity);
-      gl.drawArrays(gl.POINTS, 0, count);
+      if (lost || gl.isContextLost?.()) {
+        lose();
+        return false;
+      }
+      try {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform2f(uniforms.u_resolution, width, height);
+        gl.uniform1f(uniforms.u_dpr, dpr);
+        gl.uniform1f(uniforms.u_yaw, yaw);
+        gl.uniform1f(uniforms.u_pitch, pitch);
+        gl.uniform1f(uniforms.u_zoom, zoom);
+        gl.uniform1f(uniforms.u_time, time);
+        gl.uniform1f(uniforms.u_dim, dim);
+        gl.bindBuffer(gl.ARRAY_BUFFER, activityBuffer);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, activity);
+        gl.drawArrays(gl.POINTS, 0, count);
+        return true;
+      } catch {
+        lose();
+        return false;
+      }
     },
-    destroy: release,
+    destroy() {
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      release();
+    },
   };
 }

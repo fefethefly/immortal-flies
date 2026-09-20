@@ -14,10 +14,14 @@ import {
   queryLatestLog,
   readBreedBuy,
   readPendingHatch,
+  requestLifeAccounts,
 } from "../src/life/chain.mjs";
 
 test("lifeListingPath only uses the testnet file when asked", () => {
-  assert.equal(lifeListingPath(""), "/contract/life/ImmortalSoul.deployment.json");
+  assert.equal(
+    lifeListingPath(""),
+    "/contract/life/ImmortalSoul.deployment.json",
+  );
   assert.equal(
     lifeListingPath("?soul=1"),
     "/contract/life/ImmortalSoul.deployment.json",
@@ -30,7 +34,10 @@ test("lifeListingPath only uses the testnet file when asked", () => {
     lifeListingPath("?chain=97&soul=2"),
     "/contract/life/ImmortalSoul.testnet.json",
   );
-  assert.equal(marketListingPath(""), "/contract/life/SoulMarket.deployment.json");
+  assert.equal(
+    marketListingPath(""),
+    "/contract/life/SoulMarket.deployment.json",
+  );
   assert.equal(
     marketListingPath("?net=test"),
     "/contract/life/SoulMarket.testnet.json",
@@ -175,8 +182,14 @@ test("explainMarketError keeps Unauthorized off the breed copy", () => {
       "market.needOwner": "owner only",
       "kin.breedNeed": "breed",
     })[key];
-  assert.equal(explainMarketError({ shortMessage: "WrongPrice()" }, tx), "exact bnb");
-  assert.equal(explainMarketError({ shortMessage: "Unauthorized()" }, tx), "owner only");
+  assert.equal(
+    explainMarketError({ shortMessage: "WrongPrice()" }, tx),
+    "exact bnb",
+  );
+  assert.equal(
+    explainMarketError({ shortMessage: "Unauthorized()" }, tx),
+    "owner only",
+  );
 });
 
 test("explainLifeError maps hatch limit without leaking revert noise", () => {
@@ -190,24 +203,62 @@ test("explainLifeError maps hatch limit without leaking revert noise", () => {
       "hatch.walletBusy": "wallet busy",
       "kin.wrongFee": "wrong fee",
     })[key];
-  assert.equal(explainLifeError({ shortMessage: "HatchLimit()" }, tx), "already hatched");
-  assert.equal(explainLifeError({ message: "PendingHatch()" }, tx), "pending");
-  assert.equal(explainLifeError({ message: "HatchNotReady()" }, tx), "not ready");
-  assert.equal(explainLifeError({ message: "HatchUnavailable()" }, tx), "unavailable");
   assert.equal(
-    explainLifeError({ message: "Already processing eth_requestAccounts. Please wait." }, tx),
+    explainLifeError({ shortMessage: "HatchLimit()" }, tx),
+    "already hatched",
+  );
+  assert.equal(explainLifeError({ message: "PendingHatch()" }, tx), "pending");
+  assert.equal(
+    explainLifeError({ message: "HatchNotReady()" }, tx),
+    "not ready",
+  );
+  assert.equal(
+    explainLifeError({ message: "HatchUnavailable()" }, tx),
+    "unavailable",
+  );
+  assert.equal(
+    explainLifeError(
+      { message: "Already processing eth_requestAccounts. Please wait." },
+      tx,
+    ),
     "wallet busy",
   );
-  assert.equal(explainLifeError({ message: "network down" }, tx), "network down");
-  assert.equal(explainLifeError({ shortMessage: "WrongFee()" }, tx), "wrong fee");
+  assert.equal(
+    explainLifeError({ message: "network down" }, tx),
+    "network down",
+  );
+  assert.equal(
+    explainLifeError({ shortMessage: "WrongFee()" }, tx),
+    "wrong fee",
+  );
   const rpcTx = (key) => (key === "hatch.rpcLimit" ? "rpc limit" : key);
   assert.equal(
     explainLifeError(
-      { message: 'could not coalesce error (error={ "code": -32005, "message": "limit exceeded" })' },
+      {
+        message:
+          'could not coalesce error (error={ "code": -32005, "message": "limit exceeded" })',
+      },
       rpcTx,
     ),
     "rpc limit",
   );
+});
+
+test("requestLifeAccounts prompts first and never probes eth_accounts", async () => {
+  const calls = [];
+  const ethereum = {
+    async request({ method }) {
+      calls.push(method);
+      if (method === "eth_requestAccounts") return ["0xabc"];
+      if (method === "eth_accounts") return [];
+      throw new Error(method);
+    },
+  };
+  assert.deepEqual(await requestLifeAccounts(ethereum), ["0xabc"]);
+  assert.deepEqual(calls, ["eth_requestAccounts"]);
+  calls.length = 0;
+  assert.equal(await requestLifeAccounts(ethereum, { silent: true }), null);
+  assert.deepEqual(calls, ["eth_accounts"]);
 });
 
 test("queryLatestLog walks recent chunks and ignores wide-scan failures", async () => {
@@ -244,16 +295,22 @@ test("readPendingHatch ignores empty or burned request slots", async () => {
       entropyBlock: 10n,
     }),
   };
-  assert.equal(await readPendingHatch(soul, "0x1111111111111111111111111111111111111111"), null);
+  assert.equal(
+    await readPendingHatch(soul, "0x1111111111111111111111111111111111111111"),
+    null,
+  );
   soul.requests = async () => ({
     recipient: "0x1111111111111111111111111111111111111111",
     entropyBlock: 99n,
   });
-  assert.deepEqual(await readPendingHatch(soul, "0x1111111111111111111111111111111111111111"), {
-    requestId: 1,
-    recipient: "0x1111111111111111111111111111111111111111",
-    entropyBlock: 99,
-  });
+  assert.deepEqual(
+    await readPendingHatch(soul, "0x1111111111111111111111111111111111111111"),
+    {
+      requestId: 1,
+      recipient: "0x1111111111111111111111111111111111111111",
+      entropyBlock: 99,
+    },
+  );
 });
 
 test("formatBreedPrice and readBreedBuy keep hold vs fill separate", () => {
@@ -272,7 +329,13 @@ test("formatBreedPrice and readBreedBuy keep hold vs fill separate", () => {
       },
     },
   };
-  assert.equal(readBreedBuy({ logs: [{ topics: ["held"] }] }, kin).status, "held");
-  assert.equal(readBreedBuy({ logs: [{ topics: ["filled"] }] }, kin).status, "filled");
+  assert.equal(
+    readBreedBuy({ logs: [{ topics: ["held"] }] }, kin).status,
+    "held",
+  );
+  assert.equal(
+    readBreedBuy({ logs: [{ topics: ["filled"] }] }, kin).status,
+    "filled",
+  );
   assert.equal(readBreedBuy({ logs: [] }, kin).status, "none");
 });

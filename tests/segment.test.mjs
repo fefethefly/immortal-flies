@@ -514,7 +514,7 @@ async function committed(
   return { traj, seg };
 }
 
-test("私有轨全流程：加油 → 绑定 → 领段 → 承诺 → 抽检 → 窗后记账 → 挑战窗关；守恒每步成立", async () => {
+test("私有轨全流程：添料 → 绑定 → 领段 → 承诺 → 抽检 → 窗后记账 → 挑战窗关；守恒每步成立", async () => {
   const graph = fixture();
   const ledger = createSegmentLedger();
   registerOperator(ledger, { operatorId: "op-a", bond: LP.minBond, tick: 0 });
@@ -538,7 +538,7 @@ test("私有轨全流程：加油 → 绑定 → 领段 → 承诺 → 抽检 �
   assert.deepEqual(
     seg.fuel,
     { fromOwner: 10_000, fromGift: 0 },
-    "先烧主人的油",
+    "先扣主人料",
   );
   assert.equal(operatorView(ledger, "op-a").exposure, 10_000 * LP.bondMultiple);
   assert.equal(tankView(ledger, "life-1").reserved, 10_000);
@@ -621,7 +621,7 @@ test("私有轨全流程：加油 → 绑定 → 领段 → 承诺 → 抽检 �
   voidSegment(ledger, { segmentId: "s2" });
 });
 
-test("罐：罐空不开段；油按原路退；转移退 ownerFuel 留 giftFuel 清绑定；主人提不走打赏", async () => {
+test("培养基：断料不开段；料按原路退；转移退 ownerFuel 留 giftFuel 清绑定；主人提不走投喂", async () => {
   const graph = fixture();
   const ledger = createSegmentLedger();
   registerOperator(ledger, { operatorId: "op-a", bond: LP.minBond, tick: 0 });
@@ -656,7 +656,7 @@ test("罐：罐空不开段；油按原路退；转移退 ownerFuel 留 giftFuel
     () => drainOwnerFuel(ledger, { lifeId: "life-2", amount: 4_001 }),
     /不足/,
   );
-  // 罐不够一段 → 不开，生命休眠
+  // 培养基不够一段 → 不开，生命休眠
   bindRunner(ledger, {
     lifeId: "life-2",
     operatorId: "op-a",
@@ -671,7 +671,7 @@ test("罐：罐空不开段；油按原路退；转移退 ownerFuel 留 giftFuel
         steps: 10,
         startRoot: ROOT,
       }),
-    /罐空/,
+    /断料/,
   );
   // 转移：ownerFuel 退卖家，giftFuel 留下，绑定清空
   const out = transferLife(ledger, { lifeId: "life-2" });
@@ -894,8 +894,8 @@ test("争议入账：判负罚曝险进罚没、预留原路退；挑战者输�
   );
   assert.equal(operatorView(ledger, "runner").exposure, 0);
   const tank = tankView(ledger, "life-4");
-  assert.equal(tank.ownerFuel, 2_000, "主人的油原路退");
-  assert.equal(tank.giftFuel, 8_000, "打赏原路退，主人拿不到");
+  assert.equal(tank.ownerFuel, 2_000, "主人料原路退");
+  assert.equal(tank.giftFuel, 8_000, "投喂原路退，主人拿不到");
   assert.equal(ledger.segments.get("d1").status, "SLASHED");
   check(ledger);
   // 无理挑战：诚实段被挑战，挑战者输

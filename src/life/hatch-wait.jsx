@@ -1,3 +1,4 @@
+import React from "react";
 import {
   HATCH_WAIT_TICKS,
   hatchBlocksLeft,

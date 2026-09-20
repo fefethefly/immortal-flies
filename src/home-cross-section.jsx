@@ -11,7 +11,9 @@ import {
 import { loadGraph } from "./brain/graph.mjs";
 import { loadLifeDeployment, readSoulCensus } from "./life/chain.mjs";
 import { birthHref } from "./life/birth-card.mjs";
+import { hatchIntentFromLocation } from "./life/hatch-intent.mjs";
 import { HatchPanel } from "./life/hatch-panel.jsx";
+import { setPendingGiven } from "./life/names.mjs";
 import {
   CIRCUIT_MANIFEST,
   CROSS_MODES,
@@ -156,7 +158,11 @@ export function HomeCrossSection({
   const birthRef = useRef({ id: 0 });
   const [locked, setLocked] = useState(null);
   const [field, setField] = useState(null);
-  const [hatchOpen, setHatchOpen] = useState(false);
+  const [hatchOpen, setHatchOpen] = useState(() => {
+    const intent = hatchIntentFromLocation();
+    if (intent.given) setPendingGiven(intent.given);
+    return intent.open;
+  });
   const [census, setCensus] = useSoulCensus();
   const runner = useRunnerStatus();
   const rail = useMemo(() => railMarket(swarm, quotes), [swarm, quotes]);

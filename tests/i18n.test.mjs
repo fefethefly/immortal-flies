@@ -154,4 +154,17 @@ test("host copy is paired and does not call the mesh MiningHub", () => {
   assert.match(t("en", "host.wageLead"), /not mining yield/i);
   assert.doesNotMatch(t("en", "host.wage"), /APY/);
   assert.equal(t("zh", "host.okRefresh"), "已刷新。");
+  assert.equal(t("en", "host.tank"), "Vial");
+  assert.equal(t("zh", "host.tank"), "培养基");
+  assert.equal(t("en", "host.refuel"), "Replenish");
+  assert.equal(t("zh", "host.refuel"), "添料");
+  assert.equal(t("en", "host.ownerFuel"), "Owner stock");
+  assert.equal(t("zh", "host.ownerFuel"), "主人料");
+  assert.equal(t("zh", "host.giftFuel"), "投喂料");
+  assert.equal(t("zh", "public.doorHost"), "给生命添料");
+  assert.doesNotMatch(t("en", "host.lead"), /\b(refuel|fuel|tank)\b/i);
+  assert.doesNotMatch(t("zh", "host.lead"), /加油|油罐|燃油|主人油|打赏油/);
+  for (const key of keys) {
+    assert.doesNotMatch(t("zh", key), /加油|油罐|燃油|主人油|打赏油/);
+  }
 });

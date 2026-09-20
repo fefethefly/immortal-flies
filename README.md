@@ -22,7 +22,7 @@ License [MIT](LICENSE). Third-party connectome and fonts: [NOTICE](NOTICE). Cont
 
 **Site** · https://immortalflies.com · **Docs catalog** · [docs/README.md](docs/README.md) · **Repo** · https://github.com/fefethefly/immortal-flies
 
-Current focus: free BNB hatch (gas only), Soul identity, on-chain interaction, and recoverable archives. The public protocol separates LifeId, SpeciesManifest, ModelManifest, and Session so future cross-chain / cross-species work can plug in later. BNB Chain is the only identity authority in v1; bridging is closed. Trading remains a paper small world. Product rules: [PRODUCT-LATEST](docs/PRODUCT-LATEST.md). Spec: [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md).
+Current focus: free BNB hatch (gas only; `?hatch=1&given=` survives a wallet-app hop), Soul identity, on-chain interaction, and recoverable archives. The public protocol separates LifeId, SpeciesManifest, ModelManifest, and Session so future cross-chain / cross-species work can plug in later. BNB Chain is the only identity authority in v1; bridging is closed. Trading remains a paper small world. Product rules: [PRODUCT-LATEST](docs/PRODUCT-LATEST.md). Spec: [LIFE-PROTOCOL](docs/LIFE-PROTOCOL.md).
 
 LIVE identity kernel: `ImmortalSoul` [`0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD`](https://bscscan.com/address/0x9341Fe0c4CcDeFEBe2c052DAc312Ea1Bbf0Ab6bD) (`phenotype-loci/3`). Retired `/2` collection `0x500Df9B948Cb610ADcBb98adD23aBF571aA9293F` is not this set. Do **not** deploy `ImmortalFly.sol` to chainId 56, and do **not** redeploy Soul to iterate.
 

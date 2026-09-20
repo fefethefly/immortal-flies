@@ -15,6 +15,7 @@ coverage/
 *.keystore
 id_rsa
 id_rsa.pub
+.local/
 
 # Local / editor
 .DS_Store

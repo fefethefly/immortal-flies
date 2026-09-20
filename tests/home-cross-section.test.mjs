@@ -31,6 +31,7 @@ import {
   strongestEdges,
   truthLines,
   utteranceTape,
+  visibleCanvasBox,
   waveSettledAt,
 } from "../src/home-cross-section.mjs";
 import { encodeGraph } from "../src/brain/graph.mjs";
@@ -361,4 +362,25 @@ test("phone hero parks the hatch under a full-width title", () => {
   assert.match(css, /"tools tools"/);
   assert.equal(t("en", "home.crossHatchShort"), "Hatch — free");
   assert.equal(t("zh", "home.crossHatchShort"), "免费孵化");
+});
+
+test("hero canvas keeps the last real size when a wallet sheet collapses it", () => {
+  assert.deepEqual(
+    visibleCanvasBox({ width: 0, height: 0 }, { width: 1280, height: 800 }),
+    {
+      width: 1280,
+      height: 800,
+    },
+  );
+  assert.deepEqual(
+    visibleCanvasBox({ width: 1, height: 720 }, { width: 1280, height: 800 }),
+    {
+      width: 1280,
+      height: 800,
+    },
+  );
+  assert.deepEqual(visibleCanvasBox({ width: 390, height: 720 }), {
+    width: 390,
+    height: 720,
+  });
 });

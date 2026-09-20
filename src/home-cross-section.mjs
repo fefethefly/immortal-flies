@@ -893,6 +893,16 @@ function project(point, camera, width, height) {
   });
 }
 
+export function visibleCanvasBox(box, previous = { width: 0, height: 0 }) {
+  const width = Number(box?.width) || 0;
+  const height = Number(box?.height) || 0;
+  if (width < 2 || height < 2) {
+    if ((previous.width || 0) >= 2 && (previous.height || 0) >= 2)
+      return previous;
+  }
+  return { width, height };
+}
+
 export function createCrossSectionRenderer(canvas, read) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return { hits: [], schedule() {}, destroy() {} };
@@ -1071,7 +1081,16 @@ export function createCrossSectionRenderer(canvas, read) {
       }
       glField = createNeuronFieldGL(
         { positions, colors, rare, count },
-        { width: canvas.width, height: canvas.height },
+        {
+          width: canvas.width,
+          height: canvas.height,
+          onLost() {
+            glField = null;
+            glForField = null;
+            glDead = true;
+            canvas.dataset.fieldGL = "2d";
+          },
+        },
       );
       canvas.dataset.fieldGL = "webgl";
       return glField;
@@ -1135,7 +1154,11 @@ export function createCrossSectionRenderer(canvas, read) {
   }
 
   function resize() {
-    const box = canvas.getBoundingClientRect();
+    const box = visibleCanvasBox(canvas.getBoundingClientRect(), {
+      width,
+      height,
+    });
+    if (box.width < 2 || box.height < 2) return;
     const raw = window.devicePixelRatio || 1;
     width = box.width;
     height = box.height;
@@ -1403,7 +1426,7 @@ export function createCrossSectionRenderer(canvas, read) {
           if (shimmer[i] < 0) continue;
           shimmer[i] = Math.max(shimmer[i], 0.5 + Math.random() * 0.4);
         }
-        gl.draw(shimmer, {
+        const painted = gl.draw(shimmer, {
           yaw: cam.yaw,
           pitch: cam.pitch,
           zoom: cam.zoom,
@@ -1413,7 +1436,8 @@ export function createCrossSectionRenderer(canvas, read) {
           height,
           dpr,
         });
-        ctx.drawImage(gl.canvas, 0, 0, width, height);
+        if (painted) ctx.drawImage(gl.canvas, 0, 0, width, height);
+        else drawNeuronsSampled(dim, occupied);
       } else {
         drawNeuronsSampled(dim, occupied);
       }
@@ -1998,6 +2022,10 @@ export function createCrossSectionRenderer(canvas, read) {
   }
 
   function schedule() {
+    if (!document.hidden && glDead) {
+      glDead = false;
+      glForField = null;
+    }
     if (!raf) raf = requestAnimationFrame(draw);
   }
 
