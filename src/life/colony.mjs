@@ -151,10 +151,17 @@ export function filterColony(souls, view = {}) {
       (soul) => String(soul.owner || "").toLowerCase() === mine,
     );
   }
-  for (const locus of ["hue", "eye", "size", "mark"]) {
+  for (const locus of ["hue", "size", "mark"]) {
     if (!view[locus]) continue;
     rows = rows.filter(
       (soul) => locusValue(soul.phenotype, locus) === String(view[locus]),
+    );
+  }
+  if (view.eye) {
+    rows = rows.filter(({ phenotype: p }) =>
+      view.eye === "split"
+        ? p?.eyePair?.id === "split"
+        : p?.eye?.id === view.eye || p?.eyeOther?.id === view.eye,
     );
   }
   if (view.stripes !== "" && view.stripes != null) {

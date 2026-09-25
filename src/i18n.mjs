@@ -4,9 +4,9 @@ export const STORAGE_KEY = "iff.locale.v2";
 
 export const MESSAGES = Object.freeze({
   en: {
-    "meta.homeTitle": "IMMORTAL — Immortal Fly",
+    "meta.homeTitle": "IMMORTAL — Life, beyond biology",
     "meta.homeDesc":
-      "Official site. Official token $IFS is live on BSC. The pit is still paper trading only.",
+      "Explore open digital life through the fruit fly connectome. Observe a local neural response, replay its history, and hatch your own on-chain identity.",
     "meta.pitTitle": "IMMORTAL — The Pit",
     "meta.pitDesc":
       "Immortal Fruit Flies — The Pit. See why a fly turns, then see it order.",
@@ -720,7 +720,7 @@ export const MESSAGES = Object.freeze({
     "ledger.exploreTitle": "Explore the colony",
     "ledger.previewTitle": "Preview cabinet",
     "ledger.previewLead":
-      "Unborn looks, read deterministically from the published tables — every hue, eye, size, stripe and mark the decoder can express, rarest first. No soul exists at these seeds yet; occurrence is not a price.",
+      "Unborn specimens covering body, eye, wing and split-eye traits, read deterministically from real seeds. This is a curated collection, not a population sample: miniature and vestigial wings are inherited forms, not missing images. No soul has been minted for these preview entries; occurrence is not a price.",
     "ledger.previewBadge": "not yet born",
     "ledger.shownLooks": "{n} of {total} looks",
     "ledger.exploreLead":
@@ -1970,9 +1970,9 @@ export const MESSAGES = Object.freeze({
       "Documents are written against the repo. Nothing on this shelf moves funds or proves intelligence by itself.",
   },
   zh: {
-    "meta.homeTitle": "IMMORTAL — Immortal Fly",
+    "meta.homeTitle": "IMMORTAL — 生命，走向生物之外",
     "meta.homeDesc":
-      "官方站点。官方代币 $IFS 已在 BSC 上线。交易场仍是纸面模拟。",
+      "从果蝇神经连接组出发，探索开放数字生命。观察本地神经响应、重放经历，孵化属于你的链上果蝇。",
     "meta.pitTitle": "IMMORTAL — 交易场",
     "meta.pitDesc":
       "Immortal Fruit Flies — 交易场。看见果蝇为何转向，再看见它下单。",
@@ -2646,7 +2646,7 @@ export const MESSAGES = Object.freeze({
     "ledger.exploreTitle": "翻阅群体",
     "ledger.previewTitle": "预览图鉴",
     "ledger.previewLead":
-      "未出生的长相，按公布表确定性读出——解码器能表达的全部体色、眼、体型、条纹与斑纹，稀缺在前。这些 seed 上还没有任何灵魂；出现率不是定价。",
+      "从真实 seed 确定性读出的未出生标本，覆盖体色、复眼、翅形与左右异色。这是形态选集，不代表群体出现比例；小翅与残翅是基因性状，并非图片缺失。这些预览条目尚未铸造；出现率不是定价。",
     "ledger.previewBadge": "未出生",
     "ledger.shownLooks": "{total} 种长相中的 {n} 种",
     "ledger.exploreLead":

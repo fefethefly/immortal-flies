@@ -46,12 +46,13 @@ export function thoughtOf(soul, locale = "en", body) {
   const hunger = body ? hungerOf(body.energy) : "sated";
   const hue = soul.phenotype?.hue?.[locale] || soul.phenotype?.hue?.en || "amber";
   const eye = soul.phenotype?.eye?.[locale] || soul.phenotype?.eye?.en || "wild";
+  const eyeZh = eye.endsWith("眼") ? eye : `${eye}眼`;
   if (locale === "zh") {
     if (hunger === "collapsed")
       return "它歇下了。歇一会儿会自己起来。投食能快一点。链上的灵魂还在。";
     if (hunger === "faint") return `${hue}躯体已经很轻。它还走得动，但飞不起来。`;
-    if (hunger === "hungry") return `${hue}躯体，${eye}眼。它在找地上的食物。`;
-    return `${hue}躯体，${eye}眼。动作是本地演算；链上只记刺激与所有权。`;
+    if (hunger === "hungry") return `${hue}躯体，${eyeZh}。它在找地上的食物。`;
+    return `${hue}躯体，${eyeZh}。动作是本地演算；链上只记刺激与所有权。`;
   }
   if (hunger === "collapsed") {
     return "It is resting. A short rest wakes it. Food is faster. The soul is still on-chain.";
@@ -230,16 +231,16 @@ export function fitCamera(camera, bodies, pad = 0.22) {
   return camera;
 }
 
-export function stepHabitat(state, dt = 1) {
+export function stepHabitat(state, dt = 1, onEvent) {
   const total = Math.max(0, dt * (state.rate || 1));
   if (total <= 0) return state;
   const slices = total > 1.25 ? Math.min(24, Math.ceil(total)) : 1;
   const step = total / slices;
-  for (let i = 0; i < slices; i += 1) tickHabitat(state, step);
+  for (let i = 0; i < slices; i += 1) tickHabitat(state, step, onEvent);
   return state;
 }
 
-function tickHabitat(state, step) {
+function tickHabitat(state, step, onEvent) {
   state.tick = (state.tick || 0) + step;
   const living = state.bodies.filter((body) => !body.dragged && hungerOf(body.energy) !== "collapsed").length;
   const crumbCap = living === 0 ? 0 : Math.max(0, Math.ceil(living / 16));
@@ -288,6 +289,7 @@ function tickHabitat(state, step) {
     const resting = tired || (grounded && body.energy < HABITAT_ENERGY.takeoff);
     const crumb = hungry
       ? state.food.reduce((best, item) => {
+          if (item.life <= 0) return best;
           if (!best) return item;
           return Math.hypot(item.x - body.x, item.y - body.y) <
             Math.hypot(best.x - body.x, best.y - body.y)
@@ -422,8 +424,10 @@ function tickHabitat(state, step) {
       : 0;
 
     if (crumb && crumbDist < 0.028) {
+      const before = body.energy;
       body.energy = Math.min(HABITAT_ENERGY.max, body.energy + 90);
       crumb.life = 0;
+      onEvent?.({ kind: "ate", tokenId: body.tokenId, amount: Math.round(body.energy - before) });
     }
     if (airborne) {
       body.energy = Math.max(

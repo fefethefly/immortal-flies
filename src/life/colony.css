@@ -622,8 +622,8 @@
   margin: auto;
   background:
     radial-gradient(ellipse at 50% 0, #29201455, transparent 460px),
-    radial-gradient(rgba(226, 208, 160, 0.05) 1px, transparent 1.6px) 0 0 /
-      44px 44px,
+    radial-gradient(rgba(226, 208, 160, 0.05) 1px, transparent 1.6px) 0 0 / 44px
+      44px,
     #0b0b09;
 }
 .colony-cover {
@@ -631,8 +631,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px 24px;
-  padding: 10px 32px;
+  gap: 8px 20px;
+  padding: 6px 24px;
   border-bottom: 1px solid #a5844438;
 }
 .colony-cover-title {
@@ -710,7 +710,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 20px;
-  padding: 4px 32px;
+  padding: 2px 24px;
   border: 0;
   border-bottom: 1px solid rgba(47, 42, 31, 0.7);
   background: rgba(12, 11, 9, 0.4);
@@ -765,7 +765,7 @@
 .colony-tabs {
   top: 70px;
   justify-content: center;
-  padding: 6px 16px;
+  padding: 3px 16px;
   border-top: 1px solid #a5844430;
 }
 .colony-tabs a,
@@ -796,8 +796,8 @@
   text-shadow: 0 0 12px rgba(240, 185, 11, 0.35);
 }
 .is-colony .life-market-head {
-  padding: 10px 28px 2px;
-  gap: 10px;
+  padding: 6px 20px 0;
+  gap: 8px;
 }
 .is-colony .life-market-head h2 {
   margin: 2px 0 0;
@@ -813,8 +813,8 @@
   font-size: 10px;
 }
 .is-colony .life-market-filters {
-  padding: 4px 28px 10px;
-  gap: 8px 12px;
+  padding: 2px 20px 6px;
+  gap: 6px 10px;
   align-items: center;
 }
 .is-colony .life-market-filters label {
@@ -841,14 +841,14 @@
 }
 .colony-lead {
   max-width: 100ch;
-  margin: 2px 28px 0;
+  margin: 2px 20px 0;
   font-size: 11px;
   color: #9f9685;
 }
 .is-colony .life-market-grid {
-  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
-  gap: 12px;
-  padding: 10px 28px 28px;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 8px;
+  padding: 6px 20px 20px;
   align-items: start;
 }
 /* 图鉴卡：竖向收藏卡。编号+稀有度 → 立绘 → 名字 → 性状点 → 世代。 */
@@ -1018,7 +1018,7 @@
 .colony-card-data {
   grid-column: 1 / -1;
   border-top: 1px solid #b4945428;
-  padding: 6px 6px 0;
+  padding: 3px 2px 0;
   text-align: center;
 }
 .colony-card-data summary {
@@ -1041,15 +1041,16 @@
 
 /* ── 稀世 spotlight：预览区最稀缺的 6 种。金环呼吸 + 浮动 + 循环扫光（均走合成器） ── */
 .colony-spotlight-wrap {
-  padding: 2px 28px 0;
+  padding: 2px 20px 0;
 }
 .colony-spotlight-lead {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   color: #d8b76a;
   font:
     10px "IBM Plex Mono",
     monospace;
   letter-spacing: 0.22em;
+  text-overflow: ellipsis;
   text-transform: uppercase;
 }
 .colony-spotlight {
@@ -1057,8 +1058,8 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 .is-spotlight {
   border-color: #d9b36a99;
@@ -1137,16 +1138,41 @@
   outline: 2px solid #e4c17c;
   outline-offset: 4px;
 }
-@media (min-width: 1280px) {
-  .is-colony .life-market-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+@media (min-width: 1200px) {
+  .is-colony .life-market-grid,
+  .is-colony .colony-preview-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .is-colony .life-market-card .colony-portrait,
+  .is-colony .life-market-card .life-market-thumb {
+    width: min(100%, 132px);
+    max-height: 132px;
+    aspect-ratio: 1;
+    justify-self: center;
+  }
+  .is-colony .life-market-card .fly-traits,
+  .is-colony .life-market-card .colony-card-data {
+    display: none;
+  }
+  #preview .colony-lead {
+    margin: 0 20px 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
-@media (min-width: 900px) and (max-width: 1279px) {
-  .is-colony .life-market-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+@media (min-width: 840px) and (max-width: 1199px) {
+  .is-colony .life-market-grid,
+  .is-colony .colony-preview-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
   .colony-spotlight {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 701px) and (max-width: 839px) {
+  .is-colony .life-market-grid,
+  .is-colony .colony-preview-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -1176,10 +1202,11 @@
     padding: 8px;
     font-size: 9px;
   }
-  .is-colony .life-market-grid {
-    padding: 12px 16px;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
+  .is-colony .life-market-grid,
+  .is-colony .colony-preview-grid {
+    padding: 8px 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
   .life-shell.is-colony .life-rail {
     padding: 6px 20px;
@@ -1249,4 +1276,110 @@
   gap: 12px;
   max-width: 420px;
   margin: 0 0 12px;
+}
+
+/* Collectible cards: pearly character light within the existing compact tray. */
+.is-colony .life-market-card {
+  gap: 5px;
+  padding: 8px;
+  background:
+    radial-gradient(
+      ellipse at 50% 34%,
+      color-mix(in srgb, var(--pheno-body) 19%, transparent),
+      transparent 65%
+    ),
+    linear-gradient(160deg, #1e1810, #100e0b 65%);
+  box-shadow:
+    inset 0 1px 0 #f0ead91c,
+    0 6px 18px #07060433;
+}
+.is-colony .life-market-card::after,
+.is-colony .colony-spotlight-ring {
+  display: none;
+}
+.is-colony .life-market-card.is-spotlight {
+  animation: none;
+}
+.is-colony .life-market-card:focus-within {
+  border-color: #f0b90b;
+}
+.is-colony .life-market-card .colony-portrait {
+  aspect-ratio: 1;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: radial-gradient(ellipse at 50% 52%, #f5dca012, transparent 68%);
+  filter: none;
+}
+.colony-detail .colony-portrait {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border: 0;
+  background: transparent;
+}
+.is-colony .life-market-card > strong {
+  font-size: 13px;
+}
+.is-colony .life-market-card .fly-traits {
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+.is-colony .life-market-card .fly-traits span {
+  font-size: 10px;
+}
+.is-colony
+  .life-market-card
+  .fly-traits
+  li:has(.fly-traits-pair)
+  > span:last-of-type {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+.colony-wing-trait {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #bdb3a0;
+  font-size: 10px;
+  line-height: 1.35;
+  margin: 0;
+}
+.colony-wing-trait svg {
+  flex: 0 0 auto;
+  color: #c8ac71;
+}
+.colony-wing-trait span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.is-colony .life-market-card .fly-vital,
+.is-colony .life-market-card .colony-unborn {
+  width: 100%;
+  text-align: left;
+  border-top: 1px solid #b4945428;
+  padding-top: 5px;
+  margin-top: 1px;
+  font-size: 9px;
+}
+.colony-portrait[aria-busy="true"] {
+  background: radial-gradient(ellipse at center, #f0b90b12, transparent 65%);
+}
+@media (min-width: 1280px) {
+  .colony-spotlight {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .is-colony .life-market-card {
+    padding: 8px;
+    gap: 5px;
+  }
+  .is-colony .life-market-card > strong {
+    font-size: 13px;
+  }
 }

@@ -31,7 +31,7 @@ import {
 } from "./colony.mjs";
 import { sampleDescent } from "./predict.mjs";
 import { expectedCrossoverLoci, traitsOfSeed } from "./descent.mjs";
-import { previewSpecimens } from "./preview.mjs";
+import { previewSpecimens, previewSpotlight } from "./preview.mjs";
 import { KinBoard } from "./kin.jsx";
 import {
   FlyCatalogChip,
@@ -39,7 +39,10 @@ import {
   FlyTraitRows,
   FlyVital,
 } from "./fly-card.jsx";
-import { CatalogPortrait as MarketThumb } from "./catalog-portrait.jsx";
+import {
+  ColonyPortrait as MarketThumb,
+  ColonyWingTrait,
+} from "./colony-portrait.jsx";
 import { labelOf } from "./names.mjs";
 import { withNet } from "./net.mjs";
 import { hydrateColony, querySoulId, shortAddr } from "./souls.mjs";
@@ -47,7 +50,7 @@ import { useConnectedWallet } from "./use-connected-wallet.mjs";
 import "./life.css";
 import "./colony.css";
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 28;
 const SIM_SAMPLES = 6;
 const BOARD_LIMIT = 6;
 
@@ -260,6 +263,7 @@ function ColonyDetail({
           <MarketThumb soul={soul} />
         </figure>
         <FlyTraitRows soul={soul} locale={locale} />
+        <ColonyWingTrait soul={soul} locale={locale} />
         <FlyVital soul={soul} locale={locale} tx={tx} />
         {preview ? (
           <p className="life-note">{tx("ledger.detail.unborn")}</p>
@@ -340,8 +344,7 @@ export function ColonyPage() {
   const [generation, setGeneration] = useState(firstView.generation);
   const [sort, setSort] = useState(firstView.sort);
   const [mineOnly, setMineOnly] = useState(
-    () =>
-      typeof window !== "undefined" && window.location.hash === "#mine",
+    () => typeof window !== "undefined" && window.location.hash === "#mine",
   );
   const [page, setPage] = useState(1);
   const [detailKey, setDetailKey] = useState("");
@@ -367,7 +370,7 @@ export function ColonyPage() {
   const unseen = useMemo(() => unseenCombos(souls), [souls]);
   const boards = useMemo(() => boardsOf(souls, BOARD_LIMIT), [souls]);
   const previews = useMemo(() => previewSpecimens(), []);
-  const spotlight = useMemo(() => previews.slice(0, 6), [previews]);
+  const spotlight = useMemo(() => previewSpotlight(previews), [previews]);
   const view = useMemo(
     () => ({ query, hue, eye, size, stripes, mark, generation, sort }),
     [query, hue, eye, size, stripes, mark, generation, sort],
@@ -400,7 +403,7 @@ export function ColonyPage() {
     [previews, locale, hue, eye, size, stripes, mark, generation, sort],
   );
   const previewPaged = useMemo(
-    () => paginate(previewRows, previewPage, 18),
+    () => paginate(previewRows, previewPage, PAGE_SIZE),
     [previewRows, previewPage],
   );
 
@@ -797,6 +800,9 @@ export function ColonyPage() {
                   onChange={(event) => setEye(event.target.value)}
                 >
                   <option value="">{tx("ledger.filterAny")}</option>
+                  <option value="split">
+                    {locale === "zh" ? "左右异色" : "Split eyes"}
+                  </option>
                   {EYES.map((row) => (
                     <option key={row.id} value={row.id}>
                       {traitLabel(row, locale)}
@@ -924,6 +930,7 @@ export function ColonyPage() {
                           </button>
                         </strong>
                         <FlyTraitRows soul={soul} locale={locale} />
+                        <ColonyWingTrait soul={soul} locale={locale} />
                         <FlyVital soul={soul} locale={locale} tx={tx} />
                         <details className="colony-card-data">
                           <summary>
@@ -1051,13 +1058,13 @@ export function ColonyPage() {
                 </small>
               </div>
             </header>
-            {spotlight.length ? (
+            {spotlight.length && !hasColonyFilters(view) ? (
               <div className="colony-spotlight-wrap">
                 <p className="colony-spotlight-lead">
                   ✦{" "}
                   {locale === "zh"
-                    ? "稀世形态 · 每 1024 只里最稀缺的 6 种"
-                    : "Rarest forms · the 6 scarcest per 1024"}
+                    ? "形态观察 · 翅形与异色复眼"
+                    : "Form studies · wings and split eyes"}
                 </p>
                 <ol className="colony-spotlight">
                   {spotlight.map((soul, index) => {
@@ -1081,9 +1088,9 @@ export function ColonyPage() {
                           aria-hidden="true"
                         />
                         <span className="colony-spotlight-rank">
-                          {locale === "zh"
-                            ? `稀世 · ${index + 1}`
-                            : `RARE · ${index + 1}`}
+                          {soul.phenotype.eyePair.id === "split"
+                            ? soul.phenotype.eyePair[locale]
+                            : soul.phenotype.wingShape[locale]}
                         </span>
                         <FlyIndex soul={soul} />
                         <span className="colony-rarity">
@@ -1101,6 +1108,7 @@ export function ColonyPage() {
                           </button>
                         </strong>
                         <FlyTraitRows soul={soul} locale={locale} />
+                        <ColonyWingTrait soul={soul} locale={locale} />
                         <p className="colony-unborn">
                           {locale === "zh"
                             ? "第0代 · 未出生"
@@ -1147,6 +1155,7 @@ export function ColonyPage() {
                           </button>
                         </strong>
                         <FlyTraitRows soul={soul} locale={locale} />
+                        <ColonyWingTrait soul={soul} locale={locale} />
                         <p className="colony-unborn">
                           {locale === "zh"
                             ? "第0代 · 未出生"
@@ -1158,8 +1167,8 @@ export function ColonyPage() {
                           </summary>
                           <p className="colony-art-note">
                             {locale === "zh"
-                              ? "收藏插画 · 条纹与斑纹以以下基因为准"
-                              : "Collectible illustration · exact stripe and mark traits below"}
+                              ? "基因驱动外观 · 完整性状如下"
+                              : "Genome-driven appearance · full traits below"}
                           </p>
                           <p>
                             {soul.phenotype.summary?.[locale] ||

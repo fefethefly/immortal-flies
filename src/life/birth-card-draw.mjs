@@ -1,8 +1,6 @@
 import { CARD_H, CARD_W } from "./birth-card.mjs";
-import {
-  catalogSpriteAt,
-  loadCatalogFly,
-} from "./catalog-portrait.mjs";
+import { colonyPortraitCanvas, loadColonyPlate } from "./colony-portrait.mjs";
+import { drawFlyArt, fitSpan, sizeFactor } from "./fly-sprite.mjs";
 
 const MONO =
   'IBM Plex Mono, "Apple Symbols", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", ui-monospace, monospace';
@@ -155,7 +153,7 @@ function drawRarity(ctx, text, xRight, y) {
 }
 
 /** Colony 同款上色插画：3/4 正面立绘，贴进收藏卡画井。 */
-function drawCatalog(ctx, soul, x, y, w, h) {
+function drawCatalog(ctx, soul, x, y, w, h, plate) {
   rounded(ctx, x, y, w, h, 18);
   ctx.save();
   ctx.clip();
@@ -175,7 +173,10 @@ function drawCatalog(ctx, soul, x, y, w, h) {
   wash.addColorStop(1, "rgba(5, 4, 3, 0)");
   ctx.fillStyle = wash;
   ctx.fillRect(x, y, w, h);
-  const sprite = catalogSpriteAt(soul?.phenotype?.art || {}, Math.round(h));
+  const art = soul?.phenotype?.art || {};
+  const sprite = plate
+    ? colonyPortraitCanvas(plate, art, Math.round(Math.min(w, h)))
+    : null;
   if (sprite) {
     const size = Math.min(w, h) * 0.9;
     const dx = x + (w - size) / 2;
@@ -186,6 +187,19 @@ function drawCatalog(ctx, soul, x, y, w, h) {
     ctx.shadowBlur = 22;
     ctx.drawImage(sprite, dx, dy, size, size);
     ctx.shadowBlur = 0;
+  } else {
+    drawFlyArt(
+      ctx,
+      art,
+      x + w / 2,
+      y + h / 2,
+      fitSpan(w, h) * sizeFactor(art),
+      {
+        flying: false,
+        view: "portrait",
+        ignoreScale: true,
+      },
+    );
   }
   ctx.restore();
   rounded(ctx, x, y, w, h, 18);
@@ -194,7 +208,13 @@ function drawCatalog(ctx, soul, x, y, w, h) {
   ctx.stroke();
 }
 
-export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
+export function drawBirthCard(
+  ctx,
+  card,
+  w = CARD_W,
+  h = CARD_H,
+  portraitPlate,
+) {
   const inset = 28;
   const pad = 52;
   const inner = w - pad * 2;
@@ -259,7 +279,15 @@ export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
 
   const wellY = pad + 88;
   const wellH = h - pad - textH - wellY;
-  drawCatalog(ctx, card.soul, pad, wellY, inner, Math.max(320, wellH));
+  drawCatalog(
+    ctx,
+    card.soul,
+    pad,
+    wellY,
+    inner,
+    Math.max(320, wellH),
+    portraitPlate,
+  );
 
   const nameY = wellY + Math.max(320, wellH) + 18;
   const nameFont = `600 ${Math.round(h * 0.048)}px ${SERIF}`;
@@ -334,11 +362,7 @@ export function drawBirthCard(ctx, card, w = CARD_W, h = CARD_H) {
   ctx.fillStyle = "#6f6758";
   ctx.font = `16px ${MONO}`;
   ctx.textAlign = "center";
-  ctx.fillText(
-    fit(ctx, card.footer || "", ctx.font, inner),
-    w * 0.5,
-    barY,
-  );
+  ctx.fillText(fit(ctx, card.footer || "", ctx.font, inner), w * 0.5, barY);
   ctx.restore();
 }
 
@@ -350,6 +374,7 @@ export async function renderBirthPng(card, canvas) {
   node.width = CARD_W;
   node.height = CARD_H;
   const ctx = node.getContext("2d");
+  let portraitPlate;
   if (typeof document !== "undefined") {
     await Promise.all([
       document.fonts
@@ -359,10 +384,14 @@ export async function renderBirthPng(card, canvas) {
             document.fonts.ready,
           ]).catch(() => {})
         : Promise.resolve(),
-      loadCatalogFly().catch(() => {}),
+      loadColonyPlate(1280)
+        .then((plate) => {
+          portraitPlate = plate;
+        })
+        .catch(() => {}),
     ]);
   }
-  drawBirthCard(ctx, card, CARD_W, CARD_H);
+  drawBirthCard(ctx, card, CARD_W, CARD_H, portraitPlate);
   return node;
 }
 

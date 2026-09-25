@@ -74,6 +74,7 @@ export function useLifeWorld(fieldCount) {
   const [souls, setSouls] = useState([]);
   const [error, setError] = useState("");
   const [rosterError, setRosterError] = useState(false);
+  const [rosterLoading, setRosterLoading] = useState(true);
 
   useEffect(() => {
     let gone = false;
@@ -112,13 +113,24 @@ export function useLifeWorld(fieldCount) {
           setDeployment(null);
           setError(err.message || String(err));
         }
+      })
+      .finally(() => {
+        if (!gone) setRosterLoading(false);
       });
     return () => {
       gone = true;
     };
   }, [fieldCount]);
 
-  return { deployment, souls, setSouls, error, setError, rosterError };
+  return {
+    deployment,
+    souls,
+    setSouls,
+    error,
+    setError,
+    rosterError,
+    rosterLoading,
+  };
 }
 
 export function LifeDesk({
@@ -136,6 +148,7 @@ export function LifeDesk({
   compact,
   hideSpecimen,
   surface = "full",
+  management,
 }) {
   const habitat = surface === "habitat";
   const {
@@ -740,7 +753,8 @@ export function LifeDesk({
 
   const showHatch =
     !habitat ||
-    habitatShowsHatch({ used, pending, hatchStage, needRetry });
+    (Boolean(wallet) &&
+      habitatShowsHatch({ used, pending, hatchStage, needRetry }));
 
   if (deployment === undefined) {
     return <p className="life-note">{tx("hatch.loading")}</p>;
@@ -769,37 +783,14 @@ export function LifeDesk({
       {habitat || !wallet ? null : (
         <p className="life-meta">{shortAddr(wallet)}</p>
       )}
-      {habitat && !wallet ? (
-        <div className="life-actions">
-          <button
-            type="button"
-            className="primary"
-            disabled={busy || !deployment}
-            onClick={() =>
-              connectChosenLife(pick, deployment).then((session) => {
-                if (!session) return;
-                setWallet(session.address);
-                onWallet?.(session.address);
-              })
-            }
-          >
-            {tx("habitat.connect")}
-          </button>
-        </div>
-      ) : null}
-      {habitat && !selected ? (
-        <nav className="life-cross-row" aria-label={tx("habitat.careKicker")}>
-          <SiteLink href={withNet("/field.html")} className="life-cross">
-            {tx("habitat.toHatch")}
-          </SiteLink>
-          <SiteLink href={withNet("/market.html")} className="life-cross">
-            {tx("habitat.toMarket")}
-          </SiteLink>
-        </nav>
-      ) : null}
-
       {habitat && selected ? (
-        <section className="life-care" aria-label={tx("habitat.careKicker")}>
+        <details
+          className="life-care observation-management"
+          key={selected.life}
+        >
+          <summary>{tx("observe.manage")}</summary>
+          <p className="life-note">{tx("observe.manageNote")}</p>
+          {management}
           {mine.length > 1 ? (
             <div className="life-mine-picks" role="tablist">
               {mine.map((soul) => (
@@ -816,7 +807,6 @@ export function LifeDesk({
               ))}
             </div>
           ) : null}
-          <p className="life-note">{tx("habitat.careEnergy")}</p>
           <div className="life-send">
             <p className="life-care-label">{tx("habitat.transferLead")}</p>
             <label>
@@ -860,10 +850,80 @@ export function LifeDesk({
               {tx("habitat.toHost")}
             </SiteLink>
           </nav>
-        </section>
+        </details>
       ) : null}
 
-      {showHatch && (!habitat || !used) ? (
+      {showHatch && habitat ? (
+        <details
+          className="observation-hatch"
+          open={Boolean(pending || hatchStage || needRetry || !mine.length)}
+        >
+          <summary>{tx("observe.hatchTitle")}</summary>
+          <p className="life-note">
+            {deployment.chainId === 56
+              ? tx("observe.hatchNote")
+              : tx("life.testnet")}
+          </p>
+          {!used && (
+            <label>
+              {tx("hatch.name")}
+              <input
+                value={given}
+                maxLength={24}
+                disabled={used || Boolean(pending) || busy}
+                onChange={(event) => setGiven(event.target.value)}
+                placeholder={tx("hatch.nameHint")}
+              />
+            </label>
+          )}
+          <HatchWait
+            stage={hatchStage}
+            pending={pending}
+            blockNow={blockNow}
+            compact
+            tx={tx}
+          />
+          <div className="life-actions">
+            <button
+              type="button"
+              className="primary"
+              disabled={busy || used || Boolean(pending)}
+              onClick={request}
+            >
+              {tx(hatchActionKey(hatchStage))}
+            </button>
+            {needRetry && phase === "ready" && (
+              <button
+                type="button"
+                className="ghost"
+                disabled={busy}
+                onClick={complete}
+              >
+                {tx("hatch.autoRetry")}
+              </button>
+            )}
+            {phase === "expired" && (
+              <button
+                type="button"
+                className="ghost"
+                disabled={busy}
+                onClick={expire}
+              >
+                {tx("hatch.expire")}
+              </button>
+            )}
+          </div>
+        </details>
+      ) : null}
+      {habitat && wallet && !mine.length && used && !pending ? (
+        <p className="life-note">{tx("hatch.already")}</p>
+      ) : null}
+      {habitat && wallet && !mine.length ? (
+        <SiteLink href={withNet("/market.html")} className="life-cross">
+          {tx("observe.market")} →
+        </SiteLink>
+      ) : null}
+      {!habitat && showHatch ? (
         <label>
           {tx("hatch.name")}
           <input
@@ -875,7 +935,7 @@ export function LifeDesk({
           />
         </label>
       ) : null}
-      {showHatch ? (
+      {!habitat && showHatch ? (
         <>
           <HatchWait
             stage={hatchStage}
@@ -978,7 +1038,9 @@ export function LifeDesk({
               {shown.map((soul) => (
                 <li key={soul.tokenId}>
                   <button
-                    className={selected?.tokenId === soul.tokenId ? "is-on" : ""}
+                    className={
+                      selected?.tokenId === soul.tokenId ? "is-on" : ""
+                    }
                     onClick={() => setSelected(soul)}
                   >
                     <i style={{ background: soul.phenotype.art.body }} />#

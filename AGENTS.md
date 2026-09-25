@@ -17,6 +17,17 @@ Chat with the repo owner may stay in their language. Git artifacts must still be
 
 **Commit style:** 1–2 English sentences on *why*, not a file list. Example: `Keep Soul identity facts out of satellite play contracts.`
 
+## Official fly character and marketing art
+
+The owner designated the **fruit-fly character shown on Colony NFT cards** (`/colony.html`) as the official IMMORTAL brand character style on 2026-09-20. Apply this by default whenever posters, X posts, ads, banners, or other promotional artwork contain a fly.
+
+- Read [docs/BRAND.en.md](docs/BRAND.en.md) before creating fly artwork; inspect the current Colony cards and `public/assets/colony-body-v4.png`. Rendering details: [docs/COLONY-ART.en.md](docs/COLONY-ART.en.md).
+- Use the Colony character asset or an actual rendered card as an image reference. Preserve its cute rounded game-collectible proportions, luminous faceted eyes, smooth pearl-tipped antennae, glossy candy-enamel body, six delicate legs, and translucent pearly wing pair. The body asset is intentionally wingless; the complete character has renderer-supplied wings.
+- The owner explicitly rejected the realistic matte/bristly v3 direction. Keep the character cute, polished and precious; avoid pores, dense hair, sharp mouthparts and macro-specimen texture.
+- Retain the brand palette from `src/brand.mjs`. Do not substitute a generic photorealistic insect, metallic cyber-fly, old mascot, or earlier campaign image as the character authority. Those older assets do not override the Colony reference.
+- Follow an explicit user request for a different direction; otherwise this is the default without asking the owner to repeat it. This style rule does not change NFT genetics or ownership.
+- **Homepage exception (owner confirmed 2026-09-22):** homepage fly illustrations use a translucent, futuristic holographic projection with luminous contours and schematic internal light paths, rather than the gemstone NFT-card material. Keep this exception scoped to the homepage; Colony and token portraits retain their official collectible style.
+
 ## Hard product boundaries
 
 Read before changing identity, money, or deploy paths:

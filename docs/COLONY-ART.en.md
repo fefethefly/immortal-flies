@@ -1,0 +1,31 @@
+# Colony portrait rendering
+
+**Official brand character (owner confirmed 2026-09-20):** the fly design on these Colony NFT cards is also the default character style for all promotional fly artwork, including X posts and posters. Read [BRAND.en.md](BRAND.en.md) for reference precedence, campaign colors, and the requirement to supply the actual Colony image when generating art. A generic macro insect or older mascot is not a substitute.
+
+Colony uses a cute, rounded game-collectible character with separate body, eye and wing rendering. This is a presentation change only: the existing `phenotype-loci/3` decoder, seeds, ownership, generations and preview status remain authoritative.
+
+- `public/assets/colony-body-v4.png` is a transparent, wingless body refined with the built-in image generation tool. It uses rounded head/eye proportions, luminous candy enamel, jewel facets with pearly catchlights and smooth pearl-tipped antennae. The owner rejected v3’s matte, bristly realism and requested a cute, polished game collectible. Both v4 generation passes are recorded in the adjacent prompt file. Do not add promotional reference boards to the runtime bundle.
+- `src/life/colony-portrait.mjs` preserves body texture and transparency, recolors the two eyes independently, and draws abdominal stripes and markings. Eye masks and abdomen coordinates are calibrated to this body asset; replacing the image requires recalibration.
+- Pearly wing membranes are drawn separately behind the body. Their enlarged fan silhouette is fitted inside the portrait even at the maximum supported scale. Shape, markings and vein density read `wingShape`, `wingMark` and `wingVein`. Body size reads `scale`. Sex drives a localized abdominal deformation: a shorter, rounder male abdomen and a more tapered female tip. Head, eyes, feet and wing hinges remain fixed; existing stripes and markings deform with the abdomen. These are stylized expressions of the traits, not anatomical reconstructions. Abdominal shape is informed by the [FlyBase teaching manual](https://flybase.org/flybase/associated_files/Experiments_with_Drosophila_for_Biology_Courses.pdf).
+- `src/life/colony-portrait.jsx` provides loading semantics and falls back to the existing procedural portrait if the image cannot load. `CatalogPortrait` shares this renderer, so Colony, market, hatch success and static specimen views agree. Birth PNGs load the same plate at 1280 px and use the same composition. The animated habitat still uses its existing motion renderer.
+- Plate loading is cached by resolution and failed requests can retry. Colored bodies are cached per plate object with bounded entry counts (64 at card resolution, 8 at export resolution), preventing cross-resolution reuse. The portrait canvas stays mounted through loading/fallback transitions so later valid specimens can render.
+
+The card front shows body, eyes, wing shape, sex and generation/status. The detail view retains the full genome readout and lineage. Preview specimens are not presented as minted or alive.
+
+Validation: run `node --test tests/colony-portrait.test.mjs tests/life-colony.test.mjs tests/fly-traits.test.mjs tests/catalog-portrait.test.mjs tests/life-birth-card.test.mjs` and `npm run build`. Check the Colony page at desktop and narrow mobile widths, all four wing shapes, contrasting split eyes, static catalog portraits and exported birth cards. Pixel regressions cover pigment separation, transparency, dimorphism, cache keys and failed-load recovery.
+
+## Appearance audit (2026-09-20)
+
+The latest art revision removes realistic body grain and sharp bristles, increases head/eye roundness and restores a luminous illustrated finish. Eye masks are recalibrated to the v4 plate, including the far-eye position. Card backgrounds provide restrained warm and phenotype-colored light. No phenotype weights, seed decoding, eye palette or identity fields change with this art direction. v2 and v3 assets remain historical references, not the current campaign style.
+
+The decoder has no wingless allele. Its published Gen0 wing-shape weights are typical 78%, miniature 12%, curly 7%, and vestigial 3%. These are expectations, not quotas. The former scarcity-sorted spotlight happened to contain three vestigial specimens among six cards. Their wings were anchored too low behind the opaque body plate and almost disappeared. The renderer now anchors both wings at the upper thorax, preserves reduced silhouettes, and uses translucent membranes with branching longitudinal veins and short crossveins. Wing marks and incomplete/extra vein traits still determine the corresponding drawings.
+
+Split eyes remain a deterministic, display-only trait: chips 56–59 select a matched/split pair (98%/2%), and chips 60–63 choose the other color while excluding the primary one. The seed decoder and on-chain metadata were not changed. The former 71-entry preview had only one split pair (seed 17: vermilion/wild-type), whose warm colors are naturally similar. The cabinet now covers both eye-pair values with multiple specimens: 74 entries, including split seeds 17, 117, 129, and 151. Its morphology spotlight includes all four wing shapes and a contrasting, real split pair (seed 151: white/wild-type). This selection is explicitly not a population sample or rarity ranking.
+
+Pink highlights in the compound eyes previously failed the dark-red pigment test and were recolored with the body. The mask now includes these facets while excluding amber cuticle. Regression tests use bright pixel colors sampled from the actual plate. Both eye colors participate in filtering, and the eye selector also offers “Split eyes.” Long split-eye labels wrap instead of hiding the second color.
+
+Remaining art limitations:
+
+- The reference's jewel-like blue/purple/green eyes are outside the current six-color genetic eye palette. Adding those colors would change phenotype semantics; it is not a tinting fix for already-born souls.
+- The calibrated body plate still has one fixed pose and illustrated abdominal segmentation. Dimorphism changes the abdominal silhouette; it does not add sex combs or reconstruct full anatomy.
+- Animated habitat sprites retain their motion-specific renderer. Further unification must preserve orientation, wingbeat animation and rendering cost at population scale.

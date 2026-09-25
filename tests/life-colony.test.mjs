@@ -7,7 +7,7 @@ import {
   CROSS_LOCUS_COUNT,
   HUES,
 } from "../src/brain/flyswarm/phenotype-loci.mjs";
-import { previewSpecimens } from "../src/life/preview.mjs";
+import { previewSpecimens, previewSpotlight } from "../src/life/preview.mjs";
 import {
   boardsOf,
   censusOf,
@@ -563,6 +563,9 @@ test("preview cabinet covers every trait value deterministically", () => {
   assert.equal(lights.size, 3);
   assert.equal(new Set(rows.map((row) => row.phenotype.sex.id)).size, 2);
   assert.equal(new Set(rows.map((row) => row.phenotype.wingShape.id)).size, 4);
+  assert.ok(
+    rows.filter((row) => row.phenotype.eyePair.id === "split").length >= 4,
+  );
   // 确定性 + 稀缺排序 + 未出生标记 + seed 可解码回同一表型
   assert.deepEqual(previewSpecimens(), rows);
   for (let i = 1; i < rows.length; i += 1) {
@@ -579,6 +582,43 @@ test("preview cabinet covers every trait value deterministically", () => {
   }
 });
 
+test("preview spotlight shows all wing shapes and a genuine split-eye specimen", () => {
+  const rows = previewSpecimens();
+  const spotlight = previewSpotlight(rows);
+  assert.equal(spotlight.length, 6);
+  assert.equal(new Set(spotlight.map((s) => s.seed)).size, 6);
+  assert.equal(new Set(spotlight.map((s) => s.phenotype.wingShape.id)).size, 4);
+  assert.equal(
+    spotlight.filter((s) => s.phenotype.wingShape.id === "vestigial").length,
+    1,
+  );
+  const split = spotlight.find((s) => s.phenotype.eyePair.id === "split");
+  assert.ok(split);
+  assert.notEqual(split.phenotype.art.eyeLeft, split.phenotype.art.eyeRight);
+  for (const row of spotlight) assert.ok(rows.includes(row));
+  assert.deepEqual(previewSpotlight(rows), spotlight);
+  assert.deepEqual(previewSpotlight([]), []);
+});
+
+test("preview cap does not reuse a different catalog's cache", () => {
+  const bounded = previewSpecimens({ cap: 10 });
+  assert.ok(bounded.length > 0);
+  assert.ok(bounded.every((s) => s.seed <= 10));
+  assert.ok(previewSpecimens().some((s) => s.seed > 10));
+});
+
+test("eye filters find split pairs and either anatomical eye", () => {
+  const split = fakeSoul({ id: 1, seed: 151 });
+  const matched = fakeSoul({ id: 2, seed: 1 });
+  assert.equal(split.phenotype.eyePair.id, "split");
+  assert.notEqual(split.phenotype.eye.id, split.phenotype.eyeOther.id);
+  assert.deepEqual(filterColony([split, matched], { eye: "split" }), [split]);
+  assert.ok(
+    filterColony([split], { eye: split.phenotype.eyeOther.id }).includes(split),
+  );
+  assert.equal(parseColonyView(writeColonyView({ eye: "split" })).eye, "split");
+});
+
 test("preview cabinet follows the same locus filters as the roster", () => {
   const rows = previewSpecimens();
   const bone = rows.find((row) => row.phenotype.hue.id === "bone");
@@ -588,7 +628,13 @@ test("preview cabinet follows the same locus filters as the roster", () => {
   assert.ok(filtered.every((row) => row.phenotype.hue.id === "bone"));
   const white = filterColony(rows, { eye: "white" });
   assert.ok(white.length >= 1);
-  assert.ok(white.every((row) => row.phenotype.eye.id === "white"));
+  assert.ok(
+    white.every(
+      (row) =>
+        row.phenotype.eye.id === "white" ||
+        row.phenotype.eyeOther.id === "white",
+    ),
+  );
   assert.equal(filterColony(rows, { generation: "1+" }).length, 0);
 });
 

@@ -5,12 +5,15 @@ import { hash } from "./brain/codec.mjs";
 import { AdmissionPanel } from "./protocol-admission-panel.jsx";
 import { AdmissionReplayPanel } from "./protocol-admission-replay.jsx";
 import { TaskComparisonPanel } from "./protocol-task-comparison.jsx";
+import { SitePage } from "./site-chrome.jsx";
+import { useLocale } from "./use-locale.mjs";
 import "./fonts.css";
 import "./protocol.css";
 
 const arms = { off: "不通信", relay: "正常中继", duplicate: "重复投递", scrambled: "坐标打乱" };
 const point = b => `${(b.x - 3000) / 5},${(b.y - 4000) / 5}`;
 export function ProtocolPage() {
+  const [locale, setLocale, tx] = useLocale("meta.homeTitle", "meta.homeDesc");
   const [arm, setArm] = useState("relay"), [tick, setTick] = useState(0);
   const [playing, setPlaying] = useState(false), [integrity, setIntegrity] = useState("检查中");
   const run = bundle.runs[arm], max = run.config.rounds;
@@ -35,8 +38,8 @@ export function ProtocolPage() {
   const wire = run.transmissions.filter(m => m.round === tick);
   const receipts = run.receipts.filter(m => m.round === tick);
   const seek = n => { setPlaying(false); setTick(n); };
-  return <main className="protocol">
-    <header className="protocol-head"><a href="/">IMMORTAL <small> / LAB</small></a><nav><a href="/brain.html">连接组</a><a href="#comparison">四臂对照</a><a href={bundleUrl} download="protocol-replay-smoke-v1.json">下载复算包 ↓</a></nav></header>
+  return <SitePage current="protocol" locale={locale} setLocale={setLocale} tx={tx} className="protocol-page"><main className="protocol">
+    <nav className="protocol-local-nav" aria-label="实验台操作"><a href="#comparison">四臂对照</a><a href={bundleUrl} download="protocol-replay-smoke-v1.json">下载复算包 ↓</a></nav>
     <section className="protocol-intro"><div><p className="eyebrow">FLYSWARM / PROTOCOL EVIDENCE / 01</p><h1>群体协议实验台</h1><p>看见一条消息，如何成为另一个生命的输入。</p></div><div className="protocol-stamp">SIM · 只读回放<br/><small>2 生命 · 合成 2 节点图 · 32 拍</small></div></section>
     <aside className="protocol-warning">证据边界：四臂采集均为 0。这是接收与去重链路验证，不是 MaleCNS 实验、实时模拟或 T3 协作增益证明。</aside>
     <section className="protocol-controls" aria-label="回放控制"><div className="protocol-arms">{Object.entries(arms).map(([key, label]) => <button key={key} data-arm={key} aria-pressed={arm === key} onClick={() => { setArm(key); setTick(0); setPlaying(false); }}>{label}</button>)}</div><div className="protocol-timeline"><button data-play onClick={() => { if (tick === max) setTick(0); setPlaying(p => !p); }}>{playing ? "暂停" : "播放"}</button><button aria-label="上一拍" disabled={!tick} onClick={() => seek(tick - 1)}>−</button><input aria-label="回放拍数" type="range" min="0" max={max} value={tick} onChange={e => seek(Number(e.target.value))}/><button aria-label="下一拍" disabled={tick === max} onClick={() => seek(tick + 1)}>+</button><output data-tick>{String(tick).padStart(2, "0")} / {max}</output></div></section>
@@ -54,5 +57,5 @@ export function ProtocolPage() {
     <AdmissionReplayPanel />
     <TaskComparisonPanel />
     <footer className="protocol-evidence"><p role="status">{integrity} · 浏览器仅校验包哈希，不执行神经重算。</p><code>{bundle.bundleHash}</code><p>独立完整重放：在项目目录执行 <code>node scripts/protocol-replay.mjs verify</code></p><p>不连接钱包、不发送交易、不写入生命状态。数据来自固定历史复算包。</p></footer>
-  </main>;
+  </main></SitePage>;
 }

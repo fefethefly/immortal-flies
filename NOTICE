@@ -26,6 +26,16 @@ Bundled under `public/fonts/` with their OFL license files:
   - IBM Plex Mono
   - Cormorant Garamond
 
+Outfit is bundled through `@fontsource/outfit`. Its SIL OFL 1.1 notice is
+redistributed at `public/fonts/outfit-OFL.txt`.
+
+GSAP and @gsap/react
+---------------------
+Homepage animation uses GSAP and its React integration under the GSAP
+Standard License. These dependencies are not re-licensed under MIT.
+
+  https://gsap.com/standard-license/
+
 OpenZeppelin Contracts 5.4.0 (MIT)
 ----------------------------------
 Solidity contracts import `@openzeppelin/contracts`. That library keeps its

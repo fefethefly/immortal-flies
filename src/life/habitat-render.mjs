@@ -25,12 +25,18 @@ function liftRgb(hex) {
 }
 
 function drawFloor(ctx, w, h, camera) {
-  ctx.fillStyle = "#090806";
+  ctx.fillStyle = "#100f0b";
+  ctx.fillRect(0, 0, w, h);
+  const light = ctx.createRadialGradient(w * 0.48, h * 0.38, 0, w * 0.48, h * 0.38, Math.max(w, h) * 0.62);
+  light.addColorStop(0, "rgba(125, 102, 53, 0.15)");
+  light.addColorStop(0.55, "rgba(65, 54, 32, 0.06)");
+  light.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = light;
   ctx.fillRect(0, 0, w, h);
 
   const to = (x, y) => projectHabitat(x, y, camera, w, h);
   const step = camera.zoom < 0.7 ? 0.2 : 0.1;
-  ctx.strokeStyle = "rgba(28, 24, 16, 0.55)";
+  ctx.strokeStyle = "rgba(152, 131, 81, 0.065)";
   ctx.lineWidth = 1;
   for (let t = 0; t <= 1.001; t += step) {
     const a = to(t, 0);
@@ -48,7 +54,7 @@ function drawFloor(ctx, w, h, camera) {
   }
   const nw = to(0, 0);
   const se = to(1, 1);
-  ctx.strokeStyle = "rgba(240, 185, 11, 0.22)";
+  ctx.strokeStyle = "rgba(176, 148, 89, 0.18)";
   ctx.strokeRect(nw.x, nw.y, se.x - nw.x, se.y - nw.y);
 }
 
@@ -136,7 +142,7 @@ export function drawFly(
     ? Math.floor(((body.flap || 0) + 1) * 2) % 4
     : Math.floor(Math.abs(body.x + body.y) * 40) % 2;
   const size =
-    90 *
+    (selected ? 138 : 112) *
     (art.scale || 1) *
     (collapsed ? 0.8 : tired ? 0.9 : 1) *
     (0.86 + 0.22 * Math.min(1.15, Math.max(0.7, zoom || 1)));
@@ -176,7 +182,7 @@ export function drawFly(
       : "rgba(240,185,11,0.55)";
     ctx.lineWidth = 1.4;
     ctx.beginPath();
-    ctx.arc(0, 0, 18, 0, TAU);
+    ctx.arc(0, 0, 29, 0, TAU);
     ctx.stroke();
   }
   ctx.globalAlpha = collapsed ? 0.7 : 1;
@@ -189,24 +195,24 @@ export function drawFly(
   if (showLabel) {
     ctx.globalAlpha = 0.9;
     ctx.fillStyle = collapsed ? "#c45a4a" : "#e6dcc4";
-    ctx.font = "11px IBM Plex Mono, monospace";
+    ctx.font = "12px IBM Plex Mono, monospace";
     ctx.textAlign = "left";
     ctx.fillText(
       `#${soul.tokenId} ${labelOf(soul, locale || "en")}`,
-      x + 16,
-      y - 2,
+      x + 34,
+      y - 4,
     );
   }
   if (selected || hover) {
     ctx.globalAlpha = 1;
     ctx.fillStyle = "#2b2515";
-    ctx.fillRect(x + 16, y + 8, 40, 3);
+    ctx.fillRect(x + 34, y + 8, 40, 3);
     ctx.fillStyle =
       hunger === "full" || hunger === "sated"
         ? "#f0b90b"
         : hunger === "hungry"
           ? "#c98f1e"
           : "#c45a4a";
-    ctx.fillRect(x + 16, y + 8, 40 * Math.min(1, body.energy / 1000), 3);
+    ctx.fillRect(x + 34, y + 8, 40 * Math.min(1, body.energy / 1000), 3);
   }
 }

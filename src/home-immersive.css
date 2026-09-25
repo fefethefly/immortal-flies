@@ -1,0 +1,831 @@
+/* The canvas owns the space; semantic HTML owns reading and interaction. */
+.living-immersive {
+  --living-muted: #aaa89f;
+  --living-line: #eee8d81c;
+  background: #0a0907;
+  overflow: clip;
+}
+.immersive-stage {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  z-index: -1;
+  pointer-events: none;
+  background: #0a0907;
+}
+.immersive-stage canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: opacity 1.2s;
+}
+.immersive-stage[data-ready="false"] canvas {
+  opacity: 0;
+}
+.immersive-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 83% 85% at 50% 50%,
+    transparent 37%,
+    #0a090780 100%
+  );
+}
+.immersive-stage-fallback {
+  position: absolute;
+  width: min(70vw, 650px);
+  height: 70vh;
+  top: 18vh;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.5;
+}
+.living-immersive main {
+  position: relative;
+  overflow: visible;
+}
+.living-immersive .living-nav {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  height: 92px;
+  padding-inline: 4.5%;
+  background: #0a09074d;
+  backdrop-filter: blur(16px);
+  border-color: #eee8d819;
+}
+.living-immersive .living-brand {
+  font-size: 25px;
+  letter-spacing: -0.05em;
+}
+.living-immersive .living-brand-sub {
+  font-size: 7px;
+  letter-spacing: 0.2em;
+}
+.living-immersive .living-nav nav {
+  gap: 32px;
+}
+.living-immersive .living-nav-hatch {
+  background: #f0ead908;
+  border-color: #f0ead92e;
+}
+.living-immersive .living-nav-hatch:hover {
+  background: #f0ead912;
+}
+.immersive-motion {
+  position: fixed;
+  z-index: 9;
+  right: 30px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #c4bda8;
+  border: 1px solid #f0ead926;
+  background: #0a0907a8;
+  backdrop-filter: blur(14px);
+  padding: 10px 12px;
+  font: 9px var(--mono);
+}
+.immersive-motion:hover {
+  color: #fff;
+  border-color: #f0ead964;
+}
+.immersive-progress {
+  position: fixed;
+  z-index: 8;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 100dvh;
+  background: #f0ead906;
+  pointer-events: none;
+}
+.immersive-progress span {
+  display: block;
+  height: 100%;
+  transform: scaleY(var(--journey-progress, 0));
+  transform-origin: top;
+  background: #f0b90b;
+  opacity: 0.55;
+}
+.living-immersive .living-hero {
+  min-height: 790px;
+  height: 112svh;
+  max-height: none;
+  padding: 160px 5% 110px;
+  display: block;
+  background: linear-gradient(#0a090732, transparent 65%);
+}
+.living-immersive .living-hero::after {
+  display: none;
+}
+.living-immersive .living-hero-copy {
+  width: 100%;
+  max-width: 1400px;
+  margin: auto;
+  text-align: center;
+  position: static;
+}
+.living-immersive .living-hero-copy .living-kicker {
+  justify-content: center;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  margin-bottom: 22px;
+  color: #b8b4a7;
+}
+.living-immersive h1 {
+  font-size: clamp(65px, 8.3vw, 130px);
+  line-height: 1.03;
+  letter-spacing: -0.065em;
+  font-weight: 400;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-wrap: balance;
+  text-shadow: 0 4px 60px #0a0907b3;
+}
+.living-immersive.living-zh h1 {
+  font-size: clamp(60px, 7.4vw, 112px);
+  letter-spacing: -0.07em;
+}
+.living-immersive h1 span {
+  color: #f0ead9;
+}
+.living-immersive .living-hero .living-lead {
+  margin: 25px auto 0;
+  max-width: 620px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #b8b6ad;
+}
+.living-immersive .living-hero-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 108px;
+  justify-content: center;
+  gap: 35px;
+}
+.living-immersive .living-hero .living-button {
+  background: #f0ead9;
+  border-color: #f0ead9;
+  color: #13120e;
+  min-width: 198px;
+  justify-content: space-between;
+}
+.living-immersive .living-hero .living-button:hover {
+  background: #fffaf0;
+  border-color: #fffaf0;
+}
+.living-immersive .living-hero-bottom {
+  left: 4.5%;
+  right: 4.5%;
+  bottom: 35px;
+  border: 0;
+  color: #aaa28d;
+}
+.living-immersive .living-hero-bottom > span {
+  padding-right: 170px;
+  font-size: 8px;
+}
+.living-immersive .living-hero-bottom a {
+  font-size: 10px;
+}
+.living-immersive .living-observe {
+  max-width: none;
+  padding: 130px 8% 150px;
+  min-height: 105svh;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  column-gap: 12%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    #0a090725 30%,
+    #0a090722 80%,
+    transparent
+  );
+}
+.living-immersive .living-section-heading {
+  grid-column: 2;
+  max-width: 560px;
+  margin: 0 0 30px;
+  text-align: left;
+}
+.living-immersive .living-section-heading h2 {
+  font-size: clamp(36px, 3.3vw, 50px);
+  letter-spacing: -0.045em;
+}
+.living-immersive .living-section-heading > p {
+  max-width: 610px;
+  margin: 22px 0 0;
+  color: #b4b0a4;
+}
+.living-immersive .living-lab {
+  max-width: 1280px;
+  margin: auto;
+  border: 0;
+  background: none;
+  display: contents;
+}
+.living-immersive .living-lab-main {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  border: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.living-immersive .living-lab-top {
+  padding: 0;
+  font-size: 8px;
+  opacity: 0.85;
+}
+.immersive-lab-window {
+  min-height: 250px;
+  flex: 1;
+}
+.living-immersive .living-lab-readings {
+  border-top: 1px solid #f0ead929;
+  padding-top: 24px;
+  background: linear-gradient(transparent, #0a090794);
+}
+.living-immersive .living-lab-readings strong {
+  font-size: 36px;
+  font-weight: 400;
+}
+.living-immersive .living-lab-controls {
+  grid-column: 2;
+  padding: 30px;
+  border: 1px solid #eee8d824;
+  background: #0c0c09c4;
+  backdrop-filter: blur(20px);
+}
+.living-immersive .living-lab-controls .living-button {
+  min-height: 48px;
+}
+.living-immersive .living-lab-notes {
+  grid-column: 1 / -1;
+  max-width: 1280px;
+  margin: 26px auto 0;
+  border: 0;
+  opacity: 0.8;
+}
+.living-immersive .living-lab-notes p {
+  max-width: 700px;
+  font-size: 10px;
+}
+.immersive-chapter {
+  min-height: 115svh;
+  padding: 150px 9%;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.immersive-chapter-copy {
+  max-width: 450px;
+  width: 43%;
+  position: relative;
+}
+.immersive-chapter-copy h2 {
+  font-size: clamp(40px, 4.6vw, 73px);
+  line-height: 1.13;
+  margin: 27px 0;
+}
+.immersive-chapter-copy p {
+  color: #b6b3a7;
+  font-size: 14px;
+  line-height: 2;
+  max-width: 440px;
+}
+.immersive-chapter-copy .living-text-link {
+  margin-top: 26px;
+}
+.immersive-chapter-0 {
+  justify-content: flex-end;
+}
+.immersive-chapter-1 {
+  justify-content: flex-start;
+}
+.immersive-chapter .living-chapter-status {
+  font-size: 8px;
+  margin-top: 42px;
+  letter-spacing: 0.1em;
+}
+.immersive-scene-caption {
+  position: absolute;
+  left: 9%;
+  bottom: 65px;
+  font: 8px var(--mono);
+  color: #a19b89;
+  letter-spacing: 0.08em;
+}
+.immersive-chapter-1 .immersive-scene-caption {
+  left: auto;
+  right: 9%;
+}
+.immersive-memory-root {
+  display: block;
+  margin-top: 18px;
+  font: 9px var(--mono);
+  color: #9d9070;
+}
+.immersive-chapter-2 {
+  min-height: 130svh;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 95px;
+}
+.immersive-chapter-2 .immersive-chapter-copy {
+  text-align: center;
+  max-width: 870px;
+  width: 100%;
+}
+.immersive-chapter-2 h2 {
+  white-space: pre-line;
+  font-size: clamp(44px, 5vw, 76px);
+}
+.immersive-chapter-2 p {
+  margin: 0 auto;
+  max-width: 600px;
+  font-size: 14px;
+}
+.immersive-chapter-2 .living-chapter-status {
+  justify-content: center;
+  margin-top: 24px;
+}
+.immersive-chapter-2 .immersive-scene-caption {
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+.living-immersive .living-manifesto {
+  min-height: 105svh;
+  margin: 0;
+  padding: 200px 7%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: relative;
+  background: #0a090720;
+}
+.living-immersive .living-manifesto h2 {
+  font-size: clamp(48px, 6.2vw, 94px);
+  line-height: 1.28;
+  max-width: 1250px;
+  text-shadow: 0 5px 60px #000;
+}
+.living-immersive .living-manifesto-line {
+  display: none;
+}
+.living-immersive .living-manifesto .living-kicker {
+  margin-top: 45px;
+}
+.living-immersive .living-worlds {
+  max-width: none;
+  margin: 0;
+  min-height: 115svh;
+  padding: 145px 9%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 12%;
+  row-gap: 35px;
+  align-items: center;
+}
+.living-immersive .living-worlds-heading {
+  grid-column: 2;
+  display: block;
+  margin: 0;
+  align-self: start;
+  padding-top: 0;
+}
+.living-immersive .living-worlds-heading h2 {
+  font-size: clamp(43px, 4.6vw, 70px);
+}
+.living-immersive .living-worlds-heading p {
+  margin-top: 30px;
+  max-width: 360px;
+  color: #b6b3a7;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.living-immersive .living-world-list {
+  grid-column: 2;
+  border-top: 1px solid #eee8d84a;
+  background: #0a0907b0;
+  backdrop-filter: blur(18px);
+  padding: 0 25px;
+}
+.living-immersive .living-world {
+  border-color: #eee8d829;
+}
+.living-immersive .living-world > button {
+  padding: 30px 0;
+  gap: 18px;
+}
+.living-immersive .living-world > button > span {
+  font-size: 26px;
+  flex: 1;
+}
+.living-immersive .living-world > button small {
+  font-size: 8px;
+}
+.living-immersive .living-world-detail {
+  display: block;
+  padding: 0 0 32px;
+}
+.living-immersive .living-world-detail[hidden] {
+  display: none;
+}
+.living-immersive .living-world-detail p {
+  font-size: 13px;
+  line-height: 1.9;
+}
+.living-immersive .living-world-detail .living-text-link {
+  font-size: 12px;
+  margin-top: 20px;
+}
+.living-immersive .living-cta {
+  min-height: 105svh;
+  padding: 55svh 6% 130px;
+  border: 0;
+  background: linear-gradient(transparent 45%, #0a090780);
+}
+.living-immersive .living-cta h2 {
+  font-size: clamp(48px, 6vw, 91px);
+  line-height: 1.1;
+}
+.living-immersive .living-cta h2 span {
+  color: #f0ead9;
+}
+.living-immersive .living-cta p {
+  margin-top: 24px;
+}
+.living-immersive .living-cta .living-button {
+  background: #f0ead9;
+  border-color: #f0ead9;
+}
+.living-immersive .living-footer {
+  position: relative;
+  background: #0a0907e8;
+  border-top: 1px solid #eee8d821;
+  padding: 60px 6% 45px;
+}
+.living-immersive .living-footer-brand {
+  font-size: 35px;
+}
+.living-immersive .living-footer-bottom {
+  padding-right: 160px;
+}
+.living-immersive .living-hatch-backdrop {
+  z-index: 20;
+}
+
+@media (min-width: 1600px) {
+  .living-immersive .living-hero {
+    padding-top: 180px;
+  }
+  .living-immersive .living-hero .living-lead {
+    font-size: 16px;
+  }
+  .immersive-chapter {
+    padding-inline: 13%;
+  }
+}
+@media (max-width: 1050px) and (min-width: 900px) {
+  .living-immersive .living-nav nav {
+    gap: 18px;
+  }
+  .immersive-chapter {
+    padding-inline: 6%;
+  }
+  .immersive-chapter-copy {
+    width: 44%;
+  }
+  .living-immersive .living-lab {
+    gap: 7%;
+  }
+}
+@media (max-width: 899px) {
+  .living-immersive .living-nav {
+    height: 76px;
+    padding-inline: 5%;
+  }
+  .living-immersive .living-nav nav {
+    top: 75px;
+    background: #0a0907ed;
+    backdrop-filter: blur(18px);
+  }
+  .living-immersive .living-hero {
+    padding: 145px 5% 100px;
+    min-height: 850px;
+    height: 105svh;
+  }
+  .living-immersive h1 {
+    font-size: clamp(50px, 9vw, 82px);
+  }
+  .living-immersive.living-zh h1 {
+    font-size: clamp(45px, 8.3vw, 76px);
+  }
+  .living-immersive .living-hero .living-lead {
+    max-width: 540px;
+    font-size: 13px;
+  }
+  .living-immersive .living-observe {
+    display: block;
+    padding: 110px 7%;
+  }
+  .living-immersive .living-section-heading {
+    margin-bottom: 40px;
+  }
+  .living-immersive .living-lab {
+    display: block;
+  }
+  .living-immersive .living-lab-main {
+    max-width: 600px;
+    margin: auto;
+  }
+  .immersive-lab-window {
+    min-height: 240px;
+  }
+  .living-immersive .living-lab-controls {
+    margin-top: 30px;
+  }
+  .living-immersive .living-lab-notes {
+    display: block;
+  }
+  .living-immersive .living-lab-notes a {
+    margin-top: 16px;
+  }
+  .immersive-chapter {
+    min-height: 105svh;
+    padding: 53svh 8% 100px;
+    align-items: flex-end;
+  }
+  .immersive-chapter-copy {
+    width: 100%;
+    max-width: 600px;
+  }
+  .immersive-chapter-copy h2 {
+    font-size: clamp(39px, 6vw, 56px);
+  }
+  .immersive-chapter-copy p {
+    max-width: 560px;
+  }
+  .immersive-chapter-0,
+  .immersive-chapter-1 {
+    justify-content: center;
+  }
+  .immersive-chapter-copy {
+    padding: 25px;
+    margin-inline: -25px;
+    background: linear-gradient(
+      transparent,
+      #0a0907d9 18%,
+      #0a0907ad 80%,
+      transparent
+    );
+  }
+  .immersive-scene-caption {
+    bottom: 50px;
+    left: 8%;
+    right: auto;
+  }
+  .immersive-chapter-1 .immersive-scene-caption {
+    right: auto;
+    left: 8%;
+  }
+  .immersive-chapter-2 {
+    padding-top: 53svh;
+  }
+  .immersive-chapter-2 .immersive-chapter-copy {
+    text-align: left;
+  }
+  .immersive-chapter-2 h2 {
+    font-size: clamp(39px, 6vw, 56px);
+  }
+  .immersive-chapter-2 p {
+    margin: 0;
+  }
+  .immersive-chapter-2 .living-chapter-status {
+    justify-content: flex-start;
+  }
+  .immersive-chapter-2 .immersive-scene-caption {
+    text-align: left;
+    left: 8%;
+  }
+  .living-immersive .living-manifesto {
+    min-height: 95svh;
+    padding: 140px 8%;
+  }
+  .living-immersive .living-manifesto h2 {
+    font-size: clamp(39px, 6vw, 60px);
+  }
+  .living-immersive .living-worlds {
+    display: block;
+    padding: 100px 8%;
+  }
+  .living-immersive .living-worlds-heading {
+    padding: 0;
+  }
+  .living-immersive .living-worlds-heading h2 {
+    font-size: 44px;
+  }
+  .living-immersive .living-worlds-heading p {
+    max-width: 560px;
+  }
+  .living-immersive .living-world-list {
+    margin-top: 240px;
+  }
+  .living-immersive .living-cta {
+    padding-top: 52svh;
+  }
+  .living-immersive .living-footer-bottom {
+    padding-right: 0;
+  }
+  .immersive-motion span {
+    display: none;
+  }
+  .immersive-motion {
+    right: 20px;
+    bottom: 20px;
+    padding: 12px;
+  }
+}
+@media (max-width: 640px) {
+  .living-immersive .living-nav {
+    padding-inline: 23px;
+  }
+  .living-immersive .living-brand {
+    font-size: 22px;
+  }
+  .living-immersive .living-hero {
+    padding: 135px 24px 100px;
+    min-height: 780px;
+    height: 100svh;
+  }
+  .living-immersive .living-hero-copy .living-kicker {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    margin-bottom: 25px;
+  }
+  .living-immersive h1 {
+    font-size: 55px;
+    line-height: 1.02;
+    max-width: 380px;
+  }
+  .living-immersive.living-zh h1 {
+    font-size: 44px;
+    line-height: 1.18;
+    max-width: 360px;
+  }
+  .living-immersive .living-hero .living-lead {
+    font-size: 11px;
+    margin-top: 22px;
+    line-height: 1.9;
+  }
+  .living-immersive .living-hero-actions {
+    gap: 20px;
+    bottom: 100px;
+  }
+  .living-immersive .living-hero .living-button {
+    min-width: 165px;
+    padding: 14px 18px;
+    font-size: 12px;
+  }
+  .living-immersive .living-hero-actions .living-text-link {
+    font-size: 12px;
+    gap: 10px;
+  }
+  .living-immersive .living-hero-bottom {
+    left: 24px;
+    right: 24px;
+    bottom: 35px;
+  }
+  .living-immersive .living-hero-bottom > span {
+    display: none;
+  }
+  .living-immersive .living-observe {
+    padding: 95px 24px 100px;
+  }
+  .living-immersive .living-section-heading h2 {
+    font-size: 33px;
+    line-height: 1.25;
+  }
+  .living-immersive .living-section-heading > p {
+    font-size: 12px;
+    line-height: 1.9;
+  }
+  .living-immersive .living-lab-top {
+    font-size: 7px;
+  }
+  .living-immersive .living-lab-top code {
+    display: none;
+  }
+  .immersive-lab-window {
+    min-height: 210px;
+  }
+  .living-immersive .living-lab-readings strong {
+    font-size: 27px;
+  }
+  .living-immersive .living-lab-readings {
+    padding: 20px 0 0;
+  }
+  .living-immersive .living-lab-controls {
+    padding: 22px;
+  }
+  .living-immersive .living-lab-notes p {
+    font-size: 9px;
+    line-height: 1.9;
+  }
+  .immersive-chapter {
+    padding: 47svh 24px 90px;
+    min-height: 100svh;
+  }
+  .immersive-chapter-copy {
+    padding: 20px;
+    margin-inline: -20px;
+  }
+  .immersive-chapter-copy h2,
+  .immersive-chapter-2 h2 {
+    font-size: 39px;
+    line-height: 1.2;
+    margin-block: 22px;
+  }
+  .immersive-chapter-copy p {
+    font-size: 12px;
+    line-height: 1.95;
+  }
+  .immersive-chapter .living-chapter-status {
+    margin-top: 28px;
+    font-size: 7px;
+  }
+  .immersive-chapter-copy .living-text-link {
+    font-size: 12px;
+    margin-top: 20px;
+  }
+  .immersive-scene-caption,
+  .immersive-chapter-1 .immersive-scene-caption,
+  .immersive-chapter-2 .immersive-scene-caption {
+    left: 24px;
+    bottom: 45px;
+    font-size: 7px;
+  }
+  .living-immersive .living-manifesto {
+    min-height: 90svh;
+    padding-inline: 24px;
+  }
+  .living-immersive .living-manifesto h2 {
+    font-size: 36px;
+    line-height: 1.45;
+  }
+  .living-immersive .living-manifesto .living-kicker {
+    font-size: 7px;
+    max-width: 270px;
+    line-height: 2;
+  }
+  .living-immersive .living-worlds {
+    padding: 90px 24px;
+  }
+  .living-immersive .living-worlds-heading h2 {
+    font-size: 39px;
+  }
+  .living-immersive .living-worlds-heading p {
+    font-size: 12px;
+  }
+  .living-immersive .living-world-list {
+    margin-top: 220px;
+    padding-inline: 20px;
+  }
+  .living-immersive .living-world > button > span {
+    font-size: 22px;
+  }
+  .living-immersive .living-world > button small {
+    font-size: 7px;
+  }
+  .living-immersive .living-world-detail p {
+    font-size: 12px;
+  }
+  .living-immersive .living-cta {
+    padding: 48svh 24px 110px;
+    min-height: 100svh;
+  }
+  .living-immersive .living-cta h2 {
+    font-size: 43px;
+  }
+  .living-immersive .living-cta p {
+    font-size: 13px;
+  }
+  .living-immersive .living-footer {
+    padding: 45px 24px 85px;
+  }
+  .living-immersive .living-footer-top {
+    gap: 35px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .living-immersive .immersive-stage canvas {
+    transition: none;
+  }
+}

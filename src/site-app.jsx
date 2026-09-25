@@ -7,7 +7,7 @@ if (typeof window !== "undefined") hydrateActiveWallet();
 
 const PAGES = {
   "/": lazy(() =>
-    import("./public-page.jsx").then((m) => ({ default: m.HomePage })),
+    import("./home-living.jsx").then((m) => ({ default: m.LivingHomePage })),
   ),
   "/swarm.html": lazy(() =>
     import("./swarm-page.jsx").then((m) => ({ default: m.PitPage })),
